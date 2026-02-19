@@ -1,11 +1,15 @@
+import googleIcon from "@/assets/login/google.svg";
+import linkedinIcon from "@/assets/login/linkedin.svg";
+import microsoftIcon from "@/assets/login/microsoft.svg";
+import { signUpSchema, type SignUpSchema } from "@/validations/auth.validation";
 import { zodResolver } from "@hookform/resolvers/zod";
+import { Visibility, VisibilityOff } from "@mui/icons-material";
 import {
   Box,
   Button,
   Divider,
   IconButton,
   InputAdornment,
-  Link,
   Paper,
   Stack,
   TextField,
@@ -13,34 +17,30 @@ import {
 } from "@mui/material";
 import { useState } from "react";
 import { Controller, useForm } from "react-hook-form";
-import googleIcon from "../../../assets/login/google.svg";
-import linkedinIcon from "../../../assets/login/linkedin.svg";
-import microsoftIcon from "../../../assets/login/microsoft.svg";
-import {
-  loginSchema,
-  type LoginSchema,
-} from "../../../validations/auth.validation";
 
-interface LoginFormProps {
+interface SignUpFormProps {
   onSuccess: () => void;
 }
 
-export const LoginForm = ({ onSuccess }: LoginFormProps) => {
+const SignUpForm = ({ onSuccess }: SignUpFormProps) => {
   const [showPassword, setShowPassword] = useState<boolean>(false);
+  const [showConfirmPassword, setShowConfirmPassword] =
+    useState<boolean>(false);
 
   const {
     control,
     handleSubmit,
     formState: { errors },
-  } = useForm<LoginSchema>({
-    resolver: zodResolver(loginSchema),
+  } = useForm<SignUpSchema>({
+    resolver: zodResolver(signUpSchema),
     defaultValues: {
       email: "",
       password: "",
+      confirmPassword: "",
     },
   });
 
-  const onSubmit = async (data: LoginSchema) => {
+  const onSubmit = async (data: SignUpSchema) => {
     console.log("Form Data:", data);
     await new Promise((resolve) => setTimeout(resolve, 1000));
     onSuccess();
@@ -61,12 +61,10 @@ export const LoginForm = ({ onSuccess }: LoginFormProps) => {
     >
       <Typography
         variant="h4"
-        sx={{ fontWeight: 700, mb: 1, color: "#1A2B44", fontSize: "1.75rem" }}
+        sx={{ fontWeight: 700, mb: 4, color: "#1A2B44", fontSize: "1.75rem" }}
       >
-        Welcome back!
+        Welcome John Smith!
       </Typography>
-
-      <Divider sx={{ mt: 3, mb: 4, borderColor: "#D2D2D2" }} />
 
       <form onSubmit={handleSubmit(onSubmit)}>
         <Stack spacing={2.5} sx={{ textAlign: "left" }}>
@@ -77,7 +75,7 @@ export const LoginForm = ({ onSuccess }: LoginFormProps) => {
               sx={{
                 mb: 0.75,
                 fontWeight: 600,
-                color: "#4A5568",
+                color: "#1A2B44",
                 fontSize: "0.875rem",
               }}
             >
@@ -106,7 +104,7 @@ export const LoginForm = ({ onSuccess }: LoginFormProps) => {
               sx={{
                 mb: 0.75,
                 fontWeight: 600,
-                color: "#4A5568",
+                color: "#1A2B44",
                 fontSize: "0.875rem",
               }}
             >
@@ -132,19 +130,56 @@ export const LoginForm = ({ onSuccess }: LoginFormProps) => {
                           edge="end"
                           size="small"
                         >
-                          <svg
-                            width="20"
-                            height="20"
-                            viewBox="0 0 24 24"
-                            fill="none"
-                            stroke="#718096"
-                            strokeWidth="2"
-                            strokeLinecap="round"
-                            strokeLinejoin="round"
-                          >
-                            <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
-                            <circle cx="12" cy="12" r="3"></circle>
-                          </svg>
+                          {showPassword ? <VisibilityOff /> : <Visibility />}
+                        </IconButton>
+                      </InputAdornment>
+                    ),
+                  }}
+                />
+              )}
+            />
+          </Box>
+
+          {/* Confirm Password Field */}
+          <Box>
+            <Typography
+              variant="subtitle2"
+              sx={{
+                mb: 0.75,
+                fontWeight: 600,
+                color: "#1A2B44",
+                fontSize: "0.875rem",
+              }}
+            >
+              Confirm Password
+            </Typography>
+            <Controller
+              name="confirmPassword"
+              control={control}
+              render={({ field }) => (
+                <TextField
+                  {...field}
+                  fullWidth
+                  type={showConfirmPassword ? "text" : "password"}
+                  variant="outlined"
+                  placeholder=""
+                  error={!!errors.confirmPassword}
+                  helperText={errors.confirmPassword?.message}
+                  InputProps={{
+                    endAdornment: (
+                      <InputAdornment position="end">
+                        <IconButton
+                          onClick={() =>
+                            setShowConfirmPassword(!showConfirmPassword)
+                          }
+                          edge="end"
+                          size="small"
+                        >
+                          {showConfirmPassword ? (
+                            <VisibilityOff />
+                          ) : (
+                            <Visibility />
+                          )}
                         </IconButton>
                       </InputAdornment>
                     ),
@@ -159,27 +194,10 @@ export const LoginForm = ({ onSuccess }: LoginFormProps) => {
             size="large"
             type="submit"
             variant="contained"
-            sx={{ mt: 1 }}
+            sx={{ mt: 2 }}
           >
-            {false ? "Logging in..." : "Continue"}
+            {false ? "Sending..." : "Generate OTP"}
           </Button>
-
-          <Box sx={{ display: "flex", justifyContent: "center", mt: 1 }}>
-            <Link
-              component="button"
-              variant="body2"
-              type="button" // Important to prevent form submission
-              onClick={() => console.log("Forgot password clicked")}
-              sx={{
-                color: "#1A2B44",
-                fontWeight: 700,
-                textDecoration: "none",
-                fontSize: "0.875rem",
-              }}
-            >
-              Forgot Password?
-            </Link>
-          </Box>
         </Stack>
       </form>
 
@@ -206,7 +224,7 @@ export const LoginForm = ({ onSuccess }: LoginFormProps) => {
         variant="body2"
         sx={{ mb: 2, color: "#4A5568", fontSize: "0.875rem" }}
       >
-        Sign in with
+        Sign up with
       </Typography>
 
       <Stack direction="row" spacing={1.5} justifyContent="center">
@@ -247,8 +265,8 @@ export const LoginForm = ({ onSuccess }: LoginFormProps) => {
             sx={{
               bgcolor: social.bg,
               color: "white",
-              width: 44,
-              height: 44,
+              width: 48,
+              height: 48,
               borderRadius: 1,
               "&:hover": { bgcolor: "#0F3D5B" },
             }}
@@ -257,25 +275,8 @@ export const LoginForm = ({ onSuccess }: LoginFormProps) => {
           </IconButton>
         ))}
       </Stack>
-
-      <Typography
-        variant="body2"
-        align="center"
-        sx={{ mt: 4, color: "#718096", fontSize: "0.875rem" }}
-      >
-        Don't have an account?{" "}
-        <Link
-          component="button"
-          sx={{
-            color: "#144E72",
-            fontWeight: 700,
-            textDecoration: "none",
-            "&:hover": { textDecoration: "underline" },
-          }}
-        >
-          Create an account
-        </Link>
-      </Typography>
     </Paper>
   );
 };
+
+export default SignUpForm;

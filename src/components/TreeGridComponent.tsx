@@ -1,12 +1,10 @@
-import React from "react";
-import "../TreeGrid.TypeScript.API.d.ts";
-import TreeGrid from "./TreeGrid";
-import "./TreeGridComponent.css"; // Import the custom CSS
-
 import { Box } from "@mui/material";
+import React, { useRef } from "react";
 import sampleData from "../tree-grid-sample-data.json";
+import "../TreeGrid.TypeScript.API.d.ts";
+import TreeGrid, { type TreeGridRef } from "./TreeGrid";
+import "./TreeGridComponent.css";
 
-// Define the data interface
 interface ProductRow {
   id: string;
   SKU: string;
@@ -21,6 +19,8 @@ interface ProductRow {
 }
 
 const TreeGridComponent: React.FC = () => {
+  const gridRef = useRef<TreeGridRef>(null);
+
   // Enum definition for Category
   const categoryEnum =
     "|Education|Vehicles|Business Industry|Home & Living|Essentials|Mobiles|Property|Electronics";
@@ -50,108 +50,174 @@ const TreeGridComponent: React.FC = () => {
     Body: [generateData()],
   };
 
-  // Use LayoutEffect to ensure events are registered BEFORE the child TreeGrid component initializes the grid
-  // React.useLayoutEffect(() => {
-  //     // Ensure standard global Grids object exists
-  //     if (!window.Grids) (window as any).Grids = {};
-  //     const G: any = window.Grids;
+  // Callback when grid is initialized
+  const handleGridInit = (grid: TGrid) => {
+    // Cast to any to attach dynamic event handlers not explicitly in TGrid interface
+    const G = grid as any;
 
-  //     // Custom HTML Rendering
-  //     // defined globally and safely checks for our specific grid ID
-  //     const originalGetHtmlValue = G.OnGetHtmlValue;
+    // Attach Custom HTML Rendering directly to this grid instance
+    G.OnGetHtmlValue = (grid: TGrid, row: any, col: string, val: any) => {
+      // Only apply to Data rows
+      if (row.Kind !== "Data") {
+        return val;
+      }
 
-  //     G.OnGetHtmlValue = (grid: any, row: any, col: string, val: any) => {
-  //         // Only apply to our specific grid and Data rows
-  //         if (grid.id !== "TreeGrid1" || row.Kind !== "Data") {
-  //             return originalGetHtmlValue
-  //                 ? originalGetHtmlValue(grid, row, col, val)
-  //                 : val;
-  //         }
+      // Custom Select
+      if (col === "Category") {
+        const options = categoryOptions
+          .map(
+            (opt) =>
+              `<option value="${opt}" ${
+                opt === val ? "selected" : ""
+              }>${opt}</option>`,
+          )
+          .join("");
 
-  //         // Custom Select
-  //         if (col === "Category") {
-  //             const options = categoryOptions
-  //                 .map(
-  //                     (opt) =>
-  //                         `<option value="${opt}" ${opt === val ? "selected" : ""}>${opt}</option>`,
-  //                 )
-  //                 .join("");
+        return `
+            <div class="select-wrapper">
+                <select class="custom-select" onchange="window.Grids['${grid.id}'].SetValue(window.Grids['${grid.id}'].GetRowById('${row.id}'), 'Category', this.value, 1);">
+                    ${options}
+                </select>
+            </div>
+        `;
+      }
 
-  //             return `
-  //                 <div class="select-wrapper">
-  //                     <select class="custom-select" onchange="window.Grids['TreeGrid1'].SetValue(window.Grids['TreeGrid1'].GetRowById('${row.id}'), 'Category', this.value, 1);">
-  //                         ${options}
-  //                     </select>
-  //                 </div>
-  //             `;
-  //         }
+      // Custom Chips
+      if (col === "Supplier" || col === "Customer") {
+        return `
+            <div class="chip-container">
+                <span class="chip-label">${val}</span>
+                <span class="chip-count">+3</span>
+            </div>
+          `;
+      }
+      return val;
+    };
 
-  //         // Custom Chips
-  //         if (col === "Supplier" || col === "Customer") {
-  //             return `
-  //                 <div class="chip-container">
-  //                     <span class="chip-label">${val}</span>
-  //                     <span class="chip-count">+3</span>
-  //                 </div>
-  //              `;
-  //         }
-  //         return val;
-  //     };
+    // Attach Custom Class Names
+    G.OnGetClass = (grid: TGrid, row: any, col: string, cls: string) => {
+      if (col === "Category") return (cls || "") + " category-cell";
+      return cls;
+    };
+  };
 
-  //     // Custom Class Names
-  //     const originalGetClass = G.OnGetClass;
-  //     G.OnGetClass = (grid: any, row: any, col: string, cls: string) => {
-  //         if (grid.id !== "TreeGrid1")
-  //             return originalGetClass ? originalGetClass(grid, row, col, cls) : cls;
+  window.TreeGrid.prototype.GetValue = (
+    grid: TGrid,
+    row: any,
+    col: string,
+    val: any,
+  ) => {
+    console.log(")(*&^%^&*", val);
 
-  //         if (col === "Category") return (cls || "") + " category-cell";
-  //         return cls;
-  //     };
-
-  //     // Cleanup function to restore original handlers if component unmounts
-  //     // Note: In a SPA, this is important to avoid memory leaks or conflicting handlers
-  //     return () => {
-  //         G.OnGetHtmlValue = originalGetHtmlValue;
-  //         G.OnGetClass = originalGetClass;
-  //     };
-  // }, []);
+    return val;
+  };
 
   const layout = {
     Cfg: {
       id: "TreeGrid1",
-      MainCol: "SKU",
-      Sorting: "1",
-      RowHeight: 50,
-      HeaderHeight: 50,
-      HideRootTree: 1,
-      StandardFilter: 2,
-      // Ensure we use a style that respects standard CSS
+      // MainCol: "SKU",
+      // Sorting: "1",
+      // RowHeight: 50,
+      // HeaderHeight: 50,
+      // HideRootTree: 1,
+      // StandardFilter: 2,
       Style: "standard",
+      // StretchWidth: 1,
+      // StrectchHeight: 1,
+      // ResizeWidth: 1,
+      // ResizeHeight: 1,
+      CfgId: "MockGrid",
+      MainCol: "SKU",
+      Tree: 0,
+      // Alternate: 2,
+      Delete: 0,
+      NumberId: 1,
+      SaveSession: "0",
+      Paging: "0",
+      MaxHeight: "1",
+      MinTagHeight: "350",
+      ColMoving: "1",
+      MainColRelative: "0",
+      NoTreeLines: 1,
+      Deleting: "0",
+      Toolbar: "0",
+      RelHeight: 1,
+      StretchWidth: 1,
+      StretchHeight: 1,
+      ResizeWidth: 1,
+      // Style: "White",
+      DynamicBorder: 1,
+      Filtering: 1,
+      Filtered: 1,
+      ShowDeleted: 0,
+      AutoUpdate: 1,
+      CanMove: "2",
+      FilterLap: "1",
+      // Filter: "1",
+      // Filter: "1",
     },
     Cols: [
       {
         Name: "IsSelected",
         Type: "Bool",
-        // Width: 60,
+        // RelWidth: 1,
+        CanEdit: 1,
+        CanFilter: 1,
+        Width: 60,
       },
-      { Name: "SKU", Type: "Text" },
-      { Name: "UPC", Type: "Text" },
+      {
+        Name: "SKU",
+        Type: "Text",
+        RelWidth: 1,
+        CanEdit: 1,
+        CanFilter: 1,
+      },
+      {
+        Name: "UPC",
+        Type: "Text",
+        RelWidth: 1,
+        CanEdit: 1,
+        CanFilter: 1,
+      },
       {
         Name: "Category",
         Type: "Html",
+        RelWidth: 1,
+        CanEdit: 1,
+        CanFilter: 1,
         // Width: 160,
         // Ensure CanEdit is 0 to avoid editing the HTML
       },
-      { Name: "Description", Type: "Text" },
+      {
+        Name: "Description",
+        Type: "Text",
+        RelWidth: 1,
+        CanEdit: 1,
+        CanFilter: 1,
+      },
       {
         Name: "Supplier",
         Type: "Html",
+        RelWidth: 1,
+        CanEdit: 1,
+        CanFilter: 1,
       },
       {
         Name: "Customer",
         Type: "Html",
+        RelWidth: 1,
+        CanEdit: 1,
+        CanFilter: 1,
       },
     ],
+    Def: {
+      R: {
+        CanEdit: "1",
+      },
+      Filter: {
+        CanEdit: "1",
+      },
+    },
     Header: {
       IsSelected: "Selected",
       SKU: "SKU",
@@ -161,9 +227,15 @@ const TreeGridComponent: React.FC = () => {
       Supplier: "Supplier",
       Customer: "Customer",
       Align: "Left",
+      FilterBtn: "Filter",
+      FilterBtnButton: "Filter",
     },
-    // Toolbar: { Visible: 0 },
-    Panel: { Visible: 0 },
+    Actions: {
+      OnClickSide:
+        "try { var fRow = Grid.GetRowById ? Grid.GetRowById('Filter') : Grid.GetRow('Filter'); if(fRow) { if(fRow.Visible) Grid.HideRow(fRow); else Grid.ShowRow(fRow); return -1; } } catch(e) { return -1; }",
+    },
+    Toolbar: { Visible: 1 },
+    Panel: { Visible: 0, Select: 1 },
   };
 
   return (
@@ -185,10 +257,12 @@ const TreeGridComponent: React.FC = () => {
         }}
       >
         <TreeGrid
+          ref={gridRef}
           id="TreeGrid1"
           layout={layout}
           data={gridData}
           debug={{ Check: 0 }}
+          onInit={handleGridInit}
         />
       </Box>
     </Box>

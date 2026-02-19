@@ -7,12 +7,12 @@ import {
   Typography,
 } from "@mui/material";
 import { useState } from "react";
-import brandLogo from "../../assets/login/brand.svg";
-import { OtpModal } from "../../components/common/OtpModal";
-import { LoginForm } from "./components/LoginForm";
-import { LoginGraphic } from "./components/LoginGraphic";
+import brandLogo from "../../../assets/login/brand.svg";
+import { OtpModal } from "../../../components/common/OtpModal";
+import AuthGraphic from "../common/AuthGraphic";
+import SignInForm from "./components/SignInForm";
 
-export default function LoginPage() {
+const SignInPage = () => {
   const [openOtp, setOpenOtp] = useState<boolean>(false);
 
   const handleLoginSuccess = () => setOpenOtp(true);
@@ -42,13 +42,7 @@ export default function LoginPage() {
           pointerEvents: "none",
         }}
       >
-        <LoginGraphic
-          sx={{
-            width: "100%",
-            height: "100%",
-            objectFit: "cover",
-          }}
-        />
+        <AuthGraphic />
       </Box>
 
       {/* Brand Logo - Top Left */}
@@ -72,7 +66,7 @@ export default function LoginPage() {
           my: 2.5,
         }}
       >
-        <LoginForm onSuccess={handleLoginSuccess} />
+        <SignInForm onSuccess={handleLoginSuccess} />
       </Container>
 
       {/* OTP Modal */}
@@ -97,4 +91,6 @@ export default function LoginPage() {
       </OtpModal>
     </Box>
   );
-}
+};
+
+export default SignInPage;

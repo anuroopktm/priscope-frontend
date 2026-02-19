@@ -1,7 +1,7 @@
-import { Box, type BoxProps } from "@mui/material";
-import geometryOverlay from "../../../assets/login/geometry.svg";
+import geometryOverlay from "@/assets/login/geometry.svg";
+import { Box } from "@mui/material";
 
-export const LoginGraphic = (props: BoxProps) => {
+const AuthGraphic = () => {
   return (
     <Box
       sx={{
@@ -13,9 +13,7 @@ export const LoginGraphic = (props: BoxProps) => {
         zIndex: 0,
         bgcolor: "#1A2B44",
         overflow: "hidden",
-        ...props.sx,
       }}
-      {...props}
     >
       {/* Top Right Decoration */}
       <Box
@@ -44,3 +42,5 @@ export const LoginGraphic = (props: BoxProps) => {
     </Box>
   );
 };
+
+export default AuthGraphic;
