@@ -2,51 +2,22 @@ import { type Theme } from "@mui/material/styles";
 
 export default function Input(theme: Theme) {
   return {
-    MuiTextField: {
-      defaultProps: {
-        variant: "outlined" as const,
-        fullWidth: true,
-      },
-    },
     MuiOutlinedInput: {
       styleOverrides: {
         root: {
-          borderRadius: 12, // Standard login input radius
-          backgroundColor: "#FFFFFF",
+          borderRadius: 12,
+          backgroundColor: theme.palette.common.white,
           transition: theme.transitions.create(["border-color", "box-shadow"]),
           "& fieldset": {
-            borderColor: "#BBBBBB",
+            borderColor: theme.palette.brand.border,
           },
           "&:hover fieldset": {
-            borderColor: "#CBD5E0",
+            borderColor: theme.palette.grey[400],
           },
           "&.Mui-focused fieldset": {
-            borderColor: "#1A2B44", // Focused state
+            borderColor: theme.palette.primary.main,
             borderWidth: 1,
           },
-          // Input specific styles
-          "& input": {
-            padding: "12px 14px",
-            fontSize: "1rem",
-          },
-        },
-        // Remove input adornment extra heights if needed
-        adornedEnd: {
-          paddingRight: 14,
-        },
-      },
-    },
-    MuiInputLabel: {
-      styleOverrides: {
-        root: {
-          // General label refinements if needed
-        },
-      },
-    },
-    MuiInputAdornment: {
-      styleOverrides: {
-        root: {
-          // Adornment spacing
         },
       },
     },

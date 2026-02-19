@@ -1,0 +1,55 @@
+/* General cell font */
+.TSMainTable {
+    border-radius: 10px !important;
+    overflow: hidden !important;
+    border: 1px solid #E7E7E9 !important;
+}
+
+.TSHeadMid {
+    border-top: none !important;
+    border-left: none !important;
+    border-right: 1px solid #E7E7E9 !important;
+    border-bottom: 1px solid #E7E7E9 !important;
+}
+
+.TSBodyMid {
+    border: none !important;
+}
+
+.TSAlignLeft {
+    border-right: 1px solid #E7E7E9 !important;
+}
+
+
+.TSCell {
+    color: #333333 !important;
+    font-weight: 400 !important;
+    border: none !important;
+    border-right: 1px solid #E7E7E9 !important;
+    border-bottom: 1px solid #E7E7E9 !important;
+}
+
+/* Header styling */
+.TSCellHeader {
+    background: #F7F7F9 !important;
+    color: #353535 !important;
+    font-weight: 700 !important;
+    border-bottom: none !important;
+}
+
+.TSNoLeft {
+    border-right: 1px solid #E7E7E9 !important;
+}
+
+/* Targets the 2nd element counting from the right */
+.TSHeaderRow>.TSNoLeft:nth-last-child(2) {
+    border-right: none !important;
+}
+
+.TSVScroll {
+    border: none !important
+}
+
+.TSBoolInput {
+    cursor: pointer !important;
+}

@@ -1,34 +1,27 @@
 import { type Theme } from "@mui/material/styles";
 
-export default function Button(theme: Theme) {
+export default function Select(theme: Theme) {
   return {
-    MuiButton: {
+    MuiSelect: {
       styleOverrides: {
-        root: {
+        select: {
           textTransform: "none" as const,
           fontSize: "14px",
+          padding: "6.75px 12px",
           borderRadius: 12,
-          padding: "6px 12px",
           color: theme.palette.common.white,
           backgroundColor: theme.palette.primary.main,
-          boxShadow: "none",
-
           "&:hover": {
             backgroundColor: theme.palette.brand.tertiary,
-            boxShadow: "none",
           },
         },
-      },
-    },
 
-    MuiIconButton: {
-      styleOverrides: {
-        root: {
+        icon: {
           color: theme.palette.common.white,
-          backgroundColor: theme.palette.primary.main,
-          "&:hover": {
-            backgroundColor: theme.palette.brand.tertiary,
-          },
+        },
+
+        iconOpen: {
+          color: theme.palette.common.white,
         },
       },
     },

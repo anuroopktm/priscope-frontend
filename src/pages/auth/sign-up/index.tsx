@@ -1,3 +1,5 @@
+import brandLogo from "@/assets/login/brand.svg";
+import { OtpModal } from "@/components/common/OtpModal";
 import {
   Box,
   Button,
@@ -7,8 +9,6 @@ import {
   Typography,
 } from "@mui/material";
 import { useState } from "react";
-import brandLogo from "../../../assets/login/brand.svg";
-import { OtpModal } from "../../../components/common/OtpModal";
 import AuthGraphic from "../common/AuthGraphic";
 import SignUpForm from "./components/SignUpForm";
 
@@ -46,9 +46,12 @@ const SignUpPage = () => {
       </Box>
 
       {/* Brand Logo - Top Left */}
-      <Box sx={{ position: "fixed", top: 30, left: 30, zIndex: 2 }}>
-        <img src={brandLogo} alt="Priscope" />
-      </Box>
+      <Box
+        sx={{ position: "fixed", top: 30, left: 30, zIndex: 2 }}
+        component="img"
+        src={brandLogo}
+        alt="Priscope"
+      />
 
       {/* Centered Login Card */}
       <Container

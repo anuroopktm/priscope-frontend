@@ -1,4 +1,6 @@
-export default function Paper() {
+import { type Theme } from "@mui/material/styles";
+
+export default function Paper(theme: Theme) {
   return {
     MuiPaper: {
       defaultProps: {
@@ -7,7 +9,7 @@ export default function Paper() {
       styleOverrides: {
         root: {
           backgroundImage: "none",
-          backgroundColor: "#FFFFFF", // Default background
+          backgroundColor: theme.palette.background.paper, // Default background
         },
         rounded: {
           borderRadius: 24, // Standard card radius

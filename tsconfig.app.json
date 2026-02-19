@@ -20,7 +20,6 @@
     "moduleDetection": "force",
     "noEmit": true,
     "jsx": "react-jsx",
-    "resolveJsonModule": true,
     /* Linting */
     "strict": true,
     "noUnusedLocals": true,
@@ -28,6 +27,7 @@
     "erasableSyntaxOnly": true,
     "noFallthroughCasesInSwitch": true,
     "noUncheckedSideEffectImports": true,
+    /* Alias */
     "baseUrl": ".",
     "paths": {
       "@/*": [

@@ -1,0 +1,28 @@
+import GlobalHeader from "@/components/global-header";
+import { Box } from "@mui/material";
+import { useTheme } from "@mui/material/styles";
+import { Outlet } from "react-router-dom";
+
+const MainLayout = () => {
+  const theme = useTheme();
+
+  return (
+    <Box
+      sx={{
+        width: "100vw",
+        height: "100vh",
+        display: "flex",
+        flexDirection: "column",
+        backgroundColor: theme.palette.brand.background,
+        pt: "56px",
+      }}
+    >
+      <GlobalHeader />
+      <Box sx={{ flex: 1, overflow: "auto" }}>
+        <Outlet />
+      </Box>
+    </Box>
+  );
+};
+
+export default MainLayout;

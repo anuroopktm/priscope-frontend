@@ -8,11 +8,8 @@ declare module "@mui/material/styles" {
       secondary: string;
       tertiary: string;
       background: string;
-    };
-    auth: {
-      surface: string;
+      background_gradient: string;
       border: string;
-      inputBg: string;
     };
   }
   interface PaletteOptions {
@@ -21,11 +18,8 @@ declare module "@mui/material/styles" {
       secondary: string;
       tertiary: string;
       background: string;
-    };
-    auth?: {
-      surface: string;
+      background_gradient: string;
       border: string;
-      inputBg: string; // Generic placeholder for input backgrounds if needed
     };
   }
 }
@@ -44,14 +38,11 @@ const theme = createTheme({
       secondary: "#4A78BA",
       tertiary: "#144E72",
       background: "#1A2B44",
-    },
-    auth: {
-      surface: "#FFFFFF",
+      background_gradient: "linear-gradient(180deg, #14253F 0%, #1A2B44 100%)",
       border: "#BBBBBB",
-      inputBg: "#FFFFFF",
     },
     background: {
-      default: "#F4F6F8", // Neutral background for the app context
+      default: "#F4F6F8",
       paper: "#FFFFFF",
     },
   },
@@ -59,7 +50,7 @@ const theme = createTheme({
     fontFamily: '"Inter", "Roboto", "Helvetica", "Arial", sans-serif',
   },
   shape: {
-    borderRadius: 8,
+    borderRadius: 12,
   },
 });
 
