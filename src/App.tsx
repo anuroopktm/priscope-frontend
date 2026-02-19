@@ -10,6 +10,7 @@ import SignInPage from "./pages/auth/sign-in";
 import SignUpPage from "./pages/auth/sign-up";
 import ScenarioBuilderPage from "./pages/scenario-builder";
 import { theme } from "./theme/theme";
+import ItemsMasterPage from "./pages/items-master";
 
 const queryClient = new QueryClient();
 
@@ -33,6 +34,10 @@ const router = createBrowserRouter([
       {
         path: "scenario-builder",
         element: <ScenarioBuilderPage />,
+      },
+       {
+        path: "items-master",
+        element: <ItemsMasterPage />,
       },
     ],
   },
