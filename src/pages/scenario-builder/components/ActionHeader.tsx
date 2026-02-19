@@ -17,7 +17,6 @@ export const ActionHeader = () => {
   // Select states for dropdowns if needed, for UI just use buttons for visual match
   // Or implement Selects to show functionality
 
-
   // Common Select Style for header items if we convert them to Select components
   // For now using Button visually to match the "Action Header" requirement
 
@@ -46,9 +45,7 @@ export const ActionHeader = () => {
         InputProps={{
           startAdornment: (
             <InputAdornment position="start" sx={{ ml: 1, mr: 0.5 }}>
-              <Search
-                sx={{ color: "rgba(0, 0, 0, 0.54)", fontSize: 20 }}
-              />
+              <Search sx={{ color: "rgba(0, 0, 0, 0.54)", fontSize: 20 }} />
             </InputAdornment>
           ),
         }}
@@ -71,9 +68,7 @@ export const ActionHeader = () => {
         </Button>
 
         {/* Show Filter */}
-        <Button startIcon={<FilterListOutlined />}>
-          Show Filter
-        </Button>
+        <Button startIcon={<FilterListOutlined />}>Show Filter</Button>
 
         {/* Add Item */}
         <Button startIcon={<AddOutlined />}>Add Item</Button>
@@ -90,4 +85,3 @@ export const ActionHeader = () => {
     </Box>
   );
 };
-

@@ -48,7 +48,6 @@ const ScenarioBuilderPage = () => {
   return (
     <Box
       sx={{
-        height: "100%",
         display: "flex",
         flexDirection: "column",
         borderRadius: 1,
@@ -61,7 +60,6 @@ const ScenarioBuilderPage = () => {
       <Box
         sx={{
           flex: 1,
-          overflow: "hidden",
           p: 2,
         }}
       >
@@ -69,7 +67,7 @@ const ScenarioBuilderPage = () => {
           id="ScenarioGrid"
           sx={{
             width: "100%",
-            height: "100%",
+            height: "calc(100vh - 144px)",
           }}
         />
       </Box>
