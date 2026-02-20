@@ -24,6 +24,7 @@ export const GlobalHeaderActions = () => {
           height: 32,
           color: "white",
           borderRadius: 20,
+          overflow: "hidden",
           "& .MuiOutlinedInput-notchedOutline": {
             borderColor: theme.palette.brand.tertiary,
           },
