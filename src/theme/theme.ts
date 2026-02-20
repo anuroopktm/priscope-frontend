@@ -10,6 +10,7 @@ declare module "@mui/material/styles" {
       background: string;
       background_gradient: string;
       border: string;
+      gradientBg: string;
     };
   }
   interface PaletteOptions {
@@ -20,6 +21,7 @@ declare module "@mui/material/styles" {
       background: string;
       background_gradient: string;
       border: string;
+      gradientBg: string;
     };
   }
 }
@@ -40,6 +42,8 @@ const theme = createTheme({
       background: "#1A2B44",
       background_gradient: "linear-gradient(180deg, #14253F 0%, #1A2B44 100%)",
       border: "#BBBBBB",
+      gradientBg: "linear-gradient(96.81deg, #D8ECF8 0%, #89C5EA 100%)",
+      
     },
     background: {
       default: "#F4F6F8",

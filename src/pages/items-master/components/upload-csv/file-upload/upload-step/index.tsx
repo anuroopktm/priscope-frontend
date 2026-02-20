@@ -1,0 +1,207 @@
+import React, { useState, useCallback, ChangeEvent, DragEvent } from "react";
+import {
+  Box,
+  Typography,
+  CircularProgress,
+  IconButton,
+  Paper,
+} from "@mui/material";
+import {
+  UploadFile as UploadIcon,
+  InsertDriveFileOutlined as FileIcon,
+  CheckCircle as CheckCircleIcon,
+  Delete as DeleteIcon,
+} from "@mui/icons-material";
+import { styled } from "@mui/material/styles";
+import Papa from "papaparse";
+import {
+  ACCEPTED_FILE_TYPES,
+  UploadedFile,
+  isValidFileType,
+} from "@/app/[lang]/(protected)/item-master/constants/upload.constants";
+import theme from "@/shared/styles/theme";
+import { getFileHeaders } from "../../../../utils/getFileHeaders";
+import { useItemMasterStore } from "../../../../store/itemMasterStore";
+import uploadIcon from '../../../../assets/upload-icon.svg'
+import Image from "next/image";
+
+type FileUploadStepProps = {
+  uploadedFile: UploadedFile | null;
+  fileStatus: "loading" | "complete" | "";
+  onFileUpload: (file: UploadedFile) => void;
+  onFileRemove: () => void;
+  onStatusChange: (status: "loading" | "complete" | "") => void;
+  onHeadersFetched: (headers: string[]) => void;
+  isUploadPending: boolean; 
+};
+
+const DropZone = styled(Box, {
+  shouldForwardProp: (prop) => prop !== "isDragOver",
+})<{ isDragOver: boolean }>(({ theme, isDragOver }) => ({
+  border: `1px dashed ${
+    isDragOver ? theme.custom.subTextColor : theme.palette.grey[300]
+  }`,
+  borderRadius: theme.shape.borderRadius,
+  padding: theme.spacing(4),
+  textAlign: "center",
+  cursor: "pointer",
+  transition: "all 0.3s ease",
+  "&:hover": {
+    backgroundColor: theme.palette.action.hover,
+    borderColor: theme.palette.primary.main,
+  },
+}));
+
+const FileItem = styled(Paper)(({ theme }) => ({
+  padding: theme.spacing(1.5),
+  display: "flex",
+  alignItems: "center",
+  gap: theme.spacing(1.5),
+  marginBottom: theme.spacing(1),
+  boxShadow: "none",
+}));
+
+const FileUploadStep: React.FC<FileUploadStepProps> = ({
+  uploadedFile,
+  fileStatus,
+  onFileUpload,
+  onFileRemove,
+  onStatusChange,
+  onHeadersFetched,
+  isUploadPending
+}) => {
+  const [isDragOver, setIsDragOver] = useState(false);
+  const setHeaders = useItemMasterStore((s) => s.setHeaders);
+
+  const handleDragOver = useCallback((e: DragEvent) => {
+    e.preventDefault();
+    setIsDragOver(true);
+  }, []);
+
+  const handleDragLeave = useCallback((e: DragEvent) => {
+    e.preventDefault();
+    setIsDragOver(false);
+  }, []);
+
+  const handleDrop = useCallback((e: DragEvent) => {
+    e.preventDefault();
+    setIsDragOver(false);
+    const files = Array.from(e.dataTransfer.files);
+    const file = files[0];
+    if (file && isValidFileType(file)) {
+      handleFileUpload(file);
+    }
+  }, []);
+
+  const handleFileSelect = (e: ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) handleFileUpload(file);
+  };
+
+  const parseCsvHeaders = (file: File): Promise<string[]> => {
+    return new Promise((resolve, reject) => {
+      Papa.parse(file, {
+        header: true, // Treat first row as headers
+        preview: 1, // Parse only the first row
+        skipEmptyLines: true,
+        step: (results: Papa.ParseResult<any>, parser: Papa.Parser) => {
+          const headers = results.meta.fields || [];
+          parser.abort(); // Stop parsing after headers
+          resolve(headers);
+        },
+        error: (error: Error) => {
+          reject(new Error(`CSV parsing error: ${error.message}`));
+        },
+      });
+    });
+  };
+
+  const handleFileUpload = async (file: File) => {
+    const uploadedFileData: UploadedFile = {
+      name: file.name,
+      size: `${Math.round(file.size / 1024)}kb`,
+      file
+    };
+
+    onFileUpload(uploadedFileData);
+    onStatusChange("loading");
+
+    try {
+      const headers = await getFileHeaders(file);
+      setHeaders(headers);
+      onHeadersFetched(headers);
+      onStatusChange("complete");
+    } catch (error) {
+      console.error("Error parsing CSV headers:", error);
+      onStatusChange("");
+    }
+  };
+
+  const handleRemoveFile = () => {
+    onFileRemove();
+    onStatusChange("");
+    onHeadersFetched([]); // Clear headers when file is removed
+  };
+
+  return (
+    <Box>
+      <Typography variant="subtitle1" sx={{ color: theme.custom.textColor, fontWeight: 600, fontSize: 16 }}>
+        Upload File
+      </Typography>
+      {!uploadedFile ? (
+        <DropZone
+          isDragOver={isDragOver}
+          onDragOver={handleDragOver}
+          onDragLeave={handleDragLeave}
+          onDrop={handleDrop}
+          onClick={() => document.getElementById("file-input")?.click()}
+        >
+          <Box sx={{display: 'flex', justifyContent: 'center'}}>
+            <Image src={uploadIcon} alt="upload-icon" width={35} height={35} />
+          </Box>
+          <Typography variant="body1" sx={{color: theme.custom.textColor}}>Drag and drop CSV/Excel File</Typography>
+          <input
+            id="file-input"
+            type="file"
+            accept={ACCEPTED_FILE_TYPES}
+            onChange={handleFileSelect}
+            style={{ display: "none" }}
+          />
+        </DropZone>
+      ) : (
+        <FileItem>
+          <FileIcon sx={{ color: theme.custom.buttonBg, fontSize: 40 }} />
+          <Box sx={{ flexGrow: 1 }}>
+            <Typography fontWeight="normal">{uploadedFile.name}</Typography>
+            <Typography variant="caption" color={theme.custom.subTextColor}>
+              {uploadedFile.size}
+              <Box
+                component="span"
+                sx={{ mx: 0.5, color: theme.custom.subTextColor }}
+              >
+                •
+              </Box>
+              {fileStatus === "loading"
+                ? "Loading..."
+                : fileStatus === "complete"
+                ? "Completed"
+                : ""}
+            </Typography>
+          </Box>
+
+          <IconButton onClick={handleRemoveFile} disabled={isUploadPending}>
+            <DeleteIcon />
+          </IconButton>
+          {fileStatus === "loading" && (
+            <Box sx={{ ml: 1 }}>
+              <CircularProgress />
+            </Box>
+          )}
+          {fileStatus === "complete" && <CheckCircleIcon color="success" />}
+        </FileItem>
+      )}
+    </Box>
+  );
+};
+
+export default FileUploadStep;
