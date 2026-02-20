@@ -32,7 +32,7 @@ const ScenarioBuilderPage = () => {
   // Optional: Function to attach event handlers after initialization
   const handleGridReady = useCallback((grid: TGrid) => {
     const G = grid as any;
-    G.OnValueChanged = (grid: TGrid, row: TRow, col: string, val: any) => {
+    G.OnValueChanged = (_grid: TGrid, _row: TRow, col: string, val: any) => {
       console.log(`Cell ${col} updated to:`, val);
     };
   }, []);
@@ -44,6 +44,8 @@ const ScenarioBuilderPage = () => {
     generateData(),
     handleGridReady,
   );
+
+  console.log("gridInstance", gridInstance);
 
   return (
     <Box
