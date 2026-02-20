@@ -26,9 +26,7 @@ export const useTreeGridInit = (
     const source = {
       Layout: { Data: layout },
       Data: {
-        Data: {
-          Body: [data],
-        },
+        Data:data
       },
       Debug: { Check: 1 },
     };

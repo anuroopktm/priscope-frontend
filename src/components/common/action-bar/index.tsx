@@ -22,8 +22,8 @@ import HighlightOffOutlinedIcon from "@mui/icons-material/HighlightOffOutlined";
 import CheckCircleOutlineOutlinedIcon from "@mui/icons-material/CheckCircleOutlineOutlined";
 import { useConfirm } from "@/shared/providers/ModalProvider";
 import RequestsIcon from "@/public/images/requests.svg";
-import useTranslation from "@/shared/hooks/useTranslation";
-import { openConfirmationModal } from "@/shared/utils/getRequestConfirmationModal";
+// import useTranslation from "@/shared/hooks/useTranslation";
+import { openConfirmationModal } from "@/utils/getRequestConfirmationModal";
 
 interface ExtendedActionBarProps {
   alignment?: string;
@@ -127,7 +127,7 @@ const ActionBar = ({
   hasExportPermission,
   hasImportPermission,
 }: ExtendedActionBarProps) => {
-  const { t } = useTranslation();
+  // const { t } = useTranslation();
   const theme = useTheme();
   const confirm = useConfirm();
 
@@ -228,14 +228,10 @@ const ActionBar = ({
           }}
         >
           <Box component="span" sx={{ display: "flex", alignItems: "center" }}>
-            <img
-              src={SearchIcon}
-              alt={t("common", "actionBar.searchIconAlt")}
-              width={16}
-            />
+            <img src={SearchIcon} alt="Search" width={16} />
           </Box>
           <InputBase
-            placeholder={t("common", "actionBar.searchPlaceholder")}
+            placeholder="Search"
             onChange={handleSearchChange}
             sx={{
               p: 1,
@@ -284,7 +280,7 @@ const ActionBar = ({
                 )
               }
             >
-              {t("common", "actionBar.disableSelection")}
+              Disable Selection
             </Button>
           )}
 
@@ -313,7 +309,7 @@ const ActionBar = ({
                 )
               }
             >
-              {t("common", "actionBar.enableSelection")}
+              Enable Selection
             </Button>
           )}
 
@@ -334,15 +330,9 @@ const ActionBar = ({
                 textTransform: "none",
                 fontWeight: 500,
               }}
-              startIcon={
-                <Image
-                  src={ExportDataIcon}
-                  alt={t("common", "actionBar.exportDataIconAlt")}
-                  width={16}
-                />
-              }
+              startIcon={<img src={ExportDataIcon} alt="Export" width={16} />}
             >
-              {t("common", "actionBar.exportSelected")}
+              Export Selected
             </Button>
           )}
         </Box>
@@ -374,7 +364,7 @@ const ActionBar = ({
           }}
         >
           <Box component="span" sx={{ display: "flex", alignItems: "center" }}>
-            <Image
+            <img
               src={SearchIcon}
               alt={t("common", "actionBar.searchIconAlt")}
               width={16}
@@ -415,13 +405,13 @@ const ActionBar = ({
                 color: theme.palette.grey[300],
                 "&:hover": {
                   color: "white",
-                  bgcolor: theme.palette.sidebar.hover,
+                  bgcolor: theme.palette.brand.hover,
                 },
                 textTransform: "none",
                 fontWeight: 600,
               }}
               startIcon={
-                <Image
+                <img
                   src={RequestsIcon}
                   alt={t("common", "actionBar.requestIconAlt")}
                   width={16}
@@ -440,13 +430,13 @@ const ActionBar = ({
                 color: theme.palette.grey[300],
                 "&:hover": {
                   color: "white",
-                  bgcolor: theme.palette.sidebar.hover,
+                  bgcolor: theme.palette.brand.border,
                 },
                 textTransform: "none",
                 fontWeight: 600,
               }}
               startIcon={
-                <Image
+                <img
                   src={LogFileIcon}
                   alt={t("common", "actionBar.logFileIconAlt")}
                   width={16}
@@ -466,11 +456,11 @@ const ActionBar = ({
                 color: theme.palette.grey[300],
                 "&:hover": {
                   color: "white",
-                  bgcolor: theme.palette.sidebar.hover,
+                  bgcolor: theme.palette.brand.hover,
                 },
                 "&:disabled": {
                   color: "white",
-                  bgcolor: theme.palette.sidebar.hover,
+                  bgcolor: theme.palette.brand.hover,
                 },
                 textTransform: "none",
                 fontWeight: 600,
@@ -489,13 +479,13 @@ const ActionBar = ({
                 color: theme.palette.grey[300],
                 "&:hover": {
                   color: "white",
-                  bgcolor: theme.palette.sidebar.hover,
+                  bgcolor: theme.palette.brand.hover,
                 },
                 textTransform: "none",
                 fontWeight: 600,
               }}
               startIcon={
-                <Image
+                <img
                   src={ExportDataIcon}
                   alt={t("common", "actionBar.exportDataIconAlt")}
                   width={16}
@@ -514,13 +504,13 @@ const ActionBar = ({
                 color: theme.palette.grey[300],
                 "&:hover": {
                   color: "white",
-                  bgcolor: theme.palette.sidebar.hover,
+                  bgcolor: theme.palette.brand.hover,
                 },
                 textTransform: "none",
                 fontWeight: 600,
               }}
               startIcon={
-                <Image
+                <img
                   src={ImportDataIcon}
                   alt={t("common", "actionBar.importDataIconAlt")}
                   width={16}
@@ -556,7 +546,7 @@ const ActionBar = ({
                   },
                   "&:hover": {
                     borderRadius: "8px",
-                    bgcolor: theme.palette.sidebar.hover,
+                    bgcolor: theme.palette.brand.hover,
                   },
                 },
               }}
@@ -584,7 +574,7 @@ const ActionBar = ({
                 borderColor: theme.palette.brand.tertiary,
                 "&:hover": {
                   color: "white",
-                  bgcolor: theme.palette.sidebar.hover,
+                  bgcolor: theme.palette.brand.hover,
                 },
                 textTransform: "none",
                 fontWeight: 600,
@@ -592,7 +582,7 @@ const ActionBar = ({
                 width: "fit-content",
               }}
             >
-              <Image
+              <img
                 src={CommentIcon}
                 alt={t("common", "actionBar.commentIconAlt")}
                 width={16}

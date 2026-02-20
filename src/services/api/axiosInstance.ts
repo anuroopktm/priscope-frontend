@@ -14,7 +14,9 @@ export const axiosInstance = axios.create({
 // Request Interceptor
 axiosInstance.interceptors.request.use(
   (config: InternalAxiosRequestConfig) => {
-    const token = localStorage.getItem("authToken");
+    // const token = localStorage.getItem("authToken");
+    const token =
+      "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJhZG1pbkBwcmlzY29wZS5jb20iLCJ1c2VyX2lkIjoiMjhjMGFkMzAtNTUwYi00NWQ4LWIwNzQtYjEzNjI3OWRmYjQ3IiwidGVuYW50X2lkIjoiTm9uZSIsImV4cCI6MTc3MTY2OTI2MX0.C24-qmq0zBx0UZul4gbHyncAKsE9jcHbAMKfHhxC0cg";
     if (token) {
       config.headers.Authorization = `Bearer ${token}`;
     }

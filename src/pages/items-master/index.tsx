@@ -15,7 +15,11 @@ import {
   buildItemMasterTreeGridCols,
   getItemMasterLayout,
 } from "./helpers/itemMasterTreeGridHelperFunction";
-import type { TreeGridBody, TreeGridLayout } from "./helpers/types";
+import type {
+  TreeGridBody,
+  TreeGridHeader,
+  TreeGridLayout,
+} from "./helpers/types";
 
 // Enum definition for Category
 const categoryEnum =
@@ -40,6 +44,7 @@ const generateData = (): any[] => {
 };
 
 const ItemsMasterPage = () => {
+  const theme = useTheme();
   const [searchQuery, setSearchQuery] = useState("");
   const [filter, setFilter] = useState<Record<string, string[]>>({});
   const debouncedSearchQuery = useDebounce(searchQuery, 500);
@@ -48,6 +53,7 @@ const ItemsMasterPage = () => {
   const isInitialLoadRef = useRef(true);
   const isSearchReplaceRef = useRef(false);
   const prevSearchQueryRef = useRef<string>("");
+  const treeGridHeadersRef = useRef<TreeGridHeader[]>([]);
 
   const {
     data: itemMasterDataList,
@@ -62,6 +68,7 @@ const ItemsMasterPage = () => {
     filter: filter,
   });
 
+  console.log(data, "dattaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa");
   const { data: listHeaderData, isLoading: isListHeadersLoading } =
     useListHeaders({ page_size: 10000, search: "", skip: 0, filter: filter });
   useEffect(() => {
@@ -117,7 +124,6 @@ const ItemsMasterPage = () => {
     const dataToAdd = buildItemMasterTreeGridBody(newItems);
     addRowsToGrid(dataToAdd?.Body[0]);
   }, [itemMasterDataList, listHeaderData]);
-  const theme = useTheme();
   // Optional: Function to attach event handlers after initialization
   const handleGridReady = useCallback((grid: TGrid) => {
     const G = grid as any;

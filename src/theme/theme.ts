@@ -11,6 +11,7 @@ declare module "@mui/material/styles" {
       background_gradient: string;
       border: string;
       gradientBg: string;
+      hover: string;
     };
   }
   interface PaletteOptions {
@@ -22,6 +23,7 @@ declare module "@mui/material/styles" {
       background_gradient: string;
       border: string;
       gradientBg: string;
+      hover: string;
     };
   }
 }
@@ -43,7 +45,7 @@ const theme = createTheme({
       background_gradient: "linear-gradient(180deg, #14253F 0%, #1A2B44 100%)",
       border: "#BBBBBB",
       gradientBg: "linear-gradient(96.81deg, #D8ECF8 0%, #89C5EA 100%)",
-      
+      hover: "rgba(255, 255, 255, 0.05)",
     },
     background: {
       default: "#F4F6F8",
