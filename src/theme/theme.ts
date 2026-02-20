@@ -24,7 +24,7 @@ declare module "@mui/material/styles" {
   }
 }
 
-const theme = createTheme({
+let theme = createTheme({
   palette: {
     mode: "light",
     primary: {
@@ -42,7 +42,7 @@ const theme = createTheme({
       border: "#BBBBBB",
     },
     background: {
-      default: "#F4F6F8",
+      default: "#e3e3e3ff",
       paper: "#FFFFFF",
     },
   },
@@ -54,6 +54,8 @@ const theme = createTheme({
   },
 });
 
-theme.components = ComponentsOverrides(theme);
+theme = createTheme(theme, {
+  components: ComponentsOverrides(theme),
+});
 
 export { theme };
