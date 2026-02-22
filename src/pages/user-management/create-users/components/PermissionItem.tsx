@@ -4,7 +4,7 @@ interface PermissionItemProps {
   label: string;
   desc: string;
   checked: boolean;
-  handleChange: (v: boolean) => void;
+  handleChange: () => void;
 }
 
 const PermissionItem = ({
@@ -14,6 +14,7 @@ const PermissionItem = ({
   handleChange,
 }: PermissionItemProps) => (
   <Box
+    onClick={handleChange}
     sx={{
       mb: 3,
       display: "flex",
@@ -24,16 +25,18 @@ const PermissionItem = ({
   >
     <Checkbox
       checked={checked}
-      onChange={(_e, v) => handleChange(v)}
       size="small"
-      sx={{ mt: -0.5 }}
+      sx={{ mt: -0.5, pointerEvents: "none" }}
     />
     <Box>
-      <Typography variant="body2" sx={{ fontWeight: 600, color: "#1A2B44" }}>
-        {label}
+      <Typography
+        variant="body1"
+        sx={{ fontWeight: 600, color: "#1A2B44", textTransform: "capitalize" }}
+      >
+        {label.replace("_", " ")}
       </Typography>
       <Typography
-        variant="caption"
+        variant="body2"
         sx={{ color: "#7A8699", display: "block", mt: 0.2 }}
       >
         {desc}

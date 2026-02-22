@@ -1,6 +1,7 @@
 import SearchTextField from "@/components/common/SearchTextField";
 import { AddOutlined, KeyboardArrowDown } from "@mui/icons-material";
 import { Box, Button, Stack } from "@mui/material";
+import { useNavigate } from "react-router-dom";
 
 export const ActionHeader = ({
   onSearch,
@@ -9,6 +10,9 @@ export const ActionHeader = ({
   onSearch?: (val: string) => void;
   onStatus?: (val: string) => void;
 }) => {
+  const navigate = useNavigate();
+
+  const handleNavigate = () => navigate("/user-management/create-user");
   return (
     <Box
       sx={{
@@ -28,7 +32,11 @@ export const ActionHeader = ({
 
       <Stack direction="row" spacing={1} alignItems="center">
         <Button endIcon={<KeyboardArrowDown />}>Status Filter</Button>
-        <Button variant="contained" startIcon={<AddOutlined />}>
+        <Button
+          variant="contained"
+          startIcon={<AddOutlined />}
+          onClick={handleNavigate}
+        >
           Add New User
         </Button>
       </Stack>

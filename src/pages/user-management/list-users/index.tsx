@@ -28,7 +28,7 @@ const UserManagementListUsersPage = () => {
     skip: (page - 1) * pageSize,
     status: status,
     // tenant_id: localStorage.getItem("tenant_id") || "",
-    tenant_id: "123e4567-e89b-12d3-a456-426614174000",
+    tenant_id: import.meta.env.VITE_TENANT_ID,
   });
 
   const users = data?.users || [];

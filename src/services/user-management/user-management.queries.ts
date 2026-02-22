@@ -1,7 +1,9 @@
-import { useQuery } from "@tanstack/react-query";
+import { useMutation, useQuery } from "@tanstack/react-query";
 import type { AxiosError } from "axios";
 import { axiosInstance } from "../api/axiosInstance";
 import type {
+  CheckEmailRequest,
+  CheckEmailResponse,
   GetPrivilegeTemplatesResponse,
   GetUsersRequest,
   GetUsersResponse,
@@ -24,7 +26,7 @@ export const useGetResourcePrivileges = (
   payload: ResourcePrivilegesRequest,
 ) => {
   return useQuery<ResourcePrivilegesResponse, AxiosError<{ detail: string }>>({
-    queryKey: ["resource-privileges", payload],
+    queryKey: ["resource-privileges", payload.role_id, payload.tenant_id],
     queryFn: async () => {
       const { data } = await axiosInstance.post(
         "/v1/resource-privileges",
@@ -32,7 +34,6 @@ export const useGetResourcePrivileges = (
       );
       return data;
     },
-    enabled: !!payload.role_id,
     refetchOnWindowFocus: false,
   });
 };
@@ -51,5 +52,18 @@ export const useGetPrivilegeTemplates = (tenant_id: string) => {
     },
     enabled: !!tenant_id,
     refetchOnWindowFocus: false,
+  });
+};
+
+export const useCheckEmailExist = () => {
+  return useMutation<
+    CheckEmailResponse,
+    AxiosError<{ detail: string }>,
+    CheckEmailRequest
+  >({
+    mutationFn: async (payload: CheckEmailRequest) => {
+      const { data } = await axiosInstance.post("/v1/email-exist", payload);
+      return data;
+    },
   });
 };

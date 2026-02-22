@@ -25,7 +25,8 @@ export interface ResourcePrivilege {
 }
 
 export interface ResourcePrivilegesRequest {
-  role_id: string;
+  role_id?: string;
+  tenant_id: string;
 }
 
 export type ResourcePrivilegesResponse = ResourcePrivilege[];
@@ -37,3 +38,9 @@ export interface PrivilegeTemplate {
 }
 
 export type GetPrivilegeTemplatesResponse = PrivilegeTemplate[];
+
+export interface CheckEmailRequest {
+  email: string;
+}
+
+export type CheckEmailResponse = string;

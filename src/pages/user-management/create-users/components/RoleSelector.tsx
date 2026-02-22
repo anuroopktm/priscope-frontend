@@ -9,7 +9,7 @@ import {
 
 interface RoleSelectorProps {
   value: string;
-  onChange: (value: string | null) => void;
+  onChange: (value: string) => void;
   roles: { id: string; name: string }[];
   loading?: boolean;
 }

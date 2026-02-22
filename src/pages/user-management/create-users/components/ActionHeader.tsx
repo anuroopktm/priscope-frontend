@@ -1,8 +1,12 @@
 import { ArrowBack } from "@mui/icons-material";
 import { Box, IconButton, Typography, useTheme } from "@mui/material";
+import { useNavigate } from "react-router-dom";
 
 const ActionHeader = () => {
   const theme = useTheme();
+  const navigate = useNavigate();
+
+  const handleBack = () => navigate("/user-management/list-users");
 
   return (
     <Box
@@ -16,7 +20,7 @@ const ActionHeader = () => {
       }}
     >
       <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
-        <IconButton>
+        <IconButton onClick={handleBack}>
           <ArrowBack sx={{ color: theme.palette.background.default }} />
         </IconButton>
 
