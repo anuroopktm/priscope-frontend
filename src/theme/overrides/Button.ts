@@ -5,10 +5,6 @@ export default function Button(theme: Theme) {
     MuiButton: {
       styleOverrides: {
         root: {
-          textTransform: "none" as const,
-          fontSize: "14px",
-          borderRadius: 12,
-          padding: "6px 12px",
           color: theme.palette.common.white,
           backgroundColor: theme.palette.primary.main,
           boxShadow: "none",
@@ -20,17 +16,32 @@ export default function Button(theme: Theme) {
         },
       },
     },
-
     MuiIconButton: {
-      styleOverrides: {
-        root: {
-          color: theme.palette.common.white,
-          backgroundColor: theme.palette.primary.main,
-          "&:hover": {
-            backgroundColor: theme.palette.brand.tertiary,
+      variants: [
+        {
+          props: { variant: "ghost" },
+          style: {
+            backgroundColor: "transparent",
+            color: theme.palette.primary.main,
+            padding: 6,
+
+            "&:hover": {
+              backgroundColor: "transparent",
+            },
           },
         },
-      },
+
+        {
+          props: { variant: "action" },
+          style: {
+            color: theme.palette.common.white,
+            backgroundColor: theme.palette.primary.main,
+            "&:hover": {
+              backgroundColor: theme.palette.brand.tertiary,
+            },
+          },
+        },
+      ],
     },
   };
 }

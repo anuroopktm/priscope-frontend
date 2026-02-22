@@ -5,7 +5,6 @@ export default function Input(theme: Theme) {
     MuiOutlinedInput: {
       styleOverrides: {
         root: {
-          borderRadius: 12,
           backgroundColor: theme.palette.common.white,
           transition: theme.transitions.create(["border-color", "box-shadow"]),
           "& fieldset": {

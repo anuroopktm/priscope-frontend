@@ -9,10 +9,10 @@ export default function Paper(theme: Theme) {
       styleOverrides: {
         root: {
           backgroundImage: "none",
-          backgroundColor: theme.palette.background.paper, // Default background
+          backgroundColor: theme.palette.background.paper,
         },
         rounded: {
-          borderRadius: 24, // Standard card radius
+          borderRadius: 12,
         },
       },
     },

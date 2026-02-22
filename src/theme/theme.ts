@@ -1,29 +1,6 @@
 import { createTheme } from "@mui/material/styles";
 import ComponentsOverrides from "./overrides";
 
-declare module "@mui/material/styles" {
-  interface Palette {
-    brand: {
-      primary: string;
-      secondary: string;
-      tertiary: string;
-      background: string;
-      background_gradient: string;
-      border: string;
-    };
-  }
-  interface PaletteOptions {
-    brand?: {
-      primary: string;
-      secondary: string;
-      tertiary: string;
-      background: string;
-      background_gradient: string;
-      border: string;
-    };
-  }
-}
-
 let theme = createTheme({
   palette: {
     mode: "light",
@@ -50,7 +27,7 @@ let theme = createTheme({
     fontFamily: '"Inter", "Roboto", "Helvetica", "Arial", sans-serif',
   },
   shape: {
-    borderRadius: 12,
+    borderRadius: 8,
   },
 });
 
