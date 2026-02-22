@@ -1,8 +1,8 @@
-import { type Theme } from "@mui/material/styles";
+import { alpha, type Theme } from "@mui/material/styles";
 
 export default function Input(theme: Theme) {
   return {
-    MuiOutlinedInput: {
+    MuiInputBase: {
       styleOverrides: {
         root: {
           backgroundColor: theme.palette.common.white,
@@ -11,7 +11,7 @@ export default function Input(theme: Theme) {
             borderColor: theme.palette.brand.border,
           },
           "&:hover fieldset": {
-            borderColor: theme.palette.grey[400],
+            borderColor: alpha(theme.palette.primary.main, 0.2),
           },
           "&.Mui-focused fieldset": {
             borderColor: theme.palette.primary.main,

@@ -10,7 +10,7 @@ export const axiosInstance = axios.create({
 // Request Interceptor
 axiosInstance.interceptors.request.use(
   (config: InternalAxiosRequestConfig) => {
-    const token = localStorage.getItem("authToken");
+    const token = localStorage.getItem("access_token");
     if (token) {
       config.headers.Authorization = `Bearer ${token}`;
     }
@@ -26,22 +26,12 @@ axiosInstance.interceptors.response.use(
   (response) => response,
   async (error: AxiosError) => {
     if (error.response) {
-      // Handle 401 Unauthorized
       if (error.response.status === 401) {
-        // Logic for token refresh or logout
         console.warn("Unauthorized access - redirecting to login...");
-        // window.location.href = '/login';
+        localStorage.clear();
+        window.location.href = "/auth/sign-in";
       }
-
-      // Handle 500 Server Errors
-      if (error.response.status >= 500) {
-        console.error("Server error:", error.response.data);
-      }
-    } else if (error.request) {
-      // Network errors
-      console.error("Network error:", error.message);
     }
-
     return Promise.reject(error);
   },
 );

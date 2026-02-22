@@ -9,7 +9,7 @@ export interface UserLoginResponse {
   access_token_expiry_minutes: number;
   token_type: "bearer";
   user_id: string;
-  tenant_id: string | null;
+  tenant_id: string;
   privileges: Privileges;
   last_login: string | null;
 }

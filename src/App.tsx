@@ -10,11 +10,12 @@ import MainLayout from "./layouts/MainLayout";
 import SignInPage from "./pages/auth/sign-in";
 import SignUpPage from "./pages/auth/sign-up";
 import ScenarioBuilderPage from "./pages/scenario-builder";
+import UserManagementCreateUserPage from "./pages/user-management/create-users";
+import UserManagementListUsersPage from "./pages/user-management/list-users";
 import { theme } from "./theme/theme";
 
 const queryClient = new QueryClient();
 
-// ... router definition remains the same (truncated for brevity)
 const router = createBrowserRouter([
   {
     path: "/",
@@ -35,6 +36,19 @@ const router = createBrowserRouter([
       {
         path: "scenario-builder",
         element: <ScenarioBuilderPage />,
+      },
+      {
+        path: "user-management",
+        children: [
+          {
+            path: "list-users",
+            element: <UserManagementListUsersPage />,
+          },
+          {
+            path: "create-user",
+            element: <UserManagementCreateUserPage />,
+          },
+        ],
       },
     ],
   },

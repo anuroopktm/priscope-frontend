@@ -9,6 +9,7 @@ declare module "@mui/material/IconButton" {
 
 declare module "@mui/material/styles" {
   interface Palette {
+    pending: Palette["primary"];
     brand: {
       primary: string;
       secondary: string;
@@ -19,6 +20,7 @@ declare module "@mui/material/styles" {
     };
   }
   interface PaletteOptions {
+    pending?: PaletteOptions["primary"];
     brand?: {
       primary: string;
       secondary: string;

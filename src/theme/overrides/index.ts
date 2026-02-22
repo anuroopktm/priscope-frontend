@@ -1,6 +1,7 @@
 import { type Theme } from "@mui/material/styles";
 import AppBar from "./AppBar";
 import Button from "./Button";
+import Chip from "./Chip";
 import Input from "./Input";
 import Menu from "./Menu";
 import Paper from "./Paper";
@@ -16,5 +17,6 @@ export default function ComponentsOverrides(theme: Theme) {
     ...Select(theme),
     ...Typography(theme),
     ...Menu(theme),
+    ...Chip(theme),
   };
 }

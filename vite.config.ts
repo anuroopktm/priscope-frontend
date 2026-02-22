@@ -16,6 +16,7 @@ export default defineConfig({
       "@mui/material/styles",
       "@emotion/react",
       "@emotion/styled",
+      "@mui/icons-material"
     ],
   },
 })

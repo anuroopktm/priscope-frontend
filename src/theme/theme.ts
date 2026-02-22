@@ -10,6 +10,18 @@ let theme = createTheme({
     secondary: {
       main: "#4A78BA",
     },
+    success: {
+      main: "#1FC16B",
+      light: "#1FC16B1A",
+    },
+    error: {
+      main: "#D00416",
+      light: "#FB37481A",
+    },
+    pending: {
+      main: "#DFB400",
+      light: "#FFDB431A",
+    },
     brand: {
       primary: "#1A2B44",
       secondary: "#4A78BA",
@@ -19,7 +31,7 @@ let theme = createTheme({
       border: "#BBBBBB",
     },
     background: {
-      default: "#e3e3e3ff",
+      default: "#e3e3e3",
       paper: "#FFFFFF",
     },
   },
