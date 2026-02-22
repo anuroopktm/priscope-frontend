@@ -7,6 +7,8 @@ import type {
   GetPrivilegeTemplatesResponse,
   GetUsersRequest,
   GetUsersResponse,
+  InviteUserRequest,
+  InviteUserResponse,
   ResourcePrivilegesRequest,
   ResourcePrivilegesResponse,
 } from "./user-management.types";
@@ -63,6 +65,19 @@ export const useCheckEmailExist = () => {
   >({
     mutationFn: async (payload: CheckEmailRequest) => {
       const { data } = await axiosInstance.post("/v1/email-exist", payload);
+      return data;
+    },
+  });
+};
+
+export const useInviteUser = () => {
+  return useMutation<
+    InviteUserResponse,
+    AxiosError<{ detail: string }>,
+    InviteUserRequest
+  >({
+    mutationFn: async (payload: InviteUserRequest) => {
+      const { data } = await axiosInstance.post("/v1/invite", payload);
       return data;
     },
   });

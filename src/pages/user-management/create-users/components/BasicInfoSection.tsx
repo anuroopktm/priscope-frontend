@@ -57,7 +57,7 @@ const BasicInfoSection = () => {
   }, [debouncedEmail, checkEmail, setError, clearErrors]);
 
   return (
-    <Grid container spacing={2} sx={{ width: "50%", mb: 4 }}>
+    <Grid container spacing={2} sx={{ width: "50%", mb: 3 }}>
       <Grid size={{ xs: 12, md: 6 }}>
         <Controller
           name="name"

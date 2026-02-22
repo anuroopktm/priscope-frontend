@@ -25,8 +25,9 @@ const PermissionItem = ({
   >
     <Checkbox
       checked={checked}
+      onChange={handleChange}
       size="small"
-      sx={{ mt: -0.5, pointerEvents: "none" }}
+      sx={{ mt: -0.5 }}
     />
     <Box>
       <Typography

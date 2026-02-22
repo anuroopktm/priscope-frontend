@@ -44,3 +44,17 @@ export interface CheckEmailRequest {
 }
 
 export type CheckEmailResponse = string;
+
+export interface InviteUserRequest {
+  email: string;
+  job_designation: string;
+  name: string;
+  resource_privilege_ids: string[];
+  tenant_id: string;
+}
+
+export interface InviteUserResponse {
+  invite_url: string;
+  status: string;
+  user_id: string;
+}

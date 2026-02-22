@@ -23,14 +23,11 @@ const RoleSelector = ({
   const theme = useTheme();
 
   return (
-    <Box sx={{ mb: 3 }}>
-      <Typography
-        variant="subtitle1"
-        sx={{ fontWeight: 700, color: "#1A2B44" }}
-      >
+    <Box>
+      <Typography variant="h6" sx={{ fontWeight: 700, color: "#1A2B44" }}>
         Permissions
       </Typography>
-      <Typography variant="body2" sx={{ color: "#7A8699", mb: 2 }}>
+      <Typography variant="body1" sx={{ color: "#7A8699", mb: 2 }}>
         Choose any of the roles given below or choose custom access.
       </Typography>
 
