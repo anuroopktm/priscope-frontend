@@ -24,9 +24,9 @@ const UserManagementListUsersPage = () => {
 
   const { data, isLoading } = useGetUsers({
     page_size: pageSize,
-    search: search,
+    search,
     skip: (page - 1) * pageSize,
-    status: status,
+    status,
     // tenant_id: localStorage.getItem("tenant_id") || "",
     tenant_id: import.meta.env.VITE_TENANT_ID,
   });
