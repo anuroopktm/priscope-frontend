@@ -2,26 +2,65 @@ import AuthCard from "@/pages/auth/common/AuthCard";
 import EmailField from "@/pages/auth/common/EmailField";
 import PasswordField from "@/pages/auth/common/PasswordField";
 import SocialAuthButtons from "@/pages/auth/common/SocialAuthButtons";
-import { loginSchema, type LoginSchema } from "@/validations/auth.validation";
+import { useUserLogin } from "@/services/auth/sign-in/sign-in.queries";
+import { useToastStore } from "@/store/useToastStore";
+import { encryptData } from "@/utils/encryption";
+import {
+  signInSchema,
+  type SignInSchema,
+} from "@/validations/auth/sign-in.validation";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Button, Divider, Link, Stack, Typography } from "@mui/material";
 import { useForm } from "react-hook-form";
+import { useNavigate } from "react-router-dom";
 
 const SignInForm = () => {
+  const navigate = useNavigate();
+  const { mutate: login, isPending } = useUserLogin();
+  const { showToast } = useToastStore();
+
   const {
     control,
     handleSubmit,
     formState: { errors },
-  } = useForm<LoginSchema>({
-    resolver: zodResolver(loginSchema),
+  } = useForm<SignInSchema>({
+    resolver: zodResolver(signInSchema),
     defaultValues: {
       email: "",
       password: "",
     },
   });
 
-  const onSubmit = async (data: LoginSchema) => {
-    console.log(data);
+  const onSubmit = async ({ email, password }: SignInSchema) => {
+    const { encrypted, nonce } = await encryptData({
+      email,
+      password,
+      type: "email_password",
+    });
+
+    login(
+      {
+        encrypted,
+        nonce,
+      },
+      {
+        onSuccess: (response) => {
+          showToast("Login successful! Redirecting...", "success");
+
+          localStorage.setItem("access_token", response.access_token);
+          localStorage.setItem("refresh_token", response.refresh_token);
+
+          navigate("/scenario-builder");
+        },
+        onError: (error) => {
+          showToast(
+            error.response?.data.detail ||
+              "Login failed. Please check your credentials.",
+            "error",
+          );
+        },
+      },
+    );
   };
 
   return (
@@ -32,8 +71,15 @@ const SignInForm = () => {
 
           <PasswordField control={control} error={errors.password?.message} />
 
-          <Button fullWidth size="large" type="submit" variant="contained">
-            Continue
+          <Button
+            fullWidth
+            size="large"
+            type="submit"
+            variant="contained"
+            disabled={isPending}
+            loading={isPending}
+          >
+            {isPending ? "Logging in..." : "Continue"}
           </Button>
 
           <Link

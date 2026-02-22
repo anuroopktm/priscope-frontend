@@ -5,6 +5,7 @@ import {
   Navigate,
   RouterProvider,
 } from "react-router-dom";
+import GlobalToast from "./components/common/GlobalToast";
 import MainLayout from "./layouts/MainLayout";
 import SignInPage from "./pages/auth/sign-in";
 import SignUpPage from "./pages/auth/sign-up";
@@ -13,6 +14,7 @@ import { theme } from "./theme/theme";
 
 const queryClient = new QueryClient();
 
+// ... router definition remains the same (truncated for brevity)
 const router = createBrowserRouter([
   {
     path: "/",
@@ -43,6 +45,7 @@ function App() {
     <QueryClientProvider client={queryClient}>
       <ThemeProvider theme={theme}>
         <CssBaseline />
+        <GlobalToast />
         <RouterProvider router={router} />
       </ThemeProvider>
     </QueryClientProvider>

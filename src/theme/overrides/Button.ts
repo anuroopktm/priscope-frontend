@@ -13,6 +13,10 @@ export default function Button(theme: Theme) {
             backgroundColor: theme.palette.brand.tertiary,
             boxShadow: "none",
           },
+
+          "& .MuiButton-loadingIndicator": {
+            color: theme.palette.primary.main,
+          },
         },
       },
     },

@@ -2,7 +2,10 @@ import AuthCard from "@/pages/auth/common/AuthCard";
 import EmailField from "@/pages/auth/common/EmailField";
 import PasswordField from "@/pages/auth/common/PasswordField";
 import SocialAuthButtons from "@/pages/auth/common/SocialAuthButtons";
-import { signUpSchema, type SignUpSchema } from "@/validations/auth.validation";
+import {
+  createSignUpSchema,
+  type SignUpFormData,
+} from "@/validations/auth/sign-up.validation";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Button, Divider, Stack, Typography } from "@mui/material";
 import { useForm } from "react-hook-form";
@@ -11,8 +14,8 @@ const SignUpForm = () => {
     control,
     handleSubmit,
     formState: { errors },
-  } = useForm<SignUpSchema>({
-    resolver: zodResolver(signUpSchema),
+  } = useForm<SignUpFormData>({
+    resolver: zodResolver(createSignUpSchema({})),
     defaultValues: {
       email: "",
       password: "",
@@ -20,7 +23,7 @@ const SignUpForm = () => {
     },
   });
 
-  const onSubmit = async (data: SignUpSchema) => {
+  const onSubmit = async (data: SignUpFormData) => {
     console.log(data);
   };
 
