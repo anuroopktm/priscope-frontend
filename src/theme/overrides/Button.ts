@@ -5,6 +5,7 @@ export default function Button(theme: Theme) {
     MuiButton: {
       styleOverrides: {
         root: {
+          textTransform: "none" as const,
           color: theme.palette.common.white,
           backgroundColor: theme.palette.primary.main,
           boxShadow: "none",

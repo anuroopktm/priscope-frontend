@@ -1,4 +1,3 @@
-import { useDebounce } from "@/hooks/useDebounce";
 import { useCheckEmailExist } from "@/services/user-management/user-management.queries";
 import {
   CircularProgress,
@@ -6,59 +5,95 @@ import {
   InputAdornment,
   TextField,
 } from "@mui/material";
-import { useEffect, useState } from "react";
+import debounce from "lodash.debounce";
+import { useMemo } from "react";
 import { Controller, useFormContext } from "react-hook-form";
 
-const BasicInfoSection = () => {
+const EmailInputField = () => {
   const {
     control,
-    watch,
     setError,
     clearErrors,
     formState: { errors },
   } = useFormContext();
-  const email = watch("email");
-  const debouncedEmail = useDebounce(email, 500);
-  const [checkingEmail, setCheckingEmail] = useState(false);
 
-  const { mutate: checkEmail } = useCheckEmailExist();
+  const { mutate: checkEmail, isPending: isCheckingEmail } =
+    useCheckEmailExist();
 
-  useEffect(() => {
-    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    if (debouncedEmail && emailRegex.test(debouncedEmail)) {
-      setCheckingEmail(true);
-      checkEmail(
-        { email: debouncedEmail },
-        {
-          onSuccess: (data) => {
-            if (data && data.toLowerCase().includes("taken")) {
-              setError("email", {
-                type: "manual",
-                message: "Email already taken",
-              });
-            } else {
-              clearErrors("email");
-            }
-            setCheckingEmail(false);
-          },
-          onError: () => {
-            setError("email", {
-              type: "manual",
-              message: "Error checking email",
-            });
-            setCheckingEmail(false);
-          },
-        },
-      );
-    } else {
-      clearErrors("email");
-      setCheckingEmail(false);
-    }
-  }, [debouncedEmail, checkEmail, setError, clearErrors]);
+  const debouncedCheckEmail = useMemo(
+    () =>
+      debounce((email: string) => {
+        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+        if (email && emailRegex.test(email)) {
+          checkEmail(
+            { email },
+            {
+              onSuccess: (data) => {
+                if (data) {
+                  setError("email", {
+                    type: "manual",
+                    message: "Email already taken",
+                  });
+                } else {
+                  clearErrors("email");
+                }
+              },
+              onError: () => {
+                setError("email", {
+                  type: "manual",
+                  message: "Error checking email",
+                });
+              },
+            },
+          );
+        }
+      }, 500),
+    [checkEmail, setError, clearErrors],
+  );
 
   return (
-    <Grid container spacing={2} sx={{ width: "50%", mb: 3 }}>
-      <Grid size={{ xs: 12, md: 6 }}>
+    <Controller
+      name="email"
+      control={control}
+      render={({ field }) => (
+        <TextField
+          {...field}
+          label="Email"
+          error={!!errors.email}
+          fullWidth
+          size="small"
+          placeholder="Johnsmith@gmail.com"
+          helperText={errors.email?.message as string}
+          onChange={(e) => {
+            field.onChange(e);
+            debouncedCheckEmail(e.target.value);
+          }}
+          slotProps={{
+            input: {
+              endAdornment: (
+                <InputAdornment position="end">
+                  {isCheckingEmail && (
+                    <CircularProgress size={16} color="inherit" />
+                  )}
+                </InputAdornment>
+              ),
+            },
+          }}
+        />
+      )}
+    />
+  );
+};
+
+const BasicInfoSection = () => {
+  const {
+    control,
+    formState: { errors },
+  } = useFormContext();
+
+  return (
+    <Grid container spacing={2} sx={{ mb: 3 }}>
+      <Grid size={4}>
         <Controller
           name="name"
           control={control}
@@ -69,38 +104,28 @@ const BasicInfoSection = () => {
               fullWidth
               size="small"
               placeholder="John Smith"
-              sx={{ bgcolor: "white" }}
               error={!!errors.name}
               helperText={errors.name?.message as string}
             />
           )}
         />
       </Grid>
-      <Grid size={{ xs: 12, md: 6 }}>
+      <Grid size={4}>
+        <EmailInputField />
+      </Grid>
+      <Grid size={4}>
         <Controller
-          name="email"
+          name="job_designation"
           control={control}
           render={({ field }) => (
             <TextField
               {...field}
-              label="Email"
-              error={!!errors.email}
+              label="Job Designation"
               fullWidth
               size="small"
-              placeholder="Johnsmith@gmail.com"
-              helperText={errors.email?.message as string}
-              sx={{ bgcolor: "white" }}
-              slotProps={{
-                input: {
-                  endAdornment: (
-                    <InputAdornment position="end">
-                      {checkingEmail && (
-                        <CircularProgress size={16} color="inherit" />
-                      )}
-                    </InputAdornment>
-                  ),
-                },
-              }}
+              placeholder="Senior Developer"
+              error={!!errors.job_designation}
+              helperText={errors.job_designation?.message as string}
             />
           )}
         />

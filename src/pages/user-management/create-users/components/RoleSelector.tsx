@@ -9,7 +9,7 @@ import {
 
 interface RoleSelectorProps {
   value: string;
-  onChange: (value: string) => void;
+  onChange: (val: string) => void;
   roles: { id: string; name: string }[];
   loading?: boolean;
 }
@@ -56,7 +56,7 @@ const RoleSelector = ({
         <ToggleButtonGroup
           value={value}
           exclusive
-          onChange={(_event, newValue) => onChange(newValue)}
+          onChange={(_, val) => onChange(val)}
           sx={{
             display: "flex",
             flexWrap: "wrap",

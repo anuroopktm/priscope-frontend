@@ -9,18 +9,11 @@ const FooterActions = ({ loading }: FooterActionsProps) => (
   <Box sx={{ mt: 3 }}>
     <Button
       type="submit"
-      variant="contained"
+      variant="outlined"
       size="medium"
       startIcon={<MailOutlineIcon />}
       disabled={loading}
       loading={loading}
-      sx={{
-        bgcolor: "#17222B",
-        textTransform: "none",
-        px: 3,
-        py: 1,
-        "&:hover": { bgcolor: "#000" },
-      }}
     >
       Send Invitation
     </Button>

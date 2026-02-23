@@ -4,11 +4,15 @@ import { axiosInstance } from "../api/axiosInstance";
 import type {
   CheckEmailRequest,
   CheckEmailResponse,
+  CheckTemplateRequest,
+  CheckTemplateResponse,
   GetPrivilegeTemplatesResponse,
   GetUsersRequest,
   GetUsersResponse,
   InviteUserRequest,
   InviteUserResponse,
+  ListUserPrivilegesRequest,
+  ListUserPrivilegesResponse,
   ResourcePrivilegesRequest,
   ResourcePrivilegesResponse,
 } from "./user-management.types";
@@ -78,6 +82,33 @@ export const useInviteUser = () => {
   >({
     mutationFn: async (payload: InviteUserRequest) => {
       const { data } = await axiosInstance.post("/v1/invite", payload);
+      return data;
+    },
+  });
+};
+
+export const useListUserPrivileges = (payload: ListUserPrivilegesRequest) => {
+  return useQuery<ListUserPrivilegesResponse, AxiosError<{ detail: string }>>({
+    queryKey: ["user-privileges", payload.tenant_id, payload.user_id],
+    queryFn: async () => {
+      const { data } = await axiosInstance.get("/v1/list-user-privileges", {
+        params: payload,
+      });
+      return data;
+    },
+    enabled: !!payload.tenant_id && !!payload.user_id,
+    refetchOnWindowFocus: false,
+  });
+};
+
+export const useCheckPrivilegeTemplate = () => {
+  return useMutation<
+    CheckTemplateResponse,
+    AxiosError<{ detail: string }>,
+    CheckTemplateRequest
+  >({
+    mutationFn: async (payload: CheckTemplateRequest) => {
+      const { data } = await axiosInstance.post("/v1/templates/check", payload);
       return data;
     },
   });

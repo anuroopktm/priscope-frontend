@@ -6,7 +6,7 @@ import {
   useTheme,
 } from "@mui/material";
 
-const COLUMNS = ["Name", "Position", "Start Date", "Status"];
+const COLUMNS = ["Name", "Email", "Job Role", "Status"];
 
 export const UserTableHead = () => {
   const theme = useTheme();

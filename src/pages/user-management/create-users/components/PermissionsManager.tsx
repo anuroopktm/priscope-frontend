@@ -2,17 +2,25 @@ import {
   useGetPrivilegeTemplates,
   useGetResourcePrivileges,
 } from "@/services/user-management/user-management.queries";
-import { Box, Paper } from "@mui/material";
-import { useMemo } from "react";
-import { useFormContext } from "react-hook-form";
-import type { CreateUserFormValues } from "..";
+import type { CreateUserFormValues } from "@/validations/user-management/create-user.validation";
+import { Box, Paper, Typography } from "@mui/material";
+import { useEffect, useMemo } from "react";
+import { useFormContext, useWatch } from "react-hook-form";
 import PermissionsList from "./PermissionsList";
 import RoleSelector from "./RoleSelector";
 
 const PermissionsManager = () => {
-  const { watch, setValue } = useFormContext<CreateUserFormValues>();
+  const {
+    control,
+    setValue,
+    formState: { errors },
+  } = useFormContext<CreateUserFormValues>();
 
-  const currentRole = watch("currentRole");
+  const currentRole = useWatch({
+    control,
+    name: "currentRole",
+  });
+  const permissionsError = errors.permissions;
 
   const { data: templates, isLoading: isLoadingTemplates } =
     useGetPrivilegeTemplates(import.meta.env.VITE_TENANT_ID);
@@ -21,6 +29,16 @@ const PermissionsManager = () => {
       role_id: currentRole === "custom" ? undefined : currentRole,
       tenant_id: import.meta.env.VITE_TENANT_ID,
     });
+
+  useEffect(() => {
+    if (privileges) {
+      if (currentRole === "custom") {
+        setValue("defaultPermissions", privileges);
+      } else {
+        setValue("permissions", privileges, { shouldValidate: true });
+      }
+    }
+  }, [privileges, currentRole, setValue]);
 
   const roleOptions = useMemo(() => {
     const fetchedRoles =
@@ -32,18 +50,47 @@ const PermissionsManager = () => {
     return [{ id: "custom", name: "Custom" }, ...fetchedRoles];
   }, [templates]);
 
+  const onRoleChange = (newId: string) => {
+    if (newId !== currentRole) {
+      setValue("permissions", [], { shouldValidate: true });
+      setValue("currentRole", newId);
+    }
+  };
+
   return (
     <Box sx={{ display: "flex", flexDirection: "column", gap: 2 }}>
       <RoleSelector
         value={currentRole}
-        onChange={(newId) => setValue("currentRole", newId)}
+        onChange={onRoleChange}
         roles={roleOptions}
         loading={isLoadingTemplates}
       />
 
+      {permissionsError && (
+        <Box
+          sx={{
+            p: 1.5,
+            bgcolor: "#FEF3F2",
+            borderRadius: "6px",
+            border: "1px solid #FDA29B",
+            display: "flex",
+            alignItems: "center",
+          }}
+        >
+          <Typography color="#B42318" variant="body2" sx={{ fontWeight: 500 }}>
+            {permissionsError.message as string}
+          </Typography>
+        </Box>
+      )}
+
       <Paper
         variant="outlined"
-        sx={{ borderRadius: "8px", borderColor: "#E4E7EC", minHeight: "100px" }}
+        sx={{
+          borderRadius: "8px",
+          borderColor: permissionsError ? "#F04438" : "#E4E7EC",
+          minHeight: "100px",
+          borderWidth: permissionsError ? "1px" : "1px",
+        }}
       >
         <PermissionsList
           privileges={privileges}

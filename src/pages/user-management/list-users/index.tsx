@@ -17,10 +17,10 @@ import { UserTableRow } from "./components/UserTableRow";
 
 const UserManagementListUsersPage = () => {
   const theme = useTheme();
-  const [pageSize] = useState(10);
-  const [page, setPage] = useState(1);
-  const [search, setSearch] = useState("");
-  const [status, setStatus] = useState("active");
+  const [pageSize] = useState<number>(10);
+  const [page, setPage] = useState<number>(1);
+  const [search, setSearch] = useState<string | undefined>(undefined);
+  const [status, setStatus] = useState<string | undefined>(undefined);
 
   const { data, isLoading } = useGetUsers({
     page_size: pageSize,

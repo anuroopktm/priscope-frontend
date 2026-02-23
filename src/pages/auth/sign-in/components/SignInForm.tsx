@@ -50,6 +50,7 @@ const SignInForm = () => {
           localStorage.setItem("access_token", response.access_token);
           localStorage.setItem("refresh_token", response.refresh_token);
           localStorage.setItem("tenant_id", response.tenant_id);
+          localStorage.setItem("user_id", response.user_id);
 
           navigate("/scenario-builder");
         },

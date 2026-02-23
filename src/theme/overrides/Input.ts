@@ -2,7 +2,7 @@ import { alpha, type Theme } from "@mui/material/styles";
 
 export default function Input(theme: Theme) {
   return {
-    MuiInputBase: {
+    MuiOutlinedInput: {
       styleOverrides: {
         root: {
           backgroundColor: theme.palette.common.white,

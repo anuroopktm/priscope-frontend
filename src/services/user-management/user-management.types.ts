@@ -2,14 +2,14 @@ export interface User {
   email: string;
   job_designation: string;
   name: string;
-  status: "ACTIVE" | "SUSPENDED" | "INVITED";
+  status: "active" | "suspended" | "invited";
 }
 
 export interface GetUsersRequest {
   page_size: number;
-  search: string;
+  search?: string;
   skip: number;
-  status: string;
+  status?: string;
   tenant_id: string;
 }
 
@@ -26,7 +26,7 @@ export interface ResourcePrivilege {
 
 export interface ResourcePrivilegesRequest {
   role_id?: string;
-  tenant_id: string;
+  tenant_id?: string;
 }
 
 export type ResourcePrivilegesResponse = ResourcePrivilege[];
@@ -43,7 +43,7 @@ export interface CheckEmailRequest {
   email: string;
 }
 
-export type CheckEmailResponse = string;
+export type CheckEmailResponse = boolean;
 
 export interface InviteUserRequest {
   email: string;
@@ -57,4 +57,19 @@ export interface InviteUserResponse {
   invite_url: string;
   status: string;
   user_id: string;
+}
+
+export interface ListUserPrivilegesRequest {
+  tenant_id: string;
+  user_id: string;
+}
+
+export type ListUserPrivilegesResponse = ResourcePrivilege[];
+
+export interface CheckTemplateRequest {
+  resource_privilege_ids: string[];
+}
+
+export interface CheckTemplateResponse {
+  exists: boolean;
 }
