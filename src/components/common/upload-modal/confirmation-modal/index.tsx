@@ -38,7 +38,7 @@ const ConfirmationDialog: React.FC<ConfirmationDialogProps> = ({
       maxWidth="xs"
       PaperProps={{
         sx: {
-          borderRadius: 8,
+          borderRadius: 1,
           p: 4,
           px: 6,
           gap: 4,

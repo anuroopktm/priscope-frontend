@@ -1,7 +1,7 @@
 import { baseGridCfg } from "../constants/grid-cfg";
 import {
   type itemMasterBodyResponseItems,
-//   type itemMasterBodyResponseItemsField,
+  //   type itemMasterBodyResponseItemsField,
   type ItemMasterBulkUploadData,
   type ItemMasterBulkUploadFormattedDataItem,
   type ItemMasterBulkUploadFormattedDataPayload,
@@ -153,8 +153,8 @@ export async function getItemMasterLayout(
     },
     Cols: Cols,
     Header: {
-      SKU: "SKU <span style='color:red'>*</span>",
-      UPC: "UPC <span style='color:red'>*</span>",
+      SKU: "SKU",
+      UPC: "UPC",
       Category: "Category",
       Description: "Description",
       SortIcons: "2",

@@ -10,13 +10,15 @@ import { Box, Button, InputAdornment, Stack, TextField } from "@mui/material";
 import { useTheme } from "@mui/material/styles";
 import RequestsIcon from "@/assets/items-master/requests.svg";
 import LogFileIcon from "@/assets/common/log-file-view.svg";
-
+import KeyboardArrowDownRoundedIcon from "@mui/icons-material/KeyboardArrowDownRounded";
+import ImportDataIcon from "@/assets/common/import-data.svg";
 
 interface FilterProps {
   searchQuery: string;
   setSearchQuery: React.Dispatch<React.SetStateAction<string>>;
   setOpenRequestModal: React.Dispatch<React.SetStateAction<boolean>>;
   setShowFilesModal: React.Dispatch<React.SetStateAction<boolean>>;
+  onImportClick: () => void;
 }
 
 export const ActionHeader = ({
@@ -24,6 +26,7 @@ export const ActionHeader = ({
   setSearchQuery,
   setOpenRequestModal,
   setShowFilesModal,
+  onImportClick,
 }: FilterProps) => {
   const theme = useTheme();
 
@@ -123,9 +126,20 @@ export const ActionHeader = ({
 
         {/* Import Data Dropdown */}
         <Button
-          variant="contained"
-          startIcon={<StorageOutlined />}
-          endIcon={<KeyboardArrowDown />}
+          onClick={onImportClick}
+          sx={{
+            padding: "8px 12px",
+            color: theme.palette.grey[300],
+            "&:hover": {
+              color: "white",
+              bgcolor: "rgba(255, 255, 255, 0.1)",
+            },
+            textTransform: "none",
+            borderRadius: "8px",
+            fontWeight: 600,
+          }}
+          startIcon={<img src={ImportDataIcon} alt="Import" width={16} />}
+          endIcon={<KeyboardArrowDownRoundedIcon />}
         >
           Import Data
         </Button>

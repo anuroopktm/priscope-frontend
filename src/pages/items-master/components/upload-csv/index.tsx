@@ -9,8 +9,8 @@ import type {
   UploadedFile,
   ControlFields,
 } from "../../constants/upload.constants";
-import { SystemFieldObject } from "../../types";
-import { SnackbarState } from "../../../freight-rate-library/types";
+import type { SystemFieldObject } from "@/pages/items-master/types/types";
+import type { SnackbarState } from "../columns-dropdown";
 
 type ImportData = {
   systemFieldMapping: any;
@@ -23,8 +23,8 @@ type CompleteUploadFlowProps = {
   onClose: () => void;
   onImportComplete?: (data: ImportData) => void;
   onViewLog?: () => void;
-  setSnackbar: React.Dispatch<React.SetStateAction<SnackbarState>>
-  isSearchReplaceRef:any
+  setSnackbar: React.Dispatch<React.SetStateAction<SnackbarState>>;
+  isSearchReplaceRef: any;
 };
 
 const CompleteUploadFlow: React.FC<CompleteUploadFlowProps> = ({
@@ -33,16 +33,18 @@ const CompleteUploadFlow: React.FC<CompleteUploadFlowProps> = ({
   onImportComplete,
   onViewLog,
   setSnackbar,
-  isSearchReplaceRef
+  isSearchReplaceRef,
 }) => {
   const [showFileUpload, setShowFileUpload] = useState(false);
   const [showDataMapping, setShowDataMapping] = useState(false);
-  const [systemFields, setSystemFields] = useState<SystemFieldObject[] | null>(null);
+  const [systemFields, setSystemFields] = useState<SystemFieldObject[] | null>(
+    null,
+  );
   const [uploadData, setUploadData] = useState<{
     file: UploadedFile | null;
     csvType: string;
     controlFields: ControlFields;
-    uploadId?: string; 
+    uploadId?: string;
   } | null>(null);
 
   const [showSnackbar, setShowSnackbar] = useState(false);
@@ -57,7 +59,7 @@ const CompleteUploadFlow: React.FC<CompleteUploadFlowProps> = ({
     file: UploadedFile | null;
     csvType: string;
     controlFields: ControlFields;
-    uploadId?: string; 
+    uploadId?: string;
   }) => {
     setUploadData(data);
     setShowFileUpload(false);
@@ -65,9 +67,9 @@ const CompleteUploadFlow: React.FC<CompleteUploadFlowProps> = ({
   };
 
   const handleBackToMapping = () => {
-    setShowFileUpload(true)
-    handleDataMappingClose()
-  }
+    setShowFileUpload(true);
+    handleDataMappingClose();
+  };
 
   const handleImport = (data: ImportData) => {
     console.log("Import process completed successfully:", data);
@@ -107,7 +109,7 @@ const CompleteUploadFlow: React.FC<CompleteUploadFlowProps> = ({
         open={showDataMapping}
         onClose={handleDataMappingClose}
         fileName={uploadData?.file?.name || "document_file_name.csv"}
-        uploadId={uploadData?.uploadId} 
+        uploadId={uploadData?.uploadId}
         onImport={handleImport}
         handleBack={handleBackToMapping}
         systemFields={systemFields}

@@ -13,6 +13,11 @@ declare module "@mui/material/styles" {
       gradientBg: string;
       hover: string;
       surfaceBackground: string;
+      subTextColor: string;
+      buttonBg: string;
+      userSubText: string;
+      divider: string;
+      inputBg: string;
     };
   }
   interface PaletteOptions {
@@ -26,11 +31,16 @@ declare module "@mui/material/styles" {
       gradientBg: string;
       hover: string;
       surfaceBackground: string;
+      subTextColor: string;
+      buttonBg: string;
+      userSubText: string;
+      divider: string;
+      inputBg: string;
     };
   }
 }
 
-const theme = createTheme({
+let theme = createTheme({
   palette: {
     mode: "light",
     primary: {
@@ -61,6 +71,11 @@ const theme = createTheme({
       gradientBg: "linear-gradient(96.81deg, #D8ECF8 0%, #89C5EA 100%)",
       hover: "rgba(255, 255, 255, 0.05)",
       surfaceBackground: "#f8f9fa",
+      subTextColor: "#858585",
+      buttonBg: "#1A2B44",
+      userSubText: "#d2d2d2",
+      divider: "#0F3953",
+      inputBg: "#FFFFFF",
     },
     background: {
       default: "#e3e3e3",

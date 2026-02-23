@@ -1,4 +1,9 @@
-import React, { useState, useCallback, ChangeEvent, DragEvent } from "react";
+import React, {
+  useState,
+  useCallback,
+  type ChangeEvent,
+  type DragEvent,
+} from "react";
 import {
   Box,
   Typography,
@@ -13,17 +18,16 @@ import {
   Delete as DeleteIcon,
 } from "@mui/icons-material";
 import { styled } from "@mui/material/styles";
-import Papa from "papaparse";
 import {
   ACCEPTED_FILE_TYPES,
-  UploadedFile,
+  type UploadedFile,
   isValidFileType,
-} from "@/app/[lang]/(protected)/item-master/constants/upload.constants";
-import theme from "@/shared/styles/theme";
-import { getFileHeaders } from "../../../../utils/getFileHeaders";
+} from "@/pages/items-master/constants/upload.constants";
+import { getFileHeaders } from "@/pages/items-master/utils/getFileHeaders";
 import { useItemMasterStore } from "../../../../store/itemMasterStore";
-import uploadIcon from '../../../../assets/upload-icon.svg'
-import Image from "next/image";
+import uploadIcon from "@/assets/items-master/upload-icon.svg";
+import { theme } from "@/theme/theme";
+// import Image from "next/image";
 
 type FileUploadStepProps = {
   uploadedFile: UploadedFile | null;
@@ -32,14 +36,14 @@ type FileUploadStepProps = {
   onFileRemove: () => void;
   onStatusChange: (status: "loading" | "complete" | "") => void;
   onHeadersFetched: (headers: string[]) => void;
-  isUploadPending: boolean; 
+  isUploadPending: boolean;
 };
 
 const DropZone = styled(Box, {
   shouldForwardProp: (prop) => prop !== "isDragOver",
 })<{ isDragOver: boolean }>(({ theme, isDragOver }) => ({
   border: `1px dashed ${
-    isDragOver ? theme.custom.subTextColor : theme.palette.grey[300]
+    isDragOver ? theme.palette.primary.main : theme.palette.grey[300]
   }`,
   borderRadius: theme.shape.borderRadius,
   padding: theme.spacing(4),
@@ -68,7 +72,7 @@ const FileUploadStep: React.FC<FileUploadStepProps> = ({
   onFileRemove,
   onStatusChange,
   onHeadersFetched,
-  isUploadPending
+  isUploadPending,
 }) => {
   const [isDragOver, setIsDragOver] = useState(false);
   const setHeaders = useItemMasterStore((s) => s.setHeaders);
@@ -98,29 +102,11 @@ const FileUploadStep: React.FC<FileUploadStepProps> = ({
     if (file) handleFileUpload(file);
   };
 
-  const parseCsvHeaders = (file: File): Promise<string[]> => {
-    return new Promise((resolve, reject) => {
-      Papa.parse(file, {
-        header: true, // Treat first row as headers
-        preview: 1, // Parse only the first row
-        skipEmptyLines: true,
-        step: (results: Papa.ParseResult<any>, parser: Papa.Parser) => {
-          const headers = results.meta.fields || [];
-          parser.abort(); // Stop parsing after headers
-          resolve(headers);
-        },
-        error: (error: Error) => {
-          reject(new Error(`CSV parsing error: ${error.message}`));
-        },
-      });
-    });
-  };
-
   const handleFileUpload = async (file: File) => {
     const uploadedFileData: UploadedFile = {
       name: file.name,
       size: `${Math.round(file.size / 1024)}kb`,
-      file
+      file,
     };
 
     onFileUpload(uploadedFileData);
@@ -145,7 +131,14 @@ const FileUploadStep: React.FC<FileUploadStepProps> = ({
 
   return (
     <Box>
-      <Typography variant="subtitle1" sx={{ color: theme.custom.textColor, fontWeight: 600, fontSize: 16 }}>
+      <Typography
+        variant="subtitle1"
+        sx={{
+          color: theme.palette.primary.main,
+          fontWeight: 600,
+          fontSize: 16,
+        }}
+      >
         Upload File
       </Typography>
       {!uploadedFile ? (
@@ -156,10 +149,15 @@ const FileUploadStep: React.FC<FileUploadStepProps> = ({
           onDrop={handleDrop}
           onClick={() => document.getElementById("file-input")?.click()}
         >
-          <Box sx={{display: 'flex', justifyContent: 'center'}}>
-            <Image src={uploadIcon} alt="upload-icon" width={35} height={35} />
+          <Box sx={{ display: "flex", justifyContent: "center" }}>
+            <img src={uploadIcon} alt="upload-icon" width={35} height={35} />
           </Box>
-          <Typography variant="body1" sx={{color: theme.custom.textColor}}>Drag and drop CSV/Excel File</Typography>
+          <Typography
+            variant="body1"
+            sx={{ color: theme.palette.primary.main }}
+          >
+            Drag and drop CSV/Excel File
+          </Typography>
           <input
             id="file-input"
             type="file"
@@ -170,22 +168,27 @@ const FileUploadStep: React.FC<FileUploadStepProps> = ({
         </DropZone>
       ) : (
         <FileItem>
-          <FileIcon sx={{ color: theme.custom.buttonBg, fontSize: 40 }} />
+          <FileIcon
+            sx={{ color: theme.palette.brand.buttonBg, fontSize: 40 }}
+          />
           <Box sx={{ flexGrow: 1 }}>
             <Typography fontWeight="normal">{uploadedFile.name}</Typography>
-            <Typography variant="caption" color={theme.custom.subTextColor}>
+            <Typography
+              variant="caption"
+              color={theme.palette.brand.subTextColor}
+            >
               {uploadedFile.size}
               <Box
                 component="span"
-                sx={{ mx: 0.5, color: theme.custom.subTextColor }}
+                sx={{ mx: 0.5, color: theme.palette.brand.subTextColor }}
               >
                 •
               </Box>
               {fileStatus === "loading"
                 ? "Loading..."
                 : fileStatus === "complete"
-                ? "Completed"
-                : ""}
+                  ? "Completed"
+                  : ""}
             </Typography>
           </Box>
 

@@ -1,7 +1,4 @@
-import theme from "@/shared/styles/theme";
-import {
-  InsertDriveFile as FileIcon
-} from "@mui/icons-material";
+import { InsertDriveFile as FileIcon } from "@mui/icons-material";
 import {
   Box,
   Checkbox,
@@ -10,16 +7,15 @@ import {
   FormControlLabel,
   MenuItem,
   Select,
-  SelectChangeEvent,
+  type SelectChangeEvent,
   Switch,
   TextField,
-  Typography
+  Typography,
 } from "@mui/material";
 import React from "react";
-import { DATA_TYPES } from "../../../../constants/data_mapping.constants";
-import { AttributeConfigurationProps } from "../../../../types";
-
-
+import { DATA_TYPES } from "@/pages/items-master/constants/data_mapping.constants";
+import type { AttributeConfigurationProps } from "@/pages/items-master/types/types";
+import { theme } from "@/theme/theme";
 
 const AttributeConfiguration: React.FC<AttributeConfigurationProps> = ({
   fileName,
@@ -29,10 +25,9 @@ const AttributeConfiguration: React.FC<AttributeConfigurationProps> = ({
   onSaveAsTemplateChange,
   onTemplateNameChange,
   templateName,
-  selectedTemplate
+  selectedTemplate,
 }) => {
-
-  const isDefaultTemplateSelected = selectedTemplate.length > 0
+  const isDefaultTemplateSelected = selectedTemplate.length > 0;
   const handleDataTypeChange =
     (attribute: string) => (event: SelectChangeEvent<string>) => {
       onAttributeConfigChange(attribute, "dataType", event.target.value);
@@ -51,7 +46,7 @@ const AttributeConfiguration: React.FC<AttributeConfigurationProps> = ({
   };
 
   const handleTemplateNameChange = (
-    event: React.ChangeEvent<HTMLInputElement>
+    event: React.ChangeEvent<HTMLInputElement>,
   ) => {
     const name = event.target.value;
     if (onTemplateNameChange) {
@@ -72,16 +67,25 @@ const AttributeConfiguration: React.FC<AttributeConfigurationProps> = ({
       >
         <Typography
           variant="subtitle1"
-          sx={{ color: theme.custom.textColor, fontWeight: 600, fontSize: 24 }}
+          sx={{
+            color: theme.palette.primary.main,
+            fontWeight: 600,
+            fontSize: 24,
+          }}
         >
           Attribute Configuration
         </Typography>
-
-
       </Box>
 
       {/* File Info Row */}
-      <Box sx={{ padding: "12px", border: 1, borderColor: "#E8E8E8", borderRadius: "8px" }}>
+      <Box
+        sx={{
+          padding: "12px",
+          border: 1,
+          borderColor: "#E8E8E8",
+          borderRadius: "8px",
+        }}
+      >
         <Box
           sx={{
             display: "flex",
@@ -94,7 +98,9 @@ const AttributeConfiguration: React.FC<AttributeConfigurationProps> = ({
         >
           {/* File icon and name */}
           <Box sx={{ display: "flex", alignItems: "center", flex: 1, gap: 1 }}>
-            <FileIcon sx={{ color: theme.custom.subTextColor, fontSize: 28 }} />
+            <FileIcon
+              sx={{ color: theme.palette.brand.subTextColor, fontSize: 28 }}
+            />
             <Typography variant="body2" sx={{ fontSize: 16, color: "black" }}>
               {fileName}
             </Typography>
@@ -105,7 +111,7 @@ const AttributeConfiguration: React.FC<AttributeConfigurationProps> = ({
             <Typography
               variant="body2"
               fontWeight={600}
-              color={theme.custom.textColor}
+              color={theme.palette.primary.main}
             >
               Data Type
             </Typography>
@@ -114,7 +120,7 @@ const AttributeConfiguration: React.FC<AttributeConfigurationProps> = ({
             <Typography
               variant="body2"
               fontWeight={600}
-              color={theme.custom.textColor}
+              color={theme.palette.primary.main}
             >
               Mandatory
             </Typography>
@@ -138,7 +144,7 @@ const AttributeConfiguration: React.FC<AttributeConfigurationProps> = ({
                   <Typography
                     variant="body2"
                     sx={{
-                      color: theme.custom.textColor,
+                      color: theme.palette.primary.main,
                       fontWeight: 500,
                       wordBreak: "break-word",
                     }}
@@ -151,6 +157,7 @@ const AttributeConfiguration: React.FC<AttributeConfigurationProps> = ({
                 <Box sx={{ width: "45%" }}>
                   <FormControl fullWidth size="medium">
                     <Select
+                      variant={"outlined"}
                       value={config.dataType}
                       onChange={handleDataTypeChange(attributeName)}
                     >
@@ -178,38 +185,40 @@ const AttributeConfiguration: React.FC<AttributeConfigurationProps> = ({
                   />
                 </Box>
               </Box>
-            )
+            ),
           )}
         </Box>
       </Box>
       <Divider sx={{ mt: 2, mb: 1 }} />
 
       {/* Save as Template */}
-      { !isDefaultTemplateSelected && (<Box sx={{ display: "flex", alignItems: "center", gap: 2 }}>
-        <FormControlLabel
-          control={
-            <Checkbox
-              checked={saveAsTemplate}
-              onChange={(e) => handleSaveAsTemplateChange(e.target.checked)}
-              size="small"
-            />
-          }
-          label={
-            <Typography variant="body2" color={theme.custom.textColor}>
-              Save as Template
-            </Typography>
-          }
-        />
-
-        {saveAsTemplate && (
-          <TextField
-            placeholder="Enter template name"
-            value={templateName}
-            onChange={handleTemplateNameChange}
-            sx={{ minWidth: 400, m: 1 }}
+      {!isDefaultTemplateSelected && (
+        <Box sx={{ display: "flex", alignItems: "center", gap: 2 }}>
+          <FormControlLabel
+            control={
+              <Checkbox
+                checked={saveAsTemplate}
+                onChange={(e) => handleSaveAsTemplateChange(e.target.checked)}
+                size="small"
+              />
+            }
+            label={
+              <Typography variant="body2" color={theme.palette.primary.main}>
+                Save as Template
+              </Typography>
+            }
           />
-        )}
-      </Box>)}
+
+          {saveAsTemplate && (
+            <TextField
+              placeholder="Enter template name"
+              value={templateName}
+              onChange={handleTemplateNameChange}
+              sx={{ minWidth: 400, m: 1 }}
+            />
+          )}
+        </Box>
+      )}
     </Box>
   );
 };

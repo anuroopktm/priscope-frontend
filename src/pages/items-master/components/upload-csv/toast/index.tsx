@@ -10,7 +10,7 @@ import {
   Paper,
 } from '@mui/material';
 import { CheckCircleOutline } from '@mui/icons-material';
-import theme from '@/shared/styles/theme';
+import { theme } from '@/theme/theme';
 
 type UploadSnackbarProps = {
   open: boolean;
@@ -85,7 +85,7 @@ const UploadSnackbar: React.FC<UploadSnackbarProps> = ({
             <Box display="flex" alignItems="center" mb={2}>
               <CheckCircleOutline 
                 sx={{ 
-                  color: theme.custom.buttonBg, 
+                  color: theme.palette.brand.buttonBg, 
                   mr: 1,
                   fontSize: 24
                 }} 
@@ -99,10 +99,10 @@ const UploadSnackbar: React.FC<UploadSnackbarProps> = ({
               size="small"
               onClick={handleMapData}
               sx={{ 
-                backgroundColor: theme.custom.buttonBg, 
+                backgroundColor: theme.palette.brand.buttonBg, 
                 borderRadius: 8,
                 '&:hover': {
-                  backgroundColor: theme.custom.buttonBg,
+                  backgroundColor: theme.palette.brand.buttonBg,
                   opacity: 0.9,
                 },
               }}

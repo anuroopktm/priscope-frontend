@@ -1,4 +1,4 @@
-import theme from "@/shared/styles/theme";
+// import theme from "@/shared/styles/theme";
 import { InsertDriveFile as FileIcon } from "@mui/icons-material";
 import {
   Box,
@@ -7,14 +7,18 @@ import {
   FormControl,
   MenuItem,
   Select,
-  SelectChangeEvent,
-  Typography
+  type SelectChangeEvent,
+  Typography,
 } from "@mui/material";
-import React, { useEffect, useState } from "react";
-import { useListTemplateHeaders, useListTemplates } from "../../../../services/itemMasterService";
+import React from "react";
+import {
+  useListTemplateHeaders,
+  useListTemplates,
+} from "@/services/queries/item-master/item-master.queries";
 import { useItemMasterStore } from "../../../../store/itemMasterStore";
-import { SystemFieldMappingProps } from "../../../../types";
-import { SnackbarState } from "@/app/[lang]/(protected)/freight-rate-library/types";
+import type { SystemFieldMappingProps } from "@/pages/items-master/types/types";
+import { theme } from "@/theme/theme";
+import type { SnackbarState } from "../../../columns-dropdown";
 
 // Extended props to include template name handling
 interface SystemFieldMappingPropsExtended extends SystemFieldMappingProps {
@@ -23,7 +27,7 @@ interface SystemFieldMappingPropsExtended extends SystemFieldMappingProps {
   fieldErrors?: Record<string, boolean>;
   setSelectedTemplate: React.Dispatch<React.SetStateAction<string>>;
   selectedTemplate: string;
-  setSnackbar: React.Dispatch<React.SetStateAction<SnackbarState>>
+  setSnackbar: React.Dispatch<React.SetStateAction<SnackbarState>>;
 }
 
 const SystemFieldMapping: React.FC<SystemFieldMappingPropsExtended> = ({
@@ -37,17 +41,26 @@ const SystemFieldMapping: React.FC<SystemFieldMappingPropsExtended> = ({
   fieldErrors,
   setSelectedTemplate,
   selectedTemplate,
-  setSnackbar
+  setSnackbar,
 }) => {
-
   const getAvailableHeaders = useItemMasterStore(
-    (state) => state.getAvailableHeaders
+    (state) => state.getAvailableHeaders,
   );
   const setSelectedField = useItemMasterStore((state) => state.setSelected);
   const clearFields = useItemMasterStore((state) => state.clearFields);
   const selected = useItemMasterStore((state) => state.selected);
-  const { data, fetchNextPage, hasNextPage, isFetchingNextPage, isLoading, isError} = useListTemplates();
-  const { mutate: listTemplateHeaders, isPending: islistTemplateHeadersPending } = useListTemplateHeaders();
+  const {
+    data,
+    fetchNextPage,
+    hasNextPage,
+    isFetchingNextPage,
+    isLoading,
+    isError,
+  } = useListTemplates();
+  const {
+    mutate: listTemplateHeaders,
+    isPending: islistTemplateHeadersPending,
+  } = useListTemplateHeaders();
   const handleFieldChange =
     (field: string) => (event: SelectChangeEvent<string>) => {
       if (fieldErrors?.[field]) {
@@ -69,8 +82,9 @@ const SystemFieldMapping: React.FC<SystemFieldMappingPropsExtended> = ({
         payload: {
           search: "",
           page_size: 100,
-          skip: 0
-        }, template_id: templateValue
+          skip: 0,
+        },
+        template_id: templateValue,
       },
       {
         onSuccess: (response) => {
@@ -97,27 +111,33 @@ const SystemFieldMapping: React.FC<SystemFieldMappingPropsExtended> = ({
           });
         },
         onError: (err) => {
-          const message = err.status === 404 ?
-                err.body.detail[0].msg ||
-                err.body.detail : "Failed to fetch template headers"
-            setSnackbar({ message, severity: "error" });
-        }
-      }
+          const message =
+            err.status === 404
+              ? "Failed to fetch template headers"
+              : "Failed to fetch template headers";
+          setSnackbar({ message, severity: "error" });
+        },
+      },
     );
   };
 
-
-
- const templates = data?.pages.flatMap((page) => page.templates) ?? [];
+  const templates = data?.pages.flatMap((page) => page.templates) ?? [];
 
   return (
     <Box>
       {/* Template Selection */}
-      <Box sx={{ marginBottom: 3, display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+      <Box
+        sx={{
+          marginBottom: 3,
+          display: "flex",
+          justifyContent: "space-between",
+          alignItems: "center",
+        }}
+      >
         <Typography
           variant="subtitle1"
           sx={{
-            color: theme.custom.textColor,
+            color: theme.palette.primary.main,
             fontWeight: 600,
             fontSize: "20px",
           }}
@@ -126,6 +146,7 @@ const SystemFieldMapping: React.FC<SystemFieldMappingPropsExtended> = ({
         </Typography>
         <FormControl sx={{ minWidth: 272 }}>
           <Select
+            variant={"outlined"}
             value={selectedTemplate}
             onChange={handleTemplateSelect}
             displayEmpty
@@ -147,7 +168,7 @@ const SystemFieldMapping: React.FC<SystemFieldMappingPropsExtended> = ({
             disabled={islistTemplateHeadersPending}
           >
             <MenuItem value="" disabled>
-              <Typography color={theme.custom.subTextColor}>
+              <Typography color={theme.palette.brand.subTextColor}>
                 Select Template
               </Typography>
             </MenuItem>
@@ -157,8 +178,11 @@ const SystemFieldMapping: React.FC<SystemFieldMappingPropsExtended> = ({
               </MenuItem>
             ))}
             {isFetchingNextPage && (
-              <MenuItem disabled sx={{display: "flex", justifyContent: "center"}}>
-                  <CircularProgress size={20} />
+              <MenuItem
+                disabled
+                sx={{ display: "flex", justifyContent: "center" }}
+              >
+                <CircularProgress size={20} />
               </MenuItem>
             )}
           </Select>
@@ -166,7 +190,14 @@ const SystemFieldMapping: React.FC<SystemFieldMappingPropsExtended> = ({
       </Box>
 
       {/* Header */}
-      <Box sx={{ border: 1, padding: 2, borderRadius: "8px", borderColor: "#E8E8E8" }}>
+      <Box
+        sx={{
+          border: 1,
+          padding: 2,
+          borderRadius: "8px",
+          borderColor: "#E8E8E8",
+        }}
+      >
         <Box
           sx={{
             display: "flex",
@@ -178,7 +209,7 @@ const SystemFieldMapping: React.FC<SystemFieldMappingPropsExtended> = ({
           <Typography
             variant="subtitle1"
             sx={{
-              color: theme.custom.textColor,
+              color: theme.palette.primary.main,
               fontWeight: 600,
               fontSize: "20px",
             }}
@@ -197,7 +228,7 @@ const SystemFieldMapping: React.FC<SystemFieldMappingPropsExtended> = ({
           >
             <FileIcon
               sx={{
-                color: theme.custom.subTextColor,
+                color: theme.palette.brand.subTextColor,
                 fontSize: 40,
                 alignSelf: "flex-start",
               }}
@@ -208,11 +239,12 @@ const SystemFieldMapping: React.FC<SystemFieldMappingPropsExtended> = ({
           </Box>
         </Box>
 
-        {islistTemplateHeadersPending ? 
-            <Box sx={{ display: "flex", justifyContent: "center"}}>
-              <CircularProgress />
-            </Box> : 
-            (<Box sx={{ display: "flex", flexDirection: "column", gap: 2.5 }}>
+        {islistTemplateHeadersPending ? (
+          <Box sx={{ display: "flex", justifyContent: "center" }}>
+            <CircularProgress />
+          </Box>
+        ) : (
+          <Box sx={{ display: "flex", flexDirection: "column", gap: 2.5 }}>
             {Object.keys(systemFieldMapping).map((fieldName) => {
               const availableHeaders = getAvailableHeaders(fieldName);
               const currentValue = systemFieldMapping[fieldName] || "";
@@ -228,13 +260,17 @@ const SystemFieldMapping: React.FC<SystemFieldMappingPropsExtended> = ({
                 >
                   <Typography
                     variant="body1"
-                    sx={{ minWidth: "120px", color: theme.custom.textColor }}
+                    sx={{
+                      minWidth: "120px",
+                      color: theme.palette.primary.main,
+                    }}
                   >
                     {fieldName}
                   </Typography>
 
                   <FormControl sx={{ minWidth: "400px" }} error={hasError}>
                     <Select
+                      variant={"outlined"}
                       value={currentValue}
                       onChange={handleFieldChange(fieldName)}
                       displayEmpty
@@ -259,7 +295,8 @@ const SystemFieldMapping: React.FC<SystemFieldMappingPropsExtended> = ({
                 </Box>
               );
             })}
-          </Box>)}
+          </Box>
+        )}
         <Divider sx={{ mt: 2, mb: 1 }} />
       </Box>
     </Box>

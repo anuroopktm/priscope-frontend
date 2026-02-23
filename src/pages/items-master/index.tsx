@@ -3,7 +3,6 @@ import { ActionHeader } from "../scenario-builder/components/ActionHeader";
 import { useTreeGridInit } from "../scenario-builder/hooks/use-tree-grid-init";
 import { useCallback, useEffect, useRef, useState } from "react";
 // import { TreeGridLayout } from "../scenario-builder/constant/tree-grid-layout";
-import JsonData from "../scenario-builder/constant/tree-grid-sample-data.json";
 import {
   useListHeaders,
   useListItems,
@@ -24,6 +23,7 @@ import RequestsModal from "@/components/common/requests-modal";
 import type { SnackbarState } from "./components/columns-dropdown";
 import AppSnackbar from "@/components/common/action-bar/AppSnackbar";
 import LoaderOverlay from "@/components/common/loader";
+import CompleteUploadFlow from "./components/upload-csv";
 
 const ItemsMasterPage = () => {
   const theme = useTheme();
@@ -43,6 +43,7 @@ const ItemsMasterPage = () => {
     message: null,
     severity: "info",
   });
+  const [showUploadFlow, setShowUploadFlow] = useState(false);
 
   const {
     data: itemMasterDataList,
@@ -153,6 +154,14 @@ const ItemsMasterPage = () => {
     };
   }, []);
 
+  const handleUploadComplete = (data: any) => {
+    console.log("Import completed:", data);
+  };
+
+  const handleViewLog = () => {
+    console.log("View log clicked");
+  };
+
   // Initialize the grid using the dedicated hook
   const gridInstance = useTreeGridInit(
     "ScenarioGrid",
@@ -177,6 +186,7 @@ const ItemsMasterPage = () => {
         setSearchQuery={setSearchQuery}
         setOpenRequestModal={setOpenRequestModal}
         setShowFilesModal={setShowFilesModal}
+        onImportClick={() => setShowUploadFlow(true)}
       />
 
       <Box sx={{ display: "flex", position: "relative" }}>
@@ -210,6 +220,14 @@ const ItemsMasterPage = () => {
         onClose={() => setSnackbar({ message: null, severity: "info" })}
       />
       {showLoader && <LoaderOverlay />}
+      <CompleteUploadFlow
+        open={showUploadFlow}
+        onClose={() => setShowUploadFlow(false)}
+        onImportComplete={handleUploadComplete}
+        onViewLog={handleViewLog}
+        setSnackbar={setSnackbar}
+        isSearchReplaceRef={isSearchReplaceRef}
+      />
     </Box>
   );
 };

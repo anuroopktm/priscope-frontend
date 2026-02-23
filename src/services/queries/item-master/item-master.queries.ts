@@ -99,7 +99,7 @@ export const useUploadItemMasterFile = () => {
   });
 };
 
-export const useMaxiosInstancetemMasterFields = () => {
+export const useMapItemMasterFields = () => {
   return useMutation<
     MapFieldsResponse,
     AxiosError,

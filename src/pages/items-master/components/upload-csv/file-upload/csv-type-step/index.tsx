@@ -1,20 +1,20 @@
-import React, { ChangeEvent } from "react";
+import React, { type ChangeEvent } from "react";
 import {
   Box,
   Typography,
   FormControl,
   Select,
   MenuItem,
-  SelectChangeEvent,
+  type SelectChangeEvent,
   ToggleButtonGroup,
   ToggleButton,
 } from "@mui/material";
 import { Grid } from "@mui/material";
 import {
-  ControlFields,
+  type ControlFields,
   CSV_TYPE_OPTIONS,
   CONTROL_FIELDS,
-} from "@/app/[lang]/(protected)/item-master/constants/upload.constants";
+} from "@/pages/items-master/constants/upload.constants";
 import { useItemMasterStore } from "../../../../store/itemMasterStore";
 
 type CsvTypeSelectionProps = {
@@ -31,13 +31,15 @@ const CsvTypeSelection: React.FC<CsvTypeSelectionProps> = ({
   onControlFieldChange,
 }) => {
   const availableOptions = useItemMasterStore(
-    (state) => state.getAvailableHeaders
+    (state) => state.getAvailableHeaders,
   );
-  const setControlFields = useItemMasterStore((state) => state.setControlFields);
+  const setControlFields = useItemMasterStore(
+    (state) => state.setControlFields,
+  );
   const clearFields = useItemMasterStore((state) => state.clearFields);
   const selected = useItemMasterStore((state) => state.selected);
   const handleCsvTypeChange = (
-    event: SelectChangeEvent<string> | ChangeEvent<HTMLInputElement>
+    event: SelectChangeEvent<string> | ChangeEvent<HTMLInputElement>,
   ) => {
     onCsvTypeChange(event.target.value);
     clearFields([
@@ -98,9 +100,12 @@ const CsvTypeSelection: React.FC<CsvTypeSelectionProps> = ({
         </ToggleButtonGroup>
       </FormControl>
 
-
       {/* Control Fields and CSV Selection */}
-      <Grid container spacing={3} sx={{ border: "1px solid #E8E8E8", padding: 2, borderRadius: "8px" }}>
+      <Grid
+        container
+        spacing={3}
+        sx={{ border: "1px solid #E8E8E8", padding: 2, borderRadius: "8px" }}
+      >
         <Grid size={5}>
           <Typography variant="subtitle1" sx={{ mb: 1.5, fontWeight: 600 }}>
             Control fields
@@ -125,12 +130,13 @@ const CsvTypeSelection: React.FC<CsvTypeSelectionProps> = ({
             {getCurrentFields().map((field) => (
               <FormControl key={field} fullWidth size="small">
                 <Select
+                  variant={"outlined"}
                   value={controlFields[field as keyof ControlFields]}
                   onChange={(e) => {
-                    setControlFields(field, e.target.value);  
+                    setControlFields(field, e.target.value);
                     onControlFieldChange(
                       field as keyof ControlFields,
-                      e.target.value
+                      e.target.value,
                     );
                   }}
                   displayEmpty

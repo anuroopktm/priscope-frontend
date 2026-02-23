@@ -1,4 +1,4 @@
-import theme from "@/shared/styles/theme";
+// import theme from "@/shared/styles/theme";
 import { Close as CloseIcon } from "@mui/icons-material";
 import {
   Box,
@@ -16,28 +16,28 @@ import {
   DATA_MAPPING_STEPS,
   DEFAULT_ATTRIBUTE_CONFIGURATION,
   DEFAULT_SYSTEM_FIELD_MAPPING,
-} from "../../../constants/data_mapping.constants";
+} from "@/pages/items-master/constants/data_mapping.constants";
 import {
   createSystemFieldMapping,
   getAttributeConfigFromAvailableHeaders,
 } from "../../../helpers/itemMasterHelpers";
-import { useMapItemMasterFields } from "../../../services/itemMasterService";
+import { useMapItemMasterFields } from "@/services/queries/item-master/item-master.queries";
 import { useItemMasterStore } from "../../../store/itemMasterStore";
-import {
+import type {
   AttributeConfigurationData,
   DataMappingModalProps,
   MapFieldsRequest,
   SystemFieldMappingData,
   SystemFieldObject,
-} from "../../../types";
+} from "@/pages/items-master/types/types";
 import StyledStepper from "../../stepper";
 import AttributeConfiguration from "./attribute-config-step";
 import SystemFieldMapping from "./system-field-step";
 import { useQueryClient } from "@tanstack/react-query";
-import AppSnackbar from "@/shared/components/action-bar/AppSnackbar";
-import { SnackbarState } from "@/app/[lang]/(protected)/freight-rate-library/types";
-import ConfirmationDialog from "@/shared/components/upload-modal/confirmation-modal";
-import LoaderOverlay from "@/shared/components/loader";
+import ConfirmationDialog from "@/components/common/upload-modal/confirmation-modal";
+import LoaderOverlay from "@/components/common/loader";
+import type { SnackbarState } from "../../columns-dropdown";
+import { theme } from "@/theme/theme";
 
 interface DataMappingModalPropsExtended extends DataMappingModalProps {
   uploadId?: string;
@@ -257,9 +257,7 @@ const DataMappingModal: React.FC<DataMappingModalPropsExtended> = ({
         onError: (err) => {
           const message =
             err.status === 404 || err.status === 400
-              ? err.body.detail[0].msg ||
-                err.body.detail ||
-                "Failed to map fields"
+              ? "Failed to map fields"
               : "Failed to map fields";
           setSnackbar({ message, severity: "error" });
         },
@@ -281,7 +279,7 @@ const DataMappingModal: React.FC<DataMappingModalPropsExtended> = ({
         onClose={handleClose}
         maxWidth="md"
         fullWidth
-        PaperProps={{ sx: { borderRadius: 12 } }}
+        // PaperProps={{ sx: { borderRadius: 12 } }}
       >
         <DialogTitle sx={{ py: 2, px: 3 }}>
           <Box
@@ -343,11 +341,12 @@ const DataMappingModal: React.FC<DataMappingModalPropsExtended> = ({
               sx={{
                 height: 40,
                 borderRadius: 8,
-                color: theme.custom.textColor,
-                borderColor: theme.custom.buttonBg,
+                color: "#1A2B44",
+                borderColor: "#1A2B44",
+                bgcolor:"#FFFFFF",
                 "&:hover": {
-                  bgcolor: theme.palette.sidebar.userSubText,
-                  borderColor: theme.custom.buttonBg,
+                  bgcolor: "#d2d2d2",
+                  borderColor: "#1A2B44",
                 },
               }}
             >

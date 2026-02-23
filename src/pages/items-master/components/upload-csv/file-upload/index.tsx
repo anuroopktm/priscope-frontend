@@ -14,16 +14,20 @@ import FileUploadStep from "./upload-step";
 import CsvTypeSelection from "./csv-type-step";
 import StyledStepper from "../../stepper";
 import {
-  UploadedFile,
-  ControlFields,
+  type UploadedFile,
+  type ControlFields,
   CSV_TYPE_OPTIONS,
   UPLOAD_STEPS,
-} from "@/app/[lang]/(protected)/item-master/constants/upload.constants";
-import { useListSystemFields, useUploadItemMasterFile } from "../../../services/itemMasterService";
+} from "@/pages/items-master/constants/upload.constants";
+import {
+  useListSystemFields,
+  useUploadItemMasterFile,
+} from "@/services/queries/item-master/item-master.queries";
 import { useItemMasterStore } from "../../../store/itemMasterStore";
-import { SystemFieldObject } from "../../../types";
-import AppSnackbar from "@/shared/components/action-bar/AppSnackbar";
-import { SnackbarState } from "@/app/[lang]/(protected)/freight-rate-library/types";
+import type { SystemFieldObject } from "@/pages/items-master/types/types";
+import type { SnackbarState } from "../../columns-dropdown";
+// import AppSnackbar from "@/shared/components/action-bar/AppSnackbar";
+// import { SnackbarState } from "@/app/[lang]/(protected)/freight-rate-library/types";
 
 type FileUploadModalProps = {
   open: boolean;
@@ -34,10 +38,12 @@ type FileUploadModalProps = {
     controlFields: ControlFields;
     headers: string[]; // Add headers to the callback
   }) => void;
-  setSystemFields: React.Dispatch<React.SetStateAction<SystemFieldObject[] | null>>;
+  setSystemFields: React.Dispatch<
+    React.SetStateAction<SystemFieldObject[] | null>
+  >;
   csvType: string;
   setCsvType: React.Dispatch<React.SetStateAction<string>>;
-  setSnackbar: React.Dispatch<React.SetStateAction<SnackbarState>>
+  setSnackbar: React.Dispatch<React.SetStateAction<SnackbarState>>;
 };
 
 const FileUploadModal: React.FC<FileUploadModalProps> = ({
@@ -47,7 +53,7 @@ const FileUploadModal: React.FC<FileUploadModalProps> = ({
   setSystemFields,
   csvType,
   setCsvType,
-  setSnackbar
+  setSnackbar,
 }) => {
   const [activeStep, setActiveStep] = useState(0);
   const [uploadedFile, setUploadedFile] = useState<UploadedFile | null>(null);
@@ -58,8 +64,12 @@ const FileUploadModal: React.FC<FileUploadModalProps> = ({
     customer: "",
   });
   const [headers, setHeaders] = useState<string[]>([]); // New state for headers
-  const {mutate: listSystemFieldsMutation, isPending: isPendingListSystemFields} = useListSystemFields()
-  const { mutate: uploadMutation, isPending: isPendingUpload } = useUploadItemMasterFile();
+  const {
+    mutate: listSystemFieldsMutation,
+    isPending: isPendingListSystemFields,
+  } = useListSystemFields();
+  const { mutate: uploadMutation, isPending: isPendingUpload } =
+    useUploadItemMasterFile();
   const setUploadId = useItemMasterStore((s) => s.setUploadId);
   const handleFileUpload = (file: UploadedFile) => {
     setUploadedFile(file);
@@ -94,9 +104,8 @@ const FileUploadModal: React.FC<FileUploadModalProps> = ({
         onError: (err) => {
           handleFileStatusChange("");
         },
-      }
+      },
     );
-    
   };
 
   const handleCsvTypeChange = (value: string) => {
@@ -106,7 +115,7 @@ const FileUploadModal: React.FC<FileUploadModalProps> = ({
 
   const handleControlFieldChange = (
     field: keyof ControlFields,
-    value: string
+    value: string,
   ) => {
     setControlFields((prev) => ({ ...prev, [field]: value }));
   };
@@ -120,7 +129,7 @@ const FileUploadModal: React.FC<FileUploadModalProps> = ({
   const isContinueToMappingDisabled = (): boolean => {
     const requiredFields = getCurrentFields();
     return !requiredFields.every(
-      (field) => controlFields[field as keyof ControlFields]
+      (field) => controlFields[field as keyof ControlFields],
     );
   };
 
@@ -136,25 +145,26 @@ const FileUploadModal: React.FC<FileUploadModalProps> = ({
       type: csvType,
       search: "",
       page_size: 100,
-      skip: 0 
-    }
+      skip: 0,
+    };
 
-    listSystemFieldsMutation(listSystemFieldsPayload,{
+    listSystemFieldsMutation(listSystemFieldsPayload, {
       onSuccess: (res) => {
-        setSystemFields(res.data)
+        setSystemFields(res.data);
         if (onContinueToMapping) {
           onContinueToMapping(uploadData);
         }
-        setCsvType("item")
+        setCsvType("item");
       },
-      onError:(err) =>{
-        const message = err.status === 404 ?
-          err.body.detail[0].msg ||
-          err.body.detail || "Failed to fetch system fields" : "Failed to fetch system fields"
+      onError: (err) => {
+        const message =
+          err.status === 404
+            ? "Failed to fetch system fields"
+            : "Failed to fetch system fields";
         setSnackbar({ message, severity: "error" });
-      }
-    })
- };
+      },
+    });
+  };
 
   const resetFormState = () => {
     setActiveStep(0);
@@ -177,7 +187,6 @@ const FileUploadModal: React.FC<FileUploadModalProps> = ({
         onClose={handleClose}
         maxWidth="md"
         fullWidth
-        PaperProps={{ sx: { borderRadius: 12 } }}
       >
         <DialogTitle
           sx={{
@@ -222,7 +231,10 @@ const FileUploadModal: React.FC<FileUploadModalProps> = ({
             />
           )}
         </DialogContent>
-          <Divider variant="middle" sx={{marginX: 3, marginTop: 1, marginBottom: 3, height:1}}/>
+        <Divider
+          variant="middle"
+          sx={{ marginX: 3, marginTop: 1, marginBottom: 3, height: 1 }}
+        />
         <DialogActions
           sx={{
             px: 3,
@@ -232,25 +244,26 @@ const FileUploadModal: React.FC<FileUploadModalProps> = ({
           }}
         >
           <Box sx={{ display: "flex", gap: 1 }}>
-            {activeStep === 1 && 
-            (<Button
-              type="button"
-              variant="outlined"
-              onClick={() => setActiveStep( prev => prev - 1 )}
-              disabled={isPendingListSystemFields}
-              sx={{
-                height: 40,
-                bgcolor: "#fff",
-                color: (theme) => theme.custom.textColor,
-                borderColor: (theme) => theme.custom.buttonBg,
-                "&:hover": {
-                  bgcolor: (theme) => theme.palette.sidebar.userSubText,
-                  borderColor: (theme) => theme.custom.buttonBg,
-                },
-              }}
-            >
-              Back
-            </Button>)}
+            {activeStep === 1 && (
+              <Button
+                type="button"
+                variant="outlined"
+                onClick={() => setActiveStep((prev) => prev - 1)}
+                disabled={isPendingListSystemFields}
+                sx={{
+                  height: 40,
+                  bgcolor: "#fff",
+                  color: (theme) => theme.palette.primary.main,
+                  borderColor: (theme) => theme.palette.brand.buttonBg,
+                  "&:hover": {
+                    bgcolor: (theme) => theme.palette.brand.userSubText,
+                    borderColor: (theme) => theme.palette.brand.buttonBg,
+                  },
+                }}
+              >
+                Back
+              </Button>
+            )}
             {activeStep === 0 && (
               <Button
                 type="button"
