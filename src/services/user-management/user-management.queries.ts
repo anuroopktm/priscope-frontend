@@ -1,7 +1,11 @@
-import { useMutation, useQuery } from "@tanstack/react-query";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import type { AxiosError } from "axios";
 import { axiosInstance } from "../api/axiosInstance";
 import type {
+  BulkDeleteUsersRequest,
+  BulkDeleteUsersResponse,
+  BulkStatusUpdateRequest,
+  BulkStatusUpdateResponse,
   CheckEmailRequest,
   CheckEmailResponse,
   CheckTemplateNameRequest,
@@ -140,6 +144,46 @@ export const useCreateRole = () => {
     mutationFn: async (payload: CreateRoleRequest) => {
       const { data } = await axiosInstance.post("/v1/roles-creation", payload);
       return data;
+    },
+  });
+};
+
+export const useBulkDeleteUsers = () => {
+  const queryClient = useQueryClient();
+
+  return useMutation<
+    BulkDeleteUsersResponse,
+    AxiosError<{ detail: string }>,
+    BulkDeleteUsersRequest
+  >({
+    mutationFn: async (payload: BulkDeleteUsersRequest) => {
+      const { data } = await axiosInstance.delete("/v1/users/bulk-delete", {
+        data: payload,
+      });
+      return data;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["users"] });
+    },
+  });
+};
+export const useBulkStatusUpdate = () => {
+  const queryClient = useQueryClient();
+
+  return useMutation<
+    BulkStatusUpdateResponse,
+    AxiosError<{ detail: string }>,
+    BulkStatusUpdateRequest
+  >({
+    mutationFn: async (payload: BulkStatusUpdateRequest) => {
+      const { data } = await axiosInstance.put(
+        "/v1/bulk-status-update",
+        payload,
+      );
+      return data;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["users"] });
     },
   });
 };

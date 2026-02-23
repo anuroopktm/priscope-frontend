@@ -17,6 +17,7 @@ let theme = createTheme({
     error: {
       main: "#D00416",
       light: "#FB37481A",
+      contrastText: "#EA6565",
     },
     pending: {
       main: "#DFB400",

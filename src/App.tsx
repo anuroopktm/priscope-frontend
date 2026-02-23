@@ -10,8 +10,10 @@ import MainLayout from "./layouts/MainLayout";
 import SignInPage from "./pages/auth/sign-in";
 import SignUpPage from "./pages/auth/sign-up";
 import ScenarioBuilderPage from "./pages/scenario-builder";
-import UserManagementCreateUserPage from "./pages/user-management/create-users";
 import UserManagementListUsersPage from "./pages/user-management/list-users";
+import CreateUserPage from "./pages/user-management/user-actions/create-user";
+import EditUserPage from "./pages/user-management/user-actions/edit-user";
+import UserDetailsPage from "./pages/user-management/user-details";
 import { theme } from "./theme/theme";
 
 const queryClient = new QueryClient();
@@ -46,7 +48,15 @@ const router = createBrowserRouter([
           },
           {
             path: "create-user",
-            element: <UserManagementCreateUserPage />,
+            element: <CreateUserPage />,
+          },
+          {
+            path: "edit-user/:id",
+            element: <EditUserPage />,
+          },
+          {
+            path: "user-details/:id",
+            element: <UserDetailsPage />,
           },
         ],
       },

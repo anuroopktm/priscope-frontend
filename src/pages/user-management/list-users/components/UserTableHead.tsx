@@ -8,14 +8,26 @@ import {
 
 const COLUMNS = ["Name", "Email", "Job Role", "Status"];
 
-export const UserTableHead = () => {
+export const UserTableHead = ({
+  onSelectAll,
+  checked,
+  indeterminate,
+}: {
+  onSelectAll: (checked: boolean) => void;
+  checked: boolean;
+  indeterminate?: boolean;
+}) => {
   const theme = useTheme();
 
   return (
     <TableHead sx={{ bgcolor: "#F2F2F2" }}>
       <TableRow>
         <TableCell padding="checkbox">
-          <Checkbox />
+          <Checkbox
+            checked={checked}
+            indeterminate={indeterminate}
+            onChange={(e) => onSelectAll(e.target.checked)}
+          />
         </TableCell>
         {COLUMNS.map((col) => (
           <TableCell

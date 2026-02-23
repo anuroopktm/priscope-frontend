@@ -1,7 +1,8 @@
 export interface User {
+  id: string;
+  name: string;
   email: string;
   job_designation: string;
-  name: string;
   status: "active" | "suspended" | "invited";
 }
 
@@ -96,4 +97,29 @@ export interface CreateRoleResponse {
   role_name: string;
   tenant_id: string;
   type: string;
+}
+
+export interface BulkDeleteUsersRequest {
+  user_ids: string[];
+}
+
+export interface BulkDeleteUsersResponse {
+  deleted_count: number;
+  deleted_user_ids: string[];
+  message: string;
+  tenant_id: string;
+}
+
+export interface BulkStatusUpdateRequest {
+  status: string;
+  user_ids: string[];
+}
+
+export interface BulkStatusUpdateResponse {
+  failed_count: number;
+  message: string;
+  tenant_id: string;
+  total_count: number;
+  updated_count: number;
+  updated_user_ids: string[];
 }
