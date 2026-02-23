@@ -16,6 +16,7 @@ import {
   CONTROL_FIELDS,
 } from "@/pages/items-master/constants/upload.constants";
 import { useItemMasterStore } from "../../../../store/itemMasterStore";
+import { KeyboardArrowDown } from "@mui/icons-material";
 
 type CsvTypeSelectionProps = {
   csvType: string;
@@ -140,6 +141,7 @@ const CsvTypeSelection: React.FC<CsvTypeSelectionProps> = ({
                     );
                   }}
                   displayEmpty
+                  IconComponent={KeyboardArrowDown}
                 >
                   <MenuItem value="" disabled>
                     Select {field}

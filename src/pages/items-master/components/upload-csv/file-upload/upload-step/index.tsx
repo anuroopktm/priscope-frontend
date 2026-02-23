@@ -12,7 +12,6 @@ import {
   Paper,
 } from "@mui/material";
 import {
-  UploadFile as UploadIcon,
   InsertDriveFileOutlined as FileIcon,
   CheckCircle as CheckCircleIcon,
   Delete as DeleteIcon,

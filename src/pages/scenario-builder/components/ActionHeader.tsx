@@ -4,7 +4,6 @@ import {
   FilterListOutlined,
   KeyboardArrowDown,
   Search,
-  StorageOutlined,
 } from "@mui/icons-material";
 import { Box, Button, InputAdornment, Stack, TextField } from "@mui/material";
 import { useTheme } from "@mui/material/styles";

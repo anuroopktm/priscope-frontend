@@ -58,7 +58,6 @@ const ItemsMasterPage = () => {
     filter: filter,
   });
 
-  console.log(data, "dattaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa");
   const { data: listHeaderData, isLoading: isListHeadersLoading } =
     useListHeaders({ page_size: 10000, search: "", skip: 0, filter: filter });
 
@@ -93,6 +92,30 @@ const ItemsMasterPage = () => {
     }
   }, [debouncedSearchQuery]);
 
+  const addRowsToGrid = (newRows: any[]) => {
+    const Grid = gridInstance.current;
+    if (!Grid) return;
+    if (!Grid || !newRows?.length) return;
+
+    newRows.forEach((rowData) => {
+      const newRow = Grid.AddRow(null, null, 7, rowData.id);
+      if (!newRow) return;
+
+      Object.entries(rowData).forEach(([key, value]) => {
+        if (key === "id") return;
+        if (key === "Color") return;
+        if (value === undefined) return;
+
+        Grid.SetValue(newRow, key, value, 1);
+      });
+
+      Grid.RefreshRow(newRow);
+    });
+
+    Grid.Update();
+    gridInstance.current?.setLoading(false);
+  };
+
   useEffect(() => {
     if (!itemMasterDataList || !listHeaderData?.headers.length) return;
 
@@ -116,7 +139,7 @@ const ItemsMasterPage = () => {
       return;
     }
 
-    const Grid = gridRef.current?.getGridInstance();
+    const Grid = gridInstance.current?.getGridInstance();
     if (!Grid) return;
     /**  2. SEARCH REPLACE (Grid API) */
     if (isSearchReplaceRef.current) {
@@ -133,7 +156,7 @@ const ItemsMasterPage = () => {
 
       Grid.ReloadBody();
 
-      gridRef.current?.setLoading(false);
+      gridInstance.current?.setLoading(false);
 
       isSearchReplaceRef.current = false;
       return;
@@ -146,6 +169,7 @@ const ItemsMasterPage = () => {
     const dataToAdd = buildItemMasterTreeGridBody(newItems);
     addRowsToGrid(dataToAdd?.Body[0]);
   }, [itemMasterDataList, listHeaderData]);
+  
   // Optional: Function to attach event handlers after initialization
   const handleGridReady = useCallback((grid: TGrid) => {
     const G = grid as any;
