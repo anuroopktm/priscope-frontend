@@ -28,7 +28,7 @@ export const useTreeGridInit = (
       Data: {
         Data:data
       },
-      Debug: { Check: 1 },
+      Debug: { Check: 0 },
     };
 
     const grid = window.TreeGrid(source, id);

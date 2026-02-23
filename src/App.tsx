@@ -5,10 +5,13 @@ import {
   Navigate,
   RouterProvider,
 } from "react-router-dom";
+import GlobalToast from "./components/common/GlobalToast";
 import MainLayout from "./layouts/MainLayout";
 import SignInPage from "./pages/auth/sign-in";
 import SignUpPage from "./pages/auth/sign-up";
 import ScenarioBuilderPage from "./pages/scenario-builder";
+import UserManagementCreateUserPage from "./pages/user-management/create-users";
+import UserManagementListUsersPage from "./pages/user-management/list-users";
 import { theme } from "./theme/theme";
 import ItemsMasterPage from "./pages/items-master";
 
@@ -35,6 +38,19 @@ const router = createBrowserRouter([
         path: "scenario-builder",
         element: <ScenarioBuilderPage />,
       },
+      {
+        path: "user-management",
+        children: [
+          {
+            path: "list-users",
+            element: <UserManagementListUsersPage />,
+          },
+          {
+            path: "create-user",
+            element: <UserManagementCreateUserPage />,
+          },
+        ],
+      },
        {
         path: "items-master",
         element: <ItemsMasterPage />,
@@ -48,6 +64,7 @@ function App() {
     <QueryClientProvider client={queryClient}>
       <ThemeProvider theme={theme}>
         <CssBaseline />
+        <GlobalToast />
         <RouterProvider router={router} />
       </ThemeProvider>
     </QueryClientProvider>

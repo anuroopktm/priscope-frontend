@@ -1,7 +1,7 @@
 import { AppBar, Box, Toolbar } from "@mui/material";
-import { GlobalHeaderActions } from "./GlobalHeaderActions";
-import { GlobalHeaderLogo } from "./GlobalHeaderLogo";
-import { GlobalHeaderNavigation } from "./GlobalHeaderNavigation";
+import { GlobalHeaderActions } from "./components/GlobalHeaderActions";
+import { GlobalHeaderLogo } from "./components/GlobalHeaderLogo";
+import { GlobalHeaderNavigation } from "./components/GlobalHeaderNavigation";
 
 const GlobalHeader = () => {
   return (

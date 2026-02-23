@@ -10,4 +10,13 @@ export default defineConfig({
       "@": path.resolve(__dirname, "./src"),
     },
   },
+  optimizeDeps: {
+    include: [
+      "@mui/material",
+      "@mui/material/styles",
+      "@emotion/react",
+      "@emotion/styled",
+      "@mui/icons-material"
+    ],
+  },
 })

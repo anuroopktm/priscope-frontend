@@ -1,4 +1,4 @@
-import { type Theme } from "@mui/material/styles";
+import { alpha, type Theme } from "@mui/material/styles";
 
 export default function Menu(theme: Theme) {
   return {
@@ -7,6 +7,23 @@ export default function Menu(theme: Theme) {
         paper: {
           backgroundColor: theme.palette.common.white,
           borderRadius: 12,
+        },
+      },
+    },
+    MuiList: {
+      styleOverrides: {
+        root: {
+          paddingTop: 0,
+          paddingBottom: 0,
+        },
+      },
+    },
+    MuiMenuItem: {
+      styleOverrides: {
+        root: {
+          "&.Mui-selected": {
+            backgroundColor: alpha(theme.palette.primary.main, 0.1),
+          },
         },
       },
     },

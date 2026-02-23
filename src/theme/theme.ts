@@ -39,6 +39,18 @@ const theme = createTheme({
     secondary: {
       main: "#4A78BA",
     },
+    success: {
+      main: "#1FC16B",
+      light: "#1FC16B1A",
+    },
+    error: {
+      main: "#D00416",
+      light: "#FB37481A",
+    },
+    pending: {
+      main: "#DFB400",
+      light: "#FFDB431A",
+    },
     brand: {
       primary: "#1A2B44",
       secondary: "#4A78BA",
@@ -51,7 +63,7 @@ const theme = createTheme({
       surfaceBackground: "#f8f9fa",
     },
     background: {
-      default: "#F4F6F8",
+      default: "#e3e3e3",
       paper: "#FFFFFF",
     },
   },
@@ -59,10 +71,12 @@ const theme = createTheme({
     fontFamily: '"Inter", "Roboto", "Helvetica", "Arial", sans-serif',
   },
   shape: {
-    borderRadius: 12,
+    borderRadius: 8,
   },
 });
 
-theme.components = ComponentsOverrides(theme);
+theme = createTheme(theme, {
+  components: ComponentsOverrides(theme),
+});
 
 export { theme };

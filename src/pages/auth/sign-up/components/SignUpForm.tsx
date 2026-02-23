@@ -1,38 +1,21 @@
-import googleIcon from "@/assets/login/google.svg";
-import linkedinIcon from "@/assets/login/linkedin.svg";
-import microsoftIcon from "@/assets/login/microsoft.svg";
-import { signUpSchema, type SignUpSchema } from "@/validations/auth.validation";
-import { zodResolver } from "@hookform/resolvers/zod";
-import { Visibility, VisibilityOff } from "@mui/icons-material";
+import AuthCard from "@/pages/auth/common/AuthCard";
+import EmailField from "@/pages/auth/common/EmailField";
+import PasswordField from "@/pages/auth/common/PasswordField";
+import SocialAuthButtons from "@/pages/auth/common/SocialAuthButtons";
 import {
-  Box,
-  Button,
-  Divider,
-  IconButton,
-  InputAdornment,
-  Paper,
-  Stack,
-  TextField,
-  Typography,
-} from "@mui/material";
-import { useState } from "react";
-import { Controller, useForm } from "react-hook-form";
-
-interface SignUpFormProps {
-  onSuccess: () => void;
-}
-
-const SignUpForm = ({ onSuccess }: SignUpFormProps) => {
-  const [showPassword, setShowPassword] = useState<boolean>(false);
-  const [showConfirmPassword, setShowConfirmPassword] =
-    useState<boolean>(false);
-
+  createSignUpSchema,
+  type SignUpFormData,
+} from "@/validations/auth/sign-up.validation";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { Button, Divider, Stack, Typography } from "@mui/material";
+import { useForm } from "react-hook-form";
+const SignUpForm = () => {
   const {
     control,
     handleSubmit,
     formState: { errors },
-  } = useForm<SignUpSchema>({
-    resolver: zodResolver(signUpSchema),
+  } = useForm<SignUpFormData>({
+    resolver: zodResolver(createSignUpSchema({})),
     defaultValues: {
       email: "",
       password: "",
@@ -40,242 +23,46 @@ const SignUpForm = ({ onSuccess }: SignUpFormProps) => {
     },
   });
 
-  const onSubmit = async (data: SignUpSchema) => {
-    console.log("Form Data:", data);
-    await new Promise((resolve) => setTimeout(resolve, 1000));
-    onSuccess();
+  const onSubmit = async (data: SignUpFormData) => {
+    console.log(data);
   };
 
   return (
-    <Paper
-      elevation={0}
-      sx={{
-        width: "100%",
-        maxWidth: 450,
-        p: 5,
-        borderRadius: 3,
-        bgcolor: "#FFFFFF",
-        textAlign: "center",
-        boxShadow: "0px 20px 40px rgba(0, 0, 0, 0.2)",
-      }}
-    >
-      <Typography
-        variant="h4"
-        sx={{ fontWeight: 700, mb: 4, color: "#1A2B44", fontSize: "1.75rem" }}
-      >
-        Welcome John Smith!
-      </Typography>
-
+    <AuthCard title="Create your account">
       <form onSubmit={handleSubmit(onSubmit)}>
-        <Stack spacing={2.5} sx={{ textAlign: "left" }}>
-          {/* Email Field */}
-          <Box>
-            <Typography
-              variant="subtitle2"
-              sx={{
-                mb: 0.75,
-                fontWeight: 600,
-                color: "#1A2B44",
-                fontSize: "0.875rem",
-              }}
-            >
-              Email
-            </Typography>
-            <Controller
-              name="email"
-              control={control}
-              render={({ field }) => (
-                <TextField
-                  {...field}
-                  fullWidth
-                  variant="outlined"
-                  placeholder=""
-                  error={!!errors.email}
-                  helperText={errors.email?.message}
-                />
-              )}
-            />
-          </Box>
+        <Stack spacing={2}>
+          <EmailField control={control} error={errors.email?.message} />
 
-          {/* Password Field */}
-          <Box>
-            <Typography
-              variant="subtitle2"
-              sx={{
-                mb: 0.75,
-                fontWeight: 600,
-                color: "#1A2B44",
-                fontSize: "0.875rem",
-              }}
-            >
-              Password
-            </Typography>
-            <Controller
-              name="password"
-              control={control}
-              render={({ field }) => (
-                <TextField
-                  {...field}
-                  fullWidth
-                  type={showPassword ? "text" : "password"}
-                  variant="outlined"
-                  placeholder=""
-                  error={!!errors.password}
-                  helperText={errors.password?.message}
-                  InputProps={{
-                    endAdornment: (
-                      <InputAdornment position="end">
-                        <IconButton
-                          onClick={() => setShowPassword(!showPassword)}
-                          edge="end"
-                          size="small"
-                        >
-                          {showPassword ? <VisibilityOff /> : <Visibility />}
-                        </IconButton>
-                      </InputAdornment>
-                    ),
-                  }}
-                />
-              )}
-            />
-          </Box>
+          <PasswordField
+            name="password"
+            label="Password"
+            control={control}
+            error={errors.password?.message}
+          />
 
-          {/* Confirm Password Field */}
-          <Box>
-            <Typography
-              variant="subtitle2"
-              sx={{
-                mb: 0.75,
-                fontWeight: 600,
-                color: "#1A2B44",
-                fontSize: "0.875rem",
-              }}
-            >
-              Confirm Password
-            </Typography>
-            <Controller
-              name="confirmPassword"
-              control={control}
-              render={({ field }) => (
-                <TextField
-                  {...field}
-                  fullWidth
-                  type={showConfirmPassword ? "text" : "password"}
-                  variant="outlined"
-                  placeholder=""
-                  error={!!errors.confirmPassword}
-                  helperText={errors.confirmPassword?.message}
-                  InputProps={{
-                    endAdornment: (
-                      <InputAdornment position="end">
-                        <IconButton
-                          onClick={() =>
-                            setShowConfirmPassword(!showConfirmPassword)
-                          }
-                          edge="end"
-                          size="small"
-                        >
-                          {showConfirmPassword ? (
-                            <VisibilityOff />
-                          ) : (
-                            <Visibility />
-                          )}
-                        </IconButton>
-                      </InputAdornment>
-                    ),
-                  }}
-                />
-              )}
-            />
-          </Box>
+          <PasswordField
+            name="confirmPassword"
+            label="Confirm Password"
+            control={control}
+            error={errors.confirmPassword?.message}
+          />
 
-          <Button
-            fullWidth
-            size="large"
-            type="submit"
-            variant="contained"
-            sx={{ mt: 2 }}
-          >
-            {false ? "Sending..." : "Generate OTP"}
+          <Button size="large" type="submit" fullWidth>
+            Generate OTP
           </Button>
         </Stack>
       </form>
 
-      <Box sx={{ position: "relative", my: 3 }}>
-        <Divider sx={{ width: "100%", borderColor: "#E2E8F0" }} />
-        <Typography
-          variant="body2"
-          sx={{
-            position: "absolute",
-            top: "50%",
-            left: "50%",
-            transform: "translate(-50%, -50%)",
-            bgcolor: "white",
-            px: 1,
-            color: "#A0AEC0",
-            fontSize: "0.875rem",
-          }}
-        >
-          or
-        </Typography>
-      </Box>
+      <Divider sx={{ my: 3 }}>
+        <Typography variant="body2">OR</Typography>
+      </Divider>
 
-      <Typography
-        variant="body2"
-        sx={{ mb: 2, color: "#4A5568", fontSize: "0.875rem" }}
-      >
+      <Typography variant="body2" textAlign="center" mb={2}>
         Sign up with
       </Typography>
 
-      <Stack direction="row" spacing={1.5} justifyContent="center">
-        {[
-          {
-            icon: (
-              <img
-                src={googleIcon}
-                alt="Google"
-                style={{ width: 24, height: 24 }}
-              />
-            ),
-            bg: "#144E72",
-          },
-          {
-            icon: (
-              <img
-                src={microsoftIcon}
-                alt="Microsoft"
-                style={{ width: 24, height: 24 }}
-              />
-            ),
-            bg: "#144E72",
-          },
-          {
-            icon: (
-              <img
-                src={linkedinIcon}
-                alt="LinkedIn"
-                style={{ width: 24, height: 24 }}
-              />
-            ),
-            bg: "#144E72",
-          },
-        ].map((social, index) => (
-          <IconButton
-            key={index}
-            sx={{
-              bgcolor: social.bg,
-              color: "white",
-              width: 48,
-              height: 48,
-              borderRadius: 1,
-              "&:hover": { bgcolor: "#0F3D5B" },
-            }}
-          >
-            {social.icon}
-          </IconButton>
-        ))}
-      </Stack>
-    </Paper>
+      <SocialAuthButtons />
+    </AuthCard>
   );
 };
 
