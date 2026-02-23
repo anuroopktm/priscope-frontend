@@ -8,7 +8,7 @@ import {
   useListHeaders,
   useListItems,
 } from "@/services/queries/item-master/item-master.queries";
-import { useDebounce } from "./hooks/useDebounce";
+import { useDebounce } from "../../hooks/useDebounce";
 import { page_size_item_master } from "./constants/itemmaster.constants";
 import {
   buildItemMasterTreeGridBody,
@@ -20,28 +20,10 @@ import type {
   TreeGridHeader,
   TreeGridLayout,
 } from "./helpers/types";
-
-// Enum definition for Category
-const categoryEnum =
-  "|Education|Vehicles|Business Industry|Home & Living|Essentials|Mobiles|Property|Electronics";
-const categoryOptions = categoryEnum.split("|").filter(Boolean);
-
-const generateData = (): any[] => {
-  const rawRows = (JsonData.Body as any[]).flat();
-
-  return rawRows.map((r: any) => ({
-    id: r.id.toString(),
-    SKU: r.Name,
-    UPC: r.Phone,
-    // Map random category for demo purposes to show off the select
-    Category:
-      categoryOptions[Math.floor(Math.random() * categoryOptions.length)],
-    Description: r.Address,
-    Supplier: r.Owner,
-    Customer: r.Town,
-    IsSelected: r.Type,
-  }));
-};
+import RequestsModal from "@/components/common/requests-modal";
+import type { SnackbarState } from "./components/columns-dropdown";
+import AppSnackbar from "@/components/common/action-bar/AppSnackbar";
+import LoaderOverlay from "@/components/common/loader";
 
 const ItemsMasterPage = () => {
   const theme = useTheme();
@@ -54,6 +36,13 @@ const ItemsMasterPage = () => {
   const isSearchReplaceRef = useRef(false);
   const prevSearchQueryRef = useRef<string>("");
   const treeGridHeadersRef = useRef<TreeGridHeader[]>([]);
+  const [openReqestModal, setOpenRequestModal] = useState(false);
+  const [showFilesModal, setShowFilesModal] = useState<boolean>(false);
+  const [showLoader, setShowLoader] = useState(false);
+  const [snackbar, setSnackbar] = useState<SnackbarState>({
+    message: null,
+    severity: "info",
+  });
 
   const {
     data: itemMasterDataList,
@@ -71,6 +60,38 @@ const ItemsMasterPage = () => {
   console.log(data, "dattaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa");
   const { data: listHeaderData, isLoading: isListHeadersLoading } =
     useListHeaders({ page_size: 10000, search: "", skip: 0, filter: filter });
+
+  useEffect(() => {
+    setShowLoader(
+      isItemsLoading ||
+        isFetchingNextPage ||
+        // createCommentPending ||
+        isListHeadersLoading,
+      // isBulkInsertPending ||
+      // deleteItemMasterRowPending ||
+      // itemMasterExportRowPending ||
+      // isitemMasterBulkInsertAdminApprovalPending,
+    );
+  }, [
+    isItemsLoading,
+    isFetchingNextPage,
+    // createCommentPending,
+    isListHeadersLoading,
+    // isBulkInsertPending,
+    // deleteItemMasterRowPending,
+    // itemMasterExportRowPending,
+    // isitemMasterBulkInsertAdminApprovalPending,
+  ]);
+  useEffect(() => {
+    if (prevSearchQueryRef.current !== debouncedSearchQuery) {
+      prevSearchQueryRef.current = debouncedSearchQuery;
+
+      if (!isInitialLoadRef.current) {
+        isSearchReplaceRef.current = true;
+      }
+    }
+  }, [debouncedSearchQuery]);
+
   useEffect(() => {
     if (!itemMasterDataList || !listHeaderData?.headers.length) return;
 
@@ -151,7 +172,23 @@ const ItemsMasterPage = () => {
         bgcolor: theme.palette.brand.background,
       }}
     >
-      <ActionHeader />
+      <ActionHeader
+        searchQuery={searchQuery}
+        setSearchQuery={setSearchQuery}
+        setOpenRequestModal={setOpenRequestModal}
+        setShowFilesModal={setShowFilesModal}
+      />
+
+      <Box sx={{ display: "flex", position: "relative" }}>
+        {/* <MainContentContainer hasFilter={true}> */}
+        {openReqestModal && (
+          <RequestsModal
+            onClose={setOpenRequestModal}
+            targetModule={"item_master"}
+          />
+        )}
+        {/* </MainContentContainer> */}
+      </Box>
 
       <Box
         sx={{
@@ -168,6 +205,11 @@ const ItemsMasterPage = () => {
           }}
         />
       </Box>
+      <AppSnackbar
+        snackbar={snackbar}
+        onClose={() => setSnackbar({ message: null, severity: "info" })}
+      />
+      {showLoader && <LoaderOverlay />}
     </Box>
   );
 };
