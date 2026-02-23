@@ -78,10 +78,9 @@ const SignInForm = () => {
             size="large"
             type="submit"
             variant="contained"
-            disabled={isPending}
             loading={isPending}
           >
-            {isPending ? "Logging in..." : "Continue"}
+            Continue
           </Button>
 
           <Link

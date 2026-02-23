@@ -35,7 +35,7 @@ const PermissionsManager = () => {
       if (currentRole === "custom") {
         setValue("defaultPermissions", privileges);
       } else {
-        setValue("permissions", privileges, { shouldValidate: true });
+        setValue("permissions", privileges);
       }
     }
   }, [privileges, currentRole, setValue]);
@@ -52,7 +52,7 @@ const PermissionsManager = () => {
 
   const onRoleChange = (newId: string) => {
     if (newId !== currentRole) {
-      setValue("permissions", [], { shouldValidate: true });
+      setValue("permissions", []);
       setValue("currentRole", newId);
     }
   };
@@ -77,7 +77,7 @@ const PermissionsManager = () => {
             alignItems: "center",
           }}
         >
-          <Typography color="#B42318" variant="body2" sx={{ fontWeight: 500 }}>
+          <Typography color="red" variant="body2" sx={{ fontWeight: 500 }}>
             {permissionsError.message as string}
           </Typography>
         </Box>

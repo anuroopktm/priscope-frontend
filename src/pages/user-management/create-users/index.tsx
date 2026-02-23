@@ -1,5 +1,6 @@
 import {
   useCheckPrivilegeTemplate,
+  useCreateRole,
   useInviteUser,
 } from "@/services/user-management/user-management.queries";
 import { useToastStore } from "@/store/useToastStore";
@@ -25,8 +26,12 @@ const UserManagementCreateUserPage = () => {
   const showToast = useToastStore((state) => state.showToast);
 
   const { mutate: inviteUser, isPending: isInviting } = useInviteUser();
-  const { mutate: checkTemplate, isPending: isCheckingTemplate } =
-    useCheckPrivilegeTemplate();
+  const {
+    mutate: checkTemplate,
+    isPending: isCheckingTemplate,
+    data: checkTemplateData,
+  } = useCheckPrivilegeTemplate();
+  const { mutate: createRole, isPending: isCreatingRole } = useCreateRole();
 
   const methods = useForm<CreateUserFormValues>({
     resolver: zodResolver(createUserSchema),
@@ -56,8 +61,7 @@ const UserManagementCreateUserPage = () => {
       {
         onSuccess: () => {
           showToast("User invited successfully", "success");
-          setShowModal(false);
-          navigate("/user-management/list-users");
+          setShowModal(true);
         },
         onError: (error) => {
           showToast(
@@ -69,6 +73,40 @@ const UserManagementCreateUserPage = () => {
     );
   };
 
+  const handleCreateTemplate = (templateName?: string) => {
+    if (!templateName) return;
+
+    const data = methods.getValues();
+    createRole(
+      {
+        description: `Template for ${templateName}`,
+        resource_privilege_id: data.permissions.map(
+          (p) => p.resource_privilege_id,
+        ),
+        role_name: templateName,
+        role_type: "tenant",
+      },
+      {
+        onSuccess: () => {
+          showToast("Template created successfully", "success");
+          setShowModal(false);
+          navigate("/user-management/list-users");
+        },
+        onError: (error) => {
+          showToast(
+            error.response?.data?.detail || "Failed to create template",
+            "error",
+          );
+        },
+      },
+    );
+  };
+
+  const handleSkipTemplate = () => {
+    setShowModal(false);
+    navigate("/user-management/list-users");
+  };
+
   const onSubmit = () => {
     const data = methods.getValues();
     checkTemplate(
@@ -78,14 +116,11 @@ const UserManagementCreateUserPage = () => {
         ),
       },
       {
-        onSuccess: (data) => {
+        onSuccess: () => {
           handleCreateInvitation();
-          if (!data.exists) {
-            setShowModal(true);
-          }
         },
         onError: () => {
-          setShowModal(true);
+          showToast("Failed to check template", "error");
         },
       },
     );
@@ -124,14 +159,15 @@ const UserManagementCreateUserPage = () => {
             </Paper>
           </Box>
         </Box>
-        <CreateInvitationModal
-          open={showModal}
-          jobDesignation={methods.getValues("job_designation")}
-          onSkip={() => setShowModal(false)}
-          onCreate={handleCreateInvitation}
-          loading={isInviting}
-        />
       </Box>
+      <CreateInvitationModal
+        open={showModal}
+        jobDesignation={methods.getValues("job_designation")}
+        onSkip={handleSkipTemplate}
+        onCreate={handleCreateTemplate}
+        isLoading={isCreatingRole}
+        isTemplateExists={!!checkTemplateData?.exists}
+      />
     </FormProvider>
   );
 };

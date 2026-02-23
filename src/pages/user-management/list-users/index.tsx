@@ -57,9 +57,17 @@ const UserManagementListUsersPage = () => {
       />
 
       <Box sx={{ p: 2, flex: 1 }}>
-        <Paper elevation={0} sx={{ p: 2, height: "calc(100vh - 144px)" }}>
+        <Paper
+          elevation={0}
+          sx={{
+            display: "flex",
+            flexDirection: "column",
+            p: 2,
+            height: "calc(100vh - 144px)",
+          }}
+        >
           <TableContainer sx={{ borderRadius: 2, border: "1px solid #E8E8E8" }}>
-            <Table>
+            <Table stickyHeader>
               <UserTableHead />
               <TableBody>
                 {isLoading ? (

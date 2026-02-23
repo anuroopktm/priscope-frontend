@@ -4,8 +4,12 @@ import { axiosInstance } from "../api/axiosInstance";
 import type {
   CheckEmailRequest,
   CheckEmailResponse,
+  CheckTemplateNameRequest,
+  CheckTemplateNameResponse,
   CheckTemplateRequest,
   CheckTemplateResponse,
+  CreateRoleRequest,
+  CreateRoleResponse,
   GetPrivilegeTemplatesResponse,
   GetUsersRequest,
   GetUsersResponse,
@@ -109,6 +113,32 @@ export const useCheckPrivilegeTemplate = () => {
   >({
     mutationFn: async (payload: CheckTemplateRequest) => {
       const { data } = await axiosInstance.post("/v1/templates/check", payload);
+      return data;
+    },
+  });
+};
+
+export const useCheckTemplateName = () => {
+  return useMutation<
+    CheckTemplateNameResponse,
+    AxiosError<{ detail: string }>,
+    CheckTemplateNameRequest
+  >({
+    mutationFn: async (payload: CheckTemplateNameRequest) => {
+      const { data } = await axiosInstance.post("/v1/template-name", payload);
+      return data;
+    },
+  });
+};
+
+export const useCreateRole = () => {
+  return useMutation<
+    CreateRoleResponse,
+    AxiosError<{ detail: string }>,
+    CreateRoleRequest
+  >({
+    mutationFn: async (payload: CreateRoleRequest) => {
+      const { data } = await axiosInstance.post("/v1/roles-creation", payload);
       return data;
     },
   });

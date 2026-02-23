@@ -73,3 +73,27 @@ export interface CheckTemplateRequest {
 export interface CheckTemplateResponse {
   exists: boolean;
 }
+
+export interface CheckTemplateNameRequest {
+  template_name: string;
+}
+
+export interface CheckTemplateNameResponse {
+  exists: boolean;
+}
+
+export interface CreateRoleRequest {
+  description: string;
+  resource_privilege_id: string[];
+  role_name: string;
+  role_type: string;
+}
+
+export interface CreateRoleResponse {
+  description: string;
+  id: string;
+  is_active: boolean;
+  role_name: string;
+  tenant_id: string;
+  type: string;
+}
