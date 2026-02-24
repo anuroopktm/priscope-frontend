@@ -187,12 +187,11 @@ const ItemsMasterPage = () => {
     }
   }, [debouncedSearchQuery]);
 
-    useEffect(() => {
+  useEffect(() => {
     if (state.showSavePopover && gridInstance.current) {
       gridInstance.current.Focus(null, null);
     }
   }, [state.showSavePopover]);
-
 
   const handleExport = () => {
     if (!selectedExport && (!selectedRows || selectedRows.length === 0)) return;
