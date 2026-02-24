@@ -51,6 +51,7 @@ const SignInForm = () => {
           localStorage.setItem("refresh_token", response.refresh_token);
           localStorage.setItem("tenant_id", response.tenant_id);
           localStorage.setItem("user_id", response.user_id);
+          localStorage.setItem("privileges", JSON.stringify(response.privileges));
 
           navigate("/scenario-builder");
         },

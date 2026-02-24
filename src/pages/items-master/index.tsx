@@ -4,7 +4,10 @@ import { ActionHeader } from "../scenario-builder/components/ActionHeader";
 import { useCallback, useEffect, useRef, useState } from "react";
 // import { TreeGridLayout } from "../scenario-builder/constant/tree-grid-layout";
 import {
+  useAddBulkInsertAdminRequest,
+  // useBulkInsertItems,
   useDeleteItemMasterRow,
+  useEditItemMasterItem,
   useExportItemMasterRow,
   useListHeaders,
   useListItems,
@@ -14,17 +17,19 @@ import { page_size_item_master } from "./constants/itemmaster.constants";
 import {
   buildItemMasterTreeGridBody,
   buildItemMasterTreeGridCols,
+  getEditCellValueAdminApproval,
   getItemMasterLayout,
 } from "./helpers/itemMasterTreeGridHelperFunction";
 import type {
   ExportItemMasterRowPayload,
+  itemMasterBodyResponseItems,
+  itemMasterBodyResponseItemsField,
   TreeGridBody,
   TreeGridHeader,
   TreeGridLayout,
 } from "./helpers/types";
 import RequestsModal from "@/components/common/requests-modal";
 import type { SnackbarState } from "./components/columns-dropdown";
-import AppSnackbar from "@/components/common/action-bar/AppSnackbar";
 import LoaderOverlay from "@/components/common/loader";
 import CompleteUploadFlow from "./components/upload-csv";
 import { onScroll } from "./components/tree-grid/scroll/ScrollHandler";
@@ -36,6 +41,10 @@ import type { DeleteSelectedRowPayload } from "./types/types";
 import { deleteSeletectedRows } from "./components/tree-grid/RowSelection/DeleteRowSelection";
 import { handleValueChanged } from "./components/tree-grid/CellValue/handleValueChanged";
 import TableSavePopover from "./components/table-save-popover";
+import { hasItemMasterPrivileges } from "./helpers/itemMasterHelpers";
+import { openConfirmationModal } from "@/utils/getRequestConfirmationModal";
+import { useQueryClient } from "@tanstack/react-query";
+import RequestSuccessDialog from "@/components/common/request-notification";
 
 export interface TreeGridState {
   showSavePopover: boolean;
@@ -72,6 +81,7 @@ const ItemsMasterPage = () => {
   const [selectedExport, setSelectedExport] = useState(false);
   const [comment, setComment] = useState("");
   const [commentAdded, setCommentAdded] = useState(false);
+  const privileges: {} = JSON.parse(localStorage.getItem("privileges") || "");
 
   const [state, setState] = useState<TreeGridState>({
     showSavePopover: false,
@@ -79,9 +89,11 @@ const ItemsMasterPage = () => {
     changedCell: null,
   });
 
-  useEffect(() => {
-    console.log(selectedRows);
-  }, [selectedRows]);
+  const [
+    requestSuccessNotficationVisible,
+    setRequestSuccessNotficationVisible,
+  ] = useState(false);
+
   const {
     data: itemMasterDataList,
     fetchNextPage,
@@ -110,6 +122,17 @@ const ItemsMasterPage = () => {
 
   const { mutate: deleteItemMasterRow, isPending: deleteItemMasterRowPending } =
     useDeleteItemMasterRow();
+  const { mutateAsync: mutateItemMasterItem } = useEditItemMasterItem();
+
+  const queryClient = useQueryClient();
+
+  const { hasEditItemMasterPrivilege, hasAddItemMasterPrivilege } =
+    hasItemMasterPrivileges(privileges);
+
+  const {
+    mutate: itemMasterBulkInsertAdminApproval,
+    isPending: isitemMasterBulkInsertAdminApprovalPending,
+  } = useAddBulkInsertAdminRequest();
 
   useEffect(() => {
     window.TGSetEvent("OnScroll", gridId, onScroll);
@@ -138,8 +161,8 @@ const ItemsMasterPage = () => {
         isListHeadersLoading ||
         // isBulkInsertPending ||
         deleteItemMasterRowPending ||
-        itemMasterExportRowPending,
-      // isitemMasterBulkInsertAdminApprovalPending,
+        itemMasterExportRowPending ||
+        isitemMasterBulkInsertAdminApprovalPending,
     );
   }, [
     isItemsLoading,
@@ -151,7 +174,7 @@ const ItemsMasterPage = () => {
     // isBulkInsertPending,
     deleteItemMasterRowPending,
     itemMasterExportRowPending,
-    // isitemMasterBulkInsertAdminApprovalPending,
+    isitemMasterBulkInsertAdminApprovalPending,
   ]);
 
   useEffect(() => {
@@ -163,6 +186,13 @@ const ItemsMasterPage = () => {
       }
     }
   }, [debouncedSearchQuery]);
+
+    useEffect(() => {
+    if (state.showSavePopover && gridInstance.current) {
+      gridInstance.current.Focus(null, null);
+    }
+  }, [state.showSavePopover]);
+
 
   const handleExport = () => {
     if (!selectedExport && (!selectedRows || selectedRows.length === 0)) return;
@@ -249,6 +279,140 @@ const ItemsMasterPage = () => {
         setShowLoader(false);
       },
     });
+  };
+
+  const handleEditCellAdminRequest = (
+    row: TRow,
+    col: string,
+    value: string,
+    oldValue: string,
+    comment?: string | null,
+  ) => {
+    const item_id = row?.id;
+    const allItems: any =
+      itemMasterDataList?.pages.flatMap((page) => page.items) || [];
+    const finalPayload: itemMasterBodyResponseItems | undefined = allItems.find(
+      (item: any) => item.id === item_id,
+    );
+    const oldPayload = structuredClone(finalPayload);
+    if (!finalPayload) return;
+    if (finalPayload.attributes?.[col]) {
+      finalPayload.attributes[col].value = value;
+    } else {
+      (finalPayload as unknown as Record<string, unknown>)[col] = value;
+    }
+    const commentsPayload =
+      comment && comment.trim().length > 0
+        ? [
+            {
+              comment_type: "field",
+              item_field_key: col,
+              comment: comment,
+            },
+          ]
+        : undefined;
+    const adminRequestEditCellPayload = getEditCellValueAdminApproval(
+      finalPayload,
+      oldPayload,
+      commentsPayload,
+    );
+    setShowLoader(true);
+    if (!adminRequestEditCellPayload) return null;
+    itemMasterBulkInsertAdminApproval(adminRequestEditCellPayload, {
+      onSuccess: (response) => {
+        setShowLoader(false);
+        setRequestSuccessNotficationVisible(true);
+      },
+      onError: (e) => {
+        setShowLoader(false);
+        setSnackbar({
+          message: "Failed to save changes. Please try again.",
+          severity: "warning",
+        });
+      },
+    });
+  };
+
+  const handleGridEditConfirm = async (
+    row: TRow,
+    col: string,
+    value: string,
+    oldValue: string,
+    comment?: string | null,
+  ) => {
+    if (value === oldValue) return;
+    if (!hasEditItemMasterPrivilege) {
+      const result = await openConfirmationModal("edit", confirm);
+      if (result) {
+        handleEditCellAdminRequest(row, col, value, oldValue, comment);
+      } else {
+        const Grid = gridInstance.current?.getGridInstance();
+        if (Grid) {
+          const gridRow = Grid.GetRowById(row.id);
+          if (gridRow) Grid.SetValue(gridRow, col, oldValue, 1);
+        }
+      }
+      return;
+    }
+    const item_id = row?.id;
+    if (!item_id) return;
+    const allItems: itemMasterBodyResponseItems[] =
+      itemMasterDataList?.pages.flatMap((page) => page.items) || [];
+    const finalPayload: itemMasterBodyResponseItems | undefined = allItems.find(
+      (item: any) => item.id === item_id,
+    );
+    if (!finalPayload) return;
+    if (finalPayload.attributes?.[col]) {
+      finalPayload.attributes[col].value = value;
+    } else if (
+      typeof (finalPayload as any)[col] === "object" &&
+      (finalPayload as any)[col]?.value !== undefined
+    ) {
+      (
+        finalPayload as unknown as Record<
+          string,
+          itemMasterBodyResponseItemsField
+        >
+      )[col].value = value;
+    } else {
+      // Plain primitive field
+      (finalPayload as any)[col] = value;
+    }
+    const commentsPayload =
+      comment && comment.trim().length > 0
+        ? [
+            {
+              comment_type: "field",
+              item_field_key: col,
+              comment: comment,
+            },
+          ]
+        : undefined;
+    const finalPayloadWithMetadata = {
+      data: finalPayload,
+      comments: commentsPayload,
+    };
+    setShowLoader(true);
+    mutateItemMasterItem(
+      { item_id, payload: finalPayloadWithMetadata },
+      {
+        onSuccess: () => {
+          setShowLoader(false);
+          setSnackbar({
+            message: "Item updated successfully!",
+            severity: "success",
+          });
+          queryClient.invalidateQueries({ queryKey: ["item-master-history"] });
+        },
+        onError: () => {
+          setShowLoader(false);
+          setSnackbar({
+            message: "Failed to save changes. Please try again.,",
+            severity: "warning",
+          });
+        },
+      },
+    );
   };
   const handleLoadMore = () => {
     if (hasNextPage && !isFetchingNextPage) {
@@ -371,7 +535,7 @@ const ItemsMasterPage = () => {
     }
     const { row, col, value, oldValue } = state.changedCell;
 
-    onEditConfirm?.(row, col, value, oldValue, comment);
+    handleGridEditConfirm?.(row, col, value, oldValue, comment);
     setState((prev) => ({
       ...prev,
       showSavePopover: false,
@@ -451,6 +615,11 @@ const ItemsMasterPage = () => {
         setSnackbar={setSnackbar}
         isSearchReplaceRef={isSearchReplaceRef}
       />
+      {requestSuccessNotficationVisible && (
+        <RequestSuccessDialog
+          setNotificationOpen={setRequestSuccessNotficationVisible}
+        />
+      )}
       {state.showSavePopover && (
         <div
           style={{
