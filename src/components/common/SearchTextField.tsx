@@ -58,7 +58,7 @@ const SearchTextField = ({ onSearch, ...props }: SearchTextFieldProps) => {
       }}
       InputProps={{
         startAdornment: (
-          <InputAdornment position="start" sx={{ mx: 1 }}>
+          <InputAdornment position="start" sx={{ mr: 1 }}>
             <SearchIcon />
           </InputAdornment>
         ),

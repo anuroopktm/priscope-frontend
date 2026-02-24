@@ -1,6 +1,6 @@
 import { z } from "zod";
 
-export const createSignUpSchema = (invite: any) =>
+export const createSignUpSchema = (invite: { email: string; name: string }) =>
   z
     .object({
       email: z.string().email("Please enter a valid email address"),

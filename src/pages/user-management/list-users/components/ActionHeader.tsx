@@ -34,6 +34,7 @@ export const ActionHeader = ({
         alignItems: "center",
         justifyContent: "space-between",
         pt: 2,
+        px: 2,
       }}
     >
       <SearchTextField onSearch={onSearch} />

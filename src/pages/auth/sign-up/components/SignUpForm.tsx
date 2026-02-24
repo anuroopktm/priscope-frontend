@@ -5,7 +5,6 @@ import SocialAuthButtons from "@/pages/auth/common/SocialAuthButtons";
 import {
   useSendOtp,
   useVerifyInvite,
-  useVerifyUser,
 } from "@/services/queries/auth/sign-up/sign-up.queries";
 import { useSignupStore } from "@/store/useSignupStore";
 import { useToastStore } from "@/store/useToastStore";
@@ -15,7 +14,7 @@ import {
 } from "@/validations/auth/sign-up.validation";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Button, Divider, Stack, Typography } from "@mui/material";
-import { useEffect, useState } from "react";
+import { useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { useNavigate, useSearchParams } from "react-router-dom";
 
@@ -26,14 +25,10 @@ const SignUpForm = () => {
   const showToast = useToastStore((state) => state.showToast);
   const { setSignupData, setTokenInfo } = useSignupStore();
 
-  const [tokenInfoState, setTokenInfoState] = useState<{
-    email: string;
-    tenant_id: string;
-  } | null>(null);
-
-  const verifyInviteMutation = useVerifyInvite();
-  const verifyUserMutation = useVerifyUser();
-  const sendOtpMutation = useSendOtp();
+  const { data: tokenInfoState, mutateAsync: verifyInviteMutation } =
+    useVerifyInvite();
+  const { mutateAsync: sendOtpMutation, isPending: isSendOtpPending } =
+    useSendOtp();
 
   const {
     control,
@@ -57,19 +52,25 @@ const SignUpForm = () => {
   useEffect(() => {
     const verifyToken = async () => {
       if (token) {
-        try {
-          const response = await verifyInviteMutation.mutateAsync({ token });
-          setTokenInfoState({
-            email: response.email,
-            tenant_id: response.tenant_id,
-          });
-          setValue("email", response.email);
-        } catch (error: any) {
-          showToast(
-            error.response?.data?.detail || "Invalid or expired invitation",
-            "error",
-          );
-        }
+        await verifyInviteMutation(
+          { token },
+          {
+            onSuccess: (data) => {
+              setTokenInfo({
+                email: data.email,
+                tenant_id: data.tenant_id,
+                token: token,
+              });
+              setValue("email", data.email);
+            },
+            onError: (error) => {
+              showToast(
+                error.response?.data?.detail || "Invalid or expired invitation",
+                "error",
+              );
+            },
+          },
+        );
       } else {
         showToast("Missing invitation token", "error");
       }
@@ -84,36 +85,31 @@ const SignUpForm = () => {
       return;
     }
 
-    try {
-      // 1. Verify User
-      await verifyUserMutation.mutateAsync({
-        code: token,
-        email: tokenInfoState.email,
-        otp_type: "login",
-        tenant_id: tokenInfoState.tenant_id,
-      });
-
-      // 2. Send OTP
-      await sendOtpMutation.mutateAsync({
+    await sendOtpMutation(
+      {
         email: tokenInfoState.email,
         otp_type: "activation",
         tenant_id: tokenInfoState.tenant_id,
-      });
-
-      showToast("OTP sent successfully", "success");
-
-      // Save to store and navigate
-      setSignupData(data);
-      setTokenInfo({
-        email: tokenInfoState.email,
-        tenant_id: tokenInfoState.tenant_id,
-        token: token,
-      });
-
-      navigate("/auth/otp");
-    } catch (error: any) {
-      showToast(error.response?.data?.detail || "Verification failed", "error");
-    }
+      },
+      {
+        onSuccess: () => {
+          showToast("OTP sent successfully", "success");
+          setSignupData(data);
+          setTokenInfo({
+            email: tokenInfoState.email,
+            tenant_id: tokenInfoState.tenant_id,
+            token: token,
+          });
+          navigate("/auth/otp");
+        },
+        onError: (error) => {
+          showToast(
+            error.response?.data?.detail || "Failed to send OTP",
+            "error",
+          );
+        },
+      },
+    );
   };
 
   return (
@@ -145,7 +141,7 @@ const SignUpForm = () => {
             type="submit"
             fullWidth
             variant="contained"
-            loading={verifyUserMutation.isPending || sendOtpMutation.isPending}
+            loading={isSendOtpPending}
           >
             Generate OTP
           </Button>

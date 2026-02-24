@@ -1,5 +1,8 @@
 import AuthCard from "@/pages/auth/common/AuthCard";
-import { useUserSignUp } from "@/services/queries/auth/sign-up/sign-up.queries";
+import {
+  useUserSignUp,
+  useVerifyUser,
+} from "@/services/queries/auth/sign-up/sign-up.queries";
 import { useSignupStore } from "@/store/useSignupStore";
 import { useToastStore } from "@/store/useToastStore";
 import { otpSchema, type OtpSchema } from "@/validations/auth/otp.validation";
@@ -14,11 +17,13 @@ const OTP_LENGTH = 6;
 const OtpForm = () => {
   const navigate = useNavigate();
   const inputRefs = useRef<HTMLInputElement[]>([]);
-
   const { signupData, tokenInfo, clearSignupStore } = useSignupStore();
   const showToast = useToastStore((state) => state.showToast);
 
-  const { mutateAsync, isPending } = useUserSignUp();
+  const { mutateAsync: verifyUserMutation, isPending: isVerifyUserPending } =
+    useVerifyUser();
+  const { mutateAsync: signUpMutation, isPending: isSignUpPending } =
+    useUserSignUp();
 
   const {
     control,
@@ -27,7 +32,7 @@ const OtpForm = () => {
     formState: { errors },
   } = useForm<OtpSchema>({
     resolver: zodResolver(otpSchema),
-    mode: "onChange",
+    // mode: "onChange",
     defaultValues: { otp: "" },
   });
 
@@ -61,7 +66,7 @@ const OtpForm = () => {
 
   const handleKeyDown = (
     index: number,
-    e: React.KeyboardEvent<HTMLInputElement>,
+    e: React.KeyboardEvent<HTMLDivElement>,
   ) => {
     if (e.key === "Backspace" && !digits[index] && index > 0) {
       inputRefs.current[index - 1]?.focus();
@@ -83,8 +88,15 @@ const OtpForm = () => {
   const onSubmit = async ({ otp }: OtpSchema) => {
     if (!signupData || !tokenInfo) return;
 
-    mutateAsync(
-      {
+    try {
+      await verifyUserMutation({
+        code: tokenInfo.token,
+        email: tokenInfo.email,
+        otp_type: "login",
+        tenant_id: tokenInfo.tenant_id,
+      });
+
+      await signUpMutation({
         code: otp,
         confirm_password: signupData.confirmPassword,
         email: tokenInfo.email,
@@ -92,18 +104,14 @@ const OtpForm = () => {
         password: signupData.password,
         tenant_id: tokenInfo.tenant_id,
         type: "email_password",
-      },
-      {
-        onSuccess: () => {
-          showToast("Successfully signed up!", "success");
-          clearSignupStore();
-          navigate("/auth/sign-in");
-        },
-        onError: (error) => {
-          showToast(error.response?.data.detail || "Signup failed", "error");
-        },
-      },
-    );
+      });
+
+      showToast("Successfully signed up!", "success");
+      clearSignupStore();
+      navigate("/auth/sign-in");
+    } catch (error: any) {
+      showToast(error.response?.data?.detail || "Signup failed", "error");
+    }
   };
 
   if (!signupData || !tokenInfo) return null;
@@ -119,7 +127,6 @@ const OtpForm = () => {
           Enter 6-digit OTP
         </Typography>
 
-        {/* OTP Inputs */}
         <Stack direction="row" spacing={2}>
           {digits.map((digit, index) => (
             <TextField
@@ -175,7 +182,7 @@ const OtpForm = () => {
             size="large"
             variant="contained"
             type="submit"
-            disabled={isPending}
+            loading={isVerifyUserPending || isSignUpPending}
           >
             Continue
           </Button>
