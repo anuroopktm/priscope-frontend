@@ -15,14 +15,15 @@ export const GlobalHeaderNavigation = () => {
 
   return (
     <Stack direction="row" spacing={1} alignItems="center">
-      <Button variant="text" startIcon={<Inventory2Outlined />}>
+      <Button variant="contained" startIcon={<Inventory2Outlined />}>
         Items Master
       </Button>
 
       <Select
         value={rateLib}
         onChange={(e) => setRateLib(e.target.value)}
-        variant="standard"
+        variant="filled"
+        size="small"
         disableUnderline
         IconComponent={KeyboardArrowDown}
         displayEmpty
@@ -37,14 +38,18 @@ export const GlobalHeaderNavigation = () => {
         <MenuItem value="option-1">Option 1</MenuItem>
       </Select>
 
-      <Button startIcon={<ManageAccountsOutlined />}>Supplier Card</Button>
+      <Button variant="contained" startIcon={<ManageAccountsOutlined />}>
+        Supplier Card
+      </Button>
 
-      <Button startIcon={<PersonOutline />}>Customer Card</Button>
+      <Button variant="contained" startIcon={<PersonOutline />}>
+        Customer Card
+      </Button>
 
       <Select
         value={builder}
         onChange={(e) => setBuilder(e.target.value)}
-        variant="standard"
+        variant="filled"
         disableUnderline
         IconComponent={KeyboardArrowDown}
         displayEmpty

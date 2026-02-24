@@ -45,6 +45,7 @@ const StatusUpdateModal = ({
         <Select
           fullWidth
           size="small"
+          variant="outlined"
           value={status}
           onChange={(e) => setStatus(e.target.value)}
           displayEmpty

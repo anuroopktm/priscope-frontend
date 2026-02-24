@@ -1,6 +1,5 @@
 import "@mui/material/IconButton";
 import "@mui/material/styles";
-import "@mui/material/Select";
 
 declare module "@mui/material/IconButton" {
   interface IconButtonOwnProps {
@@ -30,11 +29,5 @@ declare module "@mui/material/styles" {
       background_gradient: string;
       border: string;
     };
-  }
-}
-
-declare module "@mui/material/Select" {
-  interface SelectPropsVariantOverrides {
-    rateLibrary: true;
   }
 }

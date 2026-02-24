@@ -18,12 +18,13 @@ export const GlobalHeaderActions = () => {
         value={tenant}
         onChange={(e) => setTenant(e.target.value)}
         size="small"
+        variant="filled"
         IconComponent={KeyboardArrowDown}
         sx={{
-          // height: 32,
-          color: "white",
+          minWidth: 200,
+          textAlign: "center",
           borderRadius: 20,
-          overflow: "hidden",
+          border: `1px solid ${theme.palette.brand.tertiary}`,
           "& .MuiOutlinedInput-notchedOutline": {
             borderColor: theme.palette.brand.tertiary,
           },
@@ -41,6 +42,7 @@ export const GlobalHeaderActions = () => {
       </Select>
 
       <IconButton
+        variant="action"
         sx={{
           border: `1px solid ${theme.palette.brand.tertiary}`,
         }}
@@ -49,6 +51,7 @@ export const GlobalHeaderActions = () => {
       </IconButton>
 
       <IconButton
+        variant="action"
         sx={{
           border: `1px solid ${theme.palette.brand.tertiary}`,
         }}
