@@ -81,8 +81,8 @@ const CsvTypeSelection: React.FC<CsvTypeSelectionProps> = ({
               color: "#777777",
               backgroundColor: "#ffffffff",
               "&.Mui-selected": {
-                borderColor: "#1A2B44",
-                color: "#1A2B44",
+                borderColor: "primary.main",
+                color: "primary.main",
                 fontWeight: 600,
               },
               "&:hover": {

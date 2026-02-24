@@ -1,9 +1,9 @@
 import brandLogo from "@/assets/login/brand.svg";
 import { Box, Container } from "@mui/material";
 import AuthGraphic from "../common/AuthGraphic";
-import SignUpForm from "./components/SignUpForm";
+import OtpForm from "./components/OtpForm";
 
-const SignUpPage = () => {
+const OtpPage = () => {
   return (
     <Box
       sx={{
@@ -51,10 +51,10 @@ const SignUpPage = () => {
           my: 2.5,
         }}
       >
-        <SignUpForm />
+        <OtpForm />
       </Container>
     </Box>
   );
 };
 
-export default SignUpPage;
+export default OtpPage;

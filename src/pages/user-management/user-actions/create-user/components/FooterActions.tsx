@@ -1,4 +1,4 @@
-import MailOutlineIcon from "@mui/icons-material/MailOutline";
+import MailSendIcon from "@/assets/actions/mail-send.svg?react";
 import { Box, Button } from "@mui/material";
 
 interface FooterActionsProps {
@@ -11,7 +11,7 @@ const FooterActions = ({ loading }: FooterActionsProps) => (
       variant="contained"
       type="submit"
       size="medium"
-      startIcon={<MailOutlineIcon />}
+      startIcon={<MailSendIcon />}
       loading={loading}
     >
       Send Invitation

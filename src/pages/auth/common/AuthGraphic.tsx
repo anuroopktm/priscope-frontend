@@ -11,7 +11,7 @@ const AuthGraphic = () => {
         top: 0,
         left: 0,
         zIndex: 0,
-        bgcolor: "#1A2B44",
+        bgcolor: "primary.main",
         overflow: "hidden",
       }}
     >

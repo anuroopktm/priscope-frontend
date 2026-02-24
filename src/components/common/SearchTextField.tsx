@@ -1,4 +1,4 @@
-import { Search } from "@mui/icons-material";
+import SearchIcon from "@/assets/actions/search.svg?react";
 import type { TextFieldProps } from "@mui/material";
 import { InputAdornment, TextField } from "@mui/material";
 import debounce from "lodash.debounce";
@@ -59,7 +59,7 @@ const SearchTextField = ({ onSearch, ...props }: SearchTextFieldProps) => {
       InputProps={{
         startAdornment: (
           <InputAdornment position="start" sx={{ mx: 1 }}>
-            <Search sx={{ color: "background.paper", fontSize: 20 }} />
+            <SearchIcon />
           </InputAdornment>
         ),
       }}

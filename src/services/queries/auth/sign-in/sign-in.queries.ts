@@ -1,6 +1,6 @@
+import { axiosInstance } from "@/services/api/axiosInstance";
 import { useMutation } from "@tanstack/react-query";
 import type { AxiosError } from "axios";
-import { axiosInstance } from "../../api/axiosInstance";
 import type { UserLoginRequest, UserLoginResponse } from "./sign-in.types";
 
 export const useUserLogin = () => {

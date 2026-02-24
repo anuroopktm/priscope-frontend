@@ -24,7 +24,9 @@ export const createSignUpSchema = (invite: any) =>
           (val) => /[!@#$%^&*()]/.test(val),
           "Password must contain at least one special character",
         ),
-      confirmPassword: z.string(),
+      confirmPassword: z
+        .string()
+        .min(1, "Password must be at least 8 characters"),
     })
     .refine((data) => data.password === data.confirmPassword, {
       message: "Passwords do not match",

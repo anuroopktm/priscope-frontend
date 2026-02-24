@@ -9,9 +9,14 @@ import {
 interface Props<T extends FieldValues> {
   control: Control<T>;
   error?: string;
+  inputProps?: any;
 }
 
-const EmailField = <T extends FieldValues>({ control, error }: Props<T>) => (
+const EmailField = <T extends FieldValues>({
+  control,
+  error,
+  inputProps,
+}: Props<T>) => (
   <Box>
     <Typography variant="subtitle2" fontWeight={600} mb={0.5}>
       Email
@@ -28,6 +33,7 @@ const EmailField = <T extends FieldValues>({ control, error }: Props<T>) => (
           size="small"
           error={!!error}
           helperText={error}
+          slotProps={{ htmlInput: inputProps }}
         />
       )}
     />

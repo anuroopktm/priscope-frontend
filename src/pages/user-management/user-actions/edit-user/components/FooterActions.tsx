@@ -1,4 +1,5 @@
-import MailOutlineIcon from "@mui/icons-material/MailOutline";
+import DeleteIcon from "@/assets/actions/delete.svg?react";
+import RecycleIcon from "@/assets/actions/recycle.svg?react";
 import { alpha, Box, Button } from "@mui/material";
 
 interface FooterActionsProps {
@@ -27,7 +28,7 @@ const FooterActions = ({ loading }: FooterActionsProps) => {
         variant="contained"
         type="submit"
         size="medium"
-        startIcon={<MailOutlineIcon />}
+        startIcon={<RecycleIcon />}
         loading={loading}
       >
         Update
@@ -35,7 +36,7 @@ const FooterActions = ({ loading }: FooterActionsProps) => {
       <Button
         variant="contained"
         size="medium"
-        startIcon={<MailOutlineIcon />}
+        startIcon={<DeleteIcon />}
         loading={loading}
         sx={(theme) => ({
           backgroundColor: "error.main",

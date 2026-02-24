@@ -100,7 +100,7 @@ export const ActionHeader = ({
                   color: "#ff4444",
                   backgroundColor: "transparent",
                   "&:hover": {
-                    backgroundColor: "#144E72",
+                    backgroundColor: "primary.main",
                   },
                   "&:disabled": {
                     color: "grey.500",
@@ -121,7 +121,7 @@ export const ActionHeader = ({
                   color: "grey.300",
                   backgroundColor: "transparent",
                   "&:hover": {
-                    backgroundColor: "#144E72",
+                    backgroundColor: "primary.main",
                   },
                   "&:disabled": {
                     color: "grey.500",

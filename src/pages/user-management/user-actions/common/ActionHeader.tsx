@@ -18,7 +18,7 @@ const ActionHeader = ({ title }: { title: string }) => {
         px: 2,
       }}
     >
-      <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
+      <Box sx={{ display: "flex", alignItems: "center", gap: 2 }}>
         <IconButton
           onClick={handleBack}
           sx={{
@@ -29,7 +29,7 @@ const ActionHeader = ({ title }: { title: string }) => {
           <ArrowBackIcon />
         </IconButton>
 
-        <Typography variant="h6" sx={{ color: "background.default" }}>
+        <Typography variant="subtitle1" sx={{ color: "background.default" }}>
           {title}
         </Typography>
       </Box>

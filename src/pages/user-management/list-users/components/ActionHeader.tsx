@@ -1,5 +1,8 @@
+import AddIcon from "@/assets/actions/add.svg?react";
+import DeleteIcon from "@/assets/actions/delete.svg?react";
+import StatusFilter from "@/assets/user-management/status-filter.svg?react";
+import StatusUpdate from "@/assets/user-management/status-update.svg?react";
 import SearchTextField from "@/components/common/SearchTextField";
-import { AddOutlined, DeleteOutline, EditOutlined } from "@mui/icons-material";
 import { Box, Button, MenuItem, Select, Stack } from "@mui/material";
 import { useNavigate } from "react-router-dom";
 
@@ -31,7 +34,6 @@ export const ActionHeader = ({
         alignItems: "center",
         justifyContent: "space-between",
         pt: 2,
-        px: 2,
       }}
     >
       <SearchTextField onSearch={onSearch} />
@@ -41,7 +43,7 @@ export const ActionHeader = ({
           <>
             <Button
               variant="contained"
-              startIcon={<DeleteOutline />}
+              startIcon={<DeleteIcon />}
               onClick={onDelete}
               disabled={loading}
               sx={{ color: "error.contrastText" }}
@@ -50,7 +52,7 @@ export const ActionHeader = ({
             </Button>
             <Button
               variant="contained"
-              startIcon={<EditOutlined />}
+              startIcon={<StatusUpdate />}
               onClick={onStatusUpdate}
               disabled={loading}
             >
@@ -65,7 +67,12 @@ export const ActionHeader = ({
           variant="filled"
           disableUnderline
           displayEmpty
-          renderValue={() => <Box>Status Filter</Box>}
+          renderValue={() => (
+            <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
+              <StatusFilter />
+              Status Filter
+            </Box>
+          )}
         >
           <MenuItem value={undefined}>All</MenuItem>
           <MenuItem value="active">Active</MenuItem>
@@ -74,7 +81,7 @@ export const ActionHeader = ({
         </Select>
         <Button
           variant="contained"
-          startIcon={<AddOutlined />}
+          startIcon={<AddIcon />}
           onClick={handleNavigate}
         >
           Add New User

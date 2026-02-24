@@ -57,11 +57,11 @@ const SavedFiltersDropdown = ({
             onClick={handleToggle}
             sx={{
               padding: "8px 12px",
-              backgroundColor: "#144E72",
+              backgroundColor: "primary.main",
               color: "white",
               "&:hover": {
                 color: "white",
-                bgcolor: "#144E72",
+                bgcolor: "primary.main",
               },
               textTransform: "none",
               fontWeight: 600,

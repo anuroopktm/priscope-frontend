@@ -1,4 +1,19 @@
 // import theme from "@/shared/styles/theme";
+import LoaderOverlay from "@/components/common/loader";
+import ConfirmationDialog from "@/components/common/upload-modal/confirmation-modal";
+import {
+  DATA_MAPPING_STEPS,
+  DEFAULT_ATTRIBUTE_CONFIGURATION,
+  DEFAULT_SYSTEM_FIELD_MAPPING,
+} from "@/pages/items-master/constants/data_mapping.constants";
+import type {
+  AttributeConfigurationData,
+  DataMappingModalProps,
+  MapFieldsRequest,
+  SystemFieldMappingData,
+  SystemFieldObject,
+} from "@/pages/items-master/types/types";
+import { useMapItemMasterFields } from "@/services/queries/item-master/item-master.queries";
 import { Close as CloseIcon } from "@mui/icons-material";
 import {
   Box,
@@ -9,35 +24,18 @@ import {
   DialogTitle,
   Divider,
   IconButton,
-  Typography,
 } from "@mui/material";
+import { useQueryClient } from "@tanstack/react-query";
 import React, { useEffect, useState } from "react";
-import {
-  DATA_MAPPING_STEPS,
-  DEFAULT_ATTRIBUTE_CONFIGURATION,
-  DEFAULT_SYSTEM_FIELD_MAPPING,
-} from "@/pages/items-master/constants/data_mapping.constants";
 import {
   createSystemFieldMapping,
   getAttributeConfigFromAvailableHeaders,
 } from "../../../helpers/itemMasterHelpers";
-import { useMapItemMasterFields } from "@/services/queries/item-master/item-master.queries";
 import { useItemMasterStore } from "../../../store/itemMasterStore";
-import type {
-  AttributeConfigurationData,
-  DataMappingModalProps,
-  MapFieldsRequest,
-  SystemFieldMappingData,
-  SystemFieldObject,
-} from "@/pages/items-master/types/types";
+import type { SnackbarState } from "../../columns-dropdown";
 import StyledStepper from "../../stepper";
 import AttributeConfiguration from "./attribute-config-step";
 import SystemFieldMapping from "./system-field-step";
-import { useQueryClient } from "@tanstack/react-query";
-import ConfirmationDialog from "@/components/common/upload-modal/confirmation-modal";
-import LoaderOverlay from "@/components/common/loader";
-import type { SnackbarState } from "../../columns-dropdown";
-import { theme } from "@/theme/theme";
 
 interface DataMappingModalPropsExtended extends DataMappingModalProps {
   uploadId?: string;
@@ -341,12 +339,12 @@ const DataMappingModal: React.FC<DataMappingModalPropsExtended> = ({
               sx={{
                 height: 40,
                 borderRadius: 8,
-                color: "#1A2B44",
-                borderColor: "#1A2B44",
+                color: "primary.main",
+                borderColor: "primary.main",
                 bgcolor: "#FFFFFF",
                 "&:hover": {
                   bgcolor: "#d2d2d2",
-                  borderColor: "#1A2B44",
+                  borderColor: "primary.main",
                 },
               }}
             >

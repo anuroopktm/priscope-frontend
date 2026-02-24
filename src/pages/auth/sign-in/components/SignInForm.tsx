@@ -2,7 +2,7 @@ import AuthCard from "@/pages/auth/common/AuthCard";
 import EmailField from "@/pages/auth/common/EmailField";
 import PasswordField from "@/pages/auth/common/PasswordField";
 import SocialAuthButtons from "@/pages/auth/common/SocialAuthButtons";
-import { useUserLogin } from "@/services/auth/sign-in/sign-in.queries";
+import { useUserLogin } from "@/services/queries/auth/sign-in/sign-in.queries";
 import { useToastStore } from "@/store/useToastStore";
 import { encryptData } from "@/utils/encryption";
 import {

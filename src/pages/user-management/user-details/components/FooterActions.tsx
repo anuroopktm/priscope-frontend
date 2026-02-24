@@ -1,4 +1,4 @@
-import MailOutlineIcon from "@mui/icons-material/MailOutline";
+import EditIcon from "@/assets/actions/edit.svg?react";
 import { Box, Button } from "@mui/material";
 
 const FooterActions = ({ handleEdit }: { handleEdit: () => void }) => (
@@ -7,7 +7,7 @@ const FooterActions = ({ handleEdit }: { handleEdit: () => void }) => (
       variant="contained"
       type="submit"
       size="medium"
-      startIcon={<MailOutlineIcon />}
+      startIcon={<EditIcon />}
       onClick={handleEdit}
     >
       Edit User
