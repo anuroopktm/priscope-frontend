@@ -32,12 +32,16 @@ const CreateColumnModal = ({
 
   const [label, setLabel] = useState(defaultLabel);
   const [dataType, setDataType] = useState("");
-  const [errors, setErrors] = useState<{ label?: string; dataType?: string }>({});
+  const [errors, setErrors] = useState<{ label?: string; dataType?: string }>(
+    {},
+  );
 
   const handleSubmit = () => {
     const newErrors: typeof errors = {};
-    if (!label.trim()) newErrors.label = t("common", "createColumnModal.labelError");
-    if (!dataType) newErrors.dataType = t("common", "createColumnModal.dataTypeError");
+    if (!label.trim())
+      newErrors.label = t("common", "createColumnModal.labelError");
+    if (!dataType)
+      newErrors.dataType = t("common", "createColumnModal.dataTypeError");
 
     if (Object.keys(newErrors).length > 0) {
       setErrors(newErrors);
@@ -57,7 +61,6 @@ const CreateColumnModal = ({
     setErrors({});
     onClose();
   };
-
 
   return (
     <Dialog
@@ -85,13 +88,16 @@ const CreateColumnModal = ({
 
       <Divider />
 
-      <DialogContent sx={{ display: "flex", flexDirection: "column", gap: 2, pt: 2 }}>
+      <DialogContent
+        sx={{ display: "flex", flexDirection: "column", gap: 2, pt: 2 }}
+      >
         <TextField
           label={t("common", "createColumnModal.columnLabel")}
           value={label}
           onChange={(e) => {
             setLabel(e.target.value);
-            if (errors.label) setErrors((prev) => ({ ...prev, label: undefined }));
+            if (errors.label)
+              setErrors((prev) => ({ ...prev, label: undefined }));
           }}
           variant="outlined"
           size="small"
@@ -110,7 +116,8 @@ const CreateColumnModal = ({
           value={dataType}
           onChange={(e) => {
             setDataType(e.target.value);
-            if (errors.dataType) setErrors((prev) => ({ ...prev, dataType: undefined }));
+            if (errors.dataType)
+              setErrors((prev) => ({ ...prev, dataType: undefined }));
           }}
           variant="outlined"
           size="small"
@@ -142,19 +149,16 @@ const CreateColumnModal = ({
         <Button
           onClick={(e) => {
             e.stopPropagation();
-            handleCancel()
+            handleCancel();
           }}
           variant="outlined"
           sx={{
-            height: "40px"
+            height: "40px",
           }}
         >
           {t("common", "createColumnModal.cancelButton")}
         </Button>
-        <Button
-          onClick={handleSubmit}
-          variant="midnight"
-        >
+        <Button onClick={handleSubmit} variant="midnight">
           {t("common", "createColumnModal.createButton")}
         </Button>
       </DialogActions>

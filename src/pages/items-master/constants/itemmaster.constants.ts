@@ -11,4 +11,10 @@ export const Field_Map: Record<string, string> = {
 
 export const page_size_item_master = 50;
 
-export const allowedKeys = ["sku", "upc", "category", "description", "hs_code"] as const;
+export const allowedKeys = [
+  "sku",
+  "upc",
+  "category",
+  "description",
+  "hs_code",
+] as const;

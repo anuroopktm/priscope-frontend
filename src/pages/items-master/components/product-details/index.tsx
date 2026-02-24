@@ -51,7 +51,11 @@ const details = [
 ];
 
 // Main Drawer Component
-const ItemDetailsDrawer: React.FC<ItemDetailsDrawerProps> = ({ open, item, onClose }) => {
+const ItemDetailsDrawer: React.FC<ItemDetailsDrawerProps> = ({
+  open,
+  item,
+  onClose,
+}) => {
   // If not open, render nothing
   if (!open) return null;
   return (
@@ -130,15 +134,27 @@ const ItemDetailsDrawer: React.FC<ItemDetailsDrawerProps> = ({ open, item, onClo
                 cursor: "pointer",
                 mr: 1,
                 transition: "background 0.2s, border 0.2s",
-                '&:hover': {
-                  background: '#F3F6F9',
-                  borderColor: '#D2D2D2',
+                "&:hover": {
+                  background: "#F3F6F9",
+                  borderColor: "#D2D2D2",
                 },
               }}
             >
               {/* Bold, rounded left arrow */}
-              <svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
-                <path d="M12 8H4M4 8L8 4M4 8L8 12" stroke="#1A2B44" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+              <svg
+                width="16"
+                height="16"
+                viewBox="0 0 16 16"
+                fill="none"
+                xmlns="http://www.w3.org/2000/svg"
+              >
+                <path
+                  d="M12 8H4M4 8L8 4M4 8L8 12"
+                  stroke="#1A2B44"
+                  strokeWidth="2"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                />
               </svg>
             </Box>
             <Typography variant="h6" fontWeight={600} sx={{ fontSize: 20 }}>
@@ -160,8 +176,8 @@ const ItemDetailsDrawer: React.FC<ItemDetailsDrawerProps> = ({ open, item, onClo
                 background: "#fff",
                 cursor: "pointer",
                 transition: "background 0.2s",
-                '&:hover': {
-                  background: '#F9FAFB',
+                "&:hover": {
+                  background: "#F9FAFB",
                 },
               }}
             >
@@ -186,32 +202,43 @@ const ItemDetailsDrawer: React.FC<ItemDetailsDrawerProps> = ({ open, item, onClo
           {/* SKU, UPC, Category row */}
           <Box sx={{ display: "flex", flexWrap: "wrap", gap: 2, mb: 1 }}>
             <Typography sx={{ fontWeight: 400, fontSize: 14 }}>
-              SKU: <Box component="span" sx={{ fontWeight: 700 }}>SHRT-YLW-MD</Box>
+              SKU:{" "}
+              <Box component="span" sx={{ fontWeight: 700 }}>
+                SHRT-YLW-MD
+              </Box>
             </Typography>
             <Typography sx={{ fontWeight: 400, fontSize: 14 }}>
-              UPC: <Box component="span" sx={{ fontWeight: 700 }}>886590056951</Box>
+              UPC:{" "}
+              <Box component="span" sx={{ fontWeight: 700 }}>
+                886590056951
+              </Box>
             </Typography>
             <Typography sx={{ fontWeight: 400, fontSize: 14 }}>
-              Category: <Box component="span" sx={{ fontWeight: 700 }}>Clothing</Box>
+              Category:{" "}
+              <Box component="span" sx={{ fontWeight: 700 }}>
+                Clothing
+              </Box>
             </Typography>
           </Box>
-          {/* Product title */} 
+          {/* Product title */}
           <Typography sx={{ fontWeight: 600, fontSize: "20px", mb: 2 }}>
             Classic cotton shirt for everyday comfort
           </Typography>
           {/* Suppliers section: chips for each supplier */}
           <Box sx={{ display: "flex", alignItems: "flex-start", mb: 1 }}>
-            <Typography sx={{ fontWeight: 500, minWidth: 90 }}>Supplier:</Typography>
+            <Typography sx={{ fontWeight: 500, minWidth: 90 }}>
+              Supplier:
+            </Typography>
             <Box sx={{ display: "flex", flexWrap: "wrap", gap: 1 }}>
               {suppliers.map((s, i) => (
                 <Chip
                   key={i}
                   label={s}
-                  sx={{ 
-                    bgcolor: "#3B9EDC1A", 
-                    color: "#1A2B44", 
-                    fontWeight: 400, 
-                    fontSize: "12px", 
+                  sx={{
+                    bgcolor: "#3B9EDC1A",
+                    color: "#1A2B44",
+                    fontWeight: 400,
+                    fontSize: "12px",
                     borderRadius: "16px",
                     px: 2,
                     py: 0.5,
@@ -227,17 +254,19 @@ const ItemDetailsDrawer: React.FC<ItemDetailsDrawerProps> = ({ open, item, onClo
           </Box>
           {/* Customers section: chips for each customer */}
           <Box sx={{ display: "flex", alignItems: "flex-start", mb: 2 }}>
-            <Typography sx={{ fontWeight: 500, minWidth: 90 }}>Customers:</Typography>
+            <Typography sx={{ fontWeight: 500, minWidth: 90 }}>
+              Customers:
+            </Typography>
             <Box sx={{ display: "flex", flexWrap: "wrap", gap: 1 }}>
               {customers.map((c, i) => (
                 <Chip
                   key={i}
                   label={c}
-                  sx={{ 
-                    bgcolor: "#3B9EDC1A", 
-                    color: "#1A2B44", 
-                    fontWeight: 400, 
-                    fontSize: "12px", 
+                  sx={{
+                    bgcolor: "#3B9EDC1A",
+                    color: "#1A2B44",
+                    fontWeight: 400,
+                    fontSize: "12px",
                     borderRadius: "16px",
                     px: 2,
                     py: 0.5,
@@ -255,8 +284,14 @@ const ItemDetailsDrawer: React.FC<ItemDetailsDrawerProps> = ({ open, item, onClo
           <Box>
             {details.map((d, i) => (
               <Box key={i} sx={{ display: "flex", mb: 1 }}>
-                <Typography sx={{ minWidth: 90, color: "#1A2B44", fontWeight: 400 }}>{d.label}:</Typography>
-                <Typography sx={{ fontWeight: 700, color: "#1A2B44", ml: 1 }}>{d.value}</Typography>
+                <Typography
+                  sx={{ minWidth: 90, color: "#1A2B44", fontWeight: 400 }}
+                >
+                  {d.label}:
+                </Typography>
+                <Typography sx={{ fontWeight: 700, color: "#1A2B44", ml: 1 }}>
+                  {d.value}
+                </Typography>
               </Box>
             ))}
           </Box>
@@ -266,4 +301,4 @@ const ItemDetailsDrawer: React.FC<ItemDetailsDrawerProps> = ({ open, item, onClo
   );
 };
 
-export default ItemDetailsDrawer; 
+export default ItemDetailsDrawer;

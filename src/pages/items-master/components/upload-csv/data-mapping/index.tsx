@@ -343,7 +343,7 @@ const DataMappingModal: React.FC<DataMappingModalPropsExtended> = ({
                 borderRadius: 8,
                 color: "#1A2B44",
                 borderColor: "#1A2B44",
-                bgcolor:"#FFFFFF",
+                bgcolor: "#FFFFFF",
                 "&:hover": {
                   bgcolor: "#d2d2d2",
                   borderColor: "#1A2B44",

@@ -169,7 +169,7 @@ const ItemsMasterPage = () => {
     const dataToAdd = buildItemMasterTreeGridBody(newItems);
     addRowsToGrid(dataToAdd?.Body[0]);
   }, [itemMasterDataList, listHeaderData]);
-  
+
   // Optional: Function to attach event handlers after initialization
   const handleGridReady = useCallback((grid: TGrid) => {
     const G = grid as any;

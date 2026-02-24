@@ -46,7 +46,7 @@ export const ActionHeader = ({
         {selectedCount > 0 && (
           <>
             <Button
-              variant="outlined"
+              variant="contained"
               startIcon={<DeleteOutline />}
               onClick={onDelete}
               disabled={loading}
@@ -55,7 +55,7 @@ export const ActionHeader = ({
               Delete Selection ({selectedCount})
             </Button>
             <Button
-              variant="outlined"
+              variant="contained"
               startIcon={<EditOutlined />}
               onClick={onStatusUpdate}
               disabled={loading}
@@ -64,7 +64,9 @@ export const ActionHeader = ({
             </Button>
           </>
         )}
-        <Button endIcon={<KeyboardArrowDown />}>Status Filter</Button>
+        <Button variant="contained" endIcon={<KeyboardArrowDown />}>
+          Status Filter
+        </Button>
         <Button
           variant="contained"
           startIcon={<AddOutlined />}

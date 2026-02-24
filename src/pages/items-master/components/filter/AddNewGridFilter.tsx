@@ -12,7 +12,7 @@ const AddNewGridFilter = ({
   headerList,
   onCancel,
   onSave,
-  handleColumnVisibility
+  handleColumnVisibility,
 }: ColumnDropdownProps & { onCancel: () => void; onSave: () => void }) => {
   return (
     <>

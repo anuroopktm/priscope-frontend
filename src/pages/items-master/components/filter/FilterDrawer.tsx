@@ -59,7 +59,6 @@ const FilterDrawer = ({
   filters = sampleFilters,
   drawerWidth = 264,
 }: FilterDrawerProps) => {
-
   const theme = useTheme();
 
   const [filterState, setFilterState] = useState<FilterState>(() => {
@@ -70,7 +69,7 @@ const FilterDrawer = ({
           acc[item.name] = item.checked;
           return acc;
         },
-        {}
+        {},
       );
     });
     return initialState;
@@ -116,7 +115,13 @@ const FilterDrawer = ({
         }}
       >
         {/* Filter Sections */}
-        <Box sx={{ flex: 1, overflow: "auto", bgcolor: theme.custom.surfaceBackground }}>
+        <Box
+          sx={{
+            flex: 1,
+            overflow: "auto",
+            bgcolor: theme.custom.surfaceBackground,
+          }}
+        >
           {filters.map((section) => (
             <Accordion
               key={section.name}

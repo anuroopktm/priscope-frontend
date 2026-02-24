@@ -240,7 +240,7 @@ const RequestsModal: React.FC<FileDetailsModalProps> = ({
                 padding: "7px",
                 height: "32px",
                 width: "32px",
-                backgroundColor:"white"
+                backgroundColor: "white",
               }}
             >
               <img src={CloseIcon} alt="Close" width={20} height={20} />

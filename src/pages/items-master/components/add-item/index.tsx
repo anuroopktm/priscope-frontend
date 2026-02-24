@@ -56,7 +56,7 @@ const AddNewItemDrawer: React.FC<AddNewItemDrawerProps> = ({
           alignItems="center"
           justifyContent="space-between"
         >
-          <Box display="flex" alignItems="center" sx={{ mr: 5, gap:'auto' }}>
+          <Box display="flex" alignItems="center" sx={{ mr: 5, gap: "auto" }}>
             <Box
               component="button"
               onClick={onClose}
@@ -146,7 +146,7 @@ const AddNewItemDrawer: React.FC<AddNewItemDrawerProps> = ({
           </Stack>
         </Box>
 
-        <Divider sx={{mb: 1}} />
+        <Divider sx={{ mb: 1 }} />
 
         {/* Sticky Bottom Button */}
         <Box px={1} py={1}>
@@ -154,7 +154,11 @@ const AddNewItemDrawer: React.FC<AddNewItemDrawerProps> = ({
             fullWidth
             variant="contained"
             color="primary"
-            sx={{ borderRadius: 8, backgroundColor: theme.palette.brand.tertiary,fontWeight: 600 }}
+            sx={{
+              borderRadius: 8,
+              backgroundColor: theme.palette.brand.tertiary,
+              fontWeight: 600,
+            }}
           >
             Submit
           </Button>

@@ -28,7 +28,7 @@ const UploadDropZone: React.FC<UploadDropZoneProps> = ({
         onFileSelect(files[0]);
       }
     },
-    [onFileSelect, onDragOver]
+    [onFileSelect, onDragOver],
   );
 
   const handleDragOver = useCallback(
@@ -36,7 +36,7 @@ const UploadDropZone: React.FC<UploadDropZoneProps> = ({
       e.preventDefault();
       onDragOver(true);
     },
-    [onDragOver]
+    [onDragOver],
   );
 
   const handleDragLeave = useCallback(
@@ -44,7 +44,7 @@ const UploadDropZone: React.FC<UploadDropZoneProps> = ({
       e.preventDefault();
       onDragOver(false);
     },
-    [onDragOver]
+    [onDragOver],
   );
 
   const handleFileInputChange = useCallback(
@@ -54,7 +54,7 @@ const UploadDropZone: React.FC<UploadDropZoneProps> = ({
         onFileSelect(files[0]);
       }
     },
-    [onFileSelect]
+    [onFileSelect],
   );
 
   const getAcceptString = () => acceptedFileTypes.join(",");

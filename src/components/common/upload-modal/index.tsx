@@ -21,7 +21,10 @@ import ConfirmationDialog from "./confirmation-modal";
 
 interface ExtendedUploadModalProps extends UploadModalProps {
   useUploadMutation?: () => {
-    mutateAsync: (payload: { file: File; updateIfExists: boolean }) => Promise<any>;
+    mutateAsync: (payload: {
+      file: File;
+      updateIfExists: boolean;
+    }) => Promise<any>;
     isPending: boolean;
   };
 }

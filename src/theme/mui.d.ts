@@ -38,4 +38,3 @@ declare module "@mui/material/Select" {
     rateLibrary: true;
   }
 }
-

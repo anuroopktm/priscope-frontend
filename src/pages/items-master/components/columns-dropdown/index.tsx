@@ -26,7 +26,7 @@ export type SnackbarState = {
   message: string | null;
   severity: AlertColor;
 };
-export type AlertColor = 'success' | 'info' | 'warning' | 'error';
+export type AlertColor = "success" | "info" | "warning" | "error";
 
 export interface ColumnDropdownProps {
   selectedColumns: Record<string, boolean>;

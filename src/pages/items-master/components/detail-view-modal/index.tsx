@@ -29,12 +29,7 @@ interface DetailsModalProps {
 }
 
 const SectionLoader = () => (
-  <Box
-    display="flex"
-    alignItems="center"
-    justifyContent="center"
-    height="100%"
-  >
+  <Box display="flex" alignItems="center" justifyContent="center" height="100%">
     <CircularProgress size={28} />
   </Box>
 );

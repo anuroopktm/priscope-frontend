@@ -26,12 +26,12 @@ export function useInfiniteScroll({
             onLoadMore();
           }
         },
-        { rootMargin }
+        { rootMargin },
       );
 
       if (node) observer.current.observe(node);
     },
-    [isLoading, hasMore, onLoadMore, rootMargin]
+    [isLoading, hasMore, onLoadMore, rootMargin],
   );
 
   return lastElementRef;

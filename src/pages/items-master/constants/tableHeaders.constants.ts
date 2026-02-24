@@ -1,10 +1,10 @@
 export const ITEM_MASTER_HEADERS = [
-    "SKU",
-    "UPC",
-    "Category",
-    "Description",
-    "Supplier",
-    "Customer"
+  "SKU",
+  "UPC",
+  "Category",
+  "Description",
+  "Supplier",
+  "Customer",
 ];
 
 export const DEFAULT_VISIBLE_COLUMNS = ["SKU", "UPC"];
