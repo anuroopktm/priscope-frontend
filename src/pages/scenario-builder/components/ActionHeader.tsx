@@ -1,24 +1,41 @@
 import {
   AddOutlined,
   BookmarkBorderOutlined,
-  DescriptionOutlined,
   FilterListOutlined,
   KeyboardArrowDown,
   Search,
-  StorageOutlined,
 } from "@mui/icons-material";
 import { Box, Button, InputAdornment, Stack, TextField } from "@mui/material";
 import { useTheme } from "@mui/material/styles";
-import { useState } from "react";
+import RequestsIcon from "@/assets/items-master/requests.svg";
+import LogFileIcon from "@/assets/common/log-file-view.svg";
+import KeyboardArrowDownRoundedIcon from "@mui/icons-material/KeyboardArrowDownRounded";
+import ImportDataIcon from "@/assets/common/import-data.svg";
 
-export const ActionHeader = () => {
+interface FilterProps {
+  searchQuery: string;
+  setSearchQuery: React.Dispatch<React.SetStateAction<string>>;
+  setOpenRequestModal: React.Dispatch<React.SetStateAction<boolean>>;
+  setShowFilesModal: React.Dispatch<React.SetStateAction<boolean>>;
+  onImportClick: () => void;
+}
+
+export const ActionHeader = ({
+  searchQuery,
+  setSearchQuery,
+  setOpenRequestModal,
+  setShowFilesModal,
+  onImportClick,
+}: FilterProps) => {
   const theme = useTheme();
-  const [searchTerm, setSearchTerm] = useState("");
-  // Select states for dropdowns if needed, for UI just use buttons for visual match
-  // Or implement Selects to show functionality
 
-  // Common Select Style for header items if we convert them to Select components
-  // For now using Button visually to match the "Action Header" requirement
+  const handleRequestsClick = () => {
+    setOpenRequestModal(true);
+  };
+
+  const handleFilesClick = () => {
+    setShowFilesModal(true);
+  };
 
   return (
     <Box
@@ -37,8 +54,10 @@ export const ActionHeader = () => {
         variant="outlined"
         placeholder="Search"
         size="small"
-        value={searchTerm}
-        onChange={(e) => setSearchTerm(e.target.value)}
+        value={searchQuery}
+        onChange={(e) => {
+          setSearchQuery(e.target.value);
+        }}
         sx={{
           width: 250,
         }}
@@ -53,8 +72,39 @@ export const ActionHeader = () => {
 
       {/* Right: Actions */}
       <Stack direction="row" spacing={1} alignItems="center">
-        {/* Files */}
-        <Button startIcon={<DescriptionOutlined />}>Files</Button>
+        <Button
+          onClick={handleRequestsClick}
+          sx={{
+            padding: "8px 12px",
+            color: theme.palette.grey[300],
+            "&:hover": {
+              color: "white",
+              bgcolor: theme.palette.brand.hover,
+            },
+            textTransform: "none",
+            fontWeight: 600,
+          }}
+          startIcon={<img src={RequestsIcon} alt={"request"} width={16} />}
+        >
+          Request
+        </Button>
+        {/* <Button startIcon={<DescriptionOutlined />}>Files</Button> */}
+        <Button
+          sx={{
+            padding: "8px 12px",
+            color: theme.palette.grey[300],
+            "&:hover": {
+              color: "white",
+              bgcolor: "rgba(255, 255, 255, 0.1)",
+            },
+            textTransform: "none",
+            fontWeight: 600,
+          }}
+          startIcon={<img src={LogFileIcon} alt="Log File" width={16} />}
+          onClick={handleFilesClick}
+        >
+          Files
+        </Button>
 
         {/* Columns Dropdown Mock */}
         <Button endIcon={<KeyboardArrowDown />}>Columns</Button>
@@ -75,9 +125,20 @@ export const ActionHeader = () => {
 
         {/* Import Data Dropdown */}
         <Button
-          variant="contained"
-          startIcon={<StorageOutlined />}
-          endIcon={<KeyboardArrowDown />}
+          onClick={onImportClick}
+          sx={{
+            padding: "8px 12px",
+            color: theme.palette.grey[300],
+            "&:hover": {
+              color: "white",
+              bgcolor: "rgba(255, 255, 255, 0.1)",
+            },
+            textTransform: "none",
+            borderRadius: "8px",
+            fontWeight: 600,
+          }}
+          startIcon={<img src={ImportDataIcon} alt="Import" width={16} />}
+          endIcon={<KeyboardArrowDownRoundedIcon />}
         >
           Import Data
         </Button>

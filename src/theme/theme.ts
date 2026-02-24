@@ -1,6 +1,45 @@
 import { createTheme } from "@mui/material/styles";
 import ComponentsOverrides from "./overrides";
 
+declare module "@mui/material/styles" {
+  interface Palette {
+    brand: {
+      primary: string;
+      secondary: string;
+      tertiary: string;
+      background: string;
+      background_gradient: string;
+      border: string;
+      gradientBg: string;
+      hover: string;
+      surfaceBackground: string;
+      subTextColor: string;
+      buttonBg: string;
+      userSubText: string;
+      divider: string;
+      inputBg: string;
+    };
+  }
+  interface PaletteOptions {
+    brand?: {
+      primary: string;
+      secondary: string;
+      tertiary: string;
+      background: string;
+      background_gradient: string;
+      border: string;
+      gradientBg: string;
+      hover: string;
+      surfaceBackground: string;
+      subTextColor: string;
+      buttonBg: string;
+      userSubText: string;
+      divider: string;
+      inputBg: string;
+    };
+  }
+}
+
 let theme = createTheme({
   palette: {
     mode: "light",
@@ -30,6 +69,14 @@ let theme = createTheme({
       background: "#1A2B44",
       background_gradient: "linear-gradient(180deg, #14253F 0%, #1A2B44 100%)",
       border: "#BBBBBB",
+      gradientBg: "linear-gradient(96.81deg, #D8ECF8 0%, #89C5EA 100%)",
+      hover: "rgba(255, 255, 255, 0.05)",
+      surfaceBackground: "#f8f9fa",
+      subTextColor: "#858585",
+      buttonBg: "#1A2B44",
+      userSubText: "#d2d2d2",
+      divider: "#0F3953",
+      inputBg: "#FFFFFF",
     },
     background: {
       default: "#e3e3e3",

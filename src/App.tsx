@@ -15,6 +15,7 @@ import CreateUserPage from "./pages/user-management/user-actions/create-user";
 import EditUserPage from "./pages/user-management/user-actions/edit-user";
 import UserDetailsPage from "./pages/user-management/user-details";
 import { theme } from "./theme/theme";
+import ItemsMasterPage from "./pages/items-master";
 
 const queryClient = new QueryClient();
 
@@ -59,6 +60,10 @@ const router = createBrowserRouter([
             element: <UserDetailsPage />,
           },
         ],
+      },
+       {
+        path: "items-master",
+        element: <ItemsMasterPage />,
       },
     ],
   },
