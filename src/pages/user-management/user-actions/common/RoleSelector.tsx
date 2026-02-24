@@ -26,7 +26,7 @@ const RoleSelector = ({
 
   return (
     <Box>
-      <Typography variant="h6" sx={{ fontWeight: 700, color: "#1A2B44" }}>
+      <Typography variant="h6" sx={{ color: "#1A2B44" }}>
         Permissions
       </Typography>
       <Typography variant="body1" sx={{ color: "#7A8699", mb: 2 }}>

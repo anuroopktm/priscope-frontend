@@ -2,7 +2,7 @@ import { ArrowBack } from "@mui/icons-material";
 import { Box, IconButton, Typography, useTheme } from "@mui/material";
 import { useNavigate } from "react-router-dom";
 
-const ActionHeader = () => {
+const ActionHeader = ({ title }: { title: string }) => {
   const theme = useTheme();
   const navigate = useNavigate();
 
@@ -28,7 +28,7 @@ const ActionHeader = () => {
           variant="h6"
           sx={{ color: theme.palette.background.default }}
         >
-          Add new user
+          {title}
         </Typography>
       </Box>
     </Box>

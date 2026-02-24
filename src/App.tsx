@@ -51,11 +51,11 @@ const router = createBrowserRouter([
             element: <CreateUserPage />,
           },
           {
-            path: "edit-user/:id",
+            path: "edit-user/:userId",
             element: <EditUserPage />,
           },
           {
-            path: "user-details/:id",
+            path: "user-details/:userId",
             element: <UserDetailsPage />,
           },
         ],

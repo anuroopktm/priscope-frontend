@@ -23,8 +23,7 @@ const PermissionItem = ({
         display: "flex",
         alignItems: "flex-start",
         gap: 1,
-        cursor: disabled ? "default" : "pointer",
-        opacity: disabled ? 0.6 : 1,
+        cursor: disabled ? "not-allowed" : "pointer",
       }}
     >
       <Checkbox
@@ -32,7 +31,16 @@ const PermissionItem = ({
         disabled={disabled}
         size="small"
         onChange={handleToggle}
-        sx={{ mt: -0.5 }}
+        sx={{
+          mt: -0.5,
+          "&.Mui-disabled": {
+            opacity: 1,
+            color: "inherit",
+          },
+          "&.Mui-disabled .MuiSvgIcon-root": {
+            opacity: 1,
+          },
+        }}
       />
       <Box
         onClick={!disabled ? handleToggle : undefined}

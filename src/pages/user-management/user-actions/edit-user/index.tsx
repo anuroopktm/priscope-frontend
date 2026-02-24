@@ -1,51 +1,136 @@
+import {
+  useAssignUserPrivileges,
+  useGetResourcePrivileges,
+  useListUserDetails,
+  useListUserPrivileges,
+  useUpdateUser,
+} from "@/services/user-management/user-management.queries";
 import { useToastStore } from "@/store/useToastStore";
 import {
   manageUserSchema,
   type ManageUserFormValues,
 } from "@/validations/user-management/manage-user.validation";
 import { zodResolver } from "@hookform/resolvers/zod";
-import ArrowBackIcon from "@mui/icons-material/ArrowBack";
-import DeleteOutlineIcon from "@mui/icons-material/DeleteOutline";
-import SaveIcon from "@mui/icons-material/Save";
-import { alpha, Box, Button, Paper, Typography, useTheme } from "@mui/material";
+import { Box, CircularProgress, Paper, useTheme } from "@mui/material";
+import { useEffect } from "react";
 import { FormProvider, useForm } from "react-hook-form";
 import { useNavigate, useParams } from "react-router-dom";
-import BasicInfoSection from "../components/BasicInfoSection";
-import PermissionsManager from "../components/PermissionsManager";
+import ActionHeader from "../common/ActionHeader";
+import BasicInfoSection from "../common/BasicInfoSection";
+import FooterActions from "./components/FooterActions";
+import PermissionsList from "./components/PermissionsList";
 
 const EditUserPage = () => {
   const theme = useTheme();
   const navigate = useNavigate();
-  const { id } = useParams();
+  const { userId } = useParams<{ userId: string }>();
   const showToast = useToastStore((state) => state.showToast);
 
-  // In a real app, you would fetch user data here and use it in defaultValues
+  const { data: userDetails, isLoading: isDetailsLoading } = useListUserDetails(
+    { user_id: userId },
+  );
+  const { data: userPrivileges, isLoading: isPrivilegesLoading } =
+    useListUserPrivileges({ user_id: userId });
+  const { data: allPrivileges, isLoading: isAllPrivilegesLoading } =
+    useGetResourcePrivileges({
+      tenant_id: import.meta.env.VITE_TENANT_ID,
+    });
+  const { mutateAsync: updateUser, isPending: isUpdatingUser } =
+    useUpdateUser();
+  const { mutateAsync: assignPrivileges, isPending: isAssigningPrivileges } =
+    useAssignUserPrivileges();
+
   const methods = useForm<ManageUserFormValues>({
     resolver: zodResolver(manageUserSchema),
     defaultValues: {
-      name: "John Smith",
-      email: "john.smith@example.com",
-      job_designation: "Senior Developer",
+      name: "",
+      email: "",
+      job_designation: "",
       currentRole: "custom",
-      permissions: [
-        { resource_privilege_id: "1", display_name: "View Dashboard" },
-        { resource_privilege_id: "2", display_name: "Edit Users" },
-      ],
+      permissions: [],
+      defaultPermissions: [],
     },
   });
 
-  const onUpdate = (data: ManageUserFormValues) => {
-    console.log("Updating user:", id, data);
-    showToast("User updated successfully", "success");
-    navigate(`/user-management/user-details/${id}`);
+  const { reset } = methods;
+
+  useEffect(() => {
+    if (userDetails && allPrivileges) {
+      reset({
+        name: userDetails.name,
+        email: userDetails.email,
+        job_designation: userDetails.job_designation,
+        currentRole: "custom",
+        defaultPermissions: allPrivileges,
+        permissions:
+          userPrivileges?.resource_privilege_ids.map((id) => ({
+            display_name: id,
+            resource_privilege_id: id,
+            description: "",
+          })) || [],
+      });
+    }
+  }, [userDetails, userPrivileges, allPrivileges, reset]);
+
+  const onUpdate = async (data: ManageUserFormValues) => {
+    try {
+      await updateUser({
+        user_id: userId || "",
+        name: data.name,
+        job_designation: data.job_designation,
+        status: userDetails?.tenant_user_status || "active",
+      });
+
+      await assignPrivileges({
+        user_id: userId || "",
+        tenant_id: import.meta.env.VITE_TENANT_ID,
+        resource_privilege_ids: data.permissions.map(
+          (p) => p.resource_privilege_id,
+        ),
+      });
+
+      showToast("User updated successfully", "success");
+      navigate(`/user-management/user-details/${userId}`);
+    } catch (error: any) {
+      showToast(
+        error.response?.data?.detail || "Failed to update user",
+        "error",
+      );
+    }
   };
 
   const onDelete = () => {
-    // Show confirmation dialog logic here
-    console.log("Deleting user:", id);
+    console.log("Deleting user:", userId);
     showToast("User deleted successfully", "success");
     navigate("/user-management/list-users");
   };
+
+  if (isDetailsLoading || isPrivilegesLoading || isAllPrivilegesLoading) {
+    return (
+      <Box
+        sx={{
+          p: 2,
+          display: "flex",
+          flexDirection: "column",
+          height: "100%",
+          bgcolor: theme.palette.brand.background,
+        }}
+      >
+        <Box
+          sx={{
+            flex: 1,
+            borderRadius: 1,
+            display: "flex",
+            justifyContent: "center",
+            alignItems: "center",
+            bgcolor: theme.palette.background.paper,
+          }}
+        >
+          <CircularProgress size={30} />
+        </Box>
+      </Box>
+    );
+  }
 
   return (
     <FormProvider {...methods}>
@@ -58,30 +143,7 @@ const EditUserPage = () => {
           bgcolor: theme.palette.brand.background,
         }}
       >
-        {/* Header */}
-        <Box
-          sx={{
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "space-between",
-            p: 2,
-            bgcolor: "white",
-            borderBottom: "1px solid #E4E7EC",
-          }}
-        >
-          <Box sx={{ display: "flex", alignItems: "center", gap: 2 }}>
-            <Button
-              startIcon={<ArrowBackIcon />}
-              onClick={() => navigate(`/user-management/user-details/${id}`)}
-              sx={{ color: "text.secondary", textTransform: "none" }}
-            >
-              Back to details
-            </Button>
-            <Typography variant="h5" sx={{ fontWeight: 700 }}>
-              Edit User
-            </Typography>
-          </Box>
-        </Box>
+        <ActionHeader title="Edit User" />
 
         <Box sx={{ p: 2, flex: 1 }}>
           <Box
@@ -95,52 +157,11 @@ const EditUserPage = () => {
               elevation={0}
               sx={{ p: 2, width: "100%", height: "100%", overflowY: "auto" }}
             >
-              <Typography variant="h6" sx={{ mb: 2, fontWeight: 600 }}>
-                Basic Information
-              </Typography>
               <BasicInfoSection />
-
-              <Box sx={{ mt: 4 }}>
-                <PermissionsManager />
-              </Box>
-
-              <Box
-                sx={{
-                  mt: 4,
-                  pt: 3,
-                  borderTop: "1px solid #E4E7EC",
-                  display: "flex",
-                  justifyContent: "space-between",
-                  alignItems: "center",
-                }}
-              >
-                <Button
-                  variant="outlined"
-                  color="error"
-                  size="large"
-                  startIcon={<DeleteOutlineIcon />}
-                  onClick={onDelete}
-                  sx={{
-                    px: 3,
-                    borderColor: theme.palette.error.main,
-                    "&:hover": {
-                      bgcolor: alpha(theme.palette.error.main, 0.04),
-                    },
-                  }}
-                >
-                  Delete User
-                </Button>
-
-                <Button
-                  type="submit"
-                  variant="contained"
-                  size="large"
-                  startIcon={<SaveIcon />}
-                  sx={{ px: 4 }}
-                >
-                  Update User
-                </Button>
-              </Box>
+              <PermissionsList />
+              <FooterActions
+                loading={isUpdatingUser || isAssigningPrivileges}
+              />
             </Paper>
           </Box>
         </Box>
