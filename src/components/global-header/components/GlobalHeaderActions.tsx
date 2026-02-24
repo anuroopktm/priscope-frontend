@@ -4,11 +4,9 @@ import {
   SettingsOutlined,
 } from "@mui/icons-material";
 import { Avatar, IconButton, MenuItem, Select, Stack } from "@mui/material";
-import { useTheme } from "@mui/material/styles";
 import { useState } from "react";
 
 export const GlobalHeaderActions = () => {
-  const theme = useTheme();
   const [tenant, setTenant] = useState("tenant-name");
 
   return (
@@ -24,15 +22,17 @@ export const GlobalHeaderActions = () => {
           minWidth: 200,
           textAlign: "center",
           borderRadius: 20,
-          border: `1px solid ${theme.palette.brand.tertiary}`,
+          border: 1,
+          borderStyle: "solid",
+          borderColor: "brand.tertiary",
           "& .MuiOutlinedInput-notchedOutline": {
-            borderColor: theme.palette.brand.tertiary,
+            borderColor: "brand.tertiary",
           },
           "&:hover .MuiOutlinedInput-notchedOutline": {
-            borderColor: theme.palette.brand.tertiary,
+            borderColor: "brand.tertiary",
           },
           "&.Mui-focused .MuiOutlinedInput-notchedOutline": {
-            borderColor: theme.palette.brand.tertiary,
+            borderColor: "brand.tertiary",
             borderWidth: 1,
           },
         }}
@@ -44,7 +44,9 @@ export const GlobalHeaderActions = () => {
       <IconButton
         variant="action"
         sx={{
-          border: `1px solid ${theme.palette.brand.tertiary}`,
+          borderWidth: 1,
+          borderStyle: "solid",
+          borderColor: "brand.tertiary",
         }}
       >
         <SettingsOutlined />
@@ -53,7 +55,9 @@ export const GlobalHeaderActions = () => {
       <IconButton
         variant="action"
         sx={{
-          border: `1px solid ${theme.palette.brand.tertiary}`,
+          borderWidth: 1,
+          borderStyle: "solid",
+          borderColor: "brand.tertiary",
         }}
       >
         <NotificationsOutlined />
@@ -64,7 +68,7 @@ export const GlobalHeaderActions = () => {
           width: 36,
           height: 36,
           bgcolor: "#89C5EA",
-          color: "#1A2B44",
+          color: "brand.primary",
           fontSize: "0.875rem",
           fontWeight: 600,
           cursor: "pointer",

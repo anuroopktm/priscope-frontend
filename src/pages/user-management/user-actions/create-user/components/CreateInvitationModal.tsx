@@ -16,7 +16,6 @@ import {
   InputAdornment,
   TextField,
   Typography,
-  useTheme,
 } from "@mui/material";
 import debounce from "lodash.debounce";
 import { useEffect, useMemo } from "react";
@@ -40,7 +39,6 @@ const CreateInvitationModal = ({
   onSkip,
   onCreate,
 }: CreateInvitationModalProps) => {
-  const theme = useTheme();
   const navigate = useNavigate();
 
   const {
@@ -118,7 +116,7 @@ const CreateInvitationModal = ({
 
           <Typography
             variant="h6"
-            sx={{ color: alpha(theme.palette.primary.main, 0.9) }}
+            sx={(theme) => ({ color: alpha(theme.palette.primary.main, 0.9) })}
           >
             Invitation email sent successfully
           </Typography>
@@ -165,11 +163,11 @@ const CreateInvitationModal = ({
                   loading={isLoading}
                   sx={{
                     borderWidth: 2,
-                    backgroundColor: theme.palette.background.paper,
-                    color: theme.palette.primary.main,
+                    backgroundColor: "background.paper",
+                    color: "primary.main",
                     "&:hover": {
-                      backgroundColor: theme.palette.background.default,
-                      color: theme.palette.primary.main,
+                      backgroundColor: "background.default",
+                      color: "primary.main",
                     },
                   }}
                 >
@@ -190,11 +188,11 @@ const CreateInvitationModal = ({
             <>
               <Alert
                 severity="warning"
-                sx={{
+                sx={(theme) => ({
                   width: "100%",
                   mt: 2,
                   backgroundColor: alpha(theme.palette.warning.main, 0.08),
-                }}
+                })}
               >
                 A template with similar permissions already exists. The
                 invitation was sent using these permissions.

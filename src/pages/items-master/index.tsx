@@ -1,8 +1,12 @@
-import { Box, useTheme } from "@mui/material";
+import { Box } from "@mui/material";
 import { ActionHeader } from "../scenario-builder/components/ActionHeader";
 // import { useTreeGridInit } from "../scenario-builder/hooks/use-tree-grid-init";
 import { useCallback, useEffect, useRef, useState } from "react";
 // import { TreeGridLayout } from "../scenario-builder/constant/tree-grid-layout";
+import LoaderOverlay from "@/components/common/loader";
+import RequestSuccessDialog from "@/components/common/request-notification";
+import RequestsModal from "@/components/common/requests-modal";
+import { useGetExportedFile } from "@/services/queries/common/common.queries";
 import {
   useAddBulkInsertAdminRequest,
   // useBulkInsertItems,
@@ -12,8 +16,19 @@ import {
   useListHeaders,
   useListItems,
 } from "@/services/queries/item-master/item-master.queries";
+import { openConfirmationModal } from "@/utils/getRequestConfirmationModal";
+import { useQueryClient } from "@tanstack/react-query";
 import { useDebounce } from "../../hooks/useDebounce";
+import type { SnackbarState } from "./components/columns-dropdown";
+import TableSavePopover from "./components/table-save-popover";
+import { handleValueChanged } from "./components/tree-grid/CellValue/handleValueChanged";
+import { handleFilterChange } from "./components/tree-grid/Filter/FilterChange";
+import { deleteSeletectedRows } from "./components/tree-grid/RowSelection/DeleteRowSelection";
+import { handleSelected } from "./components/tree-grid/RowSelection/RowSelection";
+import { onScroll } from "./components/tree-grid/scroll/ScrollHandler";
+import CompleteUploadFlow from "./components/upload-csv";
 import { page_size_item_master } from "./constants/itemmaster.constants";
+import { hasItemMasterPrivileges } from "./helpers/itemMasterHelpers";
 import {
   buildItemMasterTreeGridBody,
   buildItemMasterTreeGridCols,
@@ -28,23 +43,8 @@ import type {
   TreeGridHeader,
   TreeGridLayout,
 } from "./helpers/types";
-import RequestsModal from "@/components/common/requests-modal";
-import type { SnackbarState } from "./components/columns-dropdown";
-import LoaderOverlay from "@/components/common/loader";
-import CompleteUploadFlow from "./components/upload-csv";
-import { onScroll } from "./components/tree-grid/scroll/ScrollHandler";
 import { useTreeGridInit } from "./hooks/use-tree-grid-init";
-import { handleFilterChange } from "./components/tree-grid/Filter/FilterChange";
-import { handleSelected } from "./components/tree-grid/RowSelection/RowSelection";
-import { useGetExportedFile } from "@/services/queries/common/common.queries";
 import type { DeleteSelectedRowPayload } from "./types/types";
-import { deleteSeletectedRows } from "./components/tree-grid/RowSelection/DeleteRowSelection";
-import { handleValueChanged } from "./components/tree-grid/CellValue/handleValueChanged";
-import TableSavePopover from "./components/table-save-popover";
-import { hasItemMasterPrivileges } from "./helpers/itemMasterHelpers";
-import { openConfirmationModal } from "@/utils/getRequestConfirmationModal";
-import { useQueryClient } from "@tanstack/react-query";
-import RequestSuccessDialog from "@/components/common/request-notification";
 
 export interface TreeGridState {
   showSavePopover: boolean;
@@ -57,7 +57,6 @@ export interface TreeGridState {
   } | null;
 }
 const ItemsMasterPage = () => {
-  const theme = useTheme();
   const [searchQuery, setSearchQuery] = useState("");
   const [filter, setFilter] = useState<Record<string, string[]>>({});
   const debouncedSearchQuery = useDebounce(searchQuery, 500);
@@ -565,7 +564,7 @@ const ItemsMasterPage = () => {
         flexDirection: "column",
         borderRadius: 1,
         overflow: "hidden",
-        bgcolor: theme.palette.brand.background,
+        bgcolor: "brand.background",
       }}
     >
       <ActionHeader

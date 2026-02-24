@@ -1,9 +1,9 @@
 import { useToastStore } from "@/store/useToastStore";
-import { Alert, Snackbar, useTheme } from "@mui/material";
+import { Alert, Snackbar } from "@mui/material";
 
 const GlobalToast = () => {
   const { toast, hideToast } = useToastStore();
-  const theme = useTheme();
+
   return (
     <Snackbar
       open={toast.open}
@@ -18,7 +18,7 @@ const GlobalToast = () => {
         sx={{
           width: "100%",
           borderRadius: 0.5,
-          color: theme.palette.background.paper,
+          color: "background.paper",
         }}
       >
         {toast.message}

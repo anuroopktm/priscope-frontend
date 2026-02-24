@@ -1,11 +1,8 @@
 import GlobalHeader from "@/components/global-header";
 import { Box } from "@mui/material";
-import { useTheme } from "@mui/material/styles";
 import { Outlet } from "react-router-dom";
 
 const MainLayout = () => {
-  const theme = useTheme();
-
   return (
     <Box
       sx={{
@@ -13,7 +10,7 @@ const MainLayout = () => {
         height: "100vh",
         display: "flex",
         flexDirection: "column",
-        backgroundColor: theme.palette.brand.background,
+        backgroundColor: "brand.background",
         pt: "56px",
       }}
     >

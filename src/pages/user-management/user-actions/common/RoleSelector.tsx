@@ -4,7 +4,6 @@ import {
   ToggleButton,
   ToggleButtonGroup,
   Typography,
-  useTheme,
 } from "@mui/material";
 
 interface RoleSelectorProps {
@@ -22,11 +21,9 @@ const RoleSelector = ({
   loading,
   disabled,
 }: RoleSelectorProps) => {
-  const theme = useTheme();
-
   return (
     <Box>
-      <Typography variant="h6" sx={{ color: "#1A2B44" }}>
+      <Typography variant="h6" sx={{ color: "brand.primary" }}>
         Permissions
       </Typography>
       <Typography variant="body1" sx={{ color: "#7A8699", mb: 2 }}>
@@ -59,13 +56,13 @@ const RoleSelector = ({
           value={value}
           exclusive
           disabled={disabled}
-          onChange={(_, val) => onChange(val)}
+          onChange={(_, val) => val !== null && onChange(val)}
           sx={{
             display: "flex",
             flexWrap: "wrap",
             gap: 1.5,
             "& .MuiToggleButtonGroup-grouped": {
-              border: "1px solid #D2D2D2 !important",
+              border: "1px solid #D2D2D2",
               borderRadius: "20px !important",
               ml: "0 !important",
             },
@@ -75,18 +72,18 @@ const RoleSelector = ({
             <ToggleButton
               key={r.id}
               value={r.id}
-              sx={{
+              sx={(theme) => ({
                 px: 3,
                 py: 0.5,
                 textTransform: "none",
                 fontSize: "14px",
                 color: "#777777",
                 "&.Mui-selected": {
-                  color: theme.palette.brand.primary,
+                  color: "brand.primary",
                   bgcolor: "transparent",
                   border: `1px solid ${theme.palette.brand.primary} !important`,
                 },
-              }}
+              })}
             >
               {r.name}
             </ToggleButton>

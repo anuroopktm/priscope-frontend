@@ -7,7 +7,6 @@ import {
   MenuItem,
   Select,
   Typography,
-  useTheme,
 } from "@mui/material";
 import { useState } from "react";
 
@@ -24,7 +23,6 @@ const StatusUpdateModal = ({
   onChange,
   isLoading,
 }: StatusUpdateModalProps) => {
-  const theme = useTheme();
   const [status, setStatus] = useState<string>("active");
 
   const handleUpdate = () => {
@@ -39,7 +37,7 @@ const StatusUpdateModal = ({
   return (
     <Dialog open={open} onClose={handleClose} fullWidth maxWidth="sm">
       <DialogContent sx={{ display: "flex", flexDirection: "column", gap: 2 }}>
-        <Typography variant="h6" sx={{ color: theme.palette.primary.main }}>
+        <Typography variant="h6" sx={{ color: "primary.main" }}>
           Update Status
         </Typography>
         <Select

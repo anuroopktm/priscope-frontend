@@ -1,11 +1,4 @@
-"use client";
-
-import {
-  Backdrop,
-  CircularProgress,
-  Typography,
-  useTheme,
-} from "@mui/material";
+import { Backdrop, CircularProgress, Typography } from "@mui/material";
 
 interface LoaderOverlayProps {
   message?: string;
@@ -16,23 +9,18 @@ export default function LoaderOverlay({
   message,
   open = true,
 }: Readonly<LoaderOverlayProps>) {
-  const theme = useTheme();
-
   return (
     <Backdrop
       open={open}
       sx={{
-        color: theme.palette.primary.main,
+        color: "primary.main",
         zIndex: (theme) => theme.zIndex.modal + 1,
         flexDirection: "column",
       }}
     >
       <CircularProgress color="inherit" size="4rem" thickness={4} />
       {message && (
-        <Typography
-          variant="body1"
-          sx={{ mt: 2, color: theme.palette.text.primary }}
-        >
+        <Typography variant="body1" sx={{ mt: 2, color: "text.primary" }}>
           {message}
         </Typography>
       )}

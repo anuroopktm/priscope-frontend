@@ -51,7 +51,7 @@ const PermissionsManager = ({ readOnly = false }: { readOnly?: boolean }) => {
   }, [templates]);
 
   const onRoleChange = (newId: string) => {
-    if (!readOnly && newId !== currentRole) {
+    if (!readOnly && newId && newId !== currentRole) {
       setValue("permissions", []);
       setValue("currentRole", newId);
     }

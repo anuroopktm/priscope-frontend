@@ -5,24 +5,27 @@ import {
   EditOutlined,
   KeyboardArrowDown,
 } from "@mui/icons-material";
-import { Box, Button, Stack, useTheme } from "@mui/material";
+import { Box, Button, MenuItem, Select, Stack } from "@mui/material";
 import { useNavigate } from "react-router-dom";
 
 export const ActionHeader = ({
-  onSearch,
-  selectedCount = 0,
-  onDelete,
-  onStatusUpdate,
+  status,
   loading,
+  selectedCount = 0,
+  onSearch,
+  onDelete,
+  onStatusChange,
+  onStatusUpdate,
 }: {
-  onSearch?: (val: string) => void;
-  selectedCount?: number;
-  onDelete?: () => void;
-  onStatusUpdate?: () => void;
-  loading?: boolean;
+  status: string | undefined;
+  loading: boolean;
+  selectedCount: number;
+  onSearch: (val: string) => void;
+  onDelete: () => void;
+  onStatusChange: (status: string) => void;
+  onStatusUpdate: () => void;
 }) => {
   const navigate = useNavigate();
-  const theme = useTheme();
 
   const handleNavigate = () => navigate("/user-management/create-user");
   return (
@@ -36,11 +39,7 @@ export const ActionHeader = ({
         px: 2,
       }}
     >
-      <SearchTextField
-        onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
-          onSearch?.(e.target.value)
-        }
-      />
+      <SearchTextField onSearch={onSearch} />
 
       <Stack direction="row" spacing={1} alignItems="center">
         {selectedCount > 0 && (
@@ -50,7 +49,7 @@ export const ActionHeader = ({
               startIcon={<DeleteOutline />}
               onClick={onDelete}
               disabled={loading}
-              sx={{ color: theme.palette.error.contrastText }}
+              sx={{ color: "error.contrastText" }}
             >
               Delete Selection ({selectedCount})
             </Button>
@@ -64,9 +63,21 @@ export const ActionHeader = ({
             </Button>
           </>
         )}
-        <Button variant="contained" endIcon={<KeyboardArrowDown />}>
-          Status Filter
-        </Button>
+
+        <Select
+          value={status}
+          onChange={(e) => onStatusChange(e.target.value)}
+          variant="filled"
+          disableUnderline
+          IconComponent={KeyboardArrowDown}
+          displayEmpty
+          renderValue={() => <Box>Status Filter</Box>}
+        >
+          <MenuItem value={undefined}>All</MenuItem>
+          <MenuItem value="active">Active</MenuItem>
+          <MenuItem value="suspended">Suspended</MenuItem>
+          <MenuItem value="invited">Invited</MenuItem>
+        </Select>
         <Button
           variant="contained"
           startIcon={<AddOutlined />}

@@ -11,7 +11,7 @@ import {
   type ManageUserFormValues,
 } from "@/validations/user-management/manage-user.validation";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { Box, CircularProgress, Paper, useTheme } from "@mui/material";
+import { Box, CircularProgress, Paper } from "@mui/material";
 import { useEffect } from "react";
 import { FormProvider, useForm } from "react-hook-form";
 import { useNavigate, useParams } from "react-router-dom";
@@ -21,7 +21,6 @@ import FooterActions from "./components/FooterActions";
 import PermissionsList from "./components/PermissionsList";
 
 const EditUserPage = () => {
-  const theme = useTheme();
   const navigate = useNavigate();
   const { userId } = useParams<{ userId: string }>();
   const showToast = useToastStore((state) => state.showToast);
@@ -113,7 +112,7 @@ const EditUserPage = () => {
           display: "flex",
           flexDirection: "column",
           height: "100%",
-          bgcolor: theme.palette.brand.background,
+          bgcolor: "brand.background",
         }}
       >
         <Box
@@ -123,7 +122,7 @@ const EditUserPage = () => {
             display: "flex",
             justifyContent: "center",
             alignItems: "center",
-            bgcolor: theme.palette.background.paper,
+            bgcolor: "background.paper",
           }}
         >
           <CircularProgress size={30} />
@@ -140,7 +139,7 @@ const EditUserPage = () => {
         sx={{
           display: "flex",
           flexDirection: "column",
-          bgcolor: theme.palette.brand.background,
+          bgcolor: "brand.background",
         }}
       >
         <ActionHeader title="Edit User" />

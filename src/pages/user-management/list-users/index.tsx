@@ -13,7 +13,6 @@ import {
   TableCell,
   TableContainer,
   TableRow,
-  useTheme,
 } from "@mui/material";
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
@@ -24,7 +23,6 @@ import { UserTablePagination } from "./components/UserTablePagination";
 import { UserTableRow } from "./components/UserTableRow";
 
 const UserManagementListUsersPage = () => {
-  const theme = useTheme();
   const navigate = useNavigate();
   const showToast = useToastStore((state) => state.showToast);
 
@@ -33,11 +31,13 @@ const UserManagementListUsersPage = () => {
   const [search, setSearch] = useState<string | undefined>(undefined);
   const [selectedIds, setSelectedIds] = useState<string[]>([]);
   const [showStatusModal, setShowStatusModal] = useState<boolean>(false);
+  const [status, setStatus] = useState<string | undefined>(undefined);
 
   const { data, isLoading } = useGetUsers({
     page_size: pageSize,
     search,
     skip: (page - 1) * pageSize,
+    status,
     tenant_id: import.meta.env.VITE_TENANT_ID,
   });
 
@@ -123,18 +123,23 @@ const UserManagementListUsersPage = () => {
         flexDirection: "column",
         borderRadius: 1,
         overflow: "hidden",
-        bgcolor: theme.palette.brand.background,
+        bgcolor: "brand.background",
       }}
     >
       <ActionHeader
-        selectedCount={selectedIds.length}
-        onDelete={handleDelete}
-        onStatusUpdate={() => setShowStatusModal(true)}
+        status={status}
         loading={isDeleting || isUpdating}
+        selectedCount={selectedIds.length}
         onSearch={(val) => {
           setSearch(val);
           setPage(1);
         }}
+        onDelete={handleDelete}
+        onStatusChange={(value) => {
+          setStatus(value);
+          setPage(1);
+        }}
+        onStatusUpdate={() => setShowStatusModal(true)}
       />
 
       <Box sx={{ p: 2, flex: 1 }}>

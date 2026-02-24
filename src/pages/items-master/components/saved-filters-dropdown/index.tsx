@@ -1,22 +1,20 @@
-import React, { ReactElement, useState } from "react";
+import BookmarkIcon from "@/public/images/bookmark-02 (1).svg";
+import CloseIcon from "@/public/images/multiplication-sign-white.svg";
+import KeyboardArrowDownRoundedIcon from "@mui/icons-material/KeyboardArrowDownRounded";
 import {
-  Popper,
+  Box,
+  Button,
   ClickAwayListener,
-  Paper,
   List,
   ListItem,
   ListItemText,
-  Button,
-  useTheme,
-  IconButton,
-  Box,
+  Paper,
+  Popper,
 } from "@mui/material";
-import CloseIcon from "@/public/images/multiplication-sign-white.svg";
-import BookmarkIcon from "@/public/images/bookmark-02 (1).svg";
-import KeyboardArrowDownRoundedIcon from "@mui/icons-material/KeyboardArrowDownRounded";
 import Image from "next/image";
+import React, { useState } from "react";
+import { SavedFiltersListFilters } from "../../helpers/type";
 import { useListSavedFilter } from "../../services/itemMasterService";
-import { SavedFiltersList, SavedFiltersListFilters } from "../../helpers/type";
 
 type Props = {
   saveFilterJson: React.Dispatch<
@@ -29,7 +27,6 @@ const SavedFiltersDropdown = ({
   saveFilterJson,
   applySavedFilterToFilterRow,
 }: Props) => {
-  const theme = useTheme();
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
   const [selectedFilter, setSelectedFilter] = useState<string | null>(null);
 
@@ -91,7 +88,7 @@ const SavedFiltersDropdown = ({
           onClick={handleToggle}
           sx={{
             padding: "8px 12px",
-            color: theme.palette.grey[300],
+            color: "grey.300",
             "&:hover": {
               color: "white",
               bgcolor: "rgba(255, 255, 255, 0.1)",

@@ -1,3 +1,8 @@
+import ExportDataIcon from "@/assets/common/export-data.svg";
+import ImportDataIcon from "@/assets/common/import-data.svg";
+import LogFileIcon from "@/assets/common/log-file-view.svg";
+import RequestsIcon from "@/assets/items-master/requests.svg";
+import ConfirmationDialog from "@/components/common/upload-modal/confirmation-modal";
 import {
   AddOutlined,
   BookmarkBorderOutlined,
@@ -5,16 +10,10 @@ import {
   KeyboardArrowDown,
   Search,
 } from "@mui/icons-material";
-import { Box, Button, InputAdornment, Stack, TextField } from "@mui/material";
-import { useTheme } from "@mui/material/styles";
-import RequestsIcon from "@/assets/items-master/requests.svg";
-import LogFileIcon from "@/assets/common/log-file-view.svg";
-import KeyboardArrowDownRoundedIcon from "@mui/icons-material/KeyboardArrowDownRounded";
-import ImportDataIcon from "@/assets/common/import-data.svg";
-import ExportDataIcon from "@/assets/common/export-data.svg";
 import DeleteOutlineIcon from "@mui/icons-material/DeleteOutline";
+import KeyboardArrowDownRoundedIcon from "@mui/icons-material/KeyboardArrowDownRounded";
+import { Box, Button, InputAdornment, Stack, TextField } from "@mui/material";
 import { useState } from "react";
-import ConfirmationDialog from "@/components/common/upload-modal/confirmation-modal";
 
 interface FilterProps {
   searchQuery: string;
@@ -37,7 +36,6 @@ export const ActionHeader = ({
   onHandleExport,
   handleDeleteSelection,
 }: FilterProps) => {
-  const theme = useTheme();
   const [openDeleteModal, setOpenDeleteModal] = useState(false);
 
   const handleRequestsClick = () => {
@@ -63,7 +61,7 @@ export const ActionHeader = ({
         display: "flex",
         alignItems: "center",
         justifyContent: "space-between",
-        backgroundImage: theme.palette.brand.background_gradient,
+        backgroundImage: "brand.background_gradient",
         pt: 2,
         px: 2,
       }}
@@ -105,7 +103,7 @@ export const ActionHeader = ({
                     backgroundColor: "#144E72",
                   },
                   "&:disabled": {
-                    color: theme.palette.grey[500],
+                    color: "grey.500",
                   },
                   textTransform: "none",
                   fontWeight: 500,
@@ -120,13 +118,13 @@ export const ActionHeader = ({
                 // disabled={isUpdating}
                 sx={{
                   padding: "8px 12px",
-                  color: theme.palette.grey[300],
+                  color: "grey.300",
                   backgroundColor: "transparent",
                   "&:hover": {
                     backgroundColor: "#144E72",
                   },
                   "&:disabled": {
-                    color: theme.palette.grey[500],
+                    color: "grey.500",
                   },
                   textTransform: "none",
                   fontWeight: 500,
@@ -143,10 +141,10 @@ export const ActionHeader = ({
               onClick={handleRequestsClick}
               sx={{
                 padding: "8px 12px",
-                color: theme.palette.grey[300],
+                color: "grey.300",
                 "&:hover": {
                   color: "white",
-                  bgcolor: theme.palette.brand.hover,
+                  bgcolor: "brand.hover",
                 },
                 textTransform: "none",
                 fontWeight: 600,
@@ -155,11 +153,10 @@ export const ActionHeader = ({
             >
               Request
             </Button>
-            {/* <Button startIcon={<DescriptionOutlined />}>Files</Button> */}
             <Button
               sx={{
                 padding: "8px 12px",
-                color: theme.palette.grey[300],
+                color: "grey.300",
                 "&:hover": {
                   color: "white",
                   bgcolor: "rgba(255, 255, 255, 0.1)",
@@ -195,7 +192,7 @@ export const ActionHeader = ({
               onClick={onImportClick}
               sx={{
                 padding: "8px 12px",
-                color: theme.palette.grey[300],
+                color: "grey.300",
                 "&:hover": {
                   color: "white",
                   bgcolor: "rgba(255, 255, 255, 0.1)",
