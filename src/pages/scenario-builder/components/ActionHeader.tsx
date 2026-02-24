@@ -11,6 +11,10 @@ import RequestsIcon from "@/assets/items-master/requests.svg";
 import LogFileIcon from "@/assets/common/log-file-view.svg";
 import KeyboardArrowDownRoundedIcon from "@mui/icons-material/KeyboardArrowDownRounded";
 import ImportDataIcon from "@/assets/common/import-data.svg";
+import ExportDataIcon from "@/assets/common/export-data.svg";
+import DeleteOutlineIcon from "@mui/icons-material/DeleteOutline";
+import { useState } from "react";
+import ConfirmationDialog from "@/components/common/upload-modal/confirmation-modal";
 
 interface FilterProps {
   searchQuery: string;
@@ -18,6 +22,9 @@ interface FilterProps {
   setOpenRequestModal: React.Dispatch<React.SetStateAction<boolean>>;
   setShowFilesModal: React.Dispatch<React.SetStateAction<boolean>>;
   onImportClick: () => void;
+  selectedRows: string[];
+  onHandleExport: () => void;
+  handleDeleteSelection: () => void;
 }
 
 export const ActionHeader = ({
@@ -26,8 +33,12 @@ export const ActionHeader = ({
   setOpenRequestModal,
   setShowFilesModal,
   onImportClick,
+  selectedRows,
+  onHandleExport,
+  handleDeleteSelection,
 }: FilterProps) => {
   const theme = useTheme();
+  const [openDeleteModal, setOpenDeleteModal] = useState(false);
 
   const handleRequestsClick = () => {
     setOpenRequestModal(true);
@@ -35,6 +46,14 @@ export const ActionHeader = ({
 
   const handleFilesClick = () => {
     setShowFilesModal(true);
+  };
+
+  const handleOpenDeleteModal = () => {
+    setOpenDeleteModal(true);
+  };
+
+  const handleCloseDeleteModal = () => {
+    setOpenDeleteModal(false);
   };
 
   return (
@@ -72,77 +91,139 @@ export const ActionHeader = ({
 
       {/* Right: Actions */}
       <Stack direction="row" spacing={1} alignItems="center">
-        <Button
-          onClick={handleRequestsClick}
-          sx={{
-            padding: "8px 12px",
-            color: theme.palette.grey[300],
-            "&:hover": {
-              color: "white",
-              bgcolor: theme.palette.brand.hover,
-            },
-            textTransform: "none",
-            fontWeight: 600,
-          }}
-          startIcon={<img src={RequestsIcon} alt={"request"} width={16} />}
-        >
-          Request
-        </Button>
-        {/* <Button startIcon={<DescriptionOutlined />}>Files</Button> */}
-        <Button
-          sx={{
-            padding: "8px 12px",
-            color: theme.palette.grey[300],
-            "&:hover": {
-              color: "white",
-              bgcolor: "rgba(255, 255, 255, 0.1)",
-            },
-            textTransform: "none",
-            fontWeight: 600,
-          }}
-          startIcon={<img src={LogFileIcon} alt="Log File" width={16} />}
-          onClick={handleFilesClick}
-        >
-          Files
-        </Button>
+        {selectedRows.length > 0 ? (
+          <>
+            <div>
+              <Button
+                onClick={handleOpenDeleteModal}
+                disabled={false}
+                sx={{
+                  padding: "8px 12px",
+                  color: "#ff4444",
+                  backgroundColor: "transparent",
+                  "&:hover": {
+                    backgroundColor: "#144E72",
+                  },
+                  "&:disabled": {
+                    color: theme.palette.grey[500],
+                  },
+                  textTransform: "none",
+                  fontWeight: 500,
+                }}
+                startIcon={<DeleteOutlineIcon />}
+              >
+                Delete Selected
+              </Button>
 
-        {/* Columns Dropdown Mock */}
-        <Button endIcon={<KeyboardArrowDown />}>Columns</Button>
+              <Button
+                onClick={onHandleExport}
+                // disabled={isUpdating}
+                sx={{
+                  padding: "8px 12px",
+                  color: theme.palette.grey[300],
+                  backgroundColor: "transparent",
+                  "&:hover": {
+                    backgroundColor: "#144E72",
+                  },
+                  "&:disabled": {
+                    color: theme.palette.grey[500],
+                  },
+                  textTransform: "none",
+                  fontWeight: 500,
+                }}
+                startIcon={<img src={ExportDataIcon} width={16} />}
+              >
+                Export Selected
+              </Button>
+            </div>
+          </>
+        ) : (
+          <>
+            <Button
+              onClick={handleRequestsClick}
+              sx={{
+                padding: "8px 12px",
+                color: theme.palette.grey[300],
+                "&:hover": {
+                  color: "white",
+                  bgcolor: theme.palette.brand.hover,
+                },
+                textTransform: "none",
+                fontWeight: 600,
+              }}
+              startIcon={<img src={RequestsIcon} alt={"request"} width={16} />}
+            >
+              Request
+            </Button>
+            {/* <Button startIcon={<DescriptionOutlined />}>Files</Button> */}
+            <Button
+              sx={{
+                padding: "8px 12px",
+                color: theme.palette.grey[300],
+                "&:hover": {
+                  color: "white",
+                  bgcolor: "rgba(255, 255, 255, 0.1)",
+                },
+                textTransform: "none",
+                fontWeight: 600,
+              }}
+              startIcon={<img src={LogFileIcon} alt="Log File" width={16} />}
+              onClick={handleFilesClick}
+            >
+              Files
+            </Button>
 
-        {/* Saved Filters Dropdown Mock */}
-        <Button
-          startIcon={<BookmarkBorderOutlined />}
-          endIcon={<KeyboardArrowDown />}
-        >
-          Saved Filters
-        </Button>
+            {/* Columns Dropdown Mock */}
+            <Button endIcon={<KeyboardArrowDown />}>Columns</Button>
 
-        {/* Show Filter */}
-        <Button startIcon={<FilterListOutlined />}>Show Filter</Button>
+            {/* Saved Filters Dropdown Mock */}
+            <Button
+              startIcon={<BookmarkBorderOutlined />}
+              endIcon={<KeyboardArrowDown />}
+            >
+              Saved Filters
+            </Button>
 
-        {/* Add Item */}
-        <Button startIcon={<AddOutlined />}>Add Item</Button>
+            {/* Show Filter */}
+            <Button startIcon={<FilterListOutlined />}>Show Filter</Button>
 
-        {/* Import Data Dropdown */}
-        <Button
-          onClick={onImportClick}
-          sx={{
-            padding: "8px 12px",
-            color: theme.palette.grey[300],
-            "&:hover": {
-              color: "white",
-              bgcolor: "rgba(255, 255, 255, 0.1)",
-            },
-            textTransform: "none",
-            borderRadius: "8px",
-            fontWeight: 600,
-          }}
-          startIcon={<img src={ImportDataIcon} alt="Import" width={16} />}
-          endIcon={<KeyboardArrowDownRoundedIcon />}
-        >
-          Import Data
-        </Button>
+            {/* Add Item */}
+            <Button startIcon={<AddOutlined />}>Add Item</Button>
+
+            {/* Import Data Dropdown */}
+            <Button
+              onClick={onImportClick}
+              sx={{
+                padding: "8px 12px",
+                color: theme.palette.grey[300],
+                "&:hover": {
+                  color: "white",
+                  bgcolor: "rgba(255, 255, 255, 0.1)",
+                },
+                textTransform: "none",
+                borderRadius: "8px",
+                fontWeight: 600,
+              }}
+              startIcon={<img src={ImportDataIcon} alt="Import" width={16} />}
+              endIcon={<KeyboardArrowDownRoundedIcon />}
+            >
+              Import Data
+            </Button>
+          </>
+        )}
       </Stack>
+      {
+        <ConfirmationDialog
+          open={openDeleteModal}
+          onClose={handleCloseDeleteModal}
+          onConfirm={() => {
+            (handleDeleteSelection(), setOpenDeleteModal(false));
+          }}
+          message="Are you sure you want to delete selected row(s)? This action cannot be undone"
+          confirmText="Delete"
+          cancelText="Cancel"
+        />
+      }
     </Box>
   );
 };
