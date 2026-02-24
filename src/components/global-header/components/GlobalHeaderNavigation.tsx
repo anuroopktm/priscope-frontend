@@ -1,11 +1,7 @@
-import {
-  BuildOutlined,
-  Inventory2Outlined,
-  KeyboardArrowDown,
-  LibraryBooksOutlined,
-  ManageAccountsOutlined,
-  PersonOutline,
-} from "@mui/icons-material";
+import BookOpenIcon from "@/assets/global-header/book-open.svg?react";
+import ItemsMasterIcon from "@/assets/global-header/package.svg?react";
+import SupplierCardIcon from "@/assets/global-header/user-settings.svg?react";
+import { BuildOutlined } from "@mui/icons-material";
 import { Box, Button, MenuItem, Select, Stack } from "@mui/material";
 import { useState } from "react";
 
@@ -14,8 +10,8 @@ export const GlobalHeaderNavigation = () => {
   const [builder, setBuilder] = useState("builder");
 
   return (
-    <Stack direction="row" spacing={1} alignItems="center">
-      <Button variant="contained" startIcon={<Inventory2Outlined />}>
+    <Stack direction="row" spacing={2} alignItems="center">
+      <Button variant="contained" startIcon={<ItemsMasterIcon />}>
         Items Master
       </Button>
 
@@ -25,11 +21,10 @@ export const GlobalHeaderNavigation = () => {
         variant="filled"
         size="small"
         disableUnderline
-        IconComponent={KeyboardArrowDown}
         displayEmpty
         renderValue={() => (
           <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
-            <LibraryBooksOutlined fontSize="small" />
+            <BookOpenIcon />
             Rate Libraries
           </Box>
         )}
@@ -38,11 +33,11 @@ export const GlobalHeaderNavigation = () => {
         <MenuItem value="option-1">Option 1</MenuItem>
       </Select>
 
-      <Button variant="contained" startIcon={<ManageAccountsOutlined />}>
+      <Button variant="contained" startIcon={<SupplierCardIcon />}>
         Supplier Card
       </Button>
 
-      <Button variant="contained" startIcon={<PersonOutline />}>
+      <Button variant="contained" startIcon={<SupplierCardIcon />}>
         Customer Card
       </Button>
 
@@ -51,7 +46,6 @@ export const GlobalHeaderNavigation = () => {
         onChange={(e) => setBuilder(e.target.value)}
         variant="filled"
         disableUnderline
-        IconComponent={KeyboardArrowDown}
         displayEmpty
         renderValue={() => (
           <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>

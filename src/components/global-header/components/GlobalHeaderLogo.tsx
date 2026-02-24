@@ -5,7 +5,12 @@ import { Link } from "react-router-dom";
 export const GlobalHeaderLogo = () => {
   return (
     <Link to="/scenario-builder">
-      <Box component="img" src={brandLogo} alt="Priscope" sx={{ mr: 5 }} />
+      <Box
+        component="img"
+        src={brandLogo}
+        alt="Priscope"
+        sx={{ mr: 5, width: "auto", height: 30, mt: 1 }}
+      />
     </Link>
   );
 };

@@ -1,10 +1,5 @@
 import SearchTextField from "@/components/common/SearchTextField";
-import {
-  AddOutlined,
-  DeleteOutline,
-  EditOutlined,
-  KeyboardArrowDown,
-} from "@mui/icons-material";
+import { AddOutlined, DeleteOutline, EditOutlined } from "@mui/icons-material";
 import { Box, Button, MenuItem, Select, Stack } from "@mui/material";
 import { useNavigate } from "react-router-dom";
 
@@ -69,7 +64,6 @@ export const ActionHeader = ({
           onChange={(e) => onStatusChange(e.target.value)}
           variant="filled"
           disableUnderline
-          IconComponent={KeyboardArrowDown}
           displayEmpty
           renderValue={() => <Box>Status Filter</Box>}
         >

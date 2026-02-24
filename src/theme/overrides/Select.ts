@@ -1,8 +1,12 @@
 import type { Theme } from "@mui/material/styles";
+import SelectArrowIcon from "../icon/SelectArrowIcon";
 
 export default function Select(theme: Theme) {
   return {
     MuiSelect: {
+      defaultProps: {
+        IconComponent: SelectArrowIcon,
+      },
       styleOverrides: {
         select: {
           padding: "7px 6px",
@@ -15,7 +19,7 @@ export default function Select(theme: Theme) {
 
         icon: {
           right: 10,
-          color: theme.palette.common.white,
+          color: "inherit",
         },
       },
     },

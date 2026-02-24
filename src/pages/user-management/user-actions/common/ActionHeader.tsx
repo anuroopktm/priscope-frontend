@@ -1,4 +1,4 @@
-import { ArrowBack } from "@mui/icons-material";
+import ArrowBackIcon from "@/assets/actions/arrow-left.svg?react";
 import { Box, IconButton, Typography } from "@mui/material";
 import { useNavigate } from "react-router-dom";
 
@@ -19,8 +19,14 @@ const ActionHeader = ({ title }: { title: string }) => {
       }}
     >
       <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
-        <IconButton onClick={handleBack}>
-          <ArrowBack sx={{ color: "background.default" }} />
+        <IconButton
+          onClick={handleBack}
+          sx={{
+            border: "1px solid #3B9EDC1A",
+            borderRadius: 1,
+          }}
+        >
+          <ArrowBackIcon />
         </IconButton>
 
         <Typography variant="h6" sx={{ color: "background.default" }}>

@@ -1,8 +1,5 @@
-import {
-  KeyboardArrowDown,
-  NotificationsOutlined,
-  SettingsOutlined,
-} from "@mui/icons-material";
+import NotificationIcon from "@/assets/global-header/notification.svg?react";
+import SettingsIcon from "@/assets/global-header/settings.svg?react";
 import { Avatar, IconButton, MenuItem, Select, Stack } from "@mui/material";
 import { useState } from "react";
 
@@ -10,14 +7,12 @@ export const GlobalHeaderActions = () => {
   const [tenant, setTenant] = useState("tenant-name");
 
   return (
-    <Stack direction="row" spacing={1} alignItems="center">
-      {/* Tenant Selector */}
+    <Stack direction="row" spacing={2} alignItems="center">
       <Select
         value={tenant}
         onChange={(e) => setTenant(e.target.value)}
         size="small"
         variant="filled"
-        IconComponent={KeyboardArrowDown}
         sx={{
           minWidth: 200,
           textAlign: "center",
@@ -49,7 +44,7 @@ export const GlobalHeaderActions = () => {
           borderColor: "brand.tertiary",
         }}
       >
-        <SettingsOutlined />
+        <SettingsIcon />
       </IconButton>
 
       <IconButton
@@ -60,7 +55,7 @@ export const GlobalHeaderActions = () => {
           borderColor: "brand.tertiary",
         }}
       >
-        <NotificationsOutlined />
+        <NotificationIcon />
       </IconButton>
 
       <Avatar

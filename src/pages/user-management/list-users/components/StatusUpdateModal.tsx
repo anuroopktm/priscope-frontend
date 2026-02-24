@@ -1,4 +1,3 @@
-import KeyboardArrowDownRoundedIcon from "@mui/icons-material/KeyboardArrowDownRounded";
 import {
   Button,
   Dialog,
@@ -47,7 +46,6 @@ const StatusUpdateModal = ({
           value={status}
           onChange={(e) => setStatus(e.target.value)}
           displayEmpty
-          IconComponent={KeyboardArrowDownRoundedIcon}
         >
           <MenuItem value="active">Active</MenuItem>
           <MenuItem value="invited">Invited</MenuItem>

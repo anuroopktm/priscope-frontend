@@ -1,22 +1,21 @@
-import React, { type ChangeEvent } from "react";
 import {
-  Box,
-  Typography,
-  FormControl,
-  Select,
-  MenuItem,
-  type SelectChangeEvent,
-  ToggleButtonGroup,
-  ToggleButton,
-} from "@mui/material";
-import { Grid } from "@mui/material";
-import {
+  CONTROL_FIELDS,
   type ControlFields,
   CSV_TYPE_OPTIONS,
-  CONTROL_FIELDS,
 } from "@/pages/items-master/constants/upload.constants";
+import {
+  Box,
+  FormControl,
+  Grid,
+  MenuItem,
+  Select,
+  type SelectChangeEvent,
+  ToggleButton,
+  ToggleButtonGroup,
+  Typography,
+} from "@mui/material";
+import React, { type ChangeEvent } from "react";
 import { useItemMasterStore } from "../../../../store/itemMasterStore";
-import { KeyboardArrowDown } from "@mui/icons-material";
 
 type CsvTypeSelectionProps = {
   csvType: string;
@@ -38,7 +37,6 @@ const CsvTypeSelection: React.FC<CsvTypeSelectionProps> = ({
     (state) => state.setControlFields,
   );
   const clearFields = useItemMasterStore((state) => state.clearFields);
-  const selected = useItemMasterStore((state) => state.selected);
   const handleCsvTypeChange = (
     event: SelectChangeEvent<string> | ChangeEvent<HTMLInputElement>,
   ) => {
@@ -141,7 +139,6 @@ const CsvTypeSelection: React.FC<CsvTypeSelectionProps> = ({
                     );
                   }}
                   displayEmpty
-                  IconComponent={KeyboardArrowDown}
                 >
                   <MenuItem value="" disabled>
                     Select {field}
