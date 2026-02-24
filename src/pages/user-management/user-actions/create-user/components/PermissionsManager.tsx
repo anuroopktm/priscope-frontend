@@ -6,10 +6,10 @@ import type { ManageUserFormValues } from "@/validations/user-management/manage-
 import { Box, Paper, Typography } from "@mui/material";
 import { useEffect, useMemo } from "react";
 import { useFormContext, useWatch } from "react-hook-form";
+import RoleSelector from "../../common/RoleSelector";
 import PermissionsList from "./PermissionsList";
-import RoleSelector from "./RoleSelector";
 
-const PermissionsManager = ({ readOnly }: { readOnly?: boolean }) => {
+const PermissionsManager = ({ readOnly = false }: { readOnly?: boolean }) => {
   const {
     control,
     setValue,

@@ -5,22 +5,46 @@ export default function Button(theme: Theme) {
     MuiButton: {
       styleOverrides: {
         root: {
-          textTransform: "none" as const,
-          color: theme.palette.common.white,
-          backgroundColor: theme.palette.primary.main,
+          textTransform: "none",
           boxShadow: "none",
-
-          "&:hover": {
-            backgroundColor: theme.palette.brand.tertiary,
-            boxShadow: "none",
-          },
-
-          "& .MuiButton-loadingIndicator": {
-            color: theme.palette.primary.main,
-          },
         },
       },
+      variants: [
+        {
+          props: { variant: "contained" },
+          style: {
+            color: theme.palette.common.white,
+            backgroundColor: theme.palette.primary.main,
+            boxShadow: "none",
+
+            "&:hover": {
+              backgroundColor: theme.palette.brand.tertiary,
+              boxShadow: "none",
+            },
+
+            "& .MuiButton-loadingIndicator": {
+              color: theme.palette.primary.main,
+            },
+          },
+        },
+        {
+          props: { variant: "outlined" },
+          style: {
+            borderWidth: 2,
+            borderStyle: "solid",
+            borderColor: theme.palette.primary.main,
+            backgroundColor: theme.palette.background.paper,
+            color: theme.palette.primary.main,
+
+            "&:hover": {
+              backgroundColor: theme.palette.background.default,
+              borderColor: theme.palette.primary.main,
+            },
+          },
+        },
+      ],
     },
+
     MuiIconButton: {
       variants: [
         {
@@ -35,12 +59,12 @@ export default function Button(theme: Theme) {
             },
           },
         },
-
         {
           props: { variant: "action" },
           style: {
             color: theme.palette.common.white,
             backgroundColor: theme.palette.primary.main,
+
             "&:hover": {
               backgroundColor: theme.palette.brand.tertiary,
             },

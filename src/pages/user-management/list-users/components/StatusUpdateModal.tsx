@@ -7,7 +7,6 @@ import {
   MenuItem,
   Select,
   Typography,
-  alpha,
   useTheme,
 } from "@mui/material";
 import { useState } from "react";
@@ -39,15 +38,14 @@ const StatusUpdateModal = ({
 
   return (
     <Dialog open={open} onClose={handleClose} fullWidth maxWidth="sm">
-      <DialogContent>
-        <Typography
-          variant="h6"
-          sx={{ color: alpha(theme.palette.primary.main, 0.9) }}
-        >
+      <DialogContent sx={{ display: "flex", flexDirection: "column", gap: 2 }}>
+        <Typography variant="h6" sx={{ color: theme.palette.primary.main }}>
           Update Status
         </Typography>
         <Select
-          label="Status"
+          fullWidth
+          size="small"
+          variant="outlined"
           value={status}
           onChange={(e) => setStatus(e.target.value)}
           displayEmpty
@@ -58,25 +56,12 @@ const StatusUpdateModal = ({
           <MenuItem value="suspended">Suspended</MenuItem>
         </Select>
       </DialogContent>
-      <DialogActions sx={{ p: 2, pt: 0, justifyContent: "start" }}>
-        <Button
-          size="large"
-          variant="outlined"
-          onClick={onClose}
-          sx={{
-            borderWidth: 2,
-            backgroundColor: theme.palette.background.paper,
-            color: theme.palette.primary.main,
-            "&:hover": {
-              backgroundColor: theme.palette.background.default,
-              color: theme.palette.primary.main,
-            },
-          }}
-        >
+      <DialogActions sx={{ p: 3, pt: 0, justifyContent: "start", gap: 1 }}>
+        <Button size="medium" variant="outlined" onClick={onClose}>
           Cancel
         </Button>
         <Button
-          size="large"
+          size="medium"
           variant="contained"
           loading={isLoading}
           onClick={handleUpdate}

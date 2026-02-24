@@ -64,5 +64,5 @@ export const baseGridCfg = {
   // Filter: "1",
   Filter: "1",
   ClearFilterOff: "0",
-   Html: 1,
+  Html: 1,
 };

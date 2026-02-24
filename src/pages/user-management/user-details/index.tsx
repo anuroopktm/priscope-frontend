@@ -1,34 +1,95 @@
+import {
+  useGetResourcePrivileges,
+  useListUserDetails,
+  useListUserPrivileges,
+} from "@/services/user-management/user-management.queries";
 import type { ManageUserFormValues } from "@/validations/user-management/manage-user.validation";
-import ArrowBackIcon from "@mui/icons-material/ArrowBack";
-import EditIcon from "@mui/icons-material/Edit";
-import { Box, Button, Paper, Typography, useTheme } from "@mui/material";
+import { Box, CircularProgress, Paper, useTheme } from "@mui/material";
+import { useEffect } from "react";
 import { FormProvider, useForm } from "react-hook-form";
 import { useNavigate, useParams } from "react-router-dom";
-import BasicInfoSection from "../user-actions/components/BasicInfoSection";
-import PermissionsManager from "../user-actions/components/PermissionsManager";
+import ActionHeader from "../user-actions/common/ActionHeader";
+import BasicInfoSection from "../user-actions/common/BasicInfoSection";
+import FooterActions from "./components/FooterActions";
+import PermissionsList from "./components/PermissionsList";
 
 const UserDetailsPage = () => {
   const theme = useTheme();
   const navigate = useNavigate();
-  const { id } = useParams();
+  const { userId } = useParams<{ userId: string }>();
 
-  // In a real app, you would fetch user data here using the id
+  const { data: userDetails, isLoading: isDetailsLoading } = useListUserDetails(
+    { user_id: userId },
+  );
+  const { data: userPrivileges, isLoading: isPrivilegesLoading } =
+    useListUserPrivileges({ user_id: userId });
+  const { data: allPrivileges, isLoading: isAllPrivilegesLoading } =
+    useGetResourcePrivileges({
+      tenant_id: import.meta.env.VITE_TENANT_ID,
+    });
+
   const methods = useForm<ManageUserFormValues>({
     defaultValues: {
-      name: "John Smith",
-      email: "john.smith@example.com",
-      job_designation: "Senior Developer",
+      name: "",
+      email: "",
+      job_designation: "",
       currentRole: "custom",
-      permissions: [
-        { resource_privilege_id: "1", display_name: "View Dashboard" },
-        { resource_privilege_id: "2", display_name: "Edit Users" },
-      ],
+      permissions: [],
+      defaultPermissions: [],
     },
+    disabled: true,
   });
 
+  const { reset } = methods;
+
+  useEffect(() => {
+    if (userDetails && allPrivileges) {
+      reset({
+        name: userDetails.name,
+        email: userDetails.email,
+        job_designation: userDetails.job_designation,
+        currentRole: "custom",
+        defaultPermissions: allPrivileges,
+        permissions:
+          userPrivileges?.resource_privilege_ids.map((id) => ({
+            display_name: id,
+            resource_privilege_id: id,
+            description: "",
+          })) || [],
+      });
+    }
+  }, [userDetails, userPrivileges, allPrivileges, reset]);
+
   const handleEdit = () => {
-    navigate(`/user-management/edit-user/${id}`);
+    navigate(`/user-management/edit-user/${userId}`);
   };
+
+  if (isDetailsLoading || isPrivilegesLoading || isAllPrivilegesLoading) {
+    return (
+      <Box
+        sx={{
+          p: 2,
+          display: "flex",
+          flexDirection: "column",
+          height: "100%",
+          bgcolor: theme.palette.brand.background,
+        }}
+      >
+        <Box
+          sx={{
+            flex: 1,
+            borderRadius: 1,
+            display: "flex",
+            justifyContent: "center",
+            alignItems: "center",
+            bgcolor: theme.palette.background.paper,
+          }}
+        >
+          <CircularProgress size={30} />
+        </Box>
+      </Box>
+    );
+  }
 
   return (
     <FormProvider {...methods}>
@@ -39,30 +100,7 @@ const UserDetailsPage = () => {
           bgcolor: theme.palette.brand.background,
         }}
       >
-        {/* Header */}
-        <Box
-          sx={{
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "space-between",
-            p: 2,
-            bgcolor: "white",
-            borderBottom: "1px solid #E4E7EC",
-          }}
-        >
-          <Box sx={{ display: "flex", alignItems: "center", gap: 2 }}>
-            <Button
-              startIcon={<ArrowBackIcon />}
-              onClick={() => navigate("/user-management/list-users")}
-              sx={{ color: "text.secondary", textTransform: "none" }}
-            >
-              Back to list
-            </Button>
-            <Typography variant="h5" sx={{ fontWeight: 700 }}>
-              User Details
-            </Typography>
-          </Box>
-        </Box>
+        <ActionHeader title="User Details" />
 
         <Box sx={{ p: 2, flex: 1 }}>
           <Box
@@ -76,34 +114,9 @@ const UserDetailsPage = () => {
               elevation={0}
               sx={{ p: 2, width: "100%", height: "100%", overflowY: "auto" }}
             >
-              <Typography variant="h6" sx={{ mb: 2, fontWeight: 600 }}>
-                Basic Information
-              </Typography>
-              <BasicInfoSection readOnly />
-
-              <Box sx={{ mt: 4 }}>
-                <PermissionsManager readOnly />
-              </Box>
-
-              <Box
-                sx={{
-                  mt: 4,
-                  pt: 3,
-                  borderTop: "1px solid #E4E7EC",
-                  display: "flex",
-                  justifyContent: "flex-end",
-                }}
-              >
-                <Button
-                  variant="contained"
-                  size="large"
-                  startIcon={<EditIcon />}
-                  onClick={handleEdit}
-                  sx={{ px: 4 }}
-                >
-                  Edit User
-                </Button>
-              </Box>
+              <BasicInfoSection />
+              <PermissionsList />
+              <FooterActions handleEdit={handleEdit} />
             </Paper>
           </Box>
         </Box>

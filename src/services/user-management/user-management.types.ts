@@ -61,11 +61,12 @@ export interface InviteUserResponse {
 }
 
 export interface ListUserPrivilegesRequest {
-  tenant_id: string;
-  user_id: string;
+  user_id?: string;
 }
 
-export type ListUserPrivilegesResponse = ResourcePrivilege[];
+export interface ListUserPrivilegesResponse {
+  resource_privilege_ids: string[];
+}
 
 export interface CheckTemplateRequest {
   resource_privilege_ids: string[];
@@ -122,4 +123,37 @@ export interface BulkStatusUpdateResponse {
   total_count: number;
   updated_count: number;
   updated_user_ids: string[];
+}
+
+export interface ListUserDetailsRequest {
+  user_id?: string;
+}
+
+export interface ListUserDetailsResponse {
+  email: string;
+  job_designation: string;
+  name: string;
+  tenant_user_status: string;
+}
+
+export interface AssignUserPrivilegesRequest {
+  resource_privilege_ids: string[];
+  tenant_id: string;
+  user_id: string;
+}
+
+export interface AssignUserPrivilegesResponse {
+  added_ids: string[];
+  removed_ids: string[];
+}
+
+export interface UpdateUserRequest {
+  job_designation: string;
+  name: string;
+  status: string;
+  user_id: string;
+}
+
+export interface UpdateUserResponse {
+  message: string;
 }

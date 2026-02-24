@@ -182,12 +182,7 @@ const FileUploadModal: React.FC<FileUploadModalProps> = ({
 
   return (
     <>
-      <Dialog
-        open={open}
-        onClose={handleClose}
-        maxWidth="md"
-        fullWidth
-      >
+      <Dialog open={open} onClose={handleClose} maxWidth="md" fullWidth>
         <DialogTitle
           sx={{
             py: 2,

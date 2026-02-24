@@ -39,13 +39,15 @@ export const useItemMasterStore = create<ItemMasterStore>((set, get) => ({
 
   setControlFields: (key, value) =>
     set((state) => {
-      const currentFields = state.controlFields.filter((item) => item.key !== key);
+      const currentFields = state.controlFields.filter(
+        (item) => item.key !== key,
+      );
       if (value) {
         currentFields.push({ key, value });
       }
       return { controlFields: currentFields };
     }),
-  
+
   setUploadId: (uploadId) => {
     console.log("Setting upload ID in store:", uploadId);
     set({ uploadId });
@@ -57,14 +59,14 @@ export const useItemMasterStore = create<ItemMasterStore>((set, get) => ({
     const { headers, selected } = get();
     return headers.filter(
       (h) =>
-        !selected.some((item) => item.key !== fieldName && item.value === h)
+        !selected.some((item) => item.key !== fieldName && item.value === h),
     );
   },
 
   clearFields: (fieldsToClear) => {
     const { selected } = get();
     const filtered = selected.filter(
-      (item) => !fieldsToClear.includes(item.key)
+      (item) => !fieldsToClear.includes(item.key),
     );
     set({ selected: filtered });
   },

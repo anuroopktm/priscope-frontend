@@ -2,7 +2,12 @@
 import React, { useCallback } from "react";
 import { Box, Button, Grid, Typography } from "@mui/material";
 import Image from "next/image";
-import { cardBoxStyles, buttonStyles, titleStyles, imageBoxStyles } from "./cardStyles";
+import {
+  cardBoxStyles,
+  buttonStyles,
+  titleStyles,
+  imageBoxStyles,
+} from "./cardStyles";
 
 export interface CardConfig {
   id: string;
@@ -28,7 +33,7 @@ const ActionCard = React.memo<ActionCardProps>(({ config, onAction }) => {
       e.stopPropagation();
       onAction(id);
     },
-    [onAction, id]
+    [onAction, id],
   );
 
   return (

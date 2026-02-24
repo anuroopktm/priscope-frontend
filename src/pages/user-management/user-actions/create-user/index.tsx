@@ -13,11 +13,11 @@ import { Box, Paper, useTheme } from "@mui/material";
 import { useState } from "react";
 import { FormProvider, useForm } from "react-hook-form";
 import { useNavigate } from "react-router-dom";
-import ActionHeader from "../components/ActionHeader";
-import BasicInfoSection from "../components/BasicInfoSection";
-import CreateInvitationModal from "../components/CreateInvitationModal";
-import FooterActions from "../components/FooterActions";
-import PermissionsManager from "../components/PermissionsManager";
+import ActionHeader from "../common/ActionHeader";
+import BasicInfoSection from "../common/BasicInfoSection";
+import CreateInvitationModal from "./components/CreateInvitationModal";
+import FooterActions from "./components/FooterActions";
+import PermissionsManager from "./components/PermissionsManager";
 
 const CreateUserPage = () => {
   const theme = useTheme();
@@ -140,7 +140,7 @@ const CreateUserPage = () => {
           bgcolor: theme.palette.brand.background,
         }}
       >
-        <ActionHeader />
+        <ActionHeader title="Add new user" />
         <Box sx={{ p: 2, flex: 1 }}>
           <Box
             sx={{

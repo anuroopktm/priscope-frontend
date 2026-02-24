@@ -64,5 +64,5 @@ export const isValidFileType = (file: File): boolean => {
 export const CONTROL_FIELDS = {
   ITEM: "item",
   SUPPLIER: "supplier",
-  CUSTOMER: "customer"
-}
+  CUSTOMER: "customer",
+};

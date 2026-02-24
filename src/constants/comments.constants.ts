@@ -1,4 +1,4 @@
 export const COMMENT_TYPE = {
-    CELL: "cellComment",
-    ROW: "rowComment",
+  CELL: "cellComment",
+  ROW: "rowComment",
 } as const;

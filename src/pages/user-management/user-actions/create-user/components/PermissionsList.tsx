@@ -3,7 +3,7 @@ import type { ManageUserFormValues } from "@/validations/user-management/manage-
 import { Box, CircularProgress, Grid, Typography } from "@mui/material";
 import { useCallback, useMemo } from "react";
 import { useFormContext, useWatch } from "react-hook-form";
-import PermissionItem from "./PermissionItem";
+import PermissionItem from "../../common/PermissionItem";
 
 interface PermissionsListProps {
   privileges: ResourcePrivilege[] | undefined;
@@ -47,15 +47,25 @@ const PermissionsList = ({
     [selectedPermissions],
   );
 
+  const selectedNames = useMemo(
+    () => new Set(selectedPermissions.map((p) => p.display_name)),
+    [selectedPermissions],
+  );
+
   const handleToggle = useCallback(
     (p: ResourcePrivilege) => {
       const id = p.resource_privilege_id;
-      const isSelected = selectedIds.has(id);
+      const isSelected =
+        selectedIds.has(id) || selectedNames.has(p.display_name);
 
       if (isSelected) {
         setValue(
           "permissions",
-          selectedPermissions.filter((pr) => pr.resource_privilege_id !== id),
+          selectedPermissions.filter(
+            (pr) =>
+              pr.resource_privilege_id !== id &&
+              pr.display_name !== p.display_name,
+          ),
           { shouldValidate: true },
         );
       } else {
@@ -64,7 +74,7 @@ const PermissionsList = ({
         });
       }
     },
-    [selectedIds, selectedPermissions, setValue],
+    [selectedIds, selectedNames, selectedPermissions, setValue],
   );
 
   const columns = useMemo(() => {
@@ -124,7 +134,10 @@ const PermissionsList = ({
             <PermissionItem
               key={p.resource_privilege_id}
               privilege={p}
-              checked={selectedIds.has(p.resource_privilege_id)}
+              checked={
+                selectedIds.has(p.resource_privilege_id) ||
+                selectedNames.has(p.display_name)
+              }
               disabled={!isEditable || readOnly}
               onToggle={handleToggle}
             />

@@ -11,60 +11,60 @@ interface StyledStepperProps {
 const StyledStepper: React.FC<StyledStepperProps> = ({
   activeStep,
   steps,
-  sx = {}
+  sx = {},
 }) => {
   return (
     <Stepper
       activeStep={activeStep}
       sx={{
         width: "100%",
-        '& .MuiStepIcon-root': {
+        "& .MuiStepIcon-root": {
           // Non-active step styling
-          color: 'transparent',
+          color: "transparent",
           border: `2px solid ${theme.palette.brand.divider}`,
-          borderRadius: '30%',
+          borderRadius: "30%",
           backgroundColor: theme.palette.brand.inputBg,
-          '& .MuiStepIcon-text': {
+          "& .MuiStepIcon-text": {
             fill: theme.palette.brand.divider,
-            fontWeight: 'bold'
-          }
+            fontWeight: "bold",
+          },
         },
-        '& .MuiStepIcon-root.Mui-active': {
+        "& .MuiStepIcon-root.Mui-active": {
           // Active step styling
           backgroundColor: theme.palette.brand.divider,
           border: `2px solid ${theme.palette.brand.divider}`,
           color: theme.palette.brand.divider,
-          '& .MuiStepIcon-text': {
+          "& .MuiStepIcon-text": {
             fill: theme.palette.brand.inputBg,
-            fontWeight: 'bold'
-          }
+            fontWeight: "bold",
+          },
         },
-        '& .MuiStepIcon-root.Mui-completed': {
+        "& .MuiStepIcon-root.Mui-completed": {
           // Completed step styling (same as active)
           backgroundColor: theme.palette.brand.divider,
           border: `2px solid ${theme.palette.brand.divider}`,
           color: theme.palette.brand.inputBg,
-          '& .MuiStepIcon-text': {
+          "& .MuiStepIcon-text": {
             fill: theme.palette.brand.inputBg,
-            fontWeight: 'bold'
-          }
+            fontWeight: "bold",
+          },
         },
-        '& .MuiStepLabel-label': {
+        "& .MuiStepLabel-label": {
           // Step label text color
           color: theme.palette.brand.divider,
-          fontWeight: '600'
+          fontWeight: "600",
         },
-        '& .MuiStepLabel-label.Mui-active': {
+        "& .MuiStepLabel-label.Mui-active": {
           // Active step label
           color: theme.palette.brand.divider,
-          fontWeight: '600'
+          fontWeight: "600",
         },
-        '& .MuiStepLabel-label.Mui-completed': {
+        "& .MuiStepLabel-label.Mui-completed": {
           // Completed step label
           color: theme.palette.brand.divider,
-          fontWeight: '600'
+          fontWeight: "600",
         },
-        ...sx // Merge any additional sx props
+        ...sx, // Merge any additional sx props
       }}
     >
       {steps.map((label) => (
@@ -73,31 +73,35 @@ const StyledStepper: React.FC<StyledStepperProps> = ({
             StepIconComponent={(props) => {
               const { icon, active, completed } = props;
               return (
-                <div className="MuiStepIcon-root" style={{
-                  width: 32,
-                  height: 32,
-                  borderRadius: "50%",
-                  border: `1px solid ${theme.palette.brand.divider}`,
-                  backgroundColor: active || completed
-                    ? theme.palette.brand.divider
-                    : theme.palette.brand.inputBg,
-                  display: "flex",
-                  alignItems: "center",
-                  justifyContent: "center",
-                  fontWeight: "lighter",
-                  fontSize: 14, 
-                  color: active || completed
-                    ? theme.palette.brand.inputBg
-                    : theme.palette.brand.divider
-                }}>
+                <div
+                  className="MuiStepIcon-root"
+                  style={{
+                    width: 32,
+                    height: 32,
+                    borderRadius: "50%",
+                    border: `1px solid ${theme.palette.brand.divider}`,
+                    backgroundColor:
+                      active || completed
+                        ? theme.palette.brand.divider
+                        : theme.palette.brand.inputBg,
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    fontWeight: "lighter",
+                    fontSize: 14,
+                    color:
+                      active || completed
+                        ? theme.palette.brand.inputBg
+                        : theme.palette.brand.divider,
+                  }}
+                >
                   {icon}
                 </div>
               );
             }}
           >
-            {label }
+            {label}
           </StepLabel>
-
         </Step>
       ))}
     </Stepper>

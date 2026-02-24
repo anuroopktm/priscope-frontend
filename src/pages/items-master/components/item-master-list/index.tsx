@@ -53,7 +53,7 @@ const ItemMasterList: React.FC<ItemMasterListProps> = ({
 }) => {
   const visibleRows = items.slice(
     page * rowsPerPage,
-    page * rowsPerPage + rowsPerPage
+    page * rowsPerPage + rowsPerPage,
   );
 
   return (
@@ -221,11 +221,14 @@ const ItemMasterList: React.FC<ItemMasterListProps> = ({
                     color: "#1A2B44",
                     width: "50px",
                   }}
-                  onClick={e => e.stopPropagation()} // Prevent row click from TableCell
+                  onClick={(e) => e.stopPropagation()} // Prevent row click from TableCell
                 >
                   <Checkbox
                     checked={selectedRows.has(index)}
-                    onChange={e => { e.stopPropagation(); onSelectRow(index); }} // Prevent row click
+                    onChange={(e) => {
+                      e.stopPropagation();
+                      onSelectRow(index);
+                    }} // Prevent row click
                   />
                 </TableCell>
                 <TableCell

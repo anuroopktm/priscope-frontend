@@ -1,12 +1,6 @@
 "use client";
 import React from "react";
-import {
-  Dialog,
-  Box,
-  Button,
-  Typography,
-  useTheme,
-} from "@mui/material";
+import { Dialog, Box, Button, Typography, useTheme } from "@mui/material";
 
 interface ConfirmationDialogProps {
   open: boolean;
@@ -56,9 +50,7 @@ const ConfirmationDialog: React.FC<ConfirmationDialogProps> = ({
         </Typography>
       )}
 
-      <Typography sx={{ fontWeight: 400 }}>
-        {message}
-      </Typography>
+      <Typography sx={{ fontWeight: 400 }}>{message}</Typography>
 
       <Box display="flex" justifyContent="center" gap={1}>
         <Button
@@ -75,7 +67,8 @@ const ConfirmationDialog: React.FC<ConfirmationDialogProps> = ({
           disabled={loading}
           sx={{
             borderRadius: 8,
-            bgcolor: theme.palette.sidebar?.highlight || theme.palette.primary.main,
+            bgcolor:
+              theme.palette.sidebar?.highlight || theme.palette.primary.main,
             "&:hover": { bgcolor: "#0F3A5A" },
           }}
         >

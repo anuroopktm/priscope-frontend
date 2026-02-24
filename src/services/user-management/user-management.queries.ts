@@ -2,6 +2,8 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import type { AxiosError } from "axios";
 import { axiosInstance } from "../api/axiosInstance";
 import type {
+  AssignUserPrivilegesRequest,
+  AssignUserPrivilegesResponse,
   BulkDeleteUsersRequest,
   BulkDeleteUsersResponse,
   BulkStatusUpdateRequest,
@@ -19,10 +21,14 @@ import type {
   GetUsersResponse,
   InviteUserRequest,
   InviteUserResponse,
+  ListUserDetailsRequest,
+  ListUserDetailsResponse,
   ListUserPrivilegesRequest,
   ListUserPrivilegesResponse,
   ResourcePrivilegesRequest,
   ResourcePrivilegesResponse,
+  UpdateUserRequest,
+  UpdateUserResponse,
 } from "./user-management.types";
 
 export const useGetUsers = (payload: GetUsersRequest) => {
@@ -97,14 +103,14 @@ export const useInviteUser = () => {
 
 export const useListUserPrivileges = (payload: ListUserPrivilegesRequest) => {
   return useQuery<ListUserPrivilegesResponse, AxiosError<{ detail: string }>>({
-    queryKey: ["user-privileges", payload.tenant_id, payload.user_id],
+    queryKey: ["user-privileges", payload.user_id],
     queryFn: async () => {
       const { data } = await axiosInstance.get("/v1/list-user-privileges", {
         params: payload,
       });
       return data;
     },
-    enabled: !!payload.tenant_id && !!payload.user_id,
+    enabled: !!payload.user_id,
     refetchOnWindowFocus: false,
   });
 };
@@ -183,6 +189,55 @@ export const useBulkStatusUpdate = () => {
       return data;
     },
     onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["users"] });
+    },
+  });
+};
+
+export const useListUserDetails = (payload: ListUserDetailsRequest) => {
+  return useQuery<ListUserDetailsResponse, AxiosError<{ detail: string }>>({
+    queryKey: ["user-details", payload.user_id],
+    queryFn: async () => {
+      const { data } = await axiosInstance.get("/v1/list-user-details", {
+        params: payload,
+      });
+      return data;
+    },
+    enabled: !!payload.user_id,
+    refetchOnWindowFocus: false,
+  });
+};
+
+export const useAssignUserPrivileges = () => {
+  return useMutation<
+    AssignUserPrivilegesResponse,
+    AxiosError<{ detail: string }>,
+    AssignUserPrivilegesRequest
+  >({
+    mutationFn: async (payload: AssignUserPrivilegesRequest) => {
+      const { data } = await axiosInstance.post(
+        "/v1/user/privileges/assign",
+        payload,
+      );
+      return data;
+    },
+  });
+};
+
+export const useUpdateUser = () => {
+  const queryClient = useQueryClient();
+
+  return useMutation<
+    UpdateUserResponse,
+    AxiosError<{ detail: string }>,
+    UpdateUserRequest
+  >({
+    mutationFn: async (payload: UpdateUserRequest) => {
+      const { data } = await axiosInstance.patch("/v1/update-user", payload);
+      return data;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["user-details"] });
       queryClient.invalidateQueries({ queryKey: ["users"] });
     },
   });

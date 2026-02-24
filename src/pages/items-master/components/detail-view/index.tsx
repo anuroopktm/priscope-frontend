@@ -1,12 +1,7 @@
 "use client";
 
 import React from "react";
-import {
-  Box,
-  IconButton,
-  Typography,
-  CircularProgress,
-} from "@mui/material";
+import { Box, IconButton, Typography, CircularProgress } from "@mui/material";
 import ItemDetailCard from "@/shared/components/item-detail";
 import TimelineDetail from "@/shared/components/timeline";
 import { GridCloseIcon } from "@mui/x-data-grid";
@@ -27,12 +22,7 @@ interface DetailViewProps {
 }
 
 const SectionLoader = () => (
-  <Box
-    display="flex"
-    alignItems="center"
-    justifyContent="center"
-    height="100%"
-  >
+  <Box display="flex" alignItems="center" justifyContent="center" height="100%">
     <CircularProgress size={28} />
   </Box>
 );
@@ -63,7 +53,7 @@ const DetailView: React.FC<DetailViewProps> = ({
     [itemData],
   );
 
-   const formattedHistoryData = React.useMemo(
+  const formattedHistoryData = React.useMemo(
     () => mapHistoryToTimeline(historyData),
     [historyData],
   );
@@ -163,10 +153,7 @@ const DetailView: React.FC<DetailViewProps> = ({
           )}
 
           {!historyLoading && historyData && (
-            <TimelineDetail
-              title={timelineTitle}
-              data={formattedHistoryData}
-            />
+            <TimelineDetail title={timelineTitle} data={formattedHistoryData} />
           )}
         </Box>
       </Box>

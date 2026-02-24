@@ -9,7 +9,7 @@ import debounce from "lodash.debounce";
 import { useMemo } from "react";
 import { Controller, useFormContext } from "react-hook-form";
 
-const EmailInputField = () => {
+const BasicInfoSection = () => {
   const {
     control,
     setError,
@@ -52,46 +52,6 @@ const EmailInputField = () => {
   );
 
   return (
-    <Controller
-      name="email"
-      control={control}
-      render={({ field }) => (
-        <TextField
-          {...field}
-          label="Email"
-          error={!!errors.email}
-          fullWidth
-          size="small"
-          placeholder="Johnsmith@gmail.com"
-          helperText={errors.email?.message as string}
-          onChange={(e) => {
-            field.onChange(e);
-            debouncedCheckEmail(e.target.value);
-          }}
-          slotProps={{
-            input: {
-              endAdornment: (
-                <InputAdornment position="end">
-                  {isCheckingEmail && (
-                    <CircularProgress size={16} color="inherit" />
-                  )}
-                </InputAdornment>
-              ),
-            },
-          }}
-        />
-      )}
-    />
-  );
-};
-
-const BasicInfoSection = ({ readOnly }: { readOnly?: boolean }) => {
-  const {
-    control,
-    formState: { errors },
-  } = useFormContext();
-
-  return (
     <Grid container spacing={2} sx={{ mb: 3 }}>
       <Grid size={4}>
         <Controller
@@ -104,7 +64,6 @@ const BasicInfoSection = ({ readOnly }: { readOnly?: boolean }) => {
               fullWidth
               size="small"
               placeholder="John Smith"
-              disabled={readOnly}
               error={!!errors.name}
               helperText={errors.name?.message as string}
             />
@@ -112,23 +71,36 @@ const BasicInfoSection = ({ readOnly }: { readOnly?: boolean }) => {
         />
       </Grid>
       <Grid size={4}>
-        {readOnly ? (
-          <Controller
-            name="email"
-            control={control}
-            render={({ field }) => (
-              <TextField
-                {...field}
-                label="Email"
-                fullWidth
-                size="small"
-                disabled
-              />
-            )}
-          />
-        ) : (
-          <EmailInputField />
-        )}
+        <Controller
+          name="email"
+          control={control}
+          render={({ field }) => (
+            <TextField
+              {...field}
+              label="Email"
+              error={!!errors.email}
+              fullWidth
+              size="small"
+              placeholder="Johnsmith@gmail.com"
+              helperText={errors.email?.message as string}
+              onChange={(e) => {
+                field.onChange(e);
+                debouncedCheckEmail(e.target.value);
+              }}
+              slotProps={{
+                input: {
+                  endAdornment: (
+                    <InputAdornment position="end">
+                      {isCheckingEmail && (
+                        <CircularProgress size={16} color="inherit" />
+                      )}
+                    </InputAdornment>
+                  ),
+                },
+              }}
+            />
+          )}
+        />
       </Grid>
       <Grid size={4}>
         <Controller
@@ -141,7 +113,6 @@ const BasicInfoSection = ({ readOnly }: { readOnly?: boolean }) => {
               fullWidth
               size="small"
               placeholder="Senior Developer"
-              disabled={readOnly}
               error={!!errors.job_designation}
               helperText={errors.job_designation?.message as string}
             />

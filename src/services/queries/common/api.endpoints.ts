@@ -1,6 +1,6 @@
 export const COMMON_ENDPOINTS = {
-  getRateTemplate: `/v1/common/template`
-}
+  getRateTemplate: `/v1/common/template`,
+};
 
 export const IMPORT_RATE_ENDPOINTS = {
   getModuleImports: `/v1/common/uploads`,
@@ -11,7 +11,7 @@ export const IMPORT_RATE_ENDPOINTS = {
 };
 
 export const EXPORT_RATE_ENDPOINTS = {
-    createExport: `/v1/exports`,
-    listExports: `/v1/exports/search`,
-    downloadExportFile: (id: string) => `/v1/exports/download/${id}`,
+  createExport: `/v1/exports`,
+  listExports: `/v1/exports/search`,
+  downloadExportFile: (id: string) => `/v1/exports/download/${id}`,
 };
