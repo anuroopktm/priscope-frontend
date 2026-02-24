@@ -24,13 +24,18 @@ axiosInstance.interceptors.request.use(
 // Response Interceptor
 axiosInstance.interceptors.response.use(
   (response) => response,
-  async (error: AxiosError) => {
-    if (error.response) {
-      if (error.response.status === 401) {
-        console.warn("Unauthorized access - redirecting to login...");
-        localStorage.clear();
-        window.location.href = "/auth/sign-in";
-      }
+  async (error: AxiosError<any>) => {
+    if (Array.isArray(error.response?.data?.detail)) {
+      const formattedErrors = error.response.data.detail.map(
+        (err: any) => err.msg,
+      );
+      error.response.data.detail = formattedErrors.join("\n");
+    }
+
+    if (error.response?.status === 401) {
+      console.warn("Unauthorized access - redirecting to login...");
+      localStorage.clear();
+      window.location.href = "/auth/sign-in";
     }
     return Promise.reject(error);
   },

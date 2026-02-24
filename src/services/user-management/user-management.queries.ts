@@ -1,14 +1,26 @@
-import { useMutation, useQuery } from "@tanstack/react-query";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import type { AxiosError } from "axios";
 import { axiosInstance } from "../api/axiosInstance";
 import type {
+  BulkDeleteUsersRequest,
+  BulkDeleteUsersResponse,
+  BulkStatusUpdateRequest,
+  BulkStatusUpdateResponse,
   CheckEmailRequest,
   CheckEmailResponse,
+  CheckTemplateNameRequest,
+  CheckTemplateNameResponse,
+  CheckTemplateRequest,
+  CheckTemplateResponse,
+  CreateRoleRequest,
+  CreateRoleResponse,
   GetPrivilegeTemplatesResponse,
   GetUsersRequest,
   GetUsersResponse,
   InviteUserRequest,
   InviteUserResponse,
+  ListUserPrivilegesRequest,
+  ListUserPrivilegesResponse,
   ResourcePrivilegesRequest,
   ResourcePrivilegesResponse,
 } from "./user-management.types";
@@ -79,6 +91,99 @@ export const useInviteUser = () => {
     mutationFn: async (payload: InviteUserRequest) => {
       const { data } = await axiosInstance.post("/v1/invite", payload);
       return data;
+    },
+  });
+};
+
+export const useListUserPrivileges = (payload: ListUserPrivilegesRequest) => {
+  return useQuery<ListUserPrivilegesResponse, AxiosError<{ detail: string }>>({
+    queryKey: ["user-privileges", payload.tenant_id, payload.user_id],
+    queryFn: async () => {
+      const { data } = await axiosInstance.get("/v1/list-user-privileges", {
+        params: payload,
+      });
+      return data;
+    },
+    enabled: !!payload.tenant_id && !!payload.user_id,
+    refetchOnWindowFocus: false,
+  });
+};
+
+export const useCheckPrivilegeTemplate = () => {
+  return useMutation<
+    CheckTemplateResponse,
+    AxiosError<{ detail: string }>,
+    CheckTemplateRequest
+  >({
+    mutationFn: async (payload: CheckTemplateRequest) => {
+      const { data } = await axiosInstance.post("/v1/templates/check", payload);
+      return data;
+    },
+  });
+};
+
+export const useCheckTemplateName = () => {
+  return useMutation<
+    CheckTemplateNameResponse,
+    AxiosError<{ detail: string }>,
+    CheckTemplateNameRequest
+  >({
+    mutationFn: async (payload: CheckTemplateNameRequest) => {
+      const { data } = await axiosInstance.post("/v1/template-name", payload);
+      return data;
+    },
+  });
+};
+
+export const useCreateRole = () => {
+  return useMutation<
+    CreateRoleResponse,
+    AxiosError<{ detail: string }>,
+    CreateRoleRequest
+  >({
+    mutationFn: async (payload: CreateRoleRequest) => {
+      const { data } = await axiosInstance.post("/v1/roles-creation", payload);
+      return data;
+    },
+  });
+};
+
+export const useBulkDeleteUsers = () => {
+  const queryClient = useQueryClient();
+
+  return useMutation<
+    BulkDeleteUsersResponse,
+    AxiosError<{ detail: string }>,
+    BulkDeleteUsersRequest
+  >({
+    mutationFn: async (payload: BulkDeleteUsersRequest) => {
+      const { data } = await axiosInstance.delete("/v1/users/bulk-delete", {
+        data: payload,
+      });
+      return data;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["users"] });
+    },
+  });
+};
+export const useBulkStatusUpdate = () => {
+  const queryClient = useQueryClient();
+
+  return useMutation<
+    BulkStatusUpdateResponse,
+    AxiosError<{ detail: string }>,
+    BulkStatusUpdateRequest
+  >({
+    mutationFn: async (payload: BulkStatusUpdateRequest) => {
+      const { data } = await axiosInstance.put(
+        "/v1/bulk-status-update",
+        payload,
+      );
+      return data;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["users"] });
     },
   });
 };

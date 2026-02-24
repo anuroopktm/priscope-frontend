@@ -2,25 +2,25 @@ import {
   useGetPrivilegeTemplates,
   useGetResourcePrivileges,
 } from "@/services/user-management/user-management.queries";
-import type { CreateUserFormValues } from "@/validations/user-management/create-user.validation";
+import type { ManageUserFormValues } from "@/validations/user-management/manage-user.validation";
 import { Box, Paper, Typography } from "@mui/material";
 import { useEffect, useMemo } from "react";
 import { useFormContext, useWatch } from "react-hook-form";
 import PermissionsList from "./PermissionsList";
 import RoleSelector from "./RoleSelector";
 
-const PermissionsManager = () => {
+const PermissionsManager = ({ readOnly }: { readOnly?: boolean }) => {
   const {
     control,
     setValue,
     formState: { errors },
-  } = useFormContext<CreateUserFormValues>();
+  } = useFormContext<ManageUserFormValues>();
 
   const currentRole = useWatch({
     control,
     name: "currentRole",
   });
-  const permissionsError = errors.permissions;
+  const permissionsError = !readOnly ? errors.permissions : undefined;
 
   const { data: templates, isLoading: isLoadingTemplates } =
     useGetPrivilegeTemplates(import.meta.env.VITE_TENANT_ID);
@@ -31,14 +31,14 @@ const PermissionsManager = () => {
     });
 
   useEffect(() => {
-    if (privileges) {
+    if (privileges && !readOnly) {
       if (currentRole === "custom") {
         setValue("defaultPermissions", privileges);
       } else {
         setValue("permissions", privileges);
       }
     }
-  }, [privileges, currentRole, setValue]);
+  }, [privileges, currentRole, setValue, readOnly]);
 
   const roleOptions = useMemo(() => {
     const fetchedRoles =
@@ -51,7 +51,7 @@ const PermissionsManager = () => {
   }, [templates]);
 
   const onRoleChange = (newId: string) => {
-    if (newId !== currentRole) {
+    if (!readOnly && newId !== currentRole) {
       setValue("permissions", []);
       setValue("currentRole", newId);
     }
@@ -64,6 +64,7 @@ const PermissionsManager = () => {
         onChange={onRoleChange}
         roles={roleOptions}
         loading={isLoadingTemplates}
+        disabled={readOnly}
       />
 
       {permissionsError && (
@@ -95,6 +96,7 @@ const PermissionsManager = () => {
         <PermissionsList
           privileges={privileges}
           isLoading={isLoadingPrivileges}
+          readOnly={readOnly}
         />
       </Paper>
     </Box>

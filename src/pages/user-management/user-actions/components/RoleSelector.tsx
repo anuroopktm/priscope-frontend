@@ -12,6 +12,7 @@ interface RoleSelectorProps {
   onChange: (val: string) => void;
   roles: { id: string; name: string }[];
   loading?: boolean;
+  disabled?: boolean;
 }
 
 const RoleSelector = ({
@@ -19,6 +20,7 @@ const RoleSelector = ({
   onChange,
   roles,
   loading,
+  disabled,
 }: RoleSelectorProps) => {
   const theme = useTheme();
 
@@ -56,6 +58,7 @@ const RoleSelector = ({
         <ToggleButtonGroup
           value={value}
           exclusive
+          disabled={disabled}
           onChange={(_, val) => onChange(val)}
           sx={{
             display: "flex",

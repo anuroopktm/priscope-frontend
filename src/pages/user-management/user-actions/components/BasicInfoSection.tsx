@@ -85,7 +85,7 @@ const EmailInputField = () => {
   );
 };
 
-const BasicInfoSection = () => {
+const BasicInfoSection = ({ readOnly }: { readOnly?: boolean }) => {
   const {
     control,
     formState: { errors },
@@ -104,6 +104,7 @@ const BasicInfoSection = () => {
               fullWidth
               size="small"
               placeholder="John Smith"
+              disabled={readOnly}
               error={!!errors.name}
               helperText={errors.name?.message as string}
             />
@@ -111,7 +112,23 @@ const BasicInfoSection = () => {
         />
       </Grid>
       <Grid size={4}>
-        <EmailInputField />
+        {readOnly ? (
+          <Controller
+            name="email"
+            control={control}
+            render={({ field }) => (
+              <TextField
+                {...field}
+                label="Email"
+                fullWidth
+                size="small"
+                disabled
+              />
+            )}
+          />
+        ) : (
+          <EmailInputField />
+        )}
       </Grid>
       <Grid size={4}>
         <Controller
@@ -124,6 +141,7 @@ const BasicInfoSection = () => {
               fullWidth
               size="small"
               placeholder="Senior Developer"
+              disabled={readOnly}
               error={!!errors.job_designation}
               helperText={errors.job_designation?.message as string}
             />

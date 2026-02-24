@@ -1,5 +1,5 @@
 import type { ResourcePrivilege } from "@/services/user-management/user-management.types";
-import type { CreateUserFormValues } from "@/validations/user-management/create-user.validation";
+import type { ManageUserFormValues } from "@/validations/user-management/manage-user.validation";
 import { Box, CircularProgress, Grid, Typography } from "@mui/material";
 import { useCallback, useMemo } from "react";
 import { useFormContext, useWatch } from "react-hook-form";
@@ -8,10 +8,15 @@ import PermissionItem from "./PermissionItem";
 interface PermissionsListProps {
   privileges: ResourcePrivilege[] | undefined;
   isLoading: boolean;
+  readOnly?: boolean;
 }
 
-const PermissionsList = ({ privileges, isLoading }: PermissionsListProps) => {
-  const { control, setValue } = useFormContext<CreateUserFormValues>();
+const PermissionsList = ({
+  privileges,
+  isLoading,
+  readOnly,
+}: PermissionsListProps) => {
+  const { control, setValue } = useFormContext<ManageUserFormValues>();
 
   const defaultPrivileges =
     useWatch({
@@ -120,7 +125,7 @@ const PermissionsList = ({ privileges, isLoading }: PermissionsListProps) => {
               key={p.resource_privilege_id}
               privilege={p}
               checked={selectedIds.has(p.resource_privilege_id)}
-              disabled={!isEditable}
+              disabled={!isEditable || readOnly}
               onToggle={handleToggle}
             />
           ))}

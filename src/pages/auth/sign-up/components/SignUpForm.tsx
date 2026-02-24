@@ -47,7 +47,7 @@ const SignUpForm = () => {
             error={errors.confirmPassword?.message}
           />
 
-          <Button size="large" type="submit" fullWidth>
+          <Button size="large" type="submit" fullWidth variant="contained">
             Generate OTP
           </Button>
         </Stack>

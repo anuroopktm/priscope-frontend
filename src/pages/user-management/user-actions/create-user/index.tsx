@@ -5,21 +5,21 @@ import {
 } from "@/services/user-management/user-management.queries";
 import { useToastStore } from "@/store/useToastStore";
 import {
-  createUserSchema,
-  type CreateUserFormValues,
-} from "@/validations/user-management/create-user.validation";
+  manageUserSchema,
+  type ManageUserFormValues,
+} from "@/validations/user-management/manage-user.validation";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Box, Paper, useTheme } from "@mui/material";
 import { useState } from "react";
 import { FormProvider, useForm } from "react-hook-form";
 import { useNavigate } from "react-router-dom";
-import ActionHeader from "./components/ActionHeader";
-import BasicInfoSection from "./components/BasicInfoSection";
-import CreateInvitationModal from "./components/CreateInvitationModal";
-import FooterActions from "./components/FooterActions";
-import PermissionsManager from "./components/PermissionsManager";
+import ActionHeader from "../components/ActionHeader";
+import BasicInfoSection from "../components/BasicInfoSection";
+import CreateInvitationModal from "../components/CreateInvitationModal";
+import FooterActions from "../components/FooterActions";
+import PermissionsManager from "../components/PermissionsManager";
 
-const UserManagementCreateUserPage = () => {
+const CreateUserPage = () => {
   const theme = useTheme();
   const navigate = useNavigate();
   const [showModal, setShowModal] = useState<boolean>(false);
@@ -33,8 +33,8 @@ const UserManagementCreateUserPage = () => {
   } = useCheckPrivilegeTemplate();
   const { mutate: createRole, isPending: isCreatingRole } = useCreateRole();
 
-  const methods = useForm<CreateUserFormValues>({
-    resolver: zodResolver(createUserSchema),
+  const methods = useForm<ManageUserFormValues>({
+    resolver: zodResolver(manageUserSchema),
     defaultValues: {
       name: "",
       email: "",
@@ -132,7 +132,7 @@ const UserManagementCreateUserPage = () => {
         component="form"
         onSubmit={methods.handleSubmit(onSubmit, (errors) => {
           if (errors.permissions?.message)
-            showToast(errors.permissions.message, "error");
+            showToast(errors.permissions.message as string, "error");
         })}
         sx={{
           display: "flex",
@@ -172,4 +172,4 @@ const UserManagementCreateUserPage = () => {
   );
 };
 
-export default UserManagementCreateUserPage;
+export default CreateUserPage;
