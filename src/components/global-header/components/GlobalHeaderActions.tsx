@@ -17,11 +17,10 @@ export const GlobalHeaderActions = () => {
       <Select
         value={tenant}
         onChange={(e) => setTenant(e.target.value)}
-        variant="outlined"
         size="small"
         IconComponent={KeyboardArrowDown}
         sx={{
-          height: 32,
+          // height: 32,
           color: "white",
           borderRadius: 20,
           overflow: "hidden",

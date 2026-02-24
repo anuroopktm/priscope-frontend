@@ -131,7 +131,7 @@ const CsvTypeSelection: React.FC<CsvTypeSelectionProps> = ({
             {getCurrentFields().map((field) => (
               <FormControl key={field} fullWidth size="small">
                 <Select
-                  variant={"outlined"}
+                  // variant={"outlined"}
                   value={controlFields[field as keyof ControlFields]}
                   onChange={(e) => {
                     setControlFields(field, e.target.value);

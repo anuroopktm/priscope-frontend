@@ -16,7 +16,7 @@ export const useListApprovalRequests = () => {
   >({
     mutationFn: async (payload) => {
       const response = await axiosInstance.post(
-        `/approval-requests/search`,
+        `/v1/approval-requests/search`,
         payload,
       );
       return response.data;

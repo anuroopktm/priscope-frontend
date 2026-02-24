@@ -1,21 +1,110 @@
-import { alpha, type Theme } from "@mui/material/styles";
+// // Select.ts
+// import type { Theme } from "@mui/material/styles";
+
+// export default function Select(theme: Theme) {
+//   return {
+//     MuiSelect: {
+//       variants: [
+
+//       ],
+
+//       styleOverrides: {
+//         root: {
+//           "& .MuiSvgIcon-root": {
+//             color: "#0000003B", // arrow color
+//           },
+
+//           "& .MuiOutlinedInput-root": {
+//             "& fieldset": {
+//               borderColor: "#0000003B",
+//             },
+//             "&:hover fieldset": {
+//               borderColor: "#0000003B",
+//             },
+//             "&.Mui-focused fieldset": {
+//               borderColor: "#0000003B",
+//             },
+//           },
+//         },
+//       },
+//     },
+
+//     MuiOutlinedInput: {
+//       styleOverrides: {
+//         root: {
+//           "& .MuiSvgIcon-root": {
+//             color: "#0000003B",
+//           },
+
+//           "& fieldset": {
+//             borderColor: "#0000003B",
+//           },
+//           "&:hover fieldset": {
+//             borderColor: "#0000003B",
+//           },
+//           "&.Mui-focused fieldset": {
+//             borderColor: "#0000003B",
+//           },
+
+//           ".MuiOutlinedInput-notchedOutline": {
+//             borderColor: "#0000003B",
+//           },
+//           "&.Mui-focused .MuiOutlinedInput-notchedOutline": {
+//             borderColor: "#0000003B",
+//           },
+//         },
+//       },
+//     },
+//   };
+// }
+
+// Select.ts
+import type { Theme } from "@mui/material/styles";
 
 export default function Select(theme: Theme) {
   return {
     MuiSelect: {
-      styleOverrides: {
-        "& .MuiSvgIcon-root": {
-          color: "#0000003B", // <------------------ arrow-svg-color
+      variants: [
+        {
+          props: { variant: "rateLibrary" },
+          style: {
+            color: "#000", // text color
+            fontSize: "14px",
+            padding: "6px 12px",
+            borderRadius: 8,
+            backgroundColor: "#fff",
+            "& .MuiOutlinedInput-notchedOutline": {
+              borderColor: "#0000003B",
+            },
+            "&:hover .MuiOutlinedInput-notchedOutline": {
+              borderColor: "#0000003B",
+            },
+            "&.Mui-focused .MuiOutlinedInput-notchedOutline": {
+              borderColor: "#0000003B",
+            },
+            "& .MuiSvgIcon-root": {
+              color: "#0000003B", // arrow color
+            },
+          },
         },
-        "&.MuiOutlinedInput-root": {
-          "& fieldset": {
-            borderColor: "#0000003B", // <------------------ outline-color by default
+      ],
+
+      styleOverrides: {
+        root: {
+          "& .MuiSvgIcon-root": {
+            color: "#0000003B",
           },
-          "&:hover fieldset": {
-            borderColor: "#0000003B", // <------------------ outline-color on hover
-          },
-          "&.Mui-focused fieldset": {
-            borderColor: "#0000003B", // <------------------ outline-color on focus
+
+          "& .MuiOutlinedInput-root": {
+            "& fieldset": {
+              borderColor: "#0000003B",
+            },
+            "&:hover fieldset": {
+              borderColor: "#0000003B",
+            },
+            "&.Mui-focused fieldset": {
+              borderColor: "#0000003B",
+            },
           },
         },
       },
@@ -25,24 +114,24 @@ export default function Select(theme: Theme) {
       styleOverrides: {
         root: {
           "& .MuiSvgIcon-root": {
-            color: "#0000003B", // <------------------ arrow-svg-color
+            color: "#0000003B",
           },
-          "&.MuiOutlinedInput-root": {
-            "& fieldset": {
-              borderColor: "#0000003B", // <------------------ outline-color by default
-            },
-            "&:hover fieldset": {
-              borderColor: "#0000003B", // <------------------ outline-color on hover
-            },
-            "&.Mui-focused fieldset": {
-              borderColor: "#0000003B", // <------------------ outline-color on focus
-            },
-            ".MuiOutlinedInput-notchedOutline": {
-              borderColor: "#0000003B",
-            },
-            "&.Mui-focused .MuiOutlinedInput-notchedOutline": {
-              borderColor: "#0000003B",
-            },
+
+          "& fieldset": {
+            borderColor: "#0000003B",
+          },
+          "&:hover fieldset": {
+            borderColor: "#0000003B",
+          },
+          "&.Mui-focused fieldset": {
+            borderColor: "#0000003B",
+          },
+
+          ".MuiOutlinedInput-notchedOutline": {
+            borderColor: "#0000003B",
+          },
+          "&.Mui-focused .MuiOutlinedInput-notchedOutline": {
+            borderColor: "#0000003B",
           },
         },
       },
