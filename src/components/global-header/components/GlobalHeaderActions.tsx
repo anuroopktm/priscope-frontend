@@ -3,7 +3,7 @@ import SettingsIcon from "@/assets/global-header/settings.svg?react";
 import { Avatar, IconButton, MenuItem, Select, Stack } from "@mui/material";
 import { useState } from "react";
 
-export const GlobalHeaderActions = () => {
+const GlobalHeaderActions = () => {
   const [tenant, setTenant] = useState("tenant-name");
 
   return (
@@ -74,3 +74,5 @@ export const GlobalHeaderActions = () => {
     </Stack>
   );
 };
+
+export default GlobalHeaderActions;

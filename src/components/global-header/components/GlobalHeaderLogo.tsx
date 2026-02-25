@@ -2,7 +2,7 @@ import brandLogo from "@/assets/login/brand.svg";
 import { Box } from "@mui/material";
 import { Link } from "react-router-dom";
 
-export const GlobalHeaderLogo = () => {
+const GlobalHeaderLogo = () => {
   return (
     <Link to="/scenario-builder">
       <Box
@@ -14,3 +14,5 @@ export const GlobalHeaderLogo = () => {
     </Link>
   );
 };
+
+export default GlobalHeaderLogo;
