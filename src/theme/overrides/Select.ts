@@ -9,6 +9,8 @@ export default function Select(theme: Theme) {
       },
       styleOverrides: {
         select: {
+          fontSize: "14px",
+          fontWeight: 500,
           padding: "7px 6px",
           paddingRight: "40px !important",
 
