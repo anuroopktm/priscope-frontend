@@ -119,7 +119,7 @@ const ColumnDropdown: React.FC<ColumnDropdownProps> = ({
         onClick={handleToggle}
         sx={{
           padding: "8px 12px",
-          color: "#ccc",
+          color: "#ffffff",
           "&:hover": {
             color: "white",
             bgcolor: "rgba(255, 255, 255, 0.1)",

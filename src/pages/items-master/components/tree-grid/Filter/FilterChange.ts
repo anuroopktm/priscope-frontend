@@ -3,6 +3,7 @@ export const handleFilterChange = (
   setFilter: React.Dispatch<React.SetStateAction<Record<string, string[]>>>,
 ) => {
   const filters = grid?.GetFilter();
+  console.log(filters,"filterssssssssssssssssss")
   const data = filters?.reduce(
     (acc, [key, value]) => {
       if (!acc[key]) acc[key] = [];
@@ -16,6 +17,7 @@ export const handleFilterChange = (
     },
     {} as Record<string, string[]>,
   );
+  console.log(data,"datassssssssssssssss in filter")
   setFilter(data);
   return true;
 };

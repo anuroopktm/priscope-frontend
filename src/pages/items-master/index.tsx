@@ -1,13 +1,10 @@
 import { Box } from "@mui/material";
 import { ActionHeader } from "../scenario-builder/components/ActionHeader";
-// import { useTreeGridInit } from "../scenario-builder/hooks/use-tree-grid-init";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-// import { TreeGridLayout } from "../scenario-builder/constant/tree-grid-layout";
 import LoaderOverlay from "@/components/common/loader";
 import RequestsModal from "@/components/common/requests-modal";
 import {
   useAddBulkInsertAdminRequest,
-  // useBulkInsertItems,
   useDeleteItemMasterRow,
   useEditItemMasterItem,
   useExportItemMasterRow,
@@ -22,6 +19,7 @@ import { page_size_item_master } from "./constants/itemmaster.constants";
 import {
   buildItemMasterTreeGridBody,
   buildItemMasterTreeGridCols,
+  convertSavedFilter,
   getEditCellValueAdminApproval,
   getItemMasterLayout,
 } from "./helpers/itemMasterTreeGridHelperFunction";
@@ -48,6 +46,15 @@ import RequestSuccessDialog from "@/components/common/request-notification";
 import FileDetailsModal from "@/components/file-detail-modal";
 import { FILE_FILTER_OPTIONS } from "@/constants/file-modal.constants";
 import { INITIAL_HEADERS } from "./constants/tableHeaders.constants";
+import {
+  showColumn,
+  hideColumn,
+  addColumn,
+} from "./components/tree-grid/Columns/Columns";
+import { handleItemMasterExport } from "./actions/handleItemMasterExport";
+import { useToastStore } from "@/store/useToastStore";
+import { handleEditCellAdminRequest } from "./actions/editItemMasterAdmin";
+import { handleDeleteSelection } from "./actions/handleDeleteSelection";
 
 export interface TreeGridState {
   showSavePopover: boolean;
@@ -84,6 +91,9 @@ const ItemsMasterPage = () => {
   const [commentAdded, setCommentAdded] = useState(false);
   const privileges: {} = JSON.parse(localStorage.getItem("privileges") || "");
   const [headerLabels, setHeaderLabels] = useState<string[]>([]);
+  const [saveFilter, setSaveFilter] = useState(false);
+  const prevFilterRef = useRef<string>("");
+  const { showToast } = useToastStore();
 
   const [state, setState] = useState<TreeGridState>({
     showSavePopover: false,
@@ -143,9 +153,9 @@ const ItemsMasterPage = () => {
   const [showFilesModal, setShowFilesModal] = useState<boolean>(false);
 
   useEffect(() => {
-    window.TGSetEvent("OnScroll", gridId, onScroll);
+    window.TGSetEvent("OnScroll", gridId, onHandleScroll);
     window.TGSetEvent("OnSelected", gridId, onSelected);
-    window.TGSetEvent("OnFilter", gridId, handleFilterChange);
+    window.TGSetEvent("OnFilter", gridId, onHandleFilterChange);
     window.TGSetEvent("OnValueChanged", gridId, onHandleValueChanged);
     // window.Grids.OnRightClick = handleRightClick;
     return () => {
@@ -214,6 +224,13 @@ const ItemsMasterPage = () => {
   }, [headerList]);
 
   useEffect(() => {
+    if (!gridInstance.current) return;
+    const lastCol = headerLabels[headerLabels.length - 1];
+    if (!lastCol) return;
+    addColumn(gridInstance.current, lastCol);
+  }, [headerLabels]);
+
+  useEffect(() => {
     if (prevSearchQueryRef.current !== debouncedSearchQuery) {
       prevSearchQueryRef.current = debouncedSearchQuery;
 
@@ -224,60 +241,35 @@ const ItemsMasterPage = () => {
   }, [debouncedSearchQuery]);
 
   useEffect(() => {
+    console.log("filter in mian", filter);
+    const filterString = JSON.stringify(filter);
+
+    if (prevFilterRef.current !== filterString) {
+      prevFilterRef.current = filterString;
+
+      if (!isInitialLoadRef.current) {
+        isSearchReplaceRef.current = true;
+      }
+    }
+  }, [filter]);
+
+  useEffect(() => {
     if (state.showSavePopover && gridInstance.current) {
       gridInstance.current.Focus(null, null);
     }
   }, [state.showSavePopover]);
 
   const handleExport = () => {
-    if (!selectedExport && (!selectedRows || selectedRows.length === 0)) return;
-    setShowLoader(true);
-    const payload: ExportItemMasterRowPayload = {
-      module_name: "item_master",
-      feature_name: "main",
-      file_type: "csv",
-      parameters: {
-        ids: selectedExport ? ["all"] : selectedRows,
-        filter: {},
-        options: {},
-      },
-    };
-    itemMasterExportRowMutate(payload, {
-      onSuccess: (response) => {
-        setShowLoader(false);
-        setSnackbar({
-          message: "Rows exported successfully!",
-          severity: "success",
-        });
-        gridInstance?.current?.ClearSelection();
-        setSelectedRows([]);
-        setSelectedExport(false);
-        DownloadExportFile(response?.export_id, {
-          onSuccess: (res) => {
-            if (res?.download_url) {
-              const link = document.createElement("a");
-              link.href = res.download_url;
-              link.setAttribute("download", "export_file.csv");
-              document.body.appendChild(link);
-              link.click();
-              link.remove();
-            }
-          },
-          onError: (err: any) => {
-            setSnackbar({
-              message: "Failed to download file",
-              severity: "error",
-            });
-          },
-        });
-      },
-      onError: (error) => {
-        setShowLoader(false);
-        setSnackbar({
-          message: "Failed to export rows",
-          severity: "error",
-        });
-      },
+    handleItemMasterExport({
+      selectedExport,
+      selectedRows,
+      setShowLoader,
+      showToast,
+      gridInstance,
+      setSelectedRows,
+      setSelectedExport,
+      itemMasterExportRowMutate,
+      DownloadExportFile,
     });
   };
   const onHandleValueChanged = (
@@ -291,80 +283,22 @@ const ItemsMasterPage = () => {
     handleValueChanged(grid, row, col, val, oldval, gridId, setState);
   };
 
-  const handleDeleteSelection = () => {
-    if (!selectedRows || selectedRows.length === 0) return;
-    const payload: DeleteSelectedRowPayload = { item_ids: selectedRows };
-    setShowLoader(true);
-    deleteItemMasterRow(payload, {
-      onSuccess: (response) => {
-        setShowLoader(false);
-        setSnackbar({
-          message: "Deleted successfully!",
-          severity: "success",
-        });
-        deleteSeletectedRows(gridInstance.current);
-        // gridInstance?.current?.deleteSeletectedRows();
-        setSelectedRows([]);
-      },
-      onError: (e) => {
-        setSnackbar({
-          message: "Failed to delete rows",
-          severity: "error",
-        });
-        setShowLoader(false);
-      },
-    });
+  const onHandleFilterChange = (grid: TGrid) => {
+    handleFilterChange(grid, setFilter);
   };
 
-  const handleEditCellAdminRequest = (
-    row: TRow,
-    col: string,
-    value: string,
-    oldValue: string,
-    comment?: string | null,
-  ) => {
-    const item_id = row?.id;
-    const allItems: any =
-      itemMasterDataList?.pages.flatMap((page) => page.items) || [];
-    const finalPayload: itemMasterBodyResponseItems | undefined = allItems.find(
-      (item: any) => item.id === item_id,
-    );
-    const oldPayload = structuredClone(finalPayload);
-    if (!finalPayload) return;
-    if (finalPayload.attributes?.[col]) {
-      finalPayload.attributes[col].value = value;
-    } else {
-      (finalPayload as unknown as Record<string, unknown>)[col] = value;
-    }
-    const commentsPayload =
-      comment && comment.trim().length > 0
-        ? [
-            {
-              comment_type: "field",
-              item_field_key: col,
-              comment: comment,
-            },
-          ]
-        : undefined;
-    const adminRequestEditCellPayload = getEditCellValueAdminApproval(
-      finalPayload,
-      oldPayload,
-      commentsPayload,
-    );
-    setShowLoader(true);
-    if (!adminRequestEditCellPayload) return null;
-    itemMasterBulkInsertAdminApproval(adminRequestEditCellPayload, {
-      onSuccess: (response) => {
-        setShowLoader(false);
-        setRequestSuccessNotficationVisible(true);
-      },
-      onError: (e) => {
-        setShowLoader(false);
-        setSnackbar({
-          message: "Failed to save changes. Please try again.",
-          severity: "warning",
-        });
-      },
+  const onHandleScroll = (grid: TGrid, hpos: number, vpos: number) => {
+    onScroll(grid, hpos, vpos, gridId, 200, handleLoadMore);
+  };
+
+  const onDeleteSelection = () => {
+    handleDeleteSelection({
+      selectedRows,
+      deleteItemMasterRow,
+      gridInstance,
+      setSelectedRows,
+      setShowLoader,
+      showToast,
     });
   };
 
@@ -379,9 +313,20 @@ const ItemsMasterPage = () => {
     if (!hasEditItemMasterPrivilege) {
       const result = await openConfirmationModal("edit", confirm);
       if (result) {
-        handleEditCellAdminRequest(row, col, value, oldValue, comment);
+        handleEditCellAdminRequest({
+          row,
+          col,
+          value,
+          oldValue,
+          comment,
+          itemMasterDataList,
+          itemMasterBulkInsertAdminApproval,
+          setShowLoader,
+          setRequestSuccessNotficationVisible,
+          showToast,
+        });
       } else {
-        const Grid = gridInstance.current?.getGridInstance();
+        const Grid = gridInstance.current;
         if (Grid) {
           const gridRow = Grid.GetRowById(row.id);
           if (gridRow) Grid.SetValue(gridRow, col, oldValue, 1);
@@ -476,7 +421,7 @@ const ItemsMasterPage = () => {
     });
 
     Grid.Update();
-    gridInstance.current?.setLoading(false);
+    // gridInstance.current?.setLoading(false);
   };
 
   useEffect(() => {
@@ -503,7 +448,7 @@ const ItemsMasterPage = () => {
     }
 
     // const Grid = gridInstance?.current?.getGridInstance();
-    const Grid = gridInstance?.getGridInstance();
+    const Grid = gridInstance?.current;
     if (!Grid) return;
     /**  2. SEARCH REPLACE (Grid API) */
     if (isSearchReplaceRef.current) {
@@ -520,7 +465,10 @@ const ItemsMasterPage = () => {
 
       Grid.ReloadBody();
 
-      gridInstance.current?.setLoading(false);
+      // gridInstance.current?.setLoading(false);
+      if (isFetchingNextPage) return;
+      if (!hasNextPage) return;
+      fetchNextPage();
 
       isSearchReplaceRef.current = false;
       return;
@@ -555,9 +503,6 @@ const ItemsMasterPage = () => {
     data,
     handleGridReady,
   );
-  useEffect(() => {
-    console.log(gridInstance);
-  }, [gridInstance]);
 
   const onSelected = (grid: TGrid) => {
     handleSelected(grid, setSelectedRows);
@@ -594,6 +539,28 @@ const ItemsMasterPage = () => {
     }));
   };
 
+  const handleColumnVisibility = (label: string, check: boolean) => {
+    if (check) {
+      showColumn(gridInstance.current, label);
+    } else {
+      hideColumn(gridInstance.current, label);
+    }
+  };
+
+  const handleClearAllFilters = useCallback(() => {
+    const Grid = gridInstance.current;
+    if (Grid) {
+      Grid.ChangeFilter("", "", "", 0, 0);
+    }
+    setFilter({});
+  }, []);
+
+  const applySavedFilterToFilterRow = (filter: Record<string, string[]>) => {
+    const Grid = gridInstance.current;
+    if (!Grid) return;
+    const { cols, values, operators } = convertSavedFilter(filter);
+    Grid.ChangeFilter(cols, values, operators, false, false);
+  };
   return (
     <Box
       sx={{
@@ -612,15 +579,20 @@ const ItemsMasterPage = () => {
         onImportClick={() => setShowUploadFlow(true)}
         selectedRows={selectedRows}
         onHandleExport={handleExport}
-        handleDeleteSelection={handleDeleteSelection}
+        handleDeleteSelection={onDeleteSelection}
         headerLabels={headerLabels}
         setHeaderLabels={setHeaderLabels}
         selectedColumns={selectedColumns}
         setSelectedColumns={setSelectedColumns}
+        handleColumnVisibility={handleColumnVisibility}
+        saveFilter={saveFilter}
+        setSaveFilter={setSaveFilter}
+        filter={filter}
+        saveFilterJson={setFilter}
+        onClearAllFilters={handleClearAllFilters}
+        applySavedFilterToFilterRow={applySavedFilterToFilterRow}
       />
 
-      {/* <Box sx={{ display: "flex", position: "relative" }}> */}
-      {/* <MainContentContainer hasFilter={true}> */}
       {openReqestModal && (
         <RequestsModal
           onClose={setOpenRequestModal}

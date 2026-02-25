@@ -4,7 +4,6 @@ import ClockIcon from "@/assets/common/clock.svg";
 import DownloadIcon from "@/assets/common/download.svg";
 import CloseIcon from "@/assets/common/multiplication-sign.svg";
 import UserIcon from "@/assets/common/user-circle.svg";
-// import { mapExports } from "@/shared/helpers/file-modal-helpers";
 import {
   useGetModuleImportErrorFile,
   useListModuleImports,
@@ -12,7 +11,6 @@ import {
   useListExport,
   useGetExportedFile,
 } from "@/services/queries/common/common.queries";
-// import getListExportPayload from "@/shared/utils/getListExportPayload";
 import {
   Box,
   Chip,
@@ -186,12 +184,12 @@ const FileDetailsModal: React.FC<FileDetailsModalProps> = ({
     if (newAlignment !== null) setAlignment(newAlignment);
   };
 
-  const toggleFileExpansion = (fileId: string) => {
-    setExpandedFiles((prev) => ({
-      ...prev,
-      [fileId]: !prev[fileId],
-    }));
-  };
+  // const toggleFileExpansion = (fileId: string) => {
+  //   setExpandedFiles((prev) => ({
+  //     ...prev,
+  //     [fileId]: !prev[fileId],
+  //   }));
+  // };
 
   const handleCloseFileModal = () => {
     onClose(false);

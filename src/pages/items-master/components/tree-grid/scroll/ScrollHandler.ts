@@ -1,3 +1,5 @@
+let gridLoadingMap: Record<string, boolean> = {};
+
 export const onScroll = (
   grid: TGrid,
   hpos: number,
@@ -7,7 +9,6 @@ export const onScroll = (
   onLoadMore: () => void,
 ): void => {
   if (!onLoadMore) return;
-  let gridLoadingMap: Record<string, boolean> = {};
   if (gridLoadingMap[gridId]) return;
   const lastRow = grid?.GetLast();
   if (!lastRow) return;
