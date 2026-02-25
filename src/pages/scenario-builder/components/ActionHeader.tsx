@@ -2,7 +2,6 @@ import ExportDataIcon from "@/assets/common/export-data.svg";
 import ImportDataIcon from "@/assets/common/import-data.svg";
 import LogFileIcon from "@/assets/common/log-file-view.svg";
 import RequestsIcon from "@/assets/items-master/requests.svg";
-import ConfirmationDialog from "@/components/common/upload-modal/confirmation-modal";
 import {
   AddOutlined,
   BookmarkBorderOutlined,
