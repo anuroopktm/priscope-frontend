@@ -94,13 +94,11 @@ const ItemsMasterPage = () => {
   const [saveFilter, setSaveFilter] = useState(false);
   const prevFilterRef = useRef<string>("");
   const { showToast } = useToastStore();
-
   const [state, setState] = useState<TreeGridState>({
     showSavePopover: false,
     popoverPosition: { top: 0, left: 0 },
     changedCell: null,
   });
-
   const [selectedColumns, setSelectedColumns] = useState<
     Record<string, boolean>
   >({});
@@ -378,18 +376,12 @@ const ItemsMasterPage = () => {
       {
         onSuccess: () => {
           setShowLoader(false);
-          setSnackbar({
-            message: "Item updated successfully!",
-            severity: "success",
-          });
+          showToast("Item updated successfully!", "success");
           queryClient.invalidateQueries({ queryKey: ["item-master-history"] });
         },
         onError: () => {
           setShowLoader(false);
-          setSnackbar({
-            message: "Failed to save changes. Please try again.,",
-            severity: "warning",
-          });
+          showToast("Failed to save changes. Please try again.", "warning");
         },
       },
     );
@@ -482,7 +474,6 @@ const ItemsMasterPage = () => {
     addRowsToGrid(dataToAdd?.Body[0]);
   }, [itemMasterDataList, listHeaderData]);
 
-  // Optional: Function to attach event handlers after initialization
   const handleGridReady = useCallback((grid: TGrid) => {
     console.log("handleGridReady");
   }, []);
@@ -495,7 +486,6 @@ const ItemsMasterPage = () => {
     console.log("View log clicked");
   };
 
-  // Initialize the grid using the dedicated hook
   const gridInstance = useTreeGridInit(
     gridId,
     containerId,
@@ -579,6 +569,7 @@ const ItemsMasterPage = () => {
         onImportClick={() => setShowUploadFlow(true)}
         selectedRows={selectedRows}
         onHandleExport={handleExport}
+        setSelectedExport={setSelectedExport}
         handleDeleteSelection={onDeleteSelection}
         headerLabels={headerLabels}
         setHeaderLabels={setHeaderLabels}
@@ -608,9 +599,6 @@ const ItemsMasterPage = () => {
           filterOptions={FILE_FILTER_OPTIONS}
         />
       )}
-      {/* </MainContentContainer> */}
-      {/* </Box> */}
-
       <Box
         sx={{
           flex: 1,

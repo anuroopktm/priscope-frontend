@@ -44,6 +44,7 @@ interface FilterProps {
   >;
   onClearAllFilters?: () => void;
   applySavedFilterToFilterRow: (filter: Record<string, string[]>) => void;
+  setSelectedExport: React.Dispatch<React.SetStateAction<boolean>>;
 }
 
 export const ActionHeader = ({
@@ -66,13 +67,14 @@ export const ActionHeader = ({
   saveFilterJson,
   onClearAllFilters,
   applySavedFilterToFilterRow,
+  setSelectedExport,
 }: FilterProps) => {
   const [openDeleteModal, setOpenDeleteModal] = useState(false);
   const [filterName, setFilterName] = useState("");
   const queryClient = useQueryClient();
   const { mutate: mutateSaveFilter, isPending: mutateSaveFilterPending } =
     useSaveFilter();
-    
+
   const { showToast } = useToastStore();
 
   const handleRequestsClick = () => {
@@ -97,6 +99,11 @@ export const ActionHeader = ({
 
   const handleCloseSaveFilterModal = () => {
     setSaveFilter(false);
+  };
+
+  const handleExportData = () => {
+    setSelectedExport(true);
+    onHandleExport();
   };
 
   const handleSaveFilterModal = (label: string) => {
@@ -248,7 +255,7 @@ export const ActionHeader = ({
 
               <Button
                 variant="contained"
-                // onClick={handleExportData}
+                onClick={handleExportData}
                 startIcon={<img src={ExportIcon} alt="Export" width={16} />}
               >
                 Export

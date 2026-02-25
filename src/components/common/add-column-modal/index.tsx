@@ -151,9 +151,6 @@ const CreateColumnModal = ({
             handleCancel();
           }}
           variant="outlined"
-          sx={{
-            height: "40px",
-          }}
         >
           Cancel
         </Button>
