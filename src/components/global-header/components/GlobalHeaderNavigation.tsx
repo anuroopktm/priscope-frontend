@@ -36,7 +36,7 @@ const GlobalHeaderNavigation = () => {
             variant="filled"
             disableUnderline
             displayEmpty
-            onChange={(e) => navigate(e.target.value)}
+            // onChange={(e) => navigate(e.target.value)}
             renderValue={() => (
               <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
                 <Icon />

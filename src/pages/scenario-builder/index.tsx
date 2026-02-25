@@ -56,7 +56,7 @@ const ScenarioBuilderPage = () => {
         bgcolor: "brand.background",
       }}
     >
-      <ActionHeader />
+      <ActionHeader selectedRows={[]} />
 
       <Box
         sx={{

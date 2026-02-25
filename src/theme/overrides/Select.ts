@@ -14,9 +14,9 @@ export default function Select(theme: Theme) {
           padding: "7px 16px",
           paddingRight: "40px !important",
 
-          "&:focus": {
-            backgroundColor: "transparent",
-          },
+          // "&:focus": {
+          //   backgroundColor: "transparent",
+          // },
         },
 
         icon: {
@@ -44,10 +44,6 @@ export default function Select(theme: Theme) {
           "&.Mui-disabled": {
             backgroundColor: theme.palette.action.disabledBackground,
             color: theme.palette.text.disabled,
-          },
-
-          "&:before, &:after": {
-            display: "none",
           },
         },
       },

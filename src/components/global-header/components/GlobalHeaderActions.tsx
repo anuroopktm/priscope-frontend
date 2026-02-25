@@ -13,6 +13,7 @@ const GlobalHeaderActions = () => {
         onChange={(e) => setTenant(e.target.value)}
         size="small"
         variant="filled"
+        disableUnderline
         sx={{
           minWidth: 200,
           textAlign: "center",
