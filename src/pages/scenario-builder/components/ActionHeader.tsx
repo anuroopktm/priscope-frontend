@@ -1,3 +1,8 @@
+import ExportDataIcon from "@/assets/common/export-data.svg";
+import ImportDataIcon from "@/assets/common/import-data.svg";
+import LogFileIcon from "@/assets/common/log-file-view.svg";
+import RequestsIcon from "@/assets/items-master/requests.svg";
+import ConfirmationDialog from "@/components/common/upload-modal/confirmation-modal";
 import {
   AddOutlined,
   BookmarkBorderOutlined,
@@ -5,14 +10,9 @@ import {
   KeyboardArrowDown,
   Search,
 } from "@mui/icons-material";
-import { Box, Button, InputAdornment, Stack, TextField } from "@mui/material";
-import { useTheme } from "@mui/material/styles";
-import RequestsIcon from "@/assets/items-master/requests.svg";
-import LogFileIcon from "@/assets/common/log-file-view.svg";
-import KeyboardArrowDownRoundedIcon from "@mui/icons-material/KeyboardArrowDownRounded";
-import ImportDataIcon from "@/assets/common/import-data.svg";
-import ExportDataIcon from "@/assets/common/export-data.svg";
 import DeleteOutlineIcon from "@mui/icons-material/DeleteOutline";
+import KeyboardArrowDownRoundedIcon from "@mui/icons-material/KeyboardArrowDownRounded";
+import { Box, Button, InputAdornment, Stack, TextField } from "@mui/material";
 import { useState } from "react";
 import ConfirmationDialog from "@/components/common/upload-modal/confirmation-modal";
 import ColumnDropdown from "@/pages/items-master/components/columns-dropdown";
@@ -48,7 +48,6 @@ export const ActionHeader = ({
   selectedColumns,
   setSelectedColumns
 }: FilterProps) => {
-  const theme = useTheme();
   const [openDeleteModal, setOpenDeleteModal] = useState(false);
 
   const handleRequestsClick = () => {
@@ -74,7 +73,7 @@ export const ActionHeader = ({
         display: "flex",
         alignItems: "center",
         justifyContent: "space-between",
-        backgroundImage: theme.palette.brand.background_gradient,
+        backgroundImage: "brand.background_gradient",
         pt: 2,
         px: 2,
       }}
@@ -113,10 +112,10 @@ export const ActionHeader = ({
                   color: "#ff4444",
                   backgroundColor: "transparent",
                   "&:hover": {
-                    backgroundColor: "#144E72",
+                    backgroundColor: "primary.main",
                   },
                   "&:disabled": {
-                    color: theme.palette.grey[500],
+                    color: "grey.500",
                   },
                   textTransform: "none",
                   fontWeight: 500,
@@ -131,13 +130,13 @@ export const ActionHeader = ({
                 // disabled={isUpdating}
                 sx={{
                   padding: "8px 12px",
-                  color: theme.palette.grey[300],
+                  color: "grey.300",
                   backgroundColor: "transparent",
                   "&:hover": {
-                    backgroundColor: "#144E72",
+                    backgroundColor: "primary.main",
                   },
                   "&:disabled": {
-                    color: theme.palette.grey[500],
+                    color: "grey.500",
                   },
                   textTransform: "none",
                   fontWeight: 500,
@@ -167,7 +166,6 @@ export const ActionHeader = ({
             >
               Request
             </Button>
-            {/* <Button startIcon={<DescriptionOutlined />}>Files</Button> */}
             <Button
               variant="contained"
               // sx={{
@@ -223,7 +221,7 @@ export const ActionHeader = ({
               onClick={onImportClick}
               sx={{
                 padding: "8px 12px",
-                color: theme.palette.grey[300],
+                color: "grey.300",
                 "&:hover": {
                   color: "white",
                   bgcolor: "rgba(255, 255, 255, 0.1)",

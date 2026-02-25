@@ -2,7 +2,7 @@ import AuthCard from "@/pages/auth/common/AuthCard";
 import EmailField from "@/pages/auth/common/EmailField";
 import PasswordField from "@/pages/auth/common/PasswordField";
 import SocialAuthButtons from "@/pages/auth/common/SocialAuthButtons";
-import { useUserLogin } from "@/services/auth/sign-in/sign-in.queries";
+import { useUserLogin } from "@/services/queries/auth/sign-in/sign-in.queries";
 import { useToastStore } from "@/store/useToastStore";
 import { encryptData } from "@/utils/encryption";
 import {
@@ -51,7 +51,10 @@ const SignInForm = () => {
           localStorage.setItem("refresh_token", response.refresh_token);
           localStorage.setItem("tenant_id", response.tenant_id);
           localStorage.setItem("user_id", response.user_id);
-          localStorage.setItem("privileges", JSON.stringify(response.privileges));
+          localStorage.setItem(
+            "privileges",
+            JSON.stringify(response.privileges),
+          );
 
           navigate("/scenario-builder");
         },

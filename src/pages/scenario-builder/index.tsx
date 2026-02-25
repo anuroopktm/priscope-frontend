@@ -1,4 +1,4 @@
-import { Box, useTheme } from "@mui/material";
+import { Box } from "@mui/material";
 import { useCallback } from "react";
 import { ActionHeader } from "./components/ActionHeader";
 import { TreeGridLayout } from "./constant/tree-grid-layout";
@@ -28,7 +28,6 @@ const generateData = (): any[] => {
 };
 
 const ScenarioBuilderPage = () => {
-  const theme = useTheme();
   // Optional: Function to attach event handlers after initialization
   const handleGridReady = useCallback((grid: TGrid) => {
     const G = grid as any;
@@ -54,7 +53,7 @@ const ScenarioBuilderPage = () => {
         flexDirection: "column",
         borderRadius: 1,
         overflow: "hidden",
-        bgcolor: theme.palette.brand.background,
+        bgcolor: "brand.background",
       }}
     >
       <ActionHeader />

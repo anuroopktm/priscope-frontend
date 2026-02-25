@@ -1,10 +1,4 @@
-import {
-  Checkbox,
-  TableCell,
-  TableHead,
-  TableRow,
-  useTheme,
-} from "@mui/material";
+import { Checkbox, TableCell, TableHead, TableRow } from "@mui/material";
 
 const COLUMNS = ["Name", "Email", "Job Role", "Status"];
 
@@ -17,8 +11,6 @@ export const UserTableHead = ({
   checked: boolean;
   indeterminate?: boolean;
 }) => {
-  const theme = useTheme();
-
   return (
     <TableHead sx={{ bgcolor: "#F2F2F2" }}>
       <TableRow>
@@ -30,10 +22,7 @@ export const UserTableHead = ({
           />
         </TableCell>
         {COLUMNS.map((col) => (
-          <TableCell
-            key={col}
-            sx={{ color: theme.palette.brand.primary, fontWeight: 500 }}
-          >
+          <TableCell key={col} sx={{ color: "brand.primary", fontWeight: 500 }}>
             {col}
           </TableCell>
         ))}

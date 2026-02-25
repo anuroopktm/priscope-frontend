@@ -2,9 +2,9 @@
 // This component displays a right-side drawer with detailed product information.
 // It overlays the main UI and is used in the Item Master table for row details.
 
-import React from "react";
-import { Box, Typography, Chip } from "@mui/material";
 import EditOutlinedIcon from "@mui/icons-material/EditOutlined";
+import { Box, Chip, Typography } from "@mui/material";
+import React from "react";
 
 // Props for the drawer: open state, item data, and close handler
 interface ItemDetailsDrawerProps {
@@ -264,7 +264,7 @@ const ItemDetailsDrawer: React.FC<ItemDetailsDrawerProps> = ({
                   label={c}
                   sx={{
                     bgcolor: "#3B9EDC1A",
-                    color: "#1A2B44",
+                    color: "primary.main",
                     fontWeight: 400,
                     fontSize: "12px",
                     borderRadius: "16px",
@@ -285,11 +285,13 @@ const ItemDetailsDrawer: React.FC<ItemDetailsDrawerProps> = ({
             {details.map((d, i) => (
               <Box key={i} sx={{ display: "flex", mb: 1 }}>
                 <Typography
-                  sx={{ minWidth: 90, color: "#1A2B44", fontWeight: 400 }}
+                  sx={{ minWidth: 90, color: "primary.main", fontWeight: 400 }}
                 >
                   {d.label}:
                 </Typography>
-                <Typography sx={{ fontWeight: 700, color: "#1A2B44", ml: 1 }}>
+                <Typography
+                  sx={{ fontWeight: 700, color: "primary.main", ml: 1 }}
+                >
                   {d.value}
                 </Typography>
               </Box>

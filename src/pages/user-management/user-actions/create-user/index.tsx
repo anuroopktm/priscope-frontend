@@ -9,7 +9,7 @@ import {
   type ManageUserFormValues,
 } from "@/validations/user-management/manage-user.validation";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { Box, Paper, useTheme } from "@mui/material";
+import { Box, Paper } from "@mui/material";
 import { useState } from "react";
 import { FormProvider, useForm } from "react-hook-form";
 import { useNavigate } from "react-router-dom";
@@ -20,7 +20,6 @@ import FooterActions from "./components/FooterActions";
 import PermissionsManager from "./components/PermissionsManager";
 
 const CreateUserPage = () => {
-  const theme = useTheme();
   const navigate = useNavigate();
   const [showModal, setShowModal] = useState<boolean>(false);
   const showToast = useToastStore((state) => state.showToast);
@@ -137,7 +136,7 @@ const CreateUserPage = () => {
         sx={{
           display: "flex",
           flexDirection: "column",
-          bgcolor: theme.palette.brand.background,
+          bgcolor: "brand.background",
         }}
       >
         <ActionHeader title="Add new user" />

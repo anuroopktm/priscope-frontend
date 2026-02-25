@@ -7,6 +7,8 @@ export default function Button(theme: Theme) {
         root: {
           textTransform: "none",
           boxShadow: "none",
+          fontSize: "14px",
+          fontWeight: 500,
         },
       },
       variants: [

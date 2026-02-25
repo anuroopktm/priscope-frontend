@@ -1,24 +1,23 @@
 "use client";
 
-import React, { useState } from "react";
+import ClearIcon from "@mui/icons-material/Clear";
+import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
+import SaveIcon from "@mui/icons-material/Save";
+import SearchIcon from "@mui/icons-material/Search";
 import {
+  Accordion,
+  AccordionDetails,
+  AccordionSummary,
   Box,
-  Typography,
+  Button,
   Checkbox,
   FormControlLabel,
   FormGroup,
-  Button,
-  Accordion,
-  AccordionSummary,
-  AccordionDetails,
-  TextField,
   InputAdornment,
-  useTheme,
+  TextField,
+  Typography,
 } from "@mui/material";
-import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
-import SearchIcon from "@mui/icons-material/Search";
-import SaveIcon from "@mui/icons-material/Save";
-import ClearIcon from "@mui/icons-material/Clear";
+import { useState } from "react";
 
 const sampleFilters = [
   {
@@ -59,8 +58,6 @@ const FilterDrawer = ({
   filters = sampleFilters,
   drawerWidth = 264,
 }: FilterDrawerProps) => {
-  const theme = useTheme();
-
   const [filterState, setFilterState] = useState<FilterState>(() => {
     const initialState: FilterState = {};
     filters.forEach((section) => {
@@ -96,7 +93,7 @@ const FilterDrawer = ({
         width: drawerWidth,
         // height: `calc(100vh - ${navbarHeight + filterHeight}px - ${footerHeight}px + 30px)`, // Subtract footer height
         height: `calc(100vh - 161px)`, // Match MainContentContainer height
-        bgcolor: theme.custom.surfaceBackground,
+        bgcolor: "custom.surfaceBackground",
         borderLeft: "1px solid",
         borderColor: "divider",
         boxShadow: "-2px 0 8px rgba(0,0,0,0.1)",
@@ -119,7 +116,7 @@ const FilterDrawer = ({
           sx={{
             flex: 1,
             overflow: "auto",
-            bgcolor: theme.custom.surfaceBackground,
+            bgcolor: "custom.surfaceBackground",
           }}
         >
           {filters.map((section) => (
@@ -129,7 +126,7 @@ const FilterDrawer = ({
               disableGutters
               square
               sx={{
-                bgcolor: theme.custom.surfaceBackground,
+                bgcolor: "custom.surfaceBackground",
                 boxShadow: "none",
                 "&::before": {
                   display: "none",

@@ -4,7 +4,7 @@ import {
   useListUserPrivileges,
 } from "@/services/user-management/user-management.queries";
 import type { ManageUserFormValues } from "@/validations/user-management/manage-user.validation";
-import { Box, CircularProgress, Paper, useTheme } from "@mui/material";
+import { Box, CircularProgress, Paper } from "@mui/material";
 import { useEffect } from "react";
 import { FormProvider, useForm } from "react-hook-form";
 import { useNavigate, useParams } from "react-router-dom";
@@ -14,7 +14,6 @@ import FooterActions from "./components/FooterActions";
 import PermissionsList from "./components/PermissionsList";
 
 const UserDetailsPage = () => {
-  const theme = useTheme();
   const navigate = useNavigate();
   const { userId } = useParams<{ userId: string }>();
 
@@ -72,7 +71,7 @@ const UserDetailsPage = () => {
           display: "flex",
           flexDirection: "column",
           height: "100%",
-          bgcolor: theme.palette.brand.background,
+          bgcolor: "brand.background",
         }}
       >
         <Box
@@ -82,7 +81,7 @@ const UserDetailsPage = () => {
             display: "flex",
             justifyContent: "center",
             alignItems: "center",
-            bgcolor: theme.palette.background.paper,
+            bgcolor: "background.paper",
           }}
         >
           <CircularProgress size={30} />
@@ -97,7 +96,7 @@ const UserDetailsPage = () => {
         sx={{
           display: "flex",
           flexDirection: "column",
-          bgcolor: theme.palette.brand.background,
+          bgcolor: "brand.background",
         }}
       >
         <ActionHeader title="User Details" />

@@ -1,6 +1,6 @@
 import { z } from "zod";
 
-export const createSignUpSchema = (invite: any) =>
+export const createSignUpSchema = (invite: { email: string; name: string }) =>
   z
     .object({
       email: z.string().email("Please enter a valid email address"),
@@ -24,7 +24,9 @@ export const createSignUpSchema = (invite: any) =>
           (val) => /[!@#$%^&*()]/.test(val),
           "Password must contain at least one special character",
         ),
-      confirmPassword: z.string(),
+      confirmPassword: z
+        .string()
+        .min(1, "Password must be at least 8 characters"),
     })
     .refine((data) => data.password === data.confirmPassword, {
       message: "Passwords do not match",

@@ -50,7 +50,7 @@ const PermissionItem = ({
           variant="body1"
           sx={{
             fontWeight: 600,
-            color: "#1A2B44",
+            color: "primary.main",
             textTransform: "capitalize",
           }}
         >

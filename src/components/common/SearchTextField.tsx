@@ -1,10 +1,35 @@
-import { Search } from "@mui/icons-material";
-import { InputAdornment, TextField, useTheme } from "@mui/material";
-
+import SearchIcon from "@/assets/actions/search.svg?react";
 import type { TextFieldProps } from "@mui/material";
+import { InputAdornment, TextField } from "@mui/material";
+import debounce from "lodash.debounce";
+import React, { useEffect, useMemo, useState } from "react";
 
-const SearchTextField = (props: TextFieldProps) => {
-  const theme = useTheme();
+interface SearchTextFieldProps extends Omit<TextFieldProps, "onChange"> {
+  onSearch: (value: string) => void;
+}
+
+const SearchTextField = ({ onSearch, ...props }: SearchTextFieldProps) => {
+  const [value, setValue] = useState<string>((props.value as string) || "");
+
+  const debouncedSearch = useMemo(
+    () =>
+      debounce((searchValue: string) => {
+        onSearch(searchValue);
+      }, 500),
+    [onSearch],
+  );
+
+  useEffect(() => {
+    return () => {
+      debouncedSearch.cancel();
+    };
+  }, [debouncedSearch]);
+
+  const handleChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const newValue = event.target.value;
+    setValue(newValue);
+    debouncedSearch(newValue);
+  };
 
   return (
     <TextField
@@ -12,11 +37,13 @@ const SearchTextField = (props: TextFieldProps) => {
       placeholder="Search"
       size="small"
       {...props}
+      value={value}
+      onChange={handleChange}
       sx={{
         width: 400,
         "& .MuiOutlinedInput-root": {
-          color: theme.palette.background.paper,
-          backgroundColor: theme.palette.primary.main,
+          color: "background.paper",
+          backgroundColor: "primary.main",
           "& .MuiOutlinedInput-notchedOutline": {
             border: "none",
           },
@@ -31,10 +58,8 @@ const SearchTextField = (props: TextFieldProps) => {
       }}
       InputProps={{
         startAdornment: (
-          <InputAdornment position="start" sx={{ mx: 1 }}>
-            <Search
-              sx={{ color: theme.palette.background.paper, fontSize: 20 }}
-            />
+          <InputAdornment position="start" sx={{ mr: 1 }}>
+            <SearchIcon />
           </InputAdornment>
         ),
       }}

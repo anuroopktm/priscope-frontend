@@ -2,6 +2,7 @@ import brandLogo from "@/assets/login/brand.svg";
 import { Box, Container } from "@mui/material";
 import AuthGraphic from "../common/AuthGraphic";
 import SignUpForm from "./components/SignUpForm";
+
 const SignUpPage = () => {
   return (
     <Box
@@ -12,12 +13,14 @@ const SignUpPage = () => {
         alignItems: "center",
         justifyContent: "center",
         position: "relative",
-        bgcolor: "#1A2B44",
+        bgcolor: "primary.main",
         overflowX: "hidden",
       }}
     >
       <Box
         sx={{
+          width: "100%",
+          height: "100%",
           position: "fixed",
           top: 0,
           left: 0,

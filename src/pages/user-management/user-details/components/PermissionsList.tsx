@@ -80,7 +80,7 @@ const PermissionsList = () => {
 
   return (
     <Box sx={{ display: "flex", flexDirection: "column", gap: 2 }}>
-      <Typography variant="h6" sx={{ color: "#1A2B44" }}>
+      <Typography variant="h6" sx={{ color: "primary.main" }}>
         Permissions
       </Typography>
       <Paper

@@ -11,11 +11,9 @@ import {
   Paper,
   Popper,
   Typography,
-  useTheme,
 } from "@mui/material";
 import React, { useMemo, useState } from "react";
 import { DEFAULT_VISIBLE_COLUMNS } from "../../constants/tableHeaders.constants";
-import { useAddHeader } from "../../../../services/queries/item-master/item-master.queries";
 import { useQueryClient } from "@tanstack/react-query";
 import LoaderOverlay from "../../../../components/common/loader";
 export type SnackbarState = {
@@ -41,7 +39,6 @@ const ColumnDropdown: React.FC<ColumnDropdownProps> = ({
   handleColumnVisibility,
   setHeaderLabels,
 }) => {
-  const theme = useTheme();
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
   const [search, setSearch] = useState("");
   const [showCreateColumnModal, setShowCreateColumnModal] =
@@ -153,7 +150,7 @@ const ColumnDropdown: React.FC<ColumnDropdownProps> = ({
               p: 1,
               borderRadius: "16px",
               gap: "4px",
-              backgroundColor: theme.palette.common.white,
+              backgroundColor: "common.white",
               boxShadow: 3,
               minWidth: 160,
             }}
@@ -165,7 +162,9 @@ const ColumnDropdown: React.FC<ColumnDropdownProps> = ({
                 gap: 1,
                 px: 1,
                 py: 0.5,
-                border: `1px solid ${theme.palette.divider}`,
+                border: 1,
+                borderStyle: "solid",
+                borderColor: "divider",
                 borderRadius: "8px",
                 mb: 1,
               }}
@@ -196,9 +195,7 @@ const ColumnDropdown: React.FC<ColumnDropdownProps> = ({
                         }
                         label={label}
                         sx={{
-                          color: isDefault
-                            ? theme.palette.text.secondary
-                            : theme.palette.text.primary,
+                          color: isDefault ? "text.secondary" : "text.primary",
                           opacity: isDefault ? 0.6 : 1,
                           fontSize: "14px",
                           fontWeight: 400,
@@ -218,14 +215,12 @@ const ColumnDropdown: React.FC<ColumnDropdownProps> = ({
                       alignItems: "center",
                     }}
                   >
-                    <Typography
-                      sx={{ color: theme.palette.primary.main, fontSize: 16 }}
-                    >
+                    <Typography sx={{ color: "primary.main", fontSize: 16 }}>
                       {search}
                     </Typography>
                     <Typography
                       sx={{
-                        color: theme.palette.brand.tertiary,
+                        color: "brand.tertiary",
                         cursor: "pointer",
                         transition: "all 0.2s ease",
                         "&:hover": {

@@ -1,20 +1,18 @@
-import { createBrowserRouter, Navigate } from "react-router-dom";
-// layouts
 import MainLayout from "@/layouts/MainLayout";
-// guards
-import AuthGuard from "./guards/AuthGuard";
-import GuestGuard from "./guards/GuestGuard";
-// components
+import { createBrowserRouter, Navigate } from "react-router-dom";
 import {
   CreateUserPage,
   EditUserPage,
   ItemsMasterPage,
+  OtpPage,
   ScenarioBuilderPage,
   SignInPage,
   SignUpPage,
   UserDetailsPage,
   UserManagementListUsersPage,
 } from "./elements";
+import AuthGuard from "./guards/AuthGuard";
+import GuestGuard from "./guards/GuestGuard";
 
 export const routes = [
   {
@@ -28,6 +26,10 @@ export const routes = [
       {
         path: "sign-up",
         element: <SignUpPage />,
+      },
+      {
+        path: "otp",
+        element: <OtpPage />,
       },
     ],
   },
