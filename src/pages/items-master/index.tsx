@@ -1,7 +1,7 @@
 import { Box, useTheme } from "@mui/material";
 import { ActionHeader } from "../scenario-builder/components/ActionHeader";
 // import { useTreeGridInit } from "../scenario-builder/hooks/use-tree-grid-init";
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 // import { TreeGridLayout } from "../scenario-builder/constant/tree-grid-layout";
 import {
   useAddBulkInsertAdminRequest,
@@ -37,7 +37,7 @@ import { useTreeGridInit } from "./hooks/use-tree-grid-init";
 import { handleFilterChange } from "./components/tree-grid/Filter/FilterChange";
 import { handleSelected } from "./components/tree-grid/RowSelection/RowSelection";
 import { useGetExportedFile } from "@/services/queries/common/common.queries";
-import type { DeleteSelectedRowPayload } from "./types/types";
+import type { DeleteSelectedRowPayload, HeaderList } from "./types/types";
 import { deleteSeletectedRows } from "./components/tree-grid/RowSelection/DeleteRowSelection";
 import { handleValueChanged } from "./components/tree-grid/CellValue/handleValueChanged";
 import TableSavePopover from "./components/table-save-popover";
@@ -45,6 +45,9 @@ import { hasItemMasterPrivileges } from "./helpers/itemMasterHelpers";
 import { openConfirmationModal } from "@/utils/getRequestConfirmationModal";
 import { useQueryClient } from "@tanstack/react-query";
 import RequestSuccessDialog from "@/components/common/request-notification";
+import FileDetailsModal from "@/components/file-detail-modal";
+import { FILE_FILTER_OPTIONS } from "@/constants/file-modal.constants";
+import { INITIAL_HEADERS } from "./constants/tableHeaders.constants";
 
 export interface TreeGridState {
   showSavePopover: boolean;
@@ -68,7 +71,6 @@ const ItemsMasterPage = () => {
   const prevSearchQueryRef = useRef<string>("");
   const treeGridHeadersRef = useRef<TreeGridHeader[]>([]);
   const [openReqestModal, setOpenRequestModal] = useState(false);
-  const [showFilesModal, setShowFilesModal] = useState<boolean>(false);
   const [showLoader, setShowLoader] = useState(false);
   const [snackbar, setSnackbar] = useState<SnackbarState>({
     message: null,
@@ -82,12 +84,17 @@ const ItemsMasterPage = () => {
   const [comment, setComment] = useState("");
   const [commentAdded, setCommentAdded] = useState(false);
   const privileges: {} = JSON.parse(localStorage.getItem("privileges") || "");
+  const [headerLabels, setHeaderLabels] = useState<string[]>([]);
 
   const [state, setState] = useState<TreeGridState>({
     showSavePopover: false,
     popoverPosition: { top: 0, left: 0 },
     changedCell: null,
   });
+
+  const [selectedColumns, setSelectedColumns] = useState<
+    Record<string, boolean>
+  >({});
 
   const [
     requestSuccessNotficationVisible,
@@ -134,6 +141,8 @@ const ItemsMasterPage = () => {
     isPending: isitemMasterBulkInsertAdminApprovalPending,
   } = useAddBulkInsertAdminRequest();
 
+  const [showFilesModal, setShowFilesModal] = useState<boolean>(false);
+
   useEffect(() => {
     window.TGSetEvent("OnScroll", gridId, onScroll);
     window.TGSetEvent("OnSelected", gridId, onSelected);
@@ -178,6 +187,34 @@ const ItemsMasterPage = () => {
   ]);
 
   useEffect(() => {
+    if (!listHeaderData?.headers) return;
+    setHeaderLabels(listHeaderData.headers.map((h) => h.label));
+  }, [listHeaderData]);
+
+  const headerList = useMemo<HeaderList[]>(() => {
+    if (!listHeaderData?.headers) return [];
+    return listHeaderData.headers.map((header) => ({
+      name: header.name,
+      label: header.label,
+      data_type: header.data_type,
+    }));
+  }, [listHeaderData]);
+
+  useEffect(() => {
+    if (!headerList) return;
+    const initial: Record<string, boolean> = {};
+    headerList.forEach((h) => {
+      if (INITIAL_HEADERS.includes(h.label)) {
+        initial[h.label] = true;
+      } else {
+        initial[h.label] = false;
+      }
+    });
+    setSelectedColumns(initial);
+    // setSelectedColumnsForAdd(initial);
+  }, [headerList]);
+
+  useEffect(() => {
     if (prevSearchQueryRef.current !== debouncedSearchQuery) {
       prevSearchQueryRef.current = debouncedSearchQuery;
 
@@ -187,12 +224,11 @@ const ItemsMasterPage = () => {
     }
   }, [debouncedSearchQuery]);
 
-    useEffect(() => {
+  useEffect(() => {
     if (state.showSavePopover && gridInstance.current) {
       gridInstance.current.Focus(null, null);
     }
   }, [state.showSavePopover]);
-
 
   const handleExport = () => {
     if (!selectedExport && (!selectedRows || selectedRows.length === 0)) return;
@@ -578,18 +614,31 @@ const ItemsMasterPage = () => {
         selectedRows={selectedRows}
         onHandleExport={handleExport}
         handleDeleteSelection={handleDeleteSelection}
+        headerLabels={headerLabels}
+        setHeaderLabels={setHeaderLabels}
+        selectedColumns={selectedColumns}
+        setSelectedColumns={setSelectedColumns}
       />
 
-      <Box sx={{ display: "flex", position: "relative" }}>
-        {/* <MainContentContainer hasFilter={true}> */}
-        {openReqestModal && (
-          <RequestsModal
-            onClose={setOpenRequestModal}
-            targetModule={"item_master"}
-          />
-        )}
-        {/* </MainContentContainer> */}
-      </Box>
+      {/* <Box sx={{ display: "flex", position: "relative" }}> */}
+      {/* <MainContentContainer hasFilter={true}> */}
+      {openReqestModal && (
+        <RequestsModal
+          onClose={setOpenRequestModal}
+          targetModule={"item_master"}
+        />
+      )}
+      {showFilesModal && (
+        <FileDetailsModal
+          onClose={setShowFilesModal}
+          showLoader={setShowLoader}
+          showSnackBar={setSnackbar}
+          module="item_master"
+          filterOptions={FILE_FILTER_OPTIONS}
+        />
+      )}
+      {/* </MainContentContainer> */}
+      {/* </Box> */}
 
       <Box
         sx={{

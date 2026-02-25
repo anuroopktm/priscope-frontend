@@ -14,14 +14,10 @@ import {
   useTheme,
 } from "@mui/material";
 import React, { useMemo, useState } from "react";
-// import { HeaderList } from "../../types";
 import { DEFAULT_VISIBLE_COLUMNS } from "../../constants/tableHeaders.constants";
-// import { INITIAL_HEADERS } from "../../constants/tableHeaders.constants";
 import { useAddHeader } from "../../../../services/queries/item-master/item-master.queries";
 import { useQueryClient } from "@tanstack/react-query";
 import LoaderOverlay from "../../../../components/common/loader";
-import AppSnackbar from "../../../../components/common/action-bar";
-// import { SnackbarState } from "../../../freight-rate-library/types";
 export type SnackbarState = {
   message: string | null;
   severity: AlertColor;
@@ -35,7 +31,7 @@ export interface ColumnDropdownProps {
   >;
   headerList: string[];
   handleColumnVisibility: (label: string, checked: boolean) => void;
-  setColumns?: React.Dispatch<React.SetStateAction<string[]>>;
+  setHeaderLabels?: React.Dispatch<React.SetStateAction<string[]>>;
 }
 
 const ColumnDropdown: React.FC<ColumnDropdownProps> = ({
@@ -43,7 +39,7 @@ const ColumnDropdown: React.FC<ColumnDropdownProps> = ({
   setSelectedColumns,
   headerList,
   handleColumnVisibility,
-  setColumns,
+  setHeaderLabels,
 }) => {
   const theme = useTheme();
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
@@ -99,7 +95,7 @@ const ColumnDropdown: React.FC<ColumnDropdownProps> = ({
         queryClient.invalidateQueries({
           queryKey: ["listItemMasterHeaders"],
         });
-        setColumns?.((prev) => [...prev, label]);
+        setHeaderLabels?.((prev) => [...prev, label]);
         setSelectedColumns((prev) => ({ ...prev, [label]: true }));
         handleColumnVisibility(label, true);
         setSnackbar({
@@ -121,6 +117,7 @@ const ColumnDropdown: React.FC<ColumnDropdownProps> = ({
   return (
     <>
       <Button
+        variant="contained"
         onClick={handleToggle}
         sx={{
           padding: "8px 12px",
@@ -251,10 +248,10 @@ const ColumnDropdown: React.FC<ColumnDropdownProps> = ({
           </Paper>
         </ClickAwayListener>
       </Popper>
-      <AppSnackbar
+      {/* <AppSnackbar
         snackbar={snackbar}
         onClose={() => setSnackbar({ message: null, severity: "info" })}
-      />
+      /> */}
       {mutateAddHeaderPending && <LoaderOverlay />}
       {showCreateColumnModal && (
         <CreateColumnModal

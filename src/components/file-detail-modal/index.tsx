@@ -1,22 +1,18 @@
 "use client";
-import CalendarIcon from "@/public/images/calendar.svg";
-import ClockIcon from "@/public/images/clock.svg";
-import DownloadIcon from "@/public/images/download.svg";
-import CloseIcon from "@/public/images/multiplication-sign.svg";
-import UserIcon from "@/public/images/user-circle.svg";
-import { mapExports } from "@/shared/helpers/file-modal-helpers";
+import CalendarIcon from "@/assets/common/calendar.svg";
+import ClockIcon from "@/assets/common/clock.svg";
+import DownloadIcon from "@/assets/common/download.svg";
+import CloseIcon from "@/assets/common/multiplication-sign.svg";
+import UserIcon from "@/assets/common/user-circle.svg";
+// import { mapExports } from "@/shared/helpers/file-modal-helpers";
 import {
   useGetModuleImportErrorFile,
   useListModuleImports,
   useListModuleImportSummaryCount,
   useListExport,
   useGetExportedFile,
-} from "@/shared/services/commonService";
-import {
-  FileDetailsModalProps,
-  SimplifiedExport,
-} from "@/shared/types/file-modal";
-import getListExportPayload from "@/shared/utils/getListExportPayload";
+} from "@/services/queries/common/common.queries";
+// import getListExportPayload from "@/shared/utils/getListExportPayload";
 import {
   Box,
   Chip,
@@ -34,10 +30,11 @@ import {
   Typography,
   useTheme,
 } from "@mui/material";
-import Image from "next/image";
 import React, { useEffect, useState } from "react";
 import StatsSummaryBar from "../status-summary-bar";
-import formatDate from "@/shared/utils/formatDate";
+import formatDate from "@/utils/formatDate";
+import { mapExports } from "@/constants/file-modal-helpers";
+import getListExportPayload from "@/utils/getListExportPayload";
 
 const TOGGLE_BUTTON = ["uploaded", "downloaded"];
 const FILE_UPLOAD_STATUS = {
@@ -47,6 +44,25 @@ const FILE_UPLOAD_STATUS = {
   FAILED: "failed",
   SUCCESS: "success",
 };
+
+export interface FileDetailsModalProps {
+  open?: boolean;
+  onClose: any;
+  showSnackBar: any;
+  showLoader: any;
+  module: string;
+  filterOptions: { value: string; label: string }[];
+  defaultTab?: "uploaded" | "downloaded";
+}
+
+export interface SimplifiedExport {
+  id: string;
+  name: string;
+  created_user_name: string;
+  created_time: string;
+  created_date: string;
+  status: string;
+}
 
 const FileDetailsModal: React.FC<FileDetailsModalProps> = ({
   open = true,
@@ -213,7 +229,7 @@ const FileDetailsModal: React.FC<FileDetailsModalProps> = ({
       fullWidth
       PaperProps={{
         sx: {
-          borderRadius: 4,
+          borderRadius: 1,
           maxHeight: "75vh",
           minHeight: "75vh",
           maxWidth: "771px",
@@ -234,7 +250,7 @@ const FileDetailsModal: React.FC<FileDetailsModalProps> = ({
         >
           <Typography
             variant="h6"
-            sx={{ fontWeight: 600, color: theme.custom.textColor }}
+            sx={{ fontWeight: 600, color: theme.palette.primary.main }}
           >
             Files
           </Typography>
@@ -248,14 +264,14 @@ const FileDetailsModal: React.FC<FileDetailsModalProps> = ({
               sx={{
                 height: "32px",
                 border: "1px solid",
-                borderColor: theme.palette.sidebar.highlight,
+                borderColor: theme.palette.brand.tertiary,
                 borderRadius: "9px",
                 "& .MuiToggleButton-root": {
-                  color: theme.palette.sidebar.highlight,
+                  color: theme.palette.brand.tertiary,
                   textTransform: "none",
                   fontWeight: 600,
                   "&.Mui-selected": {
-                    bgcolor: theme.palette.sidebar.highlight,
+                    bgcolor: theme.palette.brand.tertiary,
                     color: "white",
                     borderRadius: "8px",
                     "&:hover": {
@@ -264,7 +280,7 @@ const FileDetailsModal: React.FC<FileDetailsModalProps> = ({
                   },
                   "&:hover": {
                     borderRadius: "8px",
-                    bgcolor: theme.palette.sidebar.hover,
+                    bgcolor: theme.palette.brand.hover,
                   },
                 },
               }}
@@ -290,7 +306,7 @@ const FileDetailsModal: React.FC<FileDetailsModalProps> = ({
                 width: "32px",
               }}
             >
-              <Image src={CloseIcon} alt="Close" width={20} height={20} />
+              <img src={CloseIcon} alt="Close" width={20} height={20} />
             </IconButton>
           </Box>
         </Box>
@@ -358,7 +374,7 @@ const FileDetailsModal: React.FC<FileDetailsModalProps> = ({
                       component="span"
                       onClick={() => handleDownloadErrorFile(file.id)}
                       sx={{
-                        color: theme.palette.sidebar.highlight,
+                        color: theme.palette.brand.tertiary,
                         fontSize: 14,
                         cursor: "pointer",
                         display: "flex",
@@ -366,7 +382,7 @@ const FileDetailsModal: React.FC<FileDetailsModalProps> = ({
                         fontWeight: 600,
                       }}
                     >
-                      <Image
+                      <img
                         src={DownloadIcon}
                         alt="Download"
                         width={20}
@@ -401,7 +417,7 @@ const FileDetailsModal: React.FC<FileDetailsModalProps> = ({
                   <Box
                     sx={{ display: "flex", alignItems: "center", gap: "4px" }}
                   >
-                    <Image
+                    <img
                       src={UserIcon}
                       alt="User"
                       width={20}
@@ -415,7 +431,7 @@ const FileDetailsModal: React.FC<FileDetailsModalProps> = ({
                   <Box
                     sx={{ display: "flex", alignItems: "center", gap: "4px" }}
                   >
-                    <Image
+                    <img
                       src={ClockIcon}
                       alt="Clock"
                       width={20}
@@ -429,7 +445,7 @@ const FileDetailsModal: React.FC<FileDetailsModalProps> = ({
                   <Box
                     sx={{ display: "flex", alignItems: "center", gap: "4px" }}
                   >
-                    <Image
+                    <img
                       src={CalendarIcon}
                       alt="Calendar"
                       width={20}
@@ -493,7 +509,7 @@ const FileDetailsModal: React.FC<FileDetailsModalProps> = ({
                         sx={{
                           fontWeight: 600,
                           mb: 1,
-                          color: theme.custom.textColor,
+                          color: theme.palette.primary.main,
                           fontSize: "16px",
                         }}
                       >
@@ -519,7 +535,7 @@ const FileDetailsModal: React.FC<FileDetailsModalProps> = ({
                           }}
                         />
                         <Stack direction="row" spacing={1} alignItems="center">
-                          <Image
+                          <img
                             src={UserIcon}
                             alt="User"
                             width={20}
@@ -531,14 +547,14 @@ const FileDetailsModal: React.FC<FileDetailsModalProps> = ({
                             sx={{
                               fontSize: "14px",
                               fontWeight: 400,
-                              color: theme.custom.textColor,
+                              color: theme.palette.primary.main,
                             }}
                           >
                             {file.created_user_name}
                           </Typography>
                         </Stack>
                         <Stack direction="row" spacing={1} alignItems="center">
-                          <Image
+                          <img
                             src={ClockIcon}
                             alt="Clock"
                             width={20}
@@ -549,7 +565,7 @@ const FileDetailsModal: React.FC<FileDetailsModalProps> = ({
                             variant="body2"
                             sx={{
                               fontSize: "14px",
-                              color: theme.custom.textColor,
+                              color: theme.palette.primary.main,
                             }}
                           >
                             {file.created_date} {file.created_time}
@@ -562,7 +578,7 @@ const FileDetailsModal: React.FC<FileDetailsModalProps> = ({
                         component="span"
                         onClick={() => handleDownload(file?.id)}
                         sx={{
-                          color: theme.palette.sidebar.highlight,
+                          color: theme.palette.brand.tertiary,
                           fontSize: 14,
                           cursor: "pointer",
                           display: "flex",
@@ -570,7 +586,7 @@ const FileDetailsModal: React.FC<FileDetailsModalProps> = ({
                           fontWeight: 600,
                         }}
                       >
-                        <Image
+                        <img
                           src={DownloadIcon}
                           alt="Download"
                           width={20}

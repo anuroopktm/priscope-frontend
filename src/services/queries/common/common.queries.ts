@@ -48,9 +48,9 @@ export const useGetTemplateFile = () => {
 // ---------------------- LIST MODULE IMPORTS ----------------------
 
 export const useListModuleImports = (module_name: string) => {
-  return useQuery<any, AxiosError>({
-    queryKey: ["module-imports", module_name],
-    queryFn: async () => {
+  return useMutation<any, AxiosError>({
+    // queryKey: ["module-imports", module_name],
+    mutationFn: async () => {
       const response = await axiosInstance.get(
         IMPORT_RATE_ENDPOINTS.getModuleImports,
         {
@@ -61,7 +61,7 @@ export const useListModuleImports = (module_name: string) => {
       );
       return response.data;
     },
-    enabled: Boolean(module_name),
+    // enabled: Boolean(module_name),
   });
 };
 

@@ -1,4 +1,3 @@
-import useTranslation from "@/shared/hooks/useTranslation";
 import {
   Button,
   Dialog,
@@ -27,7 +26,7 @@ const CreateColumnModal = ({
   defaultLabel = "",
   dataTypeOptions,
 }: CreateColumnModalProps) => {
-  const { t } = useTranslation();
+  // const { t } = useTranslation();
   const theme = useTheme();
 
   const [label, setLabel] = useState(defaultLabel);
@@ -39,9 +38,9 @@ const CreateColumnModal = ({
   const handleSubmit = () => {
     const newErrors: typeof errors = {};
     if (!label.trim())
-      newErrors.label = t("common", "createColumnModal.labelError");
+      newErrors.label = "Error";
     if (!dataType)
-      newErrors.dataType = t("common", "createColumnModal.dataTypeError");
+      newErrors.dataType = "Error";
 
     if (Object.keys(newErrors).length > 0) {
       setErrors(newErrors);
@@ -83,7 +82,7 @@ const CreateColumnModal = ({
           color: theme.custom.textColor,
         }}
       >
-        {t("common", "createColumnModal.title")}
+        Create new column
       </DialogTitle>
 
       <Divider />
@@ -92,7 +91,7 @@ const CreateColumnModal = ({
         sx={{ display: "flex", flexDirection: "column", gap: 2, pt: 2 }}
       >
         <TextField
-          label={t("common", "createColumnModal.columnLabel")}
+          label="Column Label"
           value={label}
           onChange={(e) => {
             setLabel(e.target.value);
@@ -112,7 +111,7 @@ const CreateColumnModal = ({
 
         <TextField
           select
-          label={t("common", "createColumnModal.dataType")}
+          label="Data Type"
           value={dataType}
           onChange={(e) => {
             setDataType(e.target.value);
@@ -156,10 +155,10 @@ const CreateColumnModal = ({
             height: "40px",
           }}
         >
-          {t("common", "createColumnModal.cancelButton")}
+          Cancel
         </Button>
-        <Button onClick={handleSubmit} variant="midnight">
-          {t("common", "createColumnModal.createButton")}
+        <Button onClick={handleSubmit} variant="contained">
+          Create Column
         </Button>
       </DialogActions>
     </Dialog>

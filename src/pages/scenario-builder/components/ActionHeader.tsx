@@ -15,6 +15,7 @@ import ExportDataIcon from "@/assets/common/export-data.svg";
 import DeleteOutlineIcon from "@mui/icons-material/DeleteOutline";
 import { useState } from "react";
 import ConfirmationDialog from "@/components/common/upload-modal/confirmation-modal";
+import ColumnDropdown from "@/pages/items-master/components/columns-dropdown";
 
 interface FilterProps {
   searchQuery: string;
@@ -25,6 +26,12 @@ interface FilterProps {
   selectedRows: string[];
   onHandleExport: () => void;
   handleDeleteSelection: () => void;
+  headerLabels: string[];
+  setHeaderLabels: React.Dispatch<React.SetStateAction<string[]>>;
+  selectedColumns: Record<string, boolean>;
+  setSelectedColumns: React.Dispatch<
+    React.SetStateAction<Record<string, boolean>>
+  >;
 }
 
 export const ActionHeader = ({
@@ -36,6 +43,10 @@ export const ActionHeader = ({
   selectedRows,
   onHandleExport,
   handleDeleteSelection,
+  headerLabels,
+  setHeaderLabels,
+  selectedColumns,
+  setSelectedColumns
 }: FilterProps) => {
   const theme = useTheme();
   const [openDeleteModal, setOpenDeleteModal] = useState(false);
@@ -140,33 +151,35 @@ export const ActionHeader = ({
         ) : (
           <>
             <Button
+              variant="contained"
               onClick={handleRequestsClick}
-              sx={{
-                padding: "8px 12px",
-                color: theme.palette.grey[300],
-                "&:hover": {
-                  color: "white",
-                  bgcolor: theme.palette.brand.hover,
-                },
-                textTransform: "none",
-                fontWeight: 600,
-              }}
+              // sx={{
+              //   padding: "8px 12px",
+              //   color: theme.palette.grey[300],
+              //   "&:hover": {
+              //     color: "white",
+              //     bgcolor: theme.palette.brand.hover,
+              //   },
+              //   textTransform: "none",
+              //   fontWeight: 600,
+              // }}
               startIcon={<img src={RequestsIcon} alt={"request"} width={16} />}
             >
               Request
             </Button>
             {/* <Button startIcon={<DescriptionOutlined />}>Files</Button> */}
             <Button
-              sx={{
-                padding: "8px 12px",
-                color: theme.palette.grey[300],
-                "&:hover": {
-                  color: "white",
-                  bgcolor: "rgba(255, 255, 255, 0.1)",
-                },
-                textTransform: "none",
-                fontWeight: 600,
-              }}
+              variant="contained"
+              // sx={{
+              //   padding: "8px 12px",
+              //   color: theme.palette.grey[300],
+              //   "&:hover": {
+              //     color: "white",
+              //     bgcolor: "rgba(255, 255, 255, 0.1)",
+              //   },
+              //   textTransform: "none",
+              //   fontWeight: 600,
+              // }}
               startIcon={<img src={LogFileIcon} alt="Log File" width={16} />}
               onClick={handleFilesClick}
             >
@@ -174,10 +187,20 @@ export const ActionHeader = ({
             </Button>
 
             {/* Columns Dropdown Mock */}
-            <Button endIcon={<KeyboardArrowDown />}>Columns</Button>
+            {/* <Button variant="contained" endIcon={<KeyboardArrowDown />}>
+              Columns
+            </Button> */}
+            <ColumnDropdown
+              selectedColumns={selectedColumns}
+              setSelectedColumns={setSelectedColumns}
+              headerList={headerLabels}
+              setHeaderLabels={setHeaderLabels}
+              // handleColumnVisibility={handleColumnVisibility}
+            />
 
             {/* Saved Filters Dropdown Mock */}
             <Button
+              variant="contained"
               startIcon={<BookmarkBorderOutlined />}
               endIcon={<KeyboardArrowDown />}
             >
@@ -185,13 +208,18 @@ export const ActionHeader = ({
             </Button>
 
             {/* Show Filter */}
-            <Button startIcon={<FilterListOutlined />}>Show Filter</Button>
+            <Button variant="contained" startIcon={<FilterListOutlined />}>
+              Show Filter
+            </Button>
 
             {/* Add Item */}
-            <Button startIcon={<AddOutlined />}>Add Item</Button>
+            <Button variant="contained" startIcon={<AddOutlined />}>
+              Add Item
+            </Button>
 
             {/* Import Data Dropdown */}
             <Button
+              variant="contained"
               onClick={onImportClick}
               sx={{
                 padding: "8px 12px",

@@ -1,6 +1,6 @@
+import type { SimplifiedExport } from "@/components/file-detail-modal";
 import { MODULE_LABELS } from "../constants/file-modal.constants";
-import { SimplifiedExport } from "../types/file-modal";
-import formatDate from "../utils/formatDate";
+import formatDate from "@/utils/formatDate";
 
 export function mapExports(data: any[]): SimplifiedExport[] {
   return data.map((item) => {
