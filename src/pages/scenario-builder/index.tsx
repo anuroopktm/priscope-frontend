@@ -1,55 +1,32 @@
 import { useListScenarios } from "@/services/queries/scenario-builder/scenario-builder.queries";
 import { Box } from "@mui/material";
-import { useCallback, useState } from "react";
+import { useMemo, useState } from "react";
 import { ActionHeader } from "./components/ActionHeader";
-import { TreeGridLayout } from "./constant/tree-grid-layout";
-import JsonData from "./constant/tree-grid-sample-data.json";
-import { useTreeGridInit } from "./hooks/use-tree-grid-init";
+import { ScenarioGridLayout } from "./tree-grid/config/layout";
+import { useTreeGridInit } from "./tree-grid/hooks/useTreeGridInit";
+import { mapScenariosToGridBody } from "./tree-grid/utils/data-mapper";
 
-const categoryEnum =
-  "|Education|Vehicles|Business Industry|Home & Living|Essentials|Mobiles|Property|Electronics";
-const categoryOptions = categoryEnum.split("|").filter(Boolean);
-
-const generateData = (): any[] => {
-  const rawRows = (JsonData.Body as any[]).flat();
-
-  return rawRows.map((r: any) => ({
-    id: r.id.toString(),
-    SKU: r.Name,
-    UPC: r.Phone,
-    Category:
-      categoryOptions[Math.floor(Math.random() * categoryOptions.length)],
-    Description: r.Address,
-    Supplier: r.Owner,
-    Customer: r.Town,
-    IsSelected: r.Type,
-  }));
-};
+const gridId = "ScenarioGrid";
+const gridContainerId = "TreeGrid_" + gridId;
 
 const ScenarioBuilderPage = () => {
   const [searchTerm, setSearchTerm] = useState<string | undefined>(undefined);
 
-  const handleGridReady = useCallback((grid: TGrid) => {
-    const G = grid as any;
-    G.OnValueChanged = (_grid: TGrid, _row: TRow, col: string, val: any) => {
-      console.log(`Cell ${col} updated to:`, val);
-    };
-  }, []);
+  const { data: scenariosData } = useListScenarios({
+    search: searchTerm,
+    filter: {},
+    page_size: 20,
+    skip: 0,
+  });
 
-  const { data: scenariosData, isLoading: isScenariosLoading } =
-    useListScenarios({
-      search: searchTerm,
-      filter: {},
-      page_size: 20,
-      skip: 0,
-    });
+  const gridData = useMemo(() => {
+    if (!scenariosData) return null;
+    return mapScenariosToGridBody(scenariosData?.scenarios);
+  }, [scenariosData]);
 
-  const gridInstance = useTreeGridInit(
-    "ScenarioGrid",
-    TreeGridLayout,
-    generateData(),
-    handleGridReady,
-  );
+  console.log("gridData", gridData);
+
+  useTreeGridInit(gridId, gridContainerId, ScenarioGridLayout, gridData);
 
   return (
     <Box
@@ -59,6 +36,7 @@ const ScenarioBuilderPage = () => {
         borderRadius: 1,
         overflow: "hidden",
         bgcolor: "brand.background",
+        height: "100%",
       }}
     >
       <ActionHeader onSearch={setSearchTerm} />
@@ -67,13 +45,18 @@ const ScenarioBuilderPage = () => {
         sx={{
           flex: 1,
           p: 2,
+          display: "flex",
+          flexDirection: "column",
+          minHeight: 0, // Ensure flex child can shrink/fill correctly
         }}
       >
         <Box
-          id="ScenarioGrid"
+          id={gridContainerId}
           sx={{
             width: "100%",
-            height: "calc(100vh - 144px)",
+            height: "calc(100vh - 160px)", // Adjusted slightly
+            backgroundColor: "background.paper",
+            borderRadius: 1,
           }}
         />
       </Box>

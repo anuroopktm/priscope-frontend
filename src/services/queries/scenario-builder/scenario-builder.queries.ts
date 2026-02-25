@@ -25,7 +25,10 @@ export const useCreateScenario = () => {
       return data;
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["scenarios"] });
+      queryClient.invalidateQueries({
+        queryKey: ["list-scenarios"],
+        exact: false,
+      });
     },
   });
 };

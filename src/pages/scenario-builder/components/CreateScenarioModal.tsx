@@ -131,7 +131,7 @@ const CreateScenarioModal = ({
                 >
                   {currencyData?.currencies.map((curr) => (
                     <MenuItem key={curr.id} value={curr.id}>
-                      {curr.currency}
+                      {curr.description} ({curr.currency})
                     </MenuItem>
                   ))}
                 </Select>
