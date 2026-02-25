@@ -13,7 +13,7 @@ const LoadingPage = () => {
       }}
     >
       <CircularProgress size={30} thickness={4} />
-      <Typography variant="body1" sx={{ color: "text.secondary" }}>
+      <Typography variant="body1" sx={{ color: "primary.main" }}>
         Loading...
       </Typography>
     </Box>

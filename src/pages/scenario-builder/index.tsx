@@ -1,11 +1,11 @@
+import { useListScenarios } from "@/services/queries/scenario-builder/scenario-builder.queries";
 import { Box } from "@mui/material";
-import { useCallback } from "react";
+import { useCallback, useState } from "react";
 import { ActionHeader } from "./components/ActionHeader";
 import { TreeGridLayout } from "./constant/tree-grid-layout";
 import JsonData from "./constant/tree-grid-sample-data.json";
 import { useTreeGridInit } from "./hooks/use-tree-grid-init";
 
-// Enum definition for Category
 const categoryEnum =
   "|Education|Vehicles|Business Industry|Home & Living|Essentials|Mobiles|Property|Electronics";
 const categoryOptions = categoryEnum.split("|").filter(Boolean);
@@ -17,7 +17,6 @@ const generateData = (): any[] => {
     id: r.id.toString(),
     SKU: r.Name,
     UPC: r.Phone,
-    // Map random category for demo purposes to show off the select
     Category:
       categoryOptions[Math.floor(Math.random() * categoryOptions.length)],
     Description: r.Address,
@@ -28,7 +27,8 @@ const generateData = (): any[] => {
 };
 
 const ScenarioBuilderPage = () => {
-  // Optional: Function to attach event handlers after initialization
+  const [searchTerm, setSearchTerm] = useState<string | undefined>(undefined);
+
   const handleGridReady = useCallback((grid: TGrid) => {
     const G = grid as any;
     G.OnValueChanged = (_grid: TGrid, _row: TRow, col: string, val: any) => {
@@ -36,15 +36,20 @@ const ScenarioBuilderPage = () => {
     };
   }, []);
 
-  // Initialize the grid using the dedicated hook
+  const { data: scenariosData, isLoading: isScenariosLoading } =
+    useListScenarios({
+      search: searchTerm,
+      filter: {},
+      page_size: 20,
+      skip: 0,
+    });
+
   const gridInstance = useTreeGridInit(
     "ScenarioGrid",
     TreeGridLayout,
     generateData(),
     handleGridReady,
   );
-
-  console.log("gridInstance", gridInstance);
 
   return (
     <Box
@@ -56,7 +61,7 @@ const ScenarioBuilderPage = () => {
         bgcolor: "brand.background",
       }}
     >
-      <ActionHeader selectedRows={[]} />
+      <ActionHeader onSearch={setSearchTerm} />
 
       <Box
         sx={{

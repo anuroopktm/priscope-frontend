@@ -42,7 +42,7 @@ export default function Menu(theme: Theme) {
           },
 
           "&.Mui-selected:hover": {
-            backgroundColor: alpha(theme.palette.primary.main, 0.2),
+            backgroundColor: alpha(theme.palette.primary.main, 0.8),
             color: theme.palette.background.paper,
           },
         },
