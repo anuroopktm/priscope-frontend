@@ -1,10 +1,13 @@
 import { useInfiniteQuery, useMutation, useQuery } from "@tanstack/react-query";
 import type { AxiosError } from "axios";
-import { ITEM_MASTER_ENDPOINTS } from "../../../pages/items-master/constants/api.endpoints";
-import { EXPORT_RATE_ENDPOINTS } from "../../../services/queries/common/api.endpoints";
+
 import { useItemMasterStore } from "../../../pages/items-master/store/itemMasterStore";
 
 import type {
+  DeleteSelectedRowPayload,
+  DeleteSelectedRowResponse,
+  Header,
+  ListCommentsPayload,
   ListItemsResponse,
   ListRequestBody,
   ListTemplateHeadersRequest,
@@ -13,12 +16,10 @@ import type {
   MapFieldsRequest,
   MapFieldsResponse,
   SystemFieldsResponse,
-  Header,
-  DeleteSelectedRowResponse,
-  DeleteSelectedRowPayload,
-  ListCommentsPayload,
 } from "./item-master.types";
 
+import type { CommentsResponse } from "@/components/common/loader/comment-sidebar/types";
+import { axiosInstance } from "@/services/api/axiosInstance";
 import type {
   AddBulkInsertAdminRequest,
   AddHeaderPayload,
@@ -27,16 +28,14 @@ import type {
   EditItemMasterColResponse,
   ExportItemMasterRowPayload,
   ExportItemMasterRowResponse,
-  itemMasterHeaderResponse,
   ItemMasterBulkInsertAdminRequestResponse,
   ItemMasterBulkUploadFormattedDataPayload,
   ItemMasterBulkUploadResponseType,
+  itemMasterHeaderResponse,
   SavedFiltersList,
   SaveFilterPayload,
   SaveFilterResponse,
 } from "../../../pages/items-master/helpers/types";
-import { axiosInstance } from "@/services/api/axiosInstance";
-import type { CommentsResponse } from "@/components/common/loader/comment-sidebar/types";
 
 export type UploadResponse = {
   upload_id: string;
@@ -87,7 +86,7 @@ export const useUploadItemMasterFile = () => {
       formData.append("file", file);
 
       const response = await axiosInstance.post<UploadResponse>(
-        `${ITEM_MASTER_ENDPOINTS.upload()}?feature=item_master`,
+        `/v1/common/upload?feature=item_master`,
         formData,
         {
           headers: { "Content-Type": "multipart/form-data" },
@@ -108,7 +107,7 @@ export const useMapItemMasterFields = () => {
   >({
     mutationFn: async ({ payload, upload_id, update_if_exists }) => {
       const response = await axiosInstance.post<MapFieldsResponse>(
-        `${ITEM_MASTER_ENDPOINTS.mapFields(upload_id)}?update_if_exists=${update_if_exists}`,
+        `/v1/item-master/${upload_id}/map-fields?update_if_exists=${update_if_exists}`,
         payload,
         { timeout: 60000 },
       );
@@ -121,7 +120,7 @@ export const useListSystemFields = () => {
   return useMutation<SystemFieldsResponse, AxiosError, any>({
     mutationFn: async (payload) => {
       const response = await axiosInstance.post<SystemFieldsResponse>(
-        ITEM_MASTER_ENDPOINTS.listSystemFields(),
+        `/v1/item-master/system-fields/search`,
         payload,
         { timeout: 60000 },
       );
@@ -134,7 +133,7 @@ export const useCreateItemMasterComment = () => {
   return useMutation<any, AxiosError, { payload: any; itemMasterId: string }>({
     mutationFn: async ({ payload, itemMasterId }) => {
       const response = await axiosInstance.post(
-        ITEM_MASTER_ENDPOINTS.saveItemMasterComment(itemMasterId),
+        `/v1/item-master/${itemMasterId}/comments`,
         payload,
         { timeout: 60000 },
       );
@@ -151,7 +150,7 @@ export const useEditItemMasterItem = () => {
   >({
     mutationFn: async ({ payload, item_id }) => {
       const response = await axiosInstance.put<EditItemMasterColResponse>(
-        ITEM_MASTER_ENDPOINTS.editDataitemMaster(item_id),
+        `/v1/item-master/${item_id}`,
         payload,
       );
       return response.data;
@@ -168,7 +167,7 @@ export const useBulkInsertItems = () => {
     mutationFn: async (payload) => {
       const response =
         await axiosInstance.post<ItemMasterBulkUploadResponseType>(
-          ITEM_MASTER_ENDPOINTS.bulkInsert,
+          `/v1/item-master/bulk-insert`,
           payload,
         );
       return response.data;
@@ -184,7 +183,7 @@ export const useDeleteItemMasterRow = () => {
   >({
     mutationFn: async (payload) => {
       const response = await axiosInstance.delete<DeleteSelectedRowResponse>(
-        ITEM_MASTER_ENDPOINTS.deleteItemMasterRow,
+        `/v1/item-master/items`,
         { data: payload },
       );
       return response.data;
@@ -200,7 +199,7 @@ export const useExportItemMasterRow = () => {
   >({
     mutationFn: async (payload) => {
       const response = await axiosInstance.post<ExportItemMasterRowResponse>(
-        EXPORT_RATE_ENDPOINTS.createExport,
+        `/v1/exports`,
         payload,
       );
       return response.data;
@@ -217,7 +216,7 @@ export const useAddBulkInsertAdminRequest = () => {
     mutationFn: async (payload) => {
       const response =
         await axiosInstance.post<ItemMasterBulkInsertAdminRequestResponse>(
-          ITEM_MASTER_ENDPOINTS.createAdminRequest,
+          `/v1/approval-requests`,
           payload,
         );
       return response.data;
@@ -229,7 +228,7 @@ export const useAddHeader = () => {
   return useMutation<AddHeaderResponse, AxiosError, AddHeaderPayload>({
     mutationFn: async (payload) => {
       const response = await axiosInstance.post<AddHeaderResponse>(
-        ITEM_MASTER_ENDPOINTS.addHeader,
+        `/v1/item-master/add-header`,
         payload,
       );
       return response.data;
@@ -241,7 +240,7 @@ export const useSaveFilter = () => {
   return useMutation<SaveFilterResponse, AxiosError, SaveFilterPayload>({
     mutationFn: async (payload) => {
       const response = await axiosInstance.post<SaveFilterResponse>(
-        ITEM_MASTER_ENDPOINTS.saveFilter,
+        `/v1/item-master/filters`,
         payload,
       );
       return response.data;
@@ -262,7 +261,7 @@ export const useListTemplates = () => {
       };
 
       const response = await axiosInstance.post<ListTemplatesResponse>(
-        ITEM_MASTER_ENDPOINTS.listTemplates(),
+        `/v1/item-master/templates/search`,
         payload,
       );
 
@@ -286,7 +285,7 @@ export const useListTemplateHeaders = () => {
   >({
     mutationFn: async ({ payload, template_id }) => {
       const response = await axiosInstance.post<ListTemplateHeadersResponse>(
-        ITEM_MASTER_ENDPOINTS.listTemplateHeaders(template_id),
+        `/v1/item-master/templates/${template_id}/headers`,
         payload,
         { timeout: 60000 },
       );
@@ -300,7 +299,7 @@ export const useListItems = (payload: Omit<ListRequestBody, "skip">) => {
     queryKey: ["listItems", payload.search, payload.filter],
     queryFn: async ({ pageParam = 0 }) => {
       const response = await axiosInstance.post<ListItemsResponse>(
-        ITEM_MASTER_ENDPOINTS.listItems(),
+        `/v1/item-master/items/search_v2`,
         {
           search: payload.search ?? "",
           page_size: payload.page_size ?? 100,
@@ -334,7 +333,7 @@ export const useListHeaders = (payload: ListRequestBody) => {
     queryKey: ["listItemMasterHeaders", payload.skip, payload.search],
     queryFn: async () => {
       const response = await axiosInstance.post<itemMasterHeaderResponse>(
-        ITEM_MASTER_ENDPOINTS.listHeaders,
+        `/v1/item-master/headers/search`,
         payload,
         { timeout: 60000 },
       );
@@ -362,7 +361,7 @@ export const useListComments = () => {
   return useMutation<CommentsResponse, AxiosError, ListCommentsPayload>({
     mutationFn: async (payload) => {
       const { data } = await axiosInstance.post<CommentsResponse>(
-        ITEM_MASTER_ENDPOINTS.listComments,
+        `/v1/item-master/comments/search`,
         payload,
       );
       return data;
@@ -378,7 +377,7 @@ export const useItemMasterHistory = ({
     queryKey: ["item-master-history", item_id, search],
     queryFn: async () => {
       const response = await axiosInstance.get<ItemHistoryResponse>(
-        ITEM_MASTER_ENDPOINTS.getItemMasterHistory(item_id),
+        `/v1/item-master/${item_id}/history/search`,
         { params: { search, skip: 0, limit: 100 } },
       );
       return response.data;
@@ -391,9 +390,7 @@ export const useGetItemMasterById = (item_id?: string) => {
   return useQuery<any, AxiosError>({
     queryKey: ["item-master-by-id", item_id],
     queryFn: async () => {
-      const response = await axiosInstance.get(
-        ITEM_MASTER_ENDPOINTS.getItemById(item_id as string),
-      );
+      const response = await axiosInstance.get(`/v1/item-master/${item_id}`);
       return response.data;
     },
     enabled: Boolean(item_id),
@@ -405,7 +402,7 @@ export const useListSavedFilter = () => {
     queryKey: ["saved-filter"],
     queryFn: async () => {
       const response = await axiosInstance.get<SavedFiltersList>(
-        ITEM_MASTER_ENDPOINTS.saveFilter,
+        `/v1/item-master/filters`,
       );
       return response.data;
     },

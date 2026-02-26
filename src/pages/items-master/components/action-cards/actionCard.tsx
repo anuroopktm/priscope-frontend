@@ -1,4 +1,3 @@
-"use client";
 import { Box, Button, Grid, Typography } from "@mui/material";
 import React, { useCallback } from "react";
 import {
@@ -6,7 +5,7 @@ import {
   cardBoxStyles,
   imageBoxStyles,
   titleStyles,
-} from "./cardStyles";
+} from "./card-styles";
 
 export interface CardConfig {
   id: string;

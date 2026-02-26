@@ -19,32 +19,26 @@ import {
   DialogTitle,
   Divider,
   IconButton,
+  Step,
+  StepLabel,
+  Stepper,
 } from "@mui/material";
 import React, { useState } from "react";
-import { useItemMasterStore } from "../../../store/itemMasterStore";
 import type { SnackbarState } from "../../columns-dropdown";
-import StyledStepper from "../../stepper";
 import CsvTypeSelection from "./csv-type-step";
 import FileUploadStep from "./upload-step";
-// import AppSnackbar from "@/shared/components/action-bar/AppSnackbar";
-// import { SnackbarState } from "@/app/[lang]/(protected)/freight-rate-library/types";
 
-type FileUploadModalProps = {
+interface FileUploadModalProps {
   open: boolean;
   onClose: () => void;
-  onContinueToMapping?: (data: {
-    file: UploadedFile | null;
-    csvType: string;
-    controlFields: ControlFields;
-    headers: string[]; // Add headers to the callback
-  }) => void;
+  onContinueToMapping?: (uploadData: any) => void;
   setSystemFields: React.Dispatch<
     React.SetStateAction<SystemFieldObject[] | null>
   >;
   csvType: string;
   setCsvType: React.Dispatch<React.SetStateAction<string>>;
   setSnackbar: React.Dispatch<React.SetStateAction<SnackbarState>>;
-};
+}
 
 const FileUploadModal: React.FC<FileUploadModalProps> = ({
   open,
@@ -57,55 +51,55 @@ const FileUploadModal: React.FC<FileUploadModalProps> = ({
 }) => {
   const [activeStep, setActiveStep] = useState(0);
   const [uploadedFile, setUploadedFile] = useState<UploadedFile | null>(null);
-  const [fileStatus, setFileStatus] = useState<"loading" | "complete" | "">("");
+  const [fileStatus, setFileStatus] = useState<string>("");
+  const [headers, setHeaders] = useState<string[]>([]);
   const [controlFields, setControlFields] = useState<ControlFields>({
     item: "",
     supplier: "",
     customer: "",
   });
-  const [headers, setHeaders] = useState<string[]>([]); // New state for headers
+
   const {
     mutate: listSystemFieldsMutation,
     isPending: isPendingListSystemFields,
   } = useListSystemFields();
-  const { mutate: uploadMutation, isPending: isPendingUpload } =
+
+  const { mutate: uploadFileMutation, isPending: isPendingUpload } =
     useUploadItemMasterFile();
-  const setUploadId = useItemMasterStore((s) => s.setUploadId);
-  const handleFileUpload = (file: UploadedFile) => {
-    setUploadedFile(file);
+
+  const handleFileUpload = (uploadedFileData: UploadedFile) => {
+    setUploadedFile(uploadedFileData);
+    setFileStatus("uploading");
+
+    uploadFileMutation(
+      { file: uploadedFileData.file },
+      {
+        onSuccess: () => {
+          setFileStatus("success");
+        },
+        onError: (err) => {
+          setFileStatus("error");
+          setSnackbar({
+            message: err.message || "Upload failed",
+            severity: "error",
+          });
+        },
+      },
+    );
   };
 
   const handleFileRemove = () => {
     setUploadedFile(null);
-    setHeaders([]); // Clear headers when file is removed
+    setFileStatus("");
+    setHeaders([]);
   };
 
-  const handleFileStatusChange = (status: "loading" | "complete" | "") => {
+  const handleFileStatusChange = (status: string) => {
     setFileStatus(status);
   };
 
-  const handleHeadersFetched = (headers: string[]) => {
-    setHeaders(headers);
-  };
-
-  const handleContinue = () => {
-    if (!uploadedFile || !uploadedFile.file) return;
-    uploadMutation(
-      { file: uploadedFile.file },
-      {
-        onSuccess: (data) => {
-          if (data.upload_id) {
-            setUploadId(data.upload_id);
-          }
-          if (fileStatus === "complete" && activeStep === 0) {
-            setActiveStep(1);
-          }
-        },
-        onError: () => {
-          handleFileStatusChange("");
-        },
-      },
-    );
+  const handleHeadersFetched = (fetchedHeaders: string[]) => {
+    setHeaders(fetchedHeaders);
   };
 
   const handleCsvTypeChange = (value: string) => {
@@ -138,14 +132,20 @@ const FileUploadModal: React.FC<FileUploadModalProps> = ({
       file: uploadedFile,
       csvType,
       controlFields,
-      headers, // Include headers in the data
+      headers,
     };
 
     const listSystemFieldsPayload = {
-      type: csvType,
-      search: "",
-      page_size: 100,
-      skip: 0,
+      template_type: csvType,
+      type: "item+supplier+customer",
+      control_fields: Object.keys(controlFields).reduce(
+        (acc, key) => {
+          const val = controlFields[key as keyof ControlFields];
+          if (val) acc[key] = val;
+          return acc;
+        },
+        {} as Record<string, string>,
+      ),
     };
 
     listSystemFieldsMutation(listSystemFieldsPayload, {
@@ -156,7 +156,7 @@ const FileUploadModal: React.FC<FileUploadModalProps> = ({
         }
         setCsvType("item");
       },
-      onError: (err) => {
+      onError: (err: any) => {
         const message =
           err.status === 404
             ? "Failed to fetch system fields"
@@ -172,7 +172,7 @@ const FileUploadModal: React.FC<FileUploadModalProps> = ({
     setFileStatus("");
     setCsvType("item");
     setControlFields({ item: "", supplier: "", customer: "" });
-    setHeaders([]); // Reset headers
+    setHeaders([]);
   };
 
   const handleClose = () => {
@@ -196,7 +196,13 @@ const FileUploadModal: React.FC<FileUploadModalProps> = ({
               justifyContent: "space-between",
             }}
           >
-            <StyledStepper activeStep={activeStep} steps={UPLOAD_STEPS} />
+            <Stepper activeStep={activeStep}>
+              {UPLOAD_STEPS.map((label) => (
+                <Step key={label}>
+                  <StepLabel>{label}</StepLabel>
+                </Step>
+              ))}
+            </Stepper>
             <IconButton onClick={handleClose} size="small" sx={{ ml: 2 }}>
               <CloseIcon />
             </IconButton>
@@ -208,11 +214,11 @@ const FileUploadModal: React.FC<FileUploadModalProps> = ({
           {activeStep === 0 && (
             <FileUploadStep
               uploadedFile={uploadedFile}
-              fileStatus={fileStatus}
+              fileStatus={fileStatus as any}
               onFileUpload={handleFileUpload}
               onFileRemove={handleFileRemove}
               onStatusChange={handleFileStatusChange}
-              onHeadersFetched={handleHeadersFetched} // Pass the new callback
+              onHeadersFetched={handleHeadersFetched}
               isUploadPending={isPendingUpload}
             />
           )}
@@ -248,40 +254,76 @@ const FileUploadModal: React.FC<FileUploadModalProps> = ({
                 sx={{
                   height: 40,
                   bgcolor: "#fff",
-                  color: (theme) => theme.palette.primary.main,
-                  borderColor: (theme) => theme.palette.brand.buttonBg,
+                  color: (theme) => theme.palette.brand.divider,
+                  borderColor: (theme) => theme.palette.brand.divider,
+                  borderRadius: "8px",
                   "&:hover": {
-                    bgcolor: (theme) => theme.palette.brand.userSubText,
-                    borderColor: (theme) => theme.palette.brand.buttonBg,
+                    bgcolor: (theme) => theme.palette.brand.hover,
+                    borderColor: (theme) => theme.palette.brand.divider,
                   },
                 }}
               >
                 Back
               </Button>
             )}
+            <Button
+              type="button"
+              variant="outlined"
+              onClick={handleClose}
+              sx={{
+                height: 40,
+                bgcolor: "#fff",
+                color: (theme) => theme.palette.brand.divider,
+                borderColor: (theme) => theme.palette.brand.divider,
+                borderRadius: "8px",
+                "&:hover": {
+                  bgcolor: (theme) => theme.palette.brand.hover,
+                  borderColor: (theme) => theme.palette.brand.divider,
+                },
+              }}
+            >
+              Cancel
+            </Button>
+          </Box>
+          <Box sx={{ display: "flex", gap: 1 }}>
             {activeStep === 0 && (
               <Button
-                type="button"
                 variant="contained"
-                onClick={handleContinue}
-                disabled={fileStatus !== "complete" || headers.length === 0}
-                sx={{ height: 40 }}
-                loading={isPendingUpload}
+                onClick={() => setActiveStep((prev) => prev + 1)}
+                disabled={fileStatus !== "success"}
+                sx={{
+                  height: 40,
+                  bgcolor: (theme) => theme.palette.brand.divider,
+                  color: "#fff",
+                  borderRadius: "8px",
+                  "&:hover": {
+                    bgcolor: (theme) => theme.palette.brand.divider,
+                  },
+                }}
               >
                 Continue
               </Button>
             )}
-
             {activeStep === 1 && (
               <Button
-                type="button"
                 variant="contained"
                 onClick={handleContinueToMapping}
-                disabled={isContinueToMappingDisabled()}
-                loading={isPendingListSystemFields}
-                sx={{ height: 40 }}
+                disabled={
+                  isContinueToMappingDisabled() || isPendingListSystemFields
+                }
+                sx={{
+                  height: 40,
+                  bgcolor: (theme) => theme.palette.brand.divider,
+                  color: "#fff",
+                  borderRadius: "8px",
+                  "&:hover": {
+                    bgcolor: (theme) => theme.palette.brand.divider,
+                  },
+                }}
               >
-                Continue
+                {isPendingListSystemFields
+                  ? "Loading..."
+                  : "Continue to Mapping"}
               </Button>
             )}
           </Box>

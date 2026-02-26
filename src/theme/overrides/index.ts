@@ -6,6 +6,7 @@ import Input from "./Input";
 import Menu from "./Menu";
 import Paper from "./Paper";
 import Select from "./Select";
+import Stepper from "./Stepper";
 import Typography from "./Typography";
 
 export default function ComponentsOverrides(theme: Theme) {
@@ -18,5 +19,6 @@ export default function ComponentsOverrides(theme: Theme) {
     ...Typography(theme),
     ...Menu(theme),
     ...Chip(theme),
+    ...Stepper(theme),
   };
 }

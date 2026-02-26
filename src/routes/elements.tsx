@@ -21,4 +21,6 @@ export const EditUserPage = lazy(
 export const UserDetailsPage = lazy(
   () => import("@/pages/user-management/user-details"),
 );
-export const ItemsMasterPage = lazy(() => import("@/pages/items-master"));
+export const ItemsMasterPage = lazy(
+  () => import("@/pages/items-master-refactor"),
+);

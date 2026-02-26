@@ -1,11 +1,7 @@
 import { axiosInstance } from "@/services/api/axiosInstance";
 import { useMutation, useQuery } from "@tanstack/react-query";
 import type { AxiosError } from "axios";
-import {
-  COMMON_ENDPOINTS,
-  EXPORT_RATE_ENDPOINTS,
-  IMPORT_RATE_ENDPOINTS,
-} from "./api.endpoints";
+
 import type {
   GlobalCurrenciesRequest,
   GlobalCurrenciesResponse,
@@ -23,12 +19,9 @@ import type {
 export const useGetTemplateFile = () => {
   return useMutation<any, AxiosError, string>({
     mutationFn: async (feature: string) => {
-      const { data } = await axiosInstance.get(
-        COMMON_ENDPOINTS.getRateTemplate,
-        {
-          params: { feature },
-        },
-      );
+      const { data } = await axiosInstance.get(`/v1/common/template`, {
+        params: { feature },
+      });
       return data;
     },
     onSuccess: (data, feature) => {
@@ -53,13 +46,10 @@ export const useListModuleImports = (module_name: string) => {
   return useMutation<any, AxiosError>({
     // queryKey: ["module-imports", module_name],
     mutationFn: async () => {
-      const { data } = await axiosInstance.get(
-        IMPORT_RATE_ENDPOINTS.getModuleImports,
-        {
-          params: { feature: module_name },
-          headers: { "Content-Type": "application/json" },
-        },
-      );
+      const { data } = await axiosInstance.get(`/v1/common/uploads`, {
+        params: { feature: module_name },
+        headers: { "Content-Type": "application/json" },
+      });
       return data;
     },
     // enabled: Boolean(module_name),
@@ -76,7 +66,7 @@ export const useListModuleImportSummaryCount = (
     queryKey: ["ModuleImportSummaryCount", module_name, uploadId],
     queryFn: async () => {
       const { data } = await axiosInstance.get(
-        IMPORT_RATE_ENDPOINTS.getModuleImportSummaryCount(uploadId),
+        `/v1/common/upload-summary/${uploadId}/counts`,
         {
           params: { feature: module_name },
           headers: { "Content-Type": "application/json" },
@@ -94,7 +84,7 @@ export const useGetModuleImportErrorFile = () => {
   return useMutation<any, AxiosError, string>({
     mutationFn: async (uploadId: string) => {
       const { data } = await axiosInstance.get(
-        IMPORT_RATE_ENDPOINTS.getModuleImportErrorFile(uploadId),
+        `/v1/common/uploads/${uploadId}/error-file`,
       );
       return data;
     },
@@ -121,7 +111,7 @@ export const useCreateExport = () => {
   >({
     mutationFn: async (payload) => {
       const { data } = await axiosInstance.post<ExportResponse>(
-        EXPORT_RATE_ENDPOINTS.createExport,
+        `/v1/exports`,
         payload,
       );
       return data;
@@ -139,7 +129,7 @@ export const useListExport = () => {
   >({
     mutationFn: async (payload) => {
       const { data } = await axiosInstance.post<ListExportResponse>(
-        EXPORT_RATE_ENDPOINTS.listExports,
+        `/v1/exports/search`,
         payload,
       );
       return data;
@@ -153,7 +143,7 @@ export const useGetExportedFile = () => {
   return useMutation<DownloadFileResponse, AxiosError, string>({
     mutationFn: async (id: string) => {
       const { data } = await axiosInstance.get<DownloadFileResponse>(
-        EXPORT_RATE_ENDPOINTS.downloadExportFile(id),
+        `/v1/exports/download/${id}`,
       );
       return data;
     },
@@ -167,7 +157,7 @@ export const useListCurrencies = (payload: GlobalCurrenciesRequest) => {
     queryKey: ["global-currencies", payload],
     queryFn: async () => {
       const { data } = await axiosInstance.post<GlobalCurrenciesResponse>(
-        COMMON_ENDPOINTS.globalCurrencies,
+        `/v1/global-currencies`,
         payload,
       );
       return data;

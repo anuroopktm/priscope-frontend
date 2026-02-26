@@ -24,6 +24,9 @@ import {
   DialogTitle,
   Divider,
   IconButton,
+  Step,
+  StepLabel,
+  Stepper,
 } from "@mui/material";
 import { useQueryClient } from "@tanstack/react-query";
 import React, { useEffect, useState } from "react";
@@ -33,7 +36,6 @@ import {
 } from "../../../helpers/itemMasterHelpers";
 import { useItemMasterStore } from "../../../store/itemMasterStore";
 import type { SnackbarState } from "../../columns-dropdown";
-import StyledStepper from "../../stepper";
 import AttributeConfiguration from "./attribute-config-step";
 import SystemFieldMapping from "./system-field-step";
 
@@ -285,10 +287,13 @@ const DataMappingModal: React.FC<DataMappingModalPropsExtended> = ({
               justifyContent: "space-between",
             }}
           >
-            <StyledStepper
-              activeStep={activeStep}
-              steps={Array.from(DATA_MAPPING_STEPS)}
-            />
+            <Stepper activeStep={activeStep}>
+              {Array.from(DATA_MAPPING_STEPS).map((label) => (
+                <Step key={label}>
+                  <StepLabel>{label}</StepLabel>
+                </Step>
+              ))}
+            </Stepper>
             <IconButton onClick={handleClose} size="small" sx={{ ml: 2 }}>
               <CloseIcon />
             </IconButton>

@@ -11,6 +11,7 @@ import LoaderOverlay from "@/components/common/loader";
 import SaveFilterModal from "@/components/common/save-filter";
 import ConfirmationDialog from "@/components/common/upload-modal/confirmation-modal";
 import { useSaveFilter } from "@/services/queries/item-master/item-master.queries";
+import { useToastStore } from "@/store/useToastStore";
 import { openConfirmationModal } from "@/utils/getRequestConfirmationModal";
 import AddIcon from "@mui/icons-material/Add";
 import DeleteOutlineIcon from "@mui/icons-material/DeleteOutline";
@@ -18,14 +19,14 @@ import KeyboardArrowDownRoundedIcon from "@mui/icons-material/KeyboardArrowDownR
 import { Box, Button, InputBase, useTheme } from "@mui/material";
 import { useQueryClient } from "@tanstack/react-query";
 import React, { useEffect, useState } from "react";
+import { useItemsMasterUIStore } from "../../store/useItemsMasterUIStore";
+import type { OpenPanel } from "../../types/types";
 import AddNewItemDrawer from "../add-item";
-import type { SnackbarState } from "../columns-dropdown";
 import ColumnDropdown from "../columns-dropdown";
 import SavedFiltersDropdown from "../saved-filters-dropdown";
 import AddNewGridFilter from "./AddNewGridFilter";
 
 interface FilterProps {
-  onToggleDrawer?: () => void;
   hasAddItemMasterPermission?: boolean;
   isAdding?: boolean;
   setIsAdding?: (isAdding: boolean) => void;
@@ -35,38 +36,22 @@ interface FilterProps {
   setSelectedColumns: React.Dispatch<
     React.SetStateAction<Record<string, boolean>>
   >;
-  searchQuery: string;
-  setSearchQuery: React.Dispatch<React.SetStateAction<string>>;
-  setSnackbar: React.Dispatch<React.SetStateAction<SnackbarState>>;
-  isAllSelected?: boolean;
-  selectedRows: string[];
-  deleteSelection: () => void;
   headerList: string[];
-  onImportClick: () => void;
   setSelectedColumnsForAdd?: React.Dispatch<
     React.SetStateAction<Record<string, boolean>>
   >;
   selectedColumnsForAdd?: Record<string, boolean>;
-  setShowFilesModal: React.Dispatch<React.SetStateAction<boolean>>;
   resetAddNewGrid?: () => void;
   handleColumnVisibility: (label: string, checked: boolean) => void;
   onHandleExport: () => void;
-  setSelectedExport: React.Dispatch<React.SetStateAction<boolean>>;
-  setOpenRequestModal: React.Dispatch<React.SetStateAction<boolean>>;
   handleEmptyColumnVisibility?: (label: string, checked: boolean) => void;
-  setSaveFilter: React.Dispatch<React.SetStateAction<boolean>>;
-  saveFilter: boolean;
-  filter: Record<string, string[]>;
-  saveFilterJson: React.Dispatch<
-    React.SetStateAction<Record<string, string[]>>
-  >;
-  onClearAllFilters?: () => void;
-  applySavedFilterToFilterRow: (filter: Record<string, string[]>) => void;
   setHeaderLabels?: React.Dispatch<React.SetStateAction<string[]>>;
+  applySavedFilterToFilterRow: (filter: Record<string, string[]>) => void;
+  deleteSelection: () => void;
+  onClearAllFilters?: () => void;
 }
 
 const Filter: React.FC<FilterProps> = ({
-  onToggleDrawer,
   isAdding,
   setIsAdding,
   onSave,
@@ -74,31 +59,36 @@ const Filter: React.FC<FilterProps> = ({
   hasAddItemMasterPermission,
   selectedColumns,
   setSelectedColumns,
-  searchQuery,
-  setSearchQuery,
-  setSnackbar,
-  selectedRows,
-  isAllSelected,
-  deleteSelection,
-  headerList,
-  onImportClick,
   selectedColumnsForAdd,
   setSelectedColumnsForAdd,
-  setShowFilesModal,
   handleColumnVisibility,
   resetAddNewGrid,
   onHandleExport,
-  setSelectedExport,
-  setOpenRequestModal,
   handleEmptyColumnVisibility,
   setHeaderLabels,
-  setSaveFilter,
-  saveFilter,
-  filter,
-  saveFilterJson,
-  onClearAllFilters,
   applySavedFilterToFilterRow,
+  deleteSelection,
+  onClearAllFilters,
+  headerList,
 }) => {
+  const {
+    searchQuery,
+    setSearchQuery,
+    selectedRows,
+    filter,
+    setFilter: saveFilterJson,
+    saveFilter,
+    setSaveFilter,
+    setOpenRequestModal,
+    setShowFilesModal,
+    setShowUploadFlow,
+    setSelectedExport,
+    setOpenPanel,
+  } = useItemsMasterUIStore();
+
+  const { showToast } = useToastStore();
+  const isAllSelected = false;
+
   const theme = useTheme();
   const [drawerOpen, setDrawerOpen] = useState(false);
   const confirm = (opts: any) => Promise.resolve(window.confirm(opts.message));
@@ -121,7 +111,9 @@ const Filter: React.FC<FilterProps> = ({
   }, [selectedRows, isAllSelected]);
 
   const handleToggle = () => {
-    onToggleDrawer?.();
+    setOpenPanel((prev: OpenPanel) =>
+      prev === "comments" ? null : "comments",
+    );
   };
 
   const handleAddItemClick = async () => {
@@ -146,6 +138,10 @@ const Filter: React.FC<FilterProps> = ({
   const handleExportData = () => {
     setSelectedExport(true);
     onHandleExport();
+  };
+
+  const onImportClick = () => {
+    setShowUploadFlow(true);
   };
 
   const handleFilesClick = () => {
@@ -180,17 +176,11 @@ const Filter: React.FC<FilterProps> = ({
     };
     mutateSaveFilter(payload, {
       onSuccess: () => {
-        setSnackbar({
-          message: "Filter added successfully!",
-          severity: "success",
-        });
+        showToast("Filter added successfully!", "success");
         queryClient.invalidateQueries({ queryKey: ["saved-filter"] });
       },
       onError: () => {
-        setSnackbar({
-          message: "Failed to add filter",
-          severity: "error",
-        });
+        showToast("Failed to add filter", "error");
       },
     });
   };

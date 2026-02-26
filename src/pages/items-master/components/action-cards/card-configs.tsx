@@ -1,11 +1,10 @@
-// import Image from "next/image";
 import add from "../../assets/add-item.svg";
 import uploadcsv from "../../assets/csv-upload.svg";
 import databaseImport from "../../assets/import.svg";
 import plus from "../../assets/plus-sign.svg";
 import refresh from "../../assets/refresh.svg";
 import upload from "../../assets/upload-circle.svg";
-import type { CardConfig } from "./actionCard";
+import type { CardConfig } from "./ActionCard";
 
 export const CARD_CONFIGS: readonly CardConfig[] = [
   {

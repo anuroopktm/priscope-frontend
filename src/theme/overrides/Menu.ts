@@ -7,7 +7,7 @@ export default function Menu(theme: Theme) {
         paper: {
           backgroundColor: theme.palette.common.white,
           borderRadius: 12,
-          overflow: "hidden",
+          overflow: "auto",
         },
       },
     },
