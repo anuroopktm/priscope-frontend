@@ -5,6 +5,7 @@ import LoaderOverlay from "@/components/common/loader";
 import RequestsModal from "@/components/common/requests-modal";
 import {
   useAddBulkInsertAdminRequest,
+  useCreateItemMasterComment,
   useDeleteItemMasterRow,
   useExportItemMasterRow,
   useListComments,
@@ -32,7 +33,10 @@ import { handleSelected } from "./components/tree-grid/RowSelection/RowSelection
 import { useGetExportedFile } from "@/services/queries/common/common.queries";
 import { handleValueChanged } from "./components/tree-grid/CellValue/handleValueChanged";
 import TableSavePopover from "./components/table-save-popover";
-import { hasItemMasterPrivileges } from "./helpers/itemMasterHelpers";
+import {
+  createItemMasterCommentPayload,
+  hasItemMasterPrivileges,
+} from "./helpers/itemMasterHelpers";
 import RequestSuccessDialog from "@/components/common/request-notification";
 import FileDetailsModal from "@/components/file-detail-modal";
 import { FILE_FILTER_OPTIONS } from "@/constants/file-modal.constants";
@@ -56,6 +60,9 @@ import type { HeaderList, OpenPanel, TreeGridState } from "./types/types";
 import { useHandleEditPopover } from "./hooks/useHandleEditPopover";
 import { useSkuUpcClickable } from "./hooks/useSkuUpcClickable";
 import { ActionHeader } from "./components/header/ActionHeader";
+import { handleRightClick } from "./components/tree-grid/CellValue/handleRightClick";
+import { COMMENT_TYPE } from "@/constants/comments.constants";
+import CommentsModal from "@/components/common/comment-modal";
 
 const ItemsMasterPage = () => {
   const [searchQuery, setSearchQuery] = useState("");
@@ -92,7 +99,12 @@ const ItemsMasterPage = () => {
   const [openPanel, setOpenPanel] = useState<OpenPanel>(null);
   const [detailedViewId, setDetailedViewId] = useState<string>("");
   const [isDetailViewModalOpen, setIsDetailViewModalOpen] = useState(false);
+  const [onSubmitComment, setOnSubmitComment] = useState<
+    ((comment: string) => void) | null
+  >(null);
+  const [showCommentModal, setShowCommentModal] = useState(false);
   const { handleGridEditConfirm } = useHandleGridEditConfirm();
+  const [isAdding, setIsAdding] = useState(false);
 
   const [
     requestSuccessNotficationVisible,
@@ -138,6 +150,9 @@ const ItemsMasterPage = () => {
   const { mutateAsync: listComments, isPending: isCommentListingPending } =
     useListComments();
 
+  const { mutateAsync: createComment, isPending: createCommentPending } =
+    useCreateItemMasterComment();
+
   const [showFilesModal, setShowFilesModal] = useState<boolean>(false);
 
   useEffect(() => {
@@ -145,11 +160,13 @@ const ItemsMasterPage = () => {
     window.TGSetEvent("OnSelected", gridId, onSelected);
     window.TGSetEvent("OnFilter", gridId, onHandleFilterChange);
     window.TGSetEvent("OnValueChanged", gridId, onHandleValueChanged);
+    window.TGSetEvent("OnRightClick", gridId, onHandleRightClick);
     return () => {
       window.TGDelEvent("OnSelected", gridId);
       window.TGDelEvent("OnScroll", gridId);
       window.TGDelEvent("OnFilter", gridId);
       window.TGSetEvent("OnValueChanged", gridId);
+      window.TGDelEvent("OnRightClick", gridId);
     };
   }, []);
 
@@ -159,7 +176,7 @@ const ItemsMasterPage = () => {
         isFetchingNextPage ||
         itemMasterExportRowPending ||
         isDownloadExportPending ||
-        // createCommentPending ||
+        createCommentPending ||
         isListHeadersLoading ||
         // isBulkInsertPending ||
         deleteItemMasterRowPending ||
@@ -169,7 +186,7 @@ const ItemsMasterPage = () => {
   }, [
     isItemsLoading,
     isFetchingNextPage,
-    // createCommentPending,
+    createCommentPending,
     isListHeadersLoading,
     itemMasterExportRowPending,
     isDownloadExportPending,
@@ -524,6 +541,51 @@ const ItemsMasterPage = () => {
   const togglePanel = useCallback((panel: OpenPanel) => {
     setOpenPanel((prev) => (prev === panel ? null : panel));
   }, []);
+  const handleConfirmComment = (
+    type: string,
+    id: string,
+    col: string,
+    comment: string,
+  ) => {
+    const payload = createItemMasterCommentPayload(type, col, comment);
+
+    if (!payload) {
+      console.error("Invalid comment type");
+      return;
+    }
+
+    setShowLoader(true);
+
+    createComment(
+      { itemMasterId: id, payload },
+      {
+        onSettled: () => {
+          setShowLoader(false);
+        },
+        onSuccess: () => {
+          showToast("Comment added successfully", "success");
+        },
+        onError: () => {
+          showToast("Failed to add comment", "error");
+        },
+      },
+    );
+  };
+
+  const onClickCellComment = (grid: TGrid, row: TRow, col: string) => {
+    setOnSubmitComment(() => (comment: string) => {
+      const id = row?.id || "";
+      handleConfirmComment(COMMENT_TYPE.CELL, id, col, comment);
+    });
+    setShowCommentModal(true);
+  };
+
+  const onHandleRightClick = handleRightClick(gridId, [
+    {
+      name: "Comment on this cell",
+      onClick: onClickCellComment,
+    },
+  ]);
 
   return (
     <Box
@@ -564,6 +626,12 @@ const ItemsMasterPage = () => {
           onClose={() => setIsDetailViewModalOpen(false)}
           timelineTitle={"Timeline"}
           item_id={detailedViewId}
+        />
+      )}
+      {showCommentModal && (
+        <CommentsModal
+          onSubmit={onSubmitComment}
+          onClose={() => setShowCommentModal(false)}
         />
       )}
       {openReqestModal && (
