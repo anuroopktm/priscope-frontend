@@ -77,7 +77,7 @@ const FilterDrawer = ({
       ...prevState,
       [sectionName]: {
         ...prevState[sectionName],
-        [itemName]: !prevState[section.name][itemName],
+        [itemName]: !prevState[sectionName][itemName],
       },
     }));
   };

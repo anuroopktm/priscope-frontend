@@ -1,6 +1,6 @@
 "use client";
+import { Box, Button, Dialog, Typography, useTheme } from "@mui/material";
 import React from "react";
-import { Dialog, Box, Button, Typography, useTheme } from "@mui/material";
 
 interface ConfirmationDialogProps {
   open: boolean;
@@ -68,7 +68,7 @@ const ConfirmationDialog: React.FC<ConfirmationDialogProps> = ({
           sx={{
             borderRadius: 8,
             bgcolor:
-              theme.palette.sidebar?.highlight || theme.palette.primary.main,
+              theme.palette.divider || theme.palette.primary.main,
             "&:hover": { bgcolor: "#0F3A5A" },
           }}
         >

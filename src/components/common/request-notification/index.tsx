@@ -1,13 +1,11 @@
-import React, { useState } from "react";
 import {
-  Dialog,
-  DialogContent,
-  DialogActions,
-  Typography,
   Button,
-  Box,
-  useTheme,
+  Dialog,
+  DialogActions,
+  DialogContent,
+  Typography,
 } from "@mui/material";
+import React from "react";
 
 type RequestSuccessDialogProps = {
   setNotificationOpen: React.Dispatch<React.SetStateAction<boolean>>;
@@ -16,7 +14,7 @@ type RequestSuccessDialogProps = {
 export default function RequestSuccessDialog({
   setNotificationOpen,
 }: RequestSuccessDialogProps) {
-  const theme = useTheme();
+  // const theme = useTheme();
   const handleClose = () => {
     setNotificationOpen(false);
   };

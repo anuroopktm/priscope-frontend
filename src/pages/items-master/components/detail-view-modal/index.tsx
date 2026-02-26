@@ -1,23 +1,22 @@
-import React from "react";
 import {
+  Box,
+  CircularProgress,
   Dialog,
   DialogContent,
-  Box,
   IconButton,
   Typography,
-  CircularProgress,
 } from "@mui/material";
-import { GridCloseIcon } from "@mui/x-data-grid";
+import React from "react";
 
 import ItemDetailCard from "@/components/common/item-detail";
 import TimelineDetail from "@/components/common/timeline";
 
+import { mapHistoryToTimeline } from "@/pages/items-master/utils/mapHistoryToTimeline";
+import { mapItemApiToDetailView } from "@/pages/items-master/utils/mapItemApiToDetailView";
 import {
   useGetItemMasterById,
   useItemMasterHistory,
 } from "@/services/queries/item-master/item-master.queries";
-import { mapItemApiToDetailView } from "@/pages/items-master/utils/mapItemApiToDetailView";
-import { mapHistoryToTimeline } from "@/pages/items-master/utils/mapHistoryToTimeline";
 
 interface DetailsModalProps {
   isOpen: boolean;
@@ -99,7 +98,8 @@ export const DetailsModal: React.FC<DetailsModalProps> = ({
           onClick={onClose}
           sx={{ border: "1px solid #ccc", borderRadius: "8px" }}
         >
-          <GridCloseIcon fontSize="small" />
+          X
+          {/* <GridCloseIcon fontSize="small" /> */}
         </IconButton>
       </Box>
 

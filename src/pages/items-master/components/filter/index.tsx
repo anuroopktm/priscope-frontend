@@ -1,55 +1,41 @@
-import React, { useEffect, useState } from "react";
+import LoaderOverlay from "@/components/common/loader";
+import SaveFilterModal from "@/components/common/save-filter";
+import ConfirmationDialog from "@/components/common/upload-modal/confirmation-modal";
+import SavedFilterIcon from "@/public/images/bookmark-check-01.svg";
+import CommentIcon from "@/public/images/comment.svg";
+import { default as ExportDataIcon, default as ExportIcon } from "@/public/images/export-data.svg";
+import ImportDataIcon from "@/public/images/import-data.svg";
+import LogFileIcon from "@/public/images/log-file-view.svg";
+import RequestsIcon from "@/public/images/requests.svg";
+import {
+  useSaveFilter
+} from "@/services/queries/item-master/item-master.queries";
+import { openConfirmationModal } from "@/utils/getRequestConfirmationModal";
+import AddIcon from "@mui/icons-material/Add";
+import DeleteOutlineIcon from "@mui/icons-material/DeleteOutline";
+import KeyboardArrowDownRoundedIcon from "@mui/icons-material/KeyboardArrowDownRounded";
 import {
   Box,
   Button,
   InputBase,
-  Menu,
-  MenuItem,
-  Checkbox,
-  useTheme,
+  useTheme
 } from "@mui/material";
+import { useQueryClient } from "@tanstack/react-query";
+import React, { useEffect, useState } from "react";
 import SearchIcon from "../../assets/searchIcon.svg";
-import Image from "next/image";
-import FilterListIcon from "@/public/images/filter.svg";
-import HideFilterIcon from "@/public/images/filter-remove.svg";
-import LogFileIcon from "@/public/images/log-file-view.svg";
-import ImportDataIcon from "@/public/images/import-data.svg";
-import AddIcon from "@mui/icons-material/Add";
-import KeyboardArrowDownRoundedIcon from "@mui/icons-material/KeyboardArrowDownRounded";
+import AddNewItemDrawer from "../add-item";
+import type { SnackbarState } from "../columns-dropdown";
 import ColumnDropdown from "../columns-dropdown";
 import SavedFiltersDropdown from "../saved-filters-dropdown";
-import AddNewItemDrawer from "../add-item";
-import CompleteUploadFlow from "../upload-csv";
-import SavedFilterIcon from "@/public/images/bookmark-check-01.svg";
-import ExportIcon from "@/public/images/export-data.svg";
-import CommentIcon from "@/public/images/comment.svg";
-import { openConfirmationModal } from "@/shared/utils/getRequestConfirmationModal";
-import { useConfirm } from "@/shared/providers/ModalProvider";
-import { SnackbarState } from "../../../freight-rate-library/types";
-import DeleteOutlineIcon from "@mui/icons-material/DeleteOutline";
-import useTranslation from "@/shared/hooks/useTranslation";
-import { HeaderList } from "../../types";
 import AddNewGridFilter from "./AddNewGridFilter";
-import { DEFAULT_VISIBLE_COLUMNS } from "../../constants/tableHeaders.constants";
-import ExportDataIcon from "@/public/images/export-data.svg";
-import RequestsIcon from "@/public/images/requests.svg";
-import SaveFilterModal from "@/shared/components/save-filter";
-import {
-  useListSavedFilter,
-  useSaveFilter,
-} from "../../services/itemMasterService";
-import LoaderOverlay from "@/shared/components/loader";
-import { useQueryClient } from "@tanstack/react-query";
-import ConfirmationDialog from "@/shared/components/upload-modal/confirmation-modal";
 
 interface FilterProps {
-  onToggleDrawer: () => void;
-  hasAddItemMasterPermission: boolean;
-  isAdding: boolean;
-  setIsAdding: (isAdding: boolean) => void;
-  onSave: () => void;
-  onCancel: () => void;
-  activeColumns: string[];
+  onToggleDrawer?: () => void;
+  hasAddItemMasterPermission?: boolean;
+  isAdding?: boolean;
+  setIsAdding?: (isAdding: boolean) => void;
+  onSave?: () => void;
+  onCancel?: () => void;
   selectedColumns: Record<string, boolean>;
   setSelectedColumns: React.Dispatch<
     React.SetStateAction<Record<string, boolean>>
@@ -57,23 +43,22 @@ interface FilterProps {
   searchQuery: string;
   setSearchQuery: React.Dispatch<React.SetStateAction<string>>;
   setSnackbar: React.Dispatch<React.SetStateAction<SnackbarState>>;
-  isAllSelected: boolean;
+  isAllSelected?: boolean;
   selectedRows: string[];
   deleteSelection: () => void;
   headerList: string[];
   onImportClick: () => void;
-  setSelectedColumnsForAdd: React.Dispatch<
+  setSelectedColumnsForAdd?: React.Dispatch<
     React.SetStateAction<Record<string, boolean>>
   >;
-  selectedColumnsForAdd: Record<string, boolean>;
+  selectedColumnsForAdd?: Record<string, boolean>;
   setShowFilesModal: React.Dispatch<React.SetStateAction<boolean>>;
-  resetAddNewGrid: () => void;
+  resetAddNewGrid?: () => void;
   handleColumnVisibility: (label: string, checked: boolean) => void;
   onHandleExport: () => void;
   setSelectedExport: React.Dispatch<React.SetStateAction<boolean>>;
   setOpenRequestModal: React.Dispatch<React.SetStateAction<boolean>>;
-  handleEmptyColumnVisibility: (label: string, checked: boolean) => void;
-  setColumns: React.Dispatch<React.SetStateAction<string[]>>;
+  handleEmptyColumnVisibility?: (label: string, checked: boolean) => void;
   setSaveFilter: React.Dispatch<React.SetStateAction<boolean>>;
   saveFilter: boolean;
   filter: Record<string, string[]>;
@@ -82,6 +67,7 @@ interface FilterProps {
   >;
   onClearAllFilters?: () => void;
   applySavedFilterToFilterRow: (filter: Record<string, string[]>) => void;
+  setHeaderLabels?: React.Dispatch<React.SetStateAction<string[]>>;
 }
 
 const Filter: React.FC<FilterProps> = ({
@@ -90,7 +76,6 @@ const Filter: React.FC<FilterProps> = ({
   setIsAdding,
   onSave,
   onCancel,
-  activeColumns,
   hasAddItemMasterPermission,
   selectedColumns,
   setSelectedColumns,
@@ -111,7 +96,7 @@ const Filter: React.FC<FilterProps> = ({
   setSelectedExport,
   setOpenRequestModal,
   handleEmptyColumnVisibility,
-  setColumns,
+  setHeaderLabels,
   setSaveFilter,
   saveFilter,
   filter,
@@ -120,11 +105,12 @@ const Filter: React.FC<FilterProps> = ({
   applySavedFilterToFilterRow,
 }) => {
   const theme = useTheme();
-  const [showFilter, setShowFilter] = useState(false);
   const [drawerOpen, setDrawerOpen] = useState(false);
-  const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
-  const confirm = useConfirm();
-  const { t } = useTranslation();
+  const confirm = (opts: any) => Promise.resolve(window.confirm(opts.message));
+  const t = (_ns: string, key: string) => {
+    const parts = key.split(".");
+    return parts[parts.length - 1].replace(/([A-Z])/g, " $1").replace(/^./, (s) => s.toUpperCase());
+  };
   const [showSelectedOptions, setShowSelectedOptions] = useState(false);
   const [filterName, setFilterName] = useState("");
   const [openDeleteModal, setOpenDeleteModal] = useState(false);
@@ -138,19 +124,18 @@ const Filter: React.FC<FilterProps> = ({
   }, [selectedRows, isAllSelected]);
 
   const handleToggle = () => {
-    setShowFilter((prev) => !prev);
     onToggleDrawer?.();
   };
 
   const handleAddItemClick = async () => {
     if (hasAddItemMasterPermission) {
-      resetAddNewGrid();
-      setIsAdding(true);
+      resetAddNewGrid?.();
+      setIsAdding?.(true);
     } else {
       const result = await openConfirmationModal("add", confirm);
       if (result) {
-        resetAddNewGrid();
-        setIsAdding(true);
+        resetAddNewGrid?.();
+        setIsAdding?.(true);
       } else {
         return;
       }
@@ -168,14 +153,6 @@ const Filter: React.FC<FilterProps> = ({
 
   const handleFilesClick = () => {
     setShowFilesModal(true);
-  };
-
-  const handleColumnsClick = (event: React.MouseEvent<HTMLButtonElement>) => {
-    setAnchorEl(event.currentTarget);
-  };
-
-  const handleCloseMenu = () => {
-    setAnchorEl(null);
   };
 
   const handleRequestsClick = () => {
@@ -249,7 +226,7 @@ const Filter: React.FC<FilterProps> = ({
               component="span"
               sx={{ display: "flex", alignItems: "center" }}
             >
-              <Image src={SearchIcon} alt="Search" width={16} />
+              <img src={SearchIcon} alt="Search" width={16} />
             </Box>
             <InputBase
               value={searchQuery}
@@ -323,7 +300,7 @@ const Filter: React.FC<FilterProps> = ({
                   fontWeight: 500,
                 }}
                 startIcon={
-                  <Image
+                  <img
                     src={ExportDataIcon}
                     alt={t("common", "actionBar.exportDataIconAlt")}
                     width={16}
@@ -344,13 +321,13 @@ const Filter: React.FC<FilterProps> = ({
                       color: theme.palette.grey[300],
                       "&:hover": {
                         color: "white",
-                        bgcolor: theme.palette.sidebar.hover,
+                        bgcolor: "rgba(32, 52, 139, 0.1)",
                       },
                       textTransform: "none",
                       fontWeight: 600,
                     }}
                     startIcon={
-                      <Image
+                      <img
                         src={RequestsIcon}
                         alt={t("common", "actionBar.requestIconAlt")}
                         width={16}
@@ -365,13 +342,13 @@ const Filter: React.FC<FilterProps> = ({
                       color: theme.palette.grey[300],
                       "&:hover": {
                         color: "white",
-                        bgcolor: theme.palette.sidebar.hover,
+                        bgcolor: "rgba(32, 52, 139, 0.1)",
                       },
                       textTransform: "none",
                       fontWeight: 600,
                     }}
                     startIcon={
-                      <Image
+                      <img
                         src={RequestsIcon}
                         alt={t("common", "actionBar.requestIconAlt")}
                         width={16}
@@ -401,7 +378,7 @@ const Filter: React.FC<FilterProps> = ({
                       fontWeight: 600,
                     }}
                     startIcon={
-                      <Image
+                      <img
                         src={SavedFilterIcon}
                         alt="Saved Filter"
                         width={16}
@@ -427,7 +404,7 @@ const Filter: React.FC<FilterProps> = ({
                       fontWeight: 600,
                     }}
                     startIcon={
-                      <Image src={LogFileIcon} alt="Log File" width={16} />
+                      <img src={LogFileIcon} alt="Log File" width={16} />
                     }
                     onClick={handleFilesClick}
                   >
@@ -438,7 +415,7 @@ const Filter: React.FC<FilterProps> = ({
                     selectedColumns={selectedColumns}
                     setSelectedColumns={setSelectedColumns}
                     headerList={headerList}
-                    setColumns={setColumns}
+                    setHeaderLabels={setHeaderLabels}
                     handleColumnVisibility={handleColumnVisibility}
                   />
 
@@ -472,7 +449,7 @@ const Filter: React.FC<FilterProps> = ({
                       fontWeight: 600,
                     }}
                     startIcon={
-                      <Image src={ExportIcon} alt="Export" width={16} />
+                      <img src={ExportIcon} alt="Export" width={16} />
                     }
                   >
                     Export
@@ -492,7 +469,7 @@ const Filter: React.FC<FilterProps> = ({
                       fontWeight: 600,
                     }}
                     startIcon={
-                      <Image src={ImportDataIcon} alt="Import" width={16} />
+                      <img src={ImportDataIcon} alt="Import" width={16} />
                     }
                     endIcon={<KeyboardArrowDownRoundedIcon />}
                   >
@@ -505,10 +482,10 @@ const Filter: React.FC<FilterProps> = ({
                       color: theme.palette.grey[300],
                       border: "1px solid",
                       borderRadius: "8px",
-                      borderColor: theme.palette.sidebar.highlight,
+                      borderColor: theme.palette.divider,
                       "&:hover": {
                         color: "white",
-                        bgcolor: theme.palette.sidebar.hover,
+                        bgcolor: "rgba(32, 52, 139, 0.1)",
                       },
                       textTransform: "none",
                       fontWeight: 600,
@@ -517,17 +494,17 @@ const Filter: React.FC<FilterProps> = ({
                     }}
                     onClick={handleToggle}
                   >
-                    <Image src={CommentIcon} alt="Comments" width={16} />
+                    <img src={CommentIcon} alt="Comments" width={16} />
                   </Button>
                 </>
               ) : (
                 <AddNewGridFilter
-                  onCancel={onCancel}
-                  onSave={onSave}
-                  selectedColumns={selectedColumnsForAdd}
-                  setSelectedColumns={setSelectedColumnsForAdd}
+                  onCancel={onCancel || (() => { })}
+                  onSave={onSave || (() => { })}
+                  selectedColumns={selectedColumnsForAdd || {}}
+                  setSelectedColumns={setSelectedColumnsForAdd || (() => { })}
                   headerList={headerList}
-                  handleColumnVisibility={handleEmptyColumnVisibility}
+                  handleColumnVisibility={handleEmptyColumnVisibility || (() => { })}
                 />
               )}
             </div>

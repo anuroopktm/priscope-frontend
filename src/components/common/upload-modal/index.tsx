@@ -1,23 +1,23 @@
 "use client";
-import React, { useState } from "react";
 import {
-  Dialog,
-  DialogContent,
+  Alert,
   Box,
   Button,
+  CircularProgress,
+  Dialog,
+  DialogContent,
+  Divider,
+  Snackbar,
   Typography,
   useTheme,
-  CircularProgress,
-  Snackbar,
-  Alert,
-  Divider,
 } from "@mui/material";
-import { UploadModalProps } from "../../types/upload-modal";
+import React, { useState } from "react";
 import { useFileUpload } from "../../hooks/useFileUpload";
-import UploadDropZone from "./upload-drop-zone";
+import type { UploadModalProps } from "../../types/upload-modal";
+import ConfirmationDialog from "./confirmation-modal";
 import FilePreview from "./file-preview";
 import ModalHeader from "./modal-header";
-import ConfirmationDialog from "./confirmation-modal";
+import UploadDropZone from "./upload-drop-zone";
 
 interface ExtendedUploadModalProps extends UploadModalProps {
   useUploadMutation?: () => {
@@ -145,15 +145,15 @@ const UploadModal: React.FC<ExtendedUploadModalProps> = ({
           showTemplate={!selectedFile}
           templateDownloadUrl={templateDownloadUrl}
           templateName={templateName}
-          feature={feature}
-          setShowLoader={setShowLoader}
+          feature={feature || ""}
+          setShowLoader={setShowLoader || (() => { })}
         />
         <Divider />
 
         <DialogContent sx={{ pt: 2 }}>
           <Typography
             variant="subtitle1"
-            sx={{ mb: 1, fontWeight: 500, color: theme.custom.textColor }}
+            sx={{ mb: 1, fontWeight: 500, color: theme.palette.text.primary }}
           >
             Upload File
           </Typography>
@@ -189,7 +189,7 @@ const UploadModal: React.FC<ExtendedUploadModalProps> = ({
                 textTransform: "none",
                 px: 3,
                 py: 1,
-                bgcolor: theme.palette.sidebar.highlight,
+                bgcolor: theme.palette.divider,
                 "&:hover": { bgcolor: "#0F3A5A" },
                 "&:disabled": {
                   bgcolor: theme.palette.grey[300],

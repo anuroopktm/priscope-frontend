@@ -53,7 +53,6 @@ const details = [
 // Main Drawer Component
 const ItemDetailsDrawer: React.FC<ItemDetailsDrawerProps> = ({
   open,
-  item,
   onClose,
 }) => {
   // If not open, render nothing

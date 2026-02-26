@@ -1,8 +1,7 @@
-import React, { useCallback } from "react";
+import UploadFileImage from "@/public/images/upload_modal/uploadfile.svg";
 import { Box, Typography } from "@mui/material";
 import { useTheme } from "@mui/material/styles";
-import Image from "next/image";
-import UploadFileImage from "@/public/images/upload_modal/uploadfile.svg";
+import React, { useCallback } from "react";
 
 interface UploadDropZoneProps {
   isDragOver: boolean;
@@ -65,9 +64,8 @@ const UploadDropZone: React.FC<UploadDropZoneProps> = ({
       onDragOver={handleDragOver}
       onDragLeave={handleDragLeave}
       sx={{
-        border: `1px dashed ${
-          isDragOver ? theme.palette.primary.main : theme.palette.grey[300]
-        }`,
+        border: `1px dashed ${isDragOver ? theme.palette.primary.main : theme.palette.grey[300]
+          }`,
         borderRadius: 2,
         p: 4,
         textAlign: "center",
@@ -84,7 +82,7 @@ const UploadDropZone: React.FC<UploadDropZoneProps> = ({
       }}
       onClick={() => document.getElementById("file-input")?.click()}
     >
-      <Image src={UploadFileImage} alt="Upload File" width={42} height={42} />
+      <img src={UploadFileImage} alt="Upload File" width={42} height={42} />
       <Typography color="text.secondary" fontSize={14}>
         Drag and drop CSV/Excel File
       </Typography>

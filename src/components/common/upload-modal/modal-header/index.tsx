@@ -1,10 +1,9 @@
-import React, { useEffect } from "react";
-import { DialogTitle, Typography, Box, IconButton } from "@mui/material";
-import Image from "next/image";
-import DownloadImage from "@/public/images/upload_modal/download.svg";
 import CloseButton from "@/public/images/upload_modal/closeButton.svg";
-import theme from "@/shared/styles/theme";
-import { useGetTemplateFile } from "@/shared/services/commonService";
+import DownloadImage from "@/public/images/upload_modal/download.svg";
+import { useGetTemplateFile } from "@/services/queries/common/common.queries";
+import { theme } from "@/theme/theme";
+import { Box, DialogTitle, Typography } from "@mui/material";
+import React, { useEffect } from "react";
 
 interface ModalHeaderProps {
   onClose: () => void;
@@ -49,7 +48,7 @@ const ModalHeader: React.FC<ModalHeaderProps> = ({
       <Typography
         variant="h6"
         fontWeight={600}
-        sx={{ color: theme.custom.textColor }}
+        sx={{ color: theme.palette.text.primary }}
       >
         Upload File
       </Typography>
@@ -59,7 +58,7 @@ const ModalHeader: React.FC<ModalHeaderProps> = ({
             component="span"
             onClick={handleTemplateDownload}
             sx={{
-              color: theme.palette.sidebar.highlight,
+              color: theme.palette.divider,
               fontSize: 14,
               textDecoration: "none",
               cursor: "pointer",
@@ -67,7 +66,7 @@ const ModalHeader: React.FC<ModalHeaderProps> = ({
               alignItems: "center",
             }}
           >
-            <Image
+            <img
               src={DownloadImage}
               alt="Download Template"
               width={20}
@@ -77,12 +76,13 @@ const ModalHeader: React.FC<ModalHeaderProps> = ({
             Download {templateName}
           </Typography>
         )}
-        <Image
+        <img
           src={CloseButton}
           alt="close button"
           width={32}
           height={32}
           onClick={onClose}
+          style={{ cursor: "pointer" }}
         />
       </Box>
     </DialogTitle>

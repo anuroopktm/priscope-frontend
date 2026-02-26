@@ -4,13 +4,16 @@ import ClockIcon from "@/assets/common/clock.svg";
 import DownloadIcon from "@/assets/common/download.svg";
 import CloseIcon from "@/assets/common/multiplication-sign.svg";
 import UserIcon from "@/assets/common/user-circle.svg";
+import { mapExports } from "@/constants/file-modal-helpers";
 import {
+  useGetExportedFile,
   useGetModuleImportErrorFile,
+  useListExport,
   useListModuleImports,
   useListModuleImportSummaryCount,
-  useListExport,
-  useGetExportedFile,
 } from "@/services/queries/common/common.queries";
+import formatDate from "@/utils/formatDate";
+import getListExportPayload from "@/utils/getListExportPayload";
 import {
   Box,
   Chip,
@@ -30,9 +33,6 @@ import {
 } from "@mui/material";
 import React, { useEffect, useState } from "react";
 import StatsSummaryBar from "../status-summary-bar";
-import formatDate from "@/utils/formatDate";
-import { mapExports } from "@/constants/file-modal-helpers";
-import getListExportPayload from "@/utils/getListExportPayload";
 
 const TOGGLE_BUTTON = ["uploaded", "downloaded"];
 const FILE_UPLOAD_STATUS = {
@@ -75,9 +75,6 @@ const FileDetailsModal: React.FC<FileDetailsModalProps> = ({
     module === "fx_rate" ? filterOptions[0]?.value : defaultTab || "",
   );
   const theme = useTheme();
-  const [expandedFiles, setExpandedFiles] = useState<Record<string, boolean>>(
-    {},
-  );
   const [selectedDownloadIndex, setSelectedDownloadIndex] = useState(0);
   const [exportedData, setExportedData] = useState<SimplifiedExport[]>([]);
   const [uploadData, setUploadData] = useState([]);
@@ -85,24 +82,24 @@ const FileDetailsModal: React.FC<FileDetailsModalProps> = ({
   const listExportPayload = getListExportPayload([module]);
 
   const {
-    mutate: downloadErrorFile = () => {},
+    mutate: downloadErrorFile = () => { },
     isPending: errorFileDownloadPending = false,
   } = useGetModuleImportErrorFile() ?? {};
 
   const {
-    mutate: listUploads = () => {},
+    mutate: listUploads = () => { },
     isPending = false,
     isError = false,
   } = useListModuleImports(module) ?? {};
 
   const {
-    mutate: listExports = () => {},
+    mutate: listExports = () => { },
     isPending: isExpostListPending = false,
     isError: isErrorListExport = false,
   } = useListExport() ?? {};
 
   const {
-    mutate: DownloadExportFile = () => {},
+    mutate: DownloadExportFile = () => { },
     isPending: isDownloadExportPending = false,
   } = useGetExportedFile() ?? {};
 
@@ -116,51 +113,49 @@ const FileDetailsModal: React.FC<FileDetailsModalProps> = ({
 
   useEffect(() => {
     if (filterOptions.find((opt) => opt.value === TOGGLE_BUTTON[0])?.value) {
-      listUploads(
-        {},
-        {
-          onSuccess: (res: any) => {
-            let uploads;
-            if (res?.uploads) {
-              uploads = res.uploads
-                .filter(
-                  (item: any) =>
-                    item.status !== FILE_UPLOAD_STATUS.PROCESSING &&
-                    item.status !== FILE_UPLOAD_STATUS.UPLOADED,
-                )
-                .map((item: any) => {
-                  const createdAt = new Date(item.created_at);
-                  return {
-                    id: item.id,
-                    title: item.file_name,
-                    status:
-                      item.status === FILE_UPLOAD_STATUS.SUCCESS ||
+      listUploads(undefined as any, {
+        onSuccess: (res: any) => {
+          let uploads;
+          if (res?.uploads) {
+            uploads = res.uploads
+              .filter(
+                (item: any) =>
+                  item.status !== FILE_UPLOAD_STATUS.PROCESSING &&
+                  item.status !== FILE_UPLOAD_STATUS.UPLOADED,
+              )
+              .map((item: any) => {
+                const createdAt = new Date(item.created_at);
+                return {
+                  id: item.id,
+                  title: item.file_name,
+                  status:
+                    item.status === FILE_UPLOAD_STATUS.SUCCESS ||
                       item.status === FILE_UPLOAD_STATUS.PROCESSED
-                        ? "Success"
-                        : item.status,
-                    uploadDate: formatDate(item.created_at),
-                    uploadTime: createdAt.toLocaleTimeString([], {
-                      hour: "2-digit",
-                      minute: "2-digit",
-                    }),
-                    uploadedBy: item?.created_by?.name ?? "",
-                    updatedDate: formatDate(item.updated_at),
-                    errorFile:
-                      item.status === FILE_UPLOAD_STATUS.PROCESSED ||
-                      item.status === FILE_UPLOAD_STATUS.FAILED,
-                    hasUploadData:
-                      item.status === FILE_UPLOAD_STATUS.SUCCESS ||
-                      item.status === FILE_UPLOAD_STATUS.PROCESSED ||
-                      item.status === FILE_UPLOAD_STATUS.FAILED,
-                  };
-                });
-            }
-            setUploadData(uploads || []);
-          },
-          onError: (err: any) => {
-            console.error("Error fetching uploads:", err);
-          },
+                      ? "Success"
+                      : item.status,
+                  uploadDate: formatDate(item.created_at),
+                  uploadTime: createdAt.toLocaleTimeString([], {
+                    hour: "2-digit",
+                    minute: "2-digit",
+                  }),
+                  uploadedBy: item?.created_by?.name ?? "",
+                  updatedDate: formatDate(item.updated_at),
+                  errorFile:
+                    item.status === FILE_UPLOAD_STATUS.PROCESSED ||
+                    item.status === FILE_UPLOAD_STATUS.FAILED,
+                  hasUploadData:
+                    item.status === FILE_UPLOAD_STATUS.SUCCESS ||
+                    item.status === FILE_UPLOAD_STATUS.PROCESSED ||
+                    item.status === FILE_UPLOAD_STATUS.FAILED,
+                };
+              });
+          }
+          setUploadData(uploads || []);
         },
+        onError: (err: any) => {
+          console.error("Error fetching uploads:", err);
+        },
+      },
       );
     }
 
@@ -178,7 +173,7 @@ const FileDetailsModal: React.FC<FileDetailsModalProps> = ({
   }, []);
 
   const handleChange = (
-    event: React.MouseEvent<HTMLElement>,
+    _event: React.MouseEvent<HTMLElement>,
     newAlignment: string,
   ) => {
     if (newAlignment !== null) setAlignment(newAlignment);
@@ -213,7 +208,7 @@ const FileDetailsModal: React.FC<FileDetailsModalProps> = ({
           link.remove();
         }
       },
-      onError: (err: any) => {
+      onError: () => {
         showSnackBar({ message: "Failed to download file", severity: "error" });
       },
     });

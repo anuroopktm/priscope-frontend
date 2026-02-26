@@ -24,7 +24,7 @@ const SaveFilterModal = ({
   defaultLabel = "",
 }: SaveFilterModalProps) => {
   const [label, setLabel] = useState(defaultLabel);
-  const [dataType, setDataType] = useState("");
+  const [_dataType, setDataType] = useState("");
   const [errors, setErrors] = useState<{ label?: string; dataType?: string }>(
     {},
   );

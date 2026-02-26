@@ -1,12 +1,11 @@
 "use client";
-import React, { useCallback } from "react";
 import { Box, Button, Grid, Typography } from "@mui/material";
-import Image from "next/image";
+import React, { useCallback } from "react";
 import {
-  cardBoxStyles,
   buttonStyles,
-  titleStyles,
+  cardBoxStyles,
   imageBoxStyles,
+  titleStyles,
 } from "./cardStyles";
 
 export interface CardConfig {
@@ -65,7 +64,7 @@ const ActionCard = React.memo<ActionCardProps>(({ config, onAction }) => {
         </Box>
 
         <Box sx={imageBoxStyles}>
-          <Image
+          <img
             src={image}
             alt={imageAlt}
             style={{

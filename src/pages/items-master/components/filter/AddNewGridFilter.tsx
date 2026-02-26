@@ -1,10 +1,8 @@
-import theme from "@/shared/styles/theme";
-import { Button } from "@mui/material";
-import React from "react";
-import Image from "next/image";
-import CancelIcon from "@/public/images/multiplication-sign-circle.svg";
 import SaveIcon from "@/public/images/bookmark-02.svg";
-import ColumnDropdown, { ColumnDropdownProps } from "../columns-dropdown";
+import CancelIcon from "@/public/images/multiplication-sign-circle.svg";
+import { theme } from "@/theme/theme";
+import { Button } from "@mui/material";
+import ColumnDropdown, { type ColumnDropdownProps } from "../columns-dropdown";
 
 const AddNewGridFilter = ({
   selectedColumns,
@@ -34,7 +32,7 @@ const AddNewGridFilter = ({
           textTransform: "none",
           fontWeight: 600,
         }}
-        startIcon={<Image src={CancelIcon} alt="Cancel" width={16} />}
+        startIcon={<img src={CancelIcon} alt="Cancel" width={16} />}
       >
         Cancel
       </Button>
@@ -43,13 +41,13 @@ const AddNewGridFilter = ({
         variant="contained"
         sx={{
           padding: "8px 12px",
-          bgcolor: theme.palette.sidebar.highlight,
+          bgcolor: theme.palette.divider,
           "&:hover": { bgcolor: theme.palette.primary.dark },
           textTransform: "none",
           borderRadius: "8px",
           fontWeight: 600,
         }}
-        startIcon={<Image src={SaveIcon} alt="Save" width={16} />}
+        startIcon={<img src={SaveIcon} alt="Save" width={16} />}
       >
         Save
       </Button>

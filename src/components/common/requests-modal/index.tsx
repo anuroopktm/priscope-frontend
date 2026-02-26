@@ -1,26 +1,26 @@
 "use client";
-import React, { useState, useMemo, useEffect, useCallback } from "react";
-import {
-  Dialog,
-  DialogTitle,
-  DialogContent,
-  Box,
-  Typography,
-  IconButton,
-  Chip,
-  ToggleButton,
-  ToggleButtonGroup,
-  useTheme,
-  CircularProgress,
-} from "@mui/material";
 import ClockIcon from "@/assets/common/clock.svg";
+import CommentIcon from "@/assets/common/comment-02.svg";
 import CloseIcon from "@/assets/common/multiplication-sign.svg";
 import UserIcon from "@/assets/common/user-circle.svg";
-import CommentIcon from "@/assets/common/comment-02.svg";
-import { useListApprovalRequests } from "@/services/queries/freight/freight.queries";
-import { RequestSummary } from "./requests-summary";
-import { getRequestTitle } from "@/utils/getRequestsTitle";
 import { useInfiniteScroll } from "@/hooks/useInfiniteScroll";
+import { useListApprovalRequests } from "@/services/queries/freight/freight.queries";
+import { getRequestTitle } from "@/utils/getRequestsTitle";
+import {
+  Box,
+  Chip,
+  CircularProgress,
+  Dialog,
+  DialogContent,
+  DialogTitle,
+  IconButton,
+  ToggleButton,
+  ToggleButtonGroup,
+  Typography,
+  useTheme,
+} from "@mui/material";
+import React, { useCallback, useEffect, useMemo, useState } from "react";
+import { RequestSummary } from "./requests-summary";
 
 const FILTER_OPTIONS = [
   { label: "All", value: "all" },
@@ -103,10 +103,10 @@ const RequestsModal: React.FC<FileDetailsModalProps> = ({
         requestedBy: item?.requested_by?.name ?? "",
         reviewedDate: reviewedAt
           ? reviewedAt.toLocaleDateString("en-GB", {
-              day: "2-digit",
-              month: "2-digit",
-              year: "numeric",
-            })
+            day: "2-digit",
+            month: "2-digit",
+            year: "numeric",
+          })
           : null,
         comments: item.request_comments ?? "",
         requestAction: item.request_action,
@@ -148,7 +148,7 @@ const RequestsModal: React.FC<FileDetailsModalProps> = ({
   });
 
   const handleChange = (
-    event: React.MouseEvent<HTMLElement>,
+    _event: React.MouseEvent<HTMLElement>,
     newAlignment: string,
   ) => {
     if (newAlignment !== null) setAlignment(newAlignment);

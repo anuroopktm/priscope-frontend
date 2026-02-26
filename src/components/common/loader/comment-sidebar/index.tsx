@@ -1,21 +1,21 @@
 "use client";
-import {
-  Box,
-  Typography,
-  IconButton,
-  TextField,
-  Avatar,
-  InputAdornment,
-  CircularProgress,
-} from "@mui/material";
-import CloseIcon from "@mui/icons-material/Close";
-import { debounce } from "lodash";
-import { useMemo, useState, useCallback, useRef, useEffect } from "react";
 import SearchIcon from "@/assets/items-master/search-01.svg";
 import { getAvatarColor } from "@/utils/getAvatarColor";
+import CloseIcon from "@mui/icons-material/Close";
+import {
+  Avatar,
+  Box,
+  CircularProgress,
+  IconButton,
+  InputAdornment,
+  TextField,
+  Typography,
+} from "@mui/material";
+import { debounce } from "lodash";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import type { Comment } from "./types";
 
-type CommentSidebarProps<T> = {
+type CommentSidebarProps = {
   isOpen: any;
   onClose: () => void;
   isLoading?: boolean;
@@ -38,17 +38,16 @@ const formatTime = (timestamp: string) => {
   });
 };
 
-const CommentSidebar = <T,>({
+const CommentSidebar = ({
   isOpen,
   onClose,
-  isLoading = false,
   error = null,
   listComments,
   title = "Comments",
   onCommentSelect,
   renderComment,
   pageSize = 50,
-}: CommentSidebarProps<T>) => {
+}: CommentSidebarProps) => {
   const [comments, setComments] = useState<Comment[]>([]);
   const [inputValue, setInputValue] = useState("");
   const [searchValue, setSearchValue] = useState("");

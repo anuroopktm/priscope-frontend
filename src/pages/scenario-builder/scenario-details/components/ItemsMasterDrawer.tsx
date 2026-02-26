@@ -1,5 +1,19 @@
+import {
+  useListHeaders,
+  useListItems,
+} from "@/services/queries/item-master/item-master.queries";
 import CloseIcon from "@mui/icons-material/Close";
 import { Box, Drawer, IconButton, Typography } from "@mui/material";
+import { useCallback, useEffect, useRef, useState } from "react";
+import {
+  buildItemMasterTreeGridBody,
+  buildItemMasterTreeGridCols,
+  getItemMasterLayout,
+} from "../../../items-master/helpers/itemMasterTreeGridHelperFunction";
+import type {
+  TreeGridBody,
+  TreeGridLayout,
+} from "../../../items-master/helpers/types";
 import { useTreeGridInit } from "../../tree-grid/hooks/useTreeGridInit";
 
 interface ItemsMasterDrawerProps {
@@ -9,53 +23,6 @@ interface ItemsMasterDrawerProps {
 
 const gridId = "ItemsMasterGrid";
 const gridContainerId = "TreeGrid_" + gridId;
-
-// Basic layout for Items Master
-const ItemsMasterLayout = {
-  Cfg: {
-    CfgId: "ItemsMasterGrid",
-    MainCol: "A",
-    Style: "White",
-    ReloadChanged: "1",
-    Paging: "0",
-    MaxHeight: "1",
-    MinTagHeight: "500",
-    RelHeight: "1",
-    StretchWidth: "1",
-    StretchHeight: "1",
-    Toolbar: "0",
-    Sorting: "0",
-    Selecting: "1",
-  },
-  Cols: [
-    { Name: "A", RelWidth: "1", Type: "Text", Caption: "Item Code" },
-    { Name: "B", RelWidth: "1", Type: "Text", Caption: "Description" },
-    { Name: "C", RelWidth: "1", Type: "Text", Caption: "Category" },
-    {
-      Name: "D",
-      RelWidth: "1",
-      Type: "Float",
-      Format: "0.00",
-      Caption: "Price",
-    },
-  ],
-  Header: {
-    A: "Item Code",
-    B: "Description",
-    C: "Category",
-    D: "Price",
-  },
-};
-
-const ItemsMasterDummyData = {
-  Body: [
-    [
-      { id: "1", A: "ITM001", B: "Item One", C: "Electronics", D: "100.00" },
-      { id: "2", A: "ITM002", B: "Item Two", C: "Hardware", D: "50.00" },
-      { id: "3", A: "ITM003", B: "Item Three", C: "Software", D: "250.00" },
-    ],
-  ],
-};
 
 const ItemsMasterDrawer = ({ open, onClose }: ItemsMasterDrawerProps) => {
   return (
@@ -96,11 +63,97 @@ const ItemsMasterDrawer = ({ open, onClose }: ItemsMasterDrawerProps) => {
 };
 
 const ItemsMasterGridContent = () => {
-  useTreeGridInit(
+  const [layout, setLayout] = useState<TreeGridLayout | null>(null);
+  const [data, setData] = useState<TreeGridBody | null>(null);
+  const isInitialLoadRef = useRef(true);
+
+  const { data: listHeaderData } = useListHeaders({
+    page_size: 1000,
+    search: "",
+    skip: 0,
+  });
+
+  const {
+    data: itemMasterDataList,
+    fetchNextPage,
+    hasNextPage,
+    isFetchingNextPage,
+  } = useListItems({
+    search: "",
+    page_size: 100,
+  });
+
+  useEffect(() => {
+    if (!itemMasterDataList || !listHeaderData?.headers.length) return;
+
+    const pages = itemMasterDataList.pages;
+    const firstPageItems = pages[0]?.items ?? [];
+    const body = buildItemMasterTreeGridBody(firstPageItems);
+
+    if (isInitialLoadRef.current) {
+      if (!firstPageItems.length) return;
+      const { cols } = buildItemMasterTreeGridCols(listHeaderData.headers);
+
+      getItemMasterLayout(cols, listHeaderData).then(setLayout);
+      setData(body);
+
+      isInitialLoadRef.current = false;
+      return;
+    }
+
+    const grid = gridInstance?.current;
+    if (!grid) return;
+
+    // Handle data updates/appends
+    const lastPage = pages[pages.length - 1];
+    const newItems = lastPage?.items ?? [];
+    const dataToAdd = buildItemMasterTreeGridBody(newItems);
+
+    // If it's the first page but grid already exists, reload body
+    if (pages.length === 1) {
+      grid.Source.Data.Data = {
+        Body: [body.Body[0] || []],
+      };
+      if (grid.Source.Data.Url) delete grid.Source.Data.Url;
+      grid.ReloadBody();
+    } else {
+      // Append rows for infinite scroll
+      dataToAdd?.Body[0].forEach((rowData: any) => {
+        const newRow = grid.AddRow(undefined, undefined, 1, rowData.id);
+        if (!newRow) return;
+        Object.entries(rowData).forEach(([key, value]) => {
+          if (key === "id" || value === undefined) return;
+          grid.SetValue(newRow, key, value, 1);
+        });
+        grid.RefreshRow(newRow);
+      });
+      grid.Update();
+    }
+  }, [itemMasterDataList, listHeaderData]);
+
+  const handleGridReady = useCallback(() => {
+    // Add scroll handler for infinite loading
+    window.TGSetEvent("OnScroll", gridId, (grid: TGrid) => {
+      if (!grid) return;
+      if (
+        (grid.GetBodyScrollHeight?.() ?? 0) -
+          (grid.GetScrollTop?.() ?? 0) -
+          (grid.GetBodyHeight?.() ?? 0) <
+        100
+      ) {
+        if (hasNextPage && !isFetchingNextPage) {
+          fetchNextPage();
+        }
+      }
+    });
+  }, [hasNextPage, isFetchingNextPage, fetchNextPage]);
+
+  const gridInstance = useTreeGridInit(
     gridId,
     gridContainerId,
-    ItemsMasterLayout,
-    ItemsMasterDummyData,
+    layout,
+    data,
+    handleGridReady,
   );
 
   return (

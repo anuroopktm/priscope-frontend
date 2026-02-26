@@ -1,31 +1,31 @@
-import React, { useState } from "react";
 import {
-  Dialog,
-  DialogTitle,
-  DialogContent,
-  DialogActions,
-  Button,
-  IconButton,
-  Box,
-  Divider,
-} from "@mui/material";
-import { Close as CloseIcon } from "@mui/icons-material";
-import FileUploadStep from "./upload-step";
-import CsvTypeSelection from "./csv-type-step";
-import StyledStepper from "../../stepper";
-import {
-  type UploadedFile,
   type ControlFields,
   CSV_TYPE_OPTIONS,
   UPLOAD_STEPS,
+  type UploadedFile,
 } from "@/pages/items-master/constants/upload.constants";
+import type { SystemFieldObject } from "@/pages/items-master/types/types";
 import {
   useListSystemFields,
   useUploadItemMasterFile,
 } from "@/services/queries/item-master/item-master.queries";
+import { Close as CloseIcon } from "@mui/icons-material";
+import {
+  Box,
+  Button,
+  Dialog,
+  DialogActions,
+  DialogContent,
+  DialogTitle,
+  Divider,
+  IconButton,
+} from "@mui/material";
+import React, { useState } from "react";
 import { useItemMasterStore } from "../../../store/itemMasterStore";
-import type { SystemFieldObject } from "@/pages/items-master/types/types";
 import type { SnackbarState } from "../../columns-dropdown";
+import StyledStepper from "../../stepper";
+import CsvTypeSelection from "./csv-type-step";
+import FileUploadStep from "./upload-step";
 // import AppSnackbar from "@/shared/components/action-bar/AppSnackbar";
 // import { SnackbarState } from "@/app/[lang]/(protected)/freight-rate-library/types";
 
@@ -101,7 +101,7 @@ const FileUploadModal: React.FC<FileUploadModalProps> = ({
             setActiveStep(1);
           }
         },
-        onError: (err) => {
+        onError: () => {
           handleFileStatusChange("");
         },
       },

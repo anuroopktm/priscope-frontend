@@ -1,15 +1,13 @@
-import React from "react";
-import { Box, Typography, IconButton, CircularProgress } from "@mui/material";
-import { useTheme } from "@mui/material/styles";
-import DeleteIcon from "@mui/icons-material/Delete";
-import CheckCircleIcon from "@mui/icons-material/CheckCircle";
-import Image from "next/image";
 import InsertDriveFileIcon from "@/public/images/upload_modal/fileUploaded.svg";
-import { FileData, UploadState } from "../../../types/upload-modal";
-import theme from "@/shared/styles/theme";
+import CheckCircleIcon from "@mui/icons-material/CheckCircle";
+import DeleteIcon from "@mui/icons-material/Delete";
+import { Box, CircularProgress, IconButton, Typography } from "@mui/material";
+import { useTheme } from "@mui/material/styles";
+import React from "react";
+import type { SelectedFile, UploadState } from "../../../hooks/useFileUpload";
 
 interface FilePreviewProps {
-  file: FileData;
+  file: SelectedFile;
   uploadState: UploadState;
   onRemove: () => void;
 }
@@ -47,7 +45,7 @@ const FilePreview: React.FC<FilePreviewProps> = ({
           bgcolor: "transparent",
         }}
       >
-        <Image
+        <img
           src={InsertDriveFileIcon}
           alt="Uploaded File"
           width={42}
@@ -76,7 +74,7 @@ const FilePreview: React.FC<FilePreviewProps> = ({
           {uploadState === "uploading" && (
             <CircularProgress
               size={20}
-              sx={{ color: theme.palette.sidebar.highlight }}
+              sx={{ color: theme.palette.divider }}
             />
           )}
           {uploadState === "complete" && (

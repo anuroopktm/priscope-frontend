@@ -5,7 +5,7 @@ export const focusRow = (grid: TGrid | null, rowId: any) => {
   if (!row) return;
 
   setTimeout(() => {
-    grid.Focus(row, null);
+    grid.Focus(row, undefined as any);
   }, 0);
 };
 

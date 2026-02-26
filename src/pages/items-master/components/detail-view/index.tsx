@@ -1,15 +1,14 @@
-import React from "react";
-import { Box, IconButton, Typography, CircularProgress } from "@mui/material";
+import ExpandIcon from "@/assets/items-master/arrow-expand.svg";
 import ItemDetailCard from "@/components/common/item-detail";
 import TimelineDetail from "@/components/common/timeline";
-import { GridCloseIcon } from "@mui/x-data-grid";
-import ExpandIcon from "@/assets/items-master/arrow-expand.svg";
-import { mapItemApiToDetailView } from "@/pages/items-master/utils/mapItemApiToDetailView";
 import { mapHistoryToTimeline } from "@/pages/items-master/utils/mapHistoryToTimeline";
+import { mapItemApiToDetailView } from "@/pages/items-master/utils/mapItemApiToDetailView";
 import {
   useGetItemMasterById,
   useItemMasterHistory,
 } from "@/services/queries/item-master/item-master.queries";
+import { Box, CircularProgress, IconButton, Typography } from "@mui/material";
+import React from "react";
 
 interface DetailViewProps {
   item_id: string;
@@ -93,7 +92,8 @@ const DetailView: React.FC<DetailViewProps> = ({
             size="small"
             sx={{ border: "1px solid #ccc", borderRadius: "8px" }}
           >
-            <GridCloseIcon fontSize="small" />
+            X
+            {/* <GridCloseIcon fontSize="small" /> */}
           </IconButton>
         </Box>
       </Box>

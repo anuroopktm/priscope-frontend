@@ -1,4 +1,10 @@
 // import theme from "@/shared/styles/theme";
+import type { SystemFieldMappingProps } from "@/pages/items-master/types/types";
+import {
+  useListTemplateHeaders,
+  useListTemplates,
+} from "@/services/queries/item-master/item-master.queries";
+import { theme } from "@/theme/theme";
 import { InsertDriveFile as FileIcon } from "@mui/icons-material";
 import {
   Box,
@@ -11,13 +17,7 @@ import {
   Typography,
 } from "@mui/material";
 import React from "react";
-import {
-  useListTemplateHeaders,
-  useListTemplates,
-} from "@/services/queries/item-master/item-master.queries";
 import { useItemMasterStore } from "../../../../store/itemMasterStore";
-import type { SystemFieldMappingProps } from "@/pages/items-master/types/types";
-import { theme } from "@/theme/theme";
 import type { SnackbarState } from "../../../columns-dropdown";
 
 // Extended props to include template name handling
@@ -34,10 +34,6 @@ const SystemFieldMapping: React.FC<SystemFieldMappingPropsExtended> = ({
   fileName,
   systemFieldMapping,
   onSystemFieldChange,
-  saveAsTemplate,
-  onSaveAsTemplateChange,
-  templateName = "",
-  onTemplateNameChange,
   fieldErrors,
   setSelectedTemplate,
   selectedTemplate,
@@ -48,14 +44,11 @@ const SystemFieldMapping: React.FC<SystemFieldMappingPropsExtended> = ({
   );
   const setSelectedField = useItemMasterStore((state) => state.setSelected);
   const clearFields = useItemMasterStore((state) => state.clearFields);
-  const selected = useItemMasterStore((state) => state.selected);
   const {
     data,
     fetchNextPage,
     hasNextPage,
     isFetchingNextPage,
-    isLoading,
-    isError,
   } = useListTemplates();
   const {
     mutate: listTemplateHeaders,

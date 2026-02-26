@@ -1,8 +1,11 @@
-import { Box } from "@mui/material";
-import { ActionHeader } from "../scenario-builder/components/ActionHeader";
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import LoaderOverlay from "@/components/common/loader";
+import CommentSidebar from "@/components/common/loader/comment-sidebar";
+import MainContentContainer from "@/components/common/main-content-container";
+import RequestSuccessDialog from "@/components/common/request-notification";
 import RequestsModal from "@/components/common/requests-modal";
+import FileDetailsModal from "@/components/file-detail-modal";
+import { FILE_FILTER_OPTIONS } from "@/constants/file-modal.constants";
+import { useGetExportedFile } from "@/services/queries/common/common.queries";
 import {
   useAddBulkInsertAdminRequest,
   useDeleteItemMasterRow,
@@ -11,63 +14,38 @@ import {
   useListHeaders,
   useListItems,
 } from "@/services/queries/item-master/item-master.queries";
-import { useDebounce } from "../../hooks/useDebounce";
-import type { SnackbarState } from "./components/columns-dropdown";
-import { onScroll } from "./components/tree-grid/scroll/ScrollHandler";
-import CompleteUploadFlow from "./components/upload-csv";
-import { page_size_item_master } from "./constants/itemmaster.constants";
-import {
-  buildItemMasterTreeGridBody,
-  buildItemMasterTreeGridCols,
-  convertSavedFilter,
-  getItemMasterLayout,
-} from "./helpers/itemMasterTreeGridHelperFunction";
-import type {
-  TreeGridBody,
-  TreeGridHeader,
-  TreeGridLayout,
-} from "./helpers/types";
-import { useTreeGridInit } from "./hooks/use-tree-grid-init";
-import { handleFilterChange } from "./components/tree-grid/Filter/FilterChange";
-import { handleSelected } from "./components/tree-grid/RowSelection/RowSelection";
-import { useGetExportedFile } from "@/services/queries/common/common.queries";
-import { handleValueChanged } from "./components/tree-grid/CellValue/handleValueChanged";
-import TableSavePopover from "./components/table-save-popover";
-import { hasItemMasterPrivileges } from "./helpers/itemMasterHelpers";
-import RequestSuccessDialog from "@/components/common/request-notification";
-import FileDetailsModal from "@/components/file-detail-modal";
-import { FILE_FILTER_OPTIONS } from "@/constants/file-modal.constants";
-import { INITIAL_HEADERS } from "./constants/tableHeaders.constants";
-import {
-  showColumn,
-  hideColumn,
-  addColumn,
-} from "./components/tree-grid/Columns/Columns";
-import { handleItemMasterExport } from "./actions/handleItemMasterExport";
 import { useToastStore } from "@/store/useToastStore";
+import { Box } from "@mui/material";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { useDebounce } from "../../hooks/useDebounce";
 import { handleEditCellAdminRequest } from "./actions/editItemMasterAdmin";
 import { handleDeleteSelection } from "./actions/handleDeleteSelection";
-import CommentSidebar from "@/components/common/loader/comment-sidebar";
-import { focusCell, focusRow } from "./components/tree-grid/focus/FocusEvents";
+import { useHandleGridEditConfirm } from "./actions/handleGridEditConfirm";
+import { handleItemMasterExport } from "./actions/handleItemMasterExport";
+import type { SnackbarState } from "./components/columns-dropdown";
 import DetailView from "./components/detail-view";
 import { DetailsModal } from "./components/detail-view-modal";
-import MainContentContainer from "@/components/common/main-content-container";
-import { useHandleGridEditConfirm } from "./actions/handleGridEditConfirm";
+import Filter from "./components/filter";
+import TableSavePopover from "./components/table-save-popover";
+import { addColumn, hideColumn, showColumn } from "./components/tree-grid/Columns/Columns";
+import { focusCell, focusRow } from "./components/tree-grid/focus/FocusEvents";
+import CompleteUploadFlow from "./components/upload-csv";
+import { page_size_item_master } from "./constants/itemmaster.constants";
+import { INITIAL_HEADERS } from "./constants/tableHeaders.constants";
+import { hasItemMasterPrivileges } from "./helpers/itemMasterHelpers";
+import { convertSavedFilter } from "./helpers/itemMasterTreeGridHelperFunction";
+import { useItemsMasterGridData } from "./hooks/useItemsMasterGridData";
+import { useItemsMasterGridEvents } from "./hooks/useItemsMasterGridEvents";
 import type { HeaderList, OpenPanel, TreeGridState } from "./types/types";
 
 const ItemsMasterPage = () => {
   const [searchQuery, setSearchQuery] = useState("");
   const [filter, setFilter] = useState<Record<string, string[]>>({});
   const debouncedSearchQuery = useDebounce(searchQuery, 500);
-  const [layout, setLayout] = useState<TreeGridLayout | null>(null);
-  const [data, setData] = useState<TreeGridBody | null>(null);
-  const isInitialLoadRef = useRef(true);
-  const isSearchReplaceRef = useRef(false);
-  const prevSearchQueryRef = useRef<string>("");
-  const treeGridHeadersRef = useRef<TreeGridHeader[]>([]);
+
   const [openReqestModal, setOpenRequestModal] = useState(false);
   const [showLoader, setShowLoader] = useState(false);
-  const [snackbar, setSnackbar] = useState<SnackbarState>({
+  const [, setSnackbar] = useState<SnackbarState>({
     message: null,
     severity: "info",
   });
@@ -78,28 +56,23 @@ const ItemsMasterPage = () => {
   const [selectedExport, setSelectedExport] = useState(false);
   const [comment, setComment] = useState("");
   const [commentAdded, setCommentAdded] = useState(false);
-  const privileges: {} = JSON.parse(localStorage.getItem("privileges") || "");
+  const privileges: {} = JSON.parse(localStorage.getItem("privileges") || "{}");
   const [headerLabels, setHeaderLabels] = useState<string[]>([]);
   const [saveFilter, setSaveFilter] = useState(false);
-  const prevFilterRef = useRef<string>("");
   const { showToast } = useToastStore();
   const [state, setState] = useState<TreeGridState>({
     showSavePopover: false,
     popoverPosition: { top: 0, left: 0 },
     changedCell: null,
   });
-  const [selectedColumns, setSelectedColumns] = useState<
-    Record<string, boolean>
-  >({});
+  const [selectedColumns, setSelectedColumns] = useState<Record<string, boolean>>({});
   const [openPanel, setOpenPanel] = useState<OpenPanel>(null);
   const [detailedViewId, setDetailedViewId] = useState<string>("");
   const [isDetailViewModalOpen, setIsDetailViewModalOpen] = useState(false);
   const { handleGridEditConfirm } = useHandleGridEditConfirm();
 
-  const [
-    requestSuccessNotficationVisible,
-    setRequestSuccessNotficationVisible,
-  ] = useState(false);
+  const [requestSuccessNotficationVisible, setRequestSuccessNotficationVisible] = useState(false);
+  const [showFilesModal, setShowFilesModal] = useState<boolean>(false);
 
   const {
     data: itemMasterDataList,
@@ -107,78 +80,67 @@ const ItemsMasterPage = () => {
     hasNextPage,
     isFetchingNextPage,
     isLoading: isItemsLoading,
-    isError: isListItemsError,
   } = useListItems({
     search: debouncedSearchQuery,
     page_size: page_size_item_master,
     filter: filter,
   });
 
-  const { data: listHeaderData, isLoading: isListHeadersLoading } =
-    useListHeaders({ page_size: 10000, search: "", skip: 0, filter: filter });
+  const { data: listHeaderData, isLoading: isListHeadersLoading } = useListHeaders({
+    page_size: 10000,
+    search: "",
+    skip: 0,
+    filter: filter,
+  });
 
-  const {
-    mutate: itemMasterExportRowMutate,
-    isPending: itemMasterExportRowPending,
-  } = useExportItemMasterRow();
+  const { mutate: itemMasterExportRowMutate, isPending: itemMasterExportRowPending } = useExportItemMasterRow();
+  const { mutate: DownloadExportFile = () => { }, isPending: isDownloadExportPending = false } = useGetExportedFile() ?? {};
+  const { mutate: deleteItemMasterRow, isPending: deleteItemMasterRowPending } = useDeleteItemMasterRow();
+  const { hasEditItemMasterPrivilege } = hasItemMasterPrivileges(privileges);
+  const { mutate: itemMasterBulkInsertAdminApproval, isPending: isitemMasterBulkInsertAdminApprovalPending } = useAddBulkInsertAdminRequest();
+  const { mutateAsync: listComments, isPending: isCommentListingPending } = useListComments();
 
-  const {
-    mutate: DownloadExportFile = () => {},
-    isPending: isDownloadExportPending = false,
-  } = useGetExportedFile() ?? {};
+  // Grid logic and layout
+  const { gridInstance, isSearchReplaceRef } = useItemsMasterGridData({
+    gridId,
+    containerId,
+    itemMasterDataList,
+    listHeaderData,
+    debouncedSearchQuery,
+    filter,
+    hasNextPage,
+    isFetchingNextPage,
+    fetchNextPage,
+  });
 
-  const { mutate: deleteItemMasterRow, isPending: deleteItemMasterRowPending } =
-    useDeleteItemMasterRow();
-
-  const { hasEditItemMasterPrivilege, hasAddItemMasterPrivilege } =
-    hasItemMasterPrivileges(privileges);
-
-  const {
-    mutate: itemMasterBulkInsertAdminApproval,
-    isPending: isitemMasterBulkInsertAdminApprovalPending,
-  } = useAddBulkInsertAdminRequest();
-
-  const { mutateAsync: listComments, isPending: isCommentListingPending } =
-    useListComments();
-
-  const [showFilesModal, setShowFilesModal] = useState<boolean>(false);
-
-  useEffect(() => {
-    window.TGSetEvent("OnScroll", gridId, onHandleScroll);
-    window.TGSetEvent("OnSelected", gridId, onSelected);
-    window.TGSetEvent("OnFilter", gridId, onHandleFilterChange);
-    window.TGSetEvent("OnValueChanged", gridId, onHandleValueChanged);
-    return () => {
-      window.TGDelEvent("OnSelected", gridId);
-      window.TGDelEvent("OnScroll", gridId);
-      window.TGDelEvent("OnFilter", gridId);
-      window.TGSetEvent("OnValueChanged", gridId);
-    };
-  }, []);
+  // Grid Events
+  useItemsMasterGridEvents({
+    gridId,
+    setFilter,
+    setSelectedRows,
+    setState,
+    fetchNextPage,
+    hasNextPage,
+    isFetchingNextPage,
+  });
 
   useEffect(() => {
     setShowLoader(
       isItemsLoading ||
-        isFetchingNextPage ||
-        itemMasterExportRowPending ||
-        isDownloadExportPending ||
-        // createCommentPending ||
-        isListHeadersLoading ||
-        // isBulkInsertPending ||
-        deleteItemMasterRowPending ||
-        itemMasterExportRowPending ||
-        isitemMasterBulkInsertAdminApprovalPending,
+      isFetchingNextPage ||
+      itemMasterExportRowPending ||
+      isDownloadExportPending ||
+      isListHeadersLoading ||
+      deleteItemMasterRowPending ||
+      isitemMasterBulkInsertAdminApprovalPending
     );
   }, [
     isItemsLoading,
     isFetchingNextPage,
-    // createCommentPending,
     isListHeadersLoading,
     itemMasterExportRowPending,
     isDownloadExportPending,
-    // isBulkInsertPending,
     deleteItemMasterRowPending,
-    itemMasterExportRowPending,
     isitemMasterBulkInsertAdminApprovalPending,
   ]);
 
@@ -200,159 +162,44 @@ const ItemsMasterPage = () => {
     if (!headerList) return;
     const initial: Record<string, boolean> = {};
     headerList.forEach((h) => {
-      if (INITIAL_HEADERS.includes(h.label)) {
-        initial[h.label] = true;
-      } else {
-        initial[h.label] = false;
-      }
+      initial[h.label] = INITIAL_HEADERS.includes(h.label);
     });
     setSelectedColumns(initial);
-    // setSelectedColumnsForAdd(initial);
   }, [headerList]);
 
   useEffect(() => {
-    if (!gridInstance.current) return;
+    if (!gridInstance?.current) return;
     const lastCol = headerLabels[headerLabels.length - 1];
     if (!lastCol) return;
     addColumn(gridInstance.current, lastCol);
-  }, [headerLabels]);
+  }, [headerLabels, gridInstance]);
 
   useEffect(() => {
-    if (prevSearchQueryRef.current !== debouncedSearchQuery) {
-      prevSearchQueryRef.current = debouncedSearchQuery;
-
-      if (!isInitialLoadRef.current) {
-        isSearchReplaceRef.current = true;
-      }
+    if (state.showSavePopover && gridInstance?.current) {
+      gridInstance.current.Focus(null as any, null as any);
     }
-  }, [debouncedSearchQuery]);
+  }, [state.showSavePopover, gridInstance]);
 
-  useEffect(() => {
-    const filterString = JSON.stringify(filter);
-
-    if (prevFilterRef.current !== filterString) {
-      prevFilterRef.current = filterString;
-
-      if (!isInitialLoadRef.current) {
-        isSearchReplaceRef.current = true;
-      }
-    }
-  }, [filter]);
-
-  useEffect(() => {
-    if (state.showSavePopover && gridInstance.current) {
-      gridInstance.current.Focus(null, null);
-    }
-  }, [state.showSavePopover]);
-
-  const hasNextPageRef = useRef(hasNextPage);
-  const isFetchingNextPageRef = useRef(isFetchingNextPage);
-
-  useEffect(() => {
-    hasNextPageRef.current = hasNextPage;
-  }, [hasNextPage]);
-
-  useEffect(() => {
-    isFetchingNextPageRef.current = isFetchingNextPage;
-  }, [isFetchingNextPage]);
-
-  useEffect(() => {
-    if (!itemMasterDataList || !listHeaderData?.headers.length) return;
-
-    const pages = itemMasterDataList.pages;
-    const firstPageItems = pages[0]?.items ?? [];
-    const body = buildItemMasterTreeGridBody(firstPageItems);
-    setData(body);
-
-    /** 🔹 1. VERY FIRST LOAD (React-driven) */
-    if (isInitialLoadRef.current) {
-      if (!firstPageItems.length) return;
-      const { cols } = buildItemMasterTreeGridCols(listHeaderData.headers);
-      treeGridHeadersRef.current = cols;
-
-      getItemMasterLayout(cols, listHeaderData).then(setLayout);
-      // IMPORTANT: first mount must go through React
-      setData(body);
-
-      isInitialLoadRef.current = false;
-      isSearchReplaceRef.current = false;
-      return;
-    }
-
-    // const Grid = gridInstance?.current?.getGridInstance();
+  const handleSkuUpcClick = useCallback((rowId: string, _col: string, _value: any) => {
     const Grid = gridInstance?.current;
-    if (!Grid) return;
-    /**  2. SEARCH REPLACE (Grid API) */
-    if (isSearchReplaceRef.current) {
-      // setData((prev) => [...prev, ...body.Body[0]]);
-      setData((prev) => ({
-        Body: [[...(prev?.Body?.[0] ?? []), ...(body?.Body?.[0] ?? [])]],
-      }));
-
-      Grid.Source.Data.Data = {
-        Body: [body.Body[0] || []],
-      };
-
-      delete Grid.Source.Data.Url;
-
-      Grid.ReloadBody();
-
-      // gridInstance.current?.setLoading(false);
-      if (isFetchingNextPage) return;
-      if (!hasNextPage) return;
-      fetchNextPage();
-
-      isSearchReplaceRef.current = false;
-      return;
-    }
-
-    /**  3. INFINITE SCROLL (append rows) */
-    const lastPage = pages[pages.length - 1];
-    const newItems = lastPage?.items ?? [];
-
-    const dataToAdd = buildItemMasterTreeGridBody(newItems);
-    addRowsToGrid(dataToAdd?.Body[0]);
-  }, [itemMasterDataList, listHeaderData]);
-
-  const handleGridReady = useCallback((grid: TGrid) => {
-    console.log("handleGridReady");
-  }, []);
-
-  const gridInstance = useTreeGridInit(
-    gridId,
-    containerId,
-    layout,
-    data,
-    handleGridReady,
-  );
-
-  const handleSkuUpcClick = (rowId: string, col: string, value: any) => {
-    const Grid = gridInstance.current;
     if (Grid) {
       const gridRow = Grid.GetRowById(rowId);
       if (!gridRow || gridRow.Kind !== "Data") return;
     }
     setOpenPanel((prev) => {
       setDetailedViewId(rowId);
-      if (prev !== "detail-view") {
-        return "detail-view";
-      }
-      return prev;
+      return prev !== "detail-view" ? "detail-view" : prev;
     });
-  };
+  }, [gridInstance]);
 
-  const handleSkuUpcClickRef =
-    useRef<(rowId: string, col: string, value: any) => void>(handleSkuUpcClick);
+  const handleSkuUpcClickRef = useRef(handleSkuUpcClick);
 
   useEffect(() => {
     handleSkuUpcClickRef.current = handleSkuUpcClick;
   });
+
   useEffect(() => {
-    (window as any).onSkuUpcClick = (
-      rowId: string,
-      col: string,
-      value: any,
-    ) => {
+    (window as any).onSkuUpcClick = (rowId: string, col: string, value: any) => {
       handleSkuUpcClickRef.current(rowId, col, value);
     };
     return () => {
@@ -361,15 +208,11 @@ const ItemsMasterPage = () => {
   }, []);
 
   useEffect(() => {
-    window.Grids ??= {};
+    (window as any).Grids = (window as any).Grids || {};
     const prev = window.Grids.OnGetHtmlValue;
 
     window.Grids.OnGetHtmlValue = (grid: any, row: any, col: any, val: any) => {
-      if (grid.id !== gridId) {
-        return prev ? prev(grid, row, col, val) : val;
-      }
-
-      if (row?.Kind === "Header") {
+      if (grid.id !== gridId || row?.Kind === "Header") {
         return prev ? prev(grid, row, col, val) : val;
       }
 
@@ -381,16 +224,12 @@ const ItemsMasterPage = () => {
         style="color: inherit; text-decoration: underline; cursor: pointer;"
       >${safeVal}</a>`;
       }
-
       return prev ? prev(grid, row, col, val) : val;
     };
 
     return () => {
-      if (prev) {
-        window.Grids.OnGetHtmlValue = prev;
-      } else {
-        delete window.Grids.OnGetHtmlValue;
-      }
+      if (prev) window.Grids.OnGetHtmlValue = prev;
+      else delete (window as any).Grids.OnGetHtmlValue;
     };
   }, [gridId]);
 
@@ -408,25 +247,6 @@ const ItemsMasterPage = () => {
     });
   };
 
-  const onHandleValueChanged = (
-    grid: TGrid,
-    row: TRow,
-    col: string,
-    val: string,
-    oldval: string,
-    // enableEditPopover: boolean,
-  ) => {
-    handleValueChanged(grid, row, col, val, oldval, gridId, setState);
-  };
-
-  const onHandleFilterChange = (grid: TGrid) => {
-    handleFilterChange(grid, setFilter);
-  };
-
-  const onHandleScroll = (grid: TGrid, hpos: number, vpos: number) => {
-    onScroll(grid, hpos, vpos, gridId, 200, handleLoadMore);
-  };
-
   const onDeleteSelection = () => {
     handleDeleteSelection({
       selectedRows,
@@ -438,13 +258,7 @@ const ItemsMasterPage = () => {
     });
   };
 
-  const onCellEditConfirm = (
-    row: TRow,
-    col: string,
-    value: string,
-    oldValue: string,
-    comment?: string,
-  ) => {
+  const onCellEditConfirm = (row: TRow, col: string, value: string, oldValue: string, comment?: string) => {
     handleGridEditConfirm({
       row,
       col,
@@ -463,132 +277,57 @@ const ItemsMasterPage = () => {
     });
   };
 
-  const handleLoadMore = () => {
-    if (hasNextPageRef.current && !isFetchingNextPageRef.current) {
-      fetchNextPage();
-    }
-  };
-
-  const addRowsToGrid = (newRows: any[]) => {
-    const Grid = gridInstance.current;
-    if (!Grid) return;
-    if (!Grid || !newRows?.length) return;
-
-    newRows.forEach((rowData) => {
-      const newRow = Grid.AddRow(null, null, 7, rowData.id);
-      if (!newRow) return;
-
-      Object.entries(rowData).forEach(([key, value]) => {
-        if (key === "id") return;
-        if (key === "Color") return;
-        if (value === undefined) return;
-
-        Grid.SetValue(newRow, key, value, 1);
-      });
-
-      Grid.RefreshRow(newRow);
-    });
-
-    Grid.Update();
-    // gridInstance.current?.setLoading(false);
-  };
-
-  const handleUploadComplete = (data: any) => {
-    console.log("Import completed:", data);
-  };
-
-  const handleViewLog = () => {
-    console.log("View log clicked");
-  };
-
-  const onSelected = (grid: TGrid) => {
-    handleSelected(grid, setSelectedRows);
-  };
-
   const handleEditSave = () => {
     if (!state.changedCell) return;
-    if (comment.trim().length === 0) {
-      return;
-    }
+    if (comment.trim().length === 0) return;
     const { row, col, value, oldValue } = state.changedCell;
-
     onCellEditConfirm?.(row, col, value, oldValue, comment);
-    setState((prev) => ({
-      ...prev,
-      showSavePopover: false,
-      changedCell: null,
-    }));
+    setState((prev) => ({ ...prev, showSavePopover: false, changedCell: null }));
     setCommentAdded(false);
   };
 
   const handleEditCancel = () => {
     if (!state.changedCell) return;
-    const { row, col, value, oldValue } = state.changedCell;
-    const Grid = gridInstance.current;
+    const { row, col, oldValue } = state.changedCell;
+    const Grid = gridInstance?.current;
     if (Grid) {
       const gridRow = Grid.GetRowById(row.id);
       if (gridRow) Grid.SetValue(gridRow, col, oldValue, 1);
     }
-    setState((prev) => ({
-      ...prev,
-      showSavePopover: false,
-      changedCell: null,
-    }));
+    setState((prev) => ({ ...prev, showSavePopover: false, changedCell: null }));
   };
 
   const handleColumnVisibility = (label: string, check: boolean) => {
-    if (check) {
-      showColumn(gridInstance.current, label);
-    } else {
-      hideColumn(gridInstance.current, label);
-    }
+    if (check) showColumn(gridInstance?.current, label);
+    else hideColumn(gridInstance?.current, label);
   };
 
   const handleClearAllFilters = useCallback(() => {
-    const Grid = gridInstance.current;
-    if (Grid) {
-      Grid.ChangeFilter("", "", "", 0, 0);
-    }
+    const Grid = gridInstance?.current;
+    if (Grid) Grid.ChangeFilter("", "", "", 0 as any, 0 as any);
     setFilter({});
-  }, []);
+  }, [gridInstance]);
 
   const applySavedFilterToFilterRow = (filter: Record<string, string[]>) => {
-    const Grid = gridInstance.current;
+    const Grid = gridInstance?.current;
     if (!Grid) return;
     const { cols, values, operators } = convertSavedFilter(filter);
-    Grid.ChangeFilter(cols, values, operators, false, false);
+    Grid.ChangeFilter(cols, values, operators, false as any, false as any);
   };
 
   const handleCommentSelect = (comment: any) => {
     const id = comment.item_id;
-    const Grid = gridInstance.current;
-    if (comment.comment_type === "row") {
-      focusRow(Grid, id);
-    } else if (comment.comment_type === "field") {
-      const fieldKey = comment.field_key;
-      focusCell(Grid, id, fieldKey);
-    }
+    const Grid = gridInstance?.current;
+    if (comment.comment_type === "row") focusRow(Grid, id);
+    else if (comment.comment_type === "field") focusCell(Grid, id, comment.field_key);
   };
 
-  const handleExpandClick = useCallback(() => {
-    setIsDetailViewModalOpen(true);
-  }, []);
-
-  const togglePanel = useCallback((panel: OpenPanel) => {
-    setOpenPanel((prev) => (prev === panel ? null : panel));
-  }, []);
+  const handleExpandClick = useCallback(() => setIsDetailViewModalOpen(true), []);
+  const togglePanel = useCallback((panel: OpenPanel) => setOpenPanel((prev) => (prev === panel ? null : panel)), []);
 
   return (
-    <Box
-      sx={{
-        display: "flex",
-        flexDirection: "column",
-        borderRadius: 1,
-        overflow: "hidden",
-        bgcolor: "brand.background",
-      }}
-    >
-      <ActionHeader
+    <Box sx={{ display: "flex", flexDirection: "column", borderRadius: 1, overflow: "hidden", bgcolor: "brand.background" }}>
+      <Filter
         searchQuery={searchQuery}
         setSearchQuery={setSearchQuery}
         setOpenRequestModal={setOpenRequestModal}
@@ -597,8 +336,8 @@ const ItemsMasterPage = () => {
         selectedRows={selectedRows}
         onHandleExport={handleExport}
         setSelectedExport={setSelectedExport}
-        handleDeleteSelection={onDeleteSelection}
-        headerLabels={headerLabels}
+        deleteSelection={onDeleteSelection}
+        headerList={headerLabels}
         setHeaderLabels={setHeaderLabels}
         selectedColumns={selectedColumns}
         setSelectedColumns={setSelectedColumns}
@@ -610,129 +349,55 @@ const ItemsMasterPage = () => {
         onClearAllFilters={handleClearAllFilters}
         applySavedFilterToFilterRow={applySavedFilterToFilterRow}
         onToggleDrawer={() => togglePanel("comments")}
+        setSnackbar={setSnackbar}
       />
+
       {isDetailViewModalOpen && (
-        <DetailsModal
-          isOpen={isDetailViewModalOpen}
-          onClose={() => setIsDetailViewModalOpen(false)}
-          timelineTitle={"Timeline"}
-          item_id={detailedViewId}
-        />
+        <DetailsModal isOpen={isDetailViewModalOpen} onClose={() => setIsDetailViewModalOpen(false)} timelineTitle={"Timeline"} item_id={detailedViewId} />
       )}
-      {openReqestModal && (
-        <RequestsModal
-          onClose={setOpenRequestModal}
-          targetModule="item_master"
-        />
-      )}
+
+      {openReqestModal && <RequestsModal onClose={setOpenRequestModal} targetModule="item_master" />}
+
       {showFilesModal && (
-        <FileDetailsModal
-          onClose={setShowFilesModal}
-          showLoader={setShowLoader}
-          showSnackBar={setSnackbar}
-          module="item_master"
-          filterOptions={FILE_FILTER_OPTIONS}
-        />
+        <FileDetailsModal onClose={setShowFilesModal} showLoader={setShowLoader} showSnackBar={setSnackbar} module="item_master" filterOptions={FILE_FILTER_OPTIONS} />
       )}
 
       <Box sx={{ display: "flex", position: "relative", padding: 2 }}>
         <MainContentContainer hasFilter={true}>
           <Box sx={{ flex: 1, padding: 2, minWidth: 0 }}>
-            <Box
-              id={containerId}
-              sx={{ width: "100%", height: "calc(100vh - 144px)" }}
-            />
+            <Box id={containerId} sx={{ width: "100%", height: "calc(100vh - 144px)" }} />
           </Box>
         </MainContentContainer>
-        <Box
-          sx={{
-            width: openPanel === "comments" ? 300 : 0,
-            transition: "width 0.3s ease",
-            overflow: "hidden",
-            height: "calc(100vh - 147px)",
-            marginLeft: openPanel === "comments" ? 1 : 0,
-            background: "white",
-            color: "black",
-            display: "flex",
-            flexDirection: "column",
-            borderRadius: "8px 0 0 8px",
-          }}
-        >
-          {openPanel === "comments" && (
-            <CommentSidebar
-              isOpen={openPanel}
-              onClose={() => setOpenPanel(null)}
-              listComments={listComments}
-              isLoading={isCommentListingPending}
-              onCommentSelect={handleCommentSelect}
-            />
-          )}
+
+        <Box sx={{
+          width: openPanel === "comments" ? 300 : 0, transition: "width 0.3s ease", overflow: "hidden",
+          height: "calc(100vh - 147px)", marginLeft: openPanel === "comments" ? 1 : 0, background: "white", color: "black",
+          display: "flex", flexDirection: "column", borderRadius: "8px 0 0 8px",
+        }}>
+          {openPanel === "comments" && <CommentSidebar isOpen={openPanel} onClose={() => setOpenPanel(null)} listComments={listComments} isLoading={isCommentListingPending} onCommentSelect={handleCommentSelect} />}
         </Box>
 
-        <Box
-          sx={{
-            width: openPanel === "detail-view" ? 406 : 0,
-            transition: "width 0.3s ease",
-            overflow: "hidden",
-            height: "calc(100vh - 147px)",
-            marginLeft: openPanel === "detail-view" ? 1 : 0,
-            background: "white",
-            color: "black",
-            display: "flex",
-            flexDirection: "column",
-            borderRadius: "8px 0 0 8px",
-          }}
-        >
-          {openPanel === "detail-view" && (
-            <DetailView
-              item_id={detailedViewId}
-              timelineTitle={"Timeline"}
-              onClose={() => setOpenPanel(null)}
-              onExpandClick={handleExpandClick}
-            />
-          )}
+        <Box sx={{
+          width: openPanel === "detail-view" ? 406 : 0, transition: "width 0.3s ease", overflow: "hidden",
+          height: "calc(100vh - 147px)", marginLeft: openPanel === "detail-view" ? 1 : 0, background: "white", color: "black",
+          display: "flex", flexDirection: "column", borderRadius: "8px 0 0 8px",
+        }}>
+          {openPanel === "detail-view" && <DetailView item_id={detailedViewId} timelineTitle={"Timeline"} onClose={() => setOpenPanel(null)} onExpandClick={handleExpandClick} />}
         </Box>
       </Box>
+
       {showLoader && <LoaderOverlay />}
-      <CompleteUploadFlow
-        open={showUploadFlow}
-        onClose={() => setShowUploadFlow(false)}
-        onImportComplete={handleUploadComplete}
-        onViewLog={handleViewLog}
-        setSnackbar={setSnackbar}
-        isSearchReplaceRef={isSearchReplaceRef}
-      />
-      {requestSuccessNotficationVisible && (
-        <RequestSuccessDialog
-          setNotificationOpen={setRequestSuccessNotficationVisible}
-        />
-      )}
+
+      <CompleteUploadFlow open={showUploadFlow} onClose={() => setShowUploadFlow(false)} onImportComplete={() => { }} onViewLog={() => { }} setSnackbar={setSnackbar} isSearchReplaceRef={isSearchReplaceRef} />
+
+      {requestSuccessNotficationVisible && <RequestSuccessDialog setNotificationOpen={setRequestSuccessNotficationVisible} />}
+
       {state.showSavePopover && (
-        <div
-          style={{
-            position: "absolute",
-            top: state.popoverPosition.top,
-            left: state.popoverPosition.left,
-            zIndex: 1000,
-          }}
-        >
-          <TableSavePopover
-            onSave={() => {
-              setCommentAdded(true);
-              handleEditSave();
-            }}
-            onCancel={() => {
-              setCommentAdded(false);
-              handleEditCancel();
-            }}
-            setComment={setComment}
-            comment={comment}
-            commentAdded={commentAdded}
-          />
+        <div style={{ position: "absolute", top: state.popoverPosition.top, left: state.popoverPosition.left, zIndex: 1000 }}>
+          <TableSavePopover onSave={() => { setCommentAdded(true); handleEditSave(); }} onCancel={() => { setCommentAdded(false); handleEditCancel(); }} setComment={setComment} comment={comment} commentAdded={commentAdded} />
         </div>
       )}
     </Box>
   );
 };
-
 export default ItemsMasterPage;

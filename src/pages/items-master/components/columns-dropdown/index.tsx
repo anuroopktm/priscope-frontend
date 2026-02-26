@@ -1,4 +1,5 @@
 import CreateColumnModal from "@/components/common/add-column-modal";
+import { useAddHeader } from "@/services/queries/item-master/item-master.queries";
 import KeyboardArrowDownRoundedIcon from "@mui/icons-material/KeyboardArrowDownRounded";
 import {
   Box,
@@ -12,11 +13,10 @@ import {
   Popper,
   Typography,
 } from "@mui/material";
-import React, { useMemo, useState } from "react";
-import { DEFAULT_VISIBLE_COLUMNS } from "../../constants/tableHeaders.constants";
 import { useQueryClient } from "@tanstack/react-query";
+import React, { useMemo, useState } from "react";
 import LoaderOverlay from "../../../../components/common/loader";
-import { useAddHeader } from "@/services/queries/item-master/item-master.queries";
+import { DEFAULT_VISIBLE_COLUMNS } from "../../constants/tableHeaders.constants";
 export type SnackbarState = {
   message: string | null;
   severity: AlertColor;
@@ -44,7 +44,7 @@ const ColumnDropdown: React.FC<ColumnDropdownProps> = ({
   const [search, setSearch] = useState("");
   const [showCreateColumnModal, setShowCreateColumnModal] =
     useState<boolean>(false);
-  const [snackbar, setSnackbar] = useState<SnackbarState>({
+  const [, setSnackbar] = useState<SnackbarState>({
     message: null,
     severity: "info",
   });
@@ -89,7 +89,7 @@ const ColumnDropdown: React.FC<ColumnDropdownProps> = ({
       name: label,
     };
     mutateAddHeader(payload, {
-      onSuccess: (resp) => {
+      onSuccess: () => {
         queryClient.invalidateQueries({
           queryKey: ["listItemMasterHeaders"],
         });
@@ -101,7 +101,7 @@ const ColumnDropdown: React.FC<ColumnDropdownProps> = ({
           severity: "success",
         });
       },
-      onError: (e) => {
+      onError: () => {
         setSnackbar({
           message: "Failed to save changes. Please try again.,",
           severity: "warning",
@@ -188,7 +188,7 @@ const ColumnDropdown: React.FC<ColumnDropdownProps> = ({
                         control={
                           <Checkbox
                             checked={!!selectedColumns[label]}
-                            onChange={(e, checked) =>
+                            onChange={(_, checked) =>
                               handleCheckboxChange(label, checked)
                             }
                             disabled={isDefault}

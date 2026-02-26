@@ -1,10 +1,10 @@
 // import Image from "next/image";
-import databaseImport from "../../assets/import.svg";
+import add from "../../assets/add-item.svg";
 import uploadcsv from "../../assets/csv-upload.svg";
+import databaseImport from "../../assets/import.svg";
 import plus from "../../assets/plus-sign.svg";
 import refresh from "../../assets/refresh.svg";
 import upload from "../../assets/upload-circle.svg";
-import add from "../../assets/add-item.svg";
 import type { CardConfig } from "./actionCard";
 
 export const CARD_CONFIGS: readonly CardConfig[] = [
@@ -19,7 +19,7 @@ export const CARD_CONFIGS: readonly CardConfig[] = [
     ),
     buttonText: "Sync ERP",
     icon: (
-      <Image
+      <img
         src={databaseImport}
         alt="Database import"
         width={20}

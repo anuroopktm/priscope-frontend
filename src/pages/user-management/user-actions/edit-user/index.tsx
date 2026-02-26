@@ -98,11 +98,6 @@ const EditUserPage = () => {
     }
   };
 
-  const onDelete = () => {
-    console.log("Deleting user:", userId);
-    showToast("User deleted successfully", "success");
-    navigate("/user-management/list-users");
-  };
 
   if (isDetailsLoading || isPrivilegesLoading || isAllPrivilegesLoading) {
     return (

@@ -72,8 +72,6 @@ const DataMappingModal: React.FC<DataMappingModalPropsExtended> = ({
   const [selectedTemplate, setSelectedTemplate] = useState<string>("");
   const [showOverwriteModal, setShowOverwriteModal] = useState(false);
 
-  // Get selected data from store and API mutation
-  const selected = useItemMasterStore((state) => state.selected);
   const controlFields = useItemMasterStore((state) => state.controlFields);
   const uploadIdFromStore = useItemMasterStore((state) => state.uploadId);
   const resetStore = useItemMasterStore((state) => state.reset);
@@ -231,7 +229,7 @@ const DataMappingModal: React.FC<DataMappingModalPropsExtended> = ({
         overwrite,
       );
 
-      mapFieldsMutation(apiPayload, {
+      mapFieldsMutation(apiPayload as any, {
         onSuccess: () => {
           isSearchReplaceRef.current = true;
           queryClient.invalidateQueries({
@@ -277,7 +275,7 @@ const DataMappingModal: React.FC<DataMappingModalPropsExtended> = ({
         onClose={handleClose}
         maxWidth="md"
         fullWidth
-        // PaperProps={{ sx: { borderRadius: 12 } }}
+      // PaperProps={{ sx: { borderRadius: 12 } }}
       >
         <DialogTitle sx={{ py: 2, px: 3 }}>
           <Box
