@@ -1,4 +1,4 @@
-const getDataFromTable = (grid: TGrid) => {
+export const getDataFromTable = (grid: TGrid) => {
   if (!grid) return [];
   const Grid = grid;
   const result = [];

@@ -23,7 +23,7 @@ export const handleEditCellAdminRequest = ({
   row,
   col,
   value,
-  oldValue,
+  // oldValue,
   comment,
   itemMasterDataList,
   itemMasterBulkInsertAdminApproval,

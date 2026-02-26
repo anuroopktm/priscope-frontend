@@ -2,7 +2,7 @@ let gridLoadingMap: Record<string, boolean> = {};
 
 export const onScroll = (
   grid: TGrid,
-  hpos: number,
+  // hpos: number,
   vpos: number,
   gridId: string,
   scrollThreshold = 200,

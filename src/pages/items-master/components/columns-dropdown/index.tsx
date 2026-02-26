@@ -180,7 +180,7 @@ const ColumnDropdown: React.FC<ColumnDropdownProps> = ({
                         control={
                           <Checkbox
                             checked={!!selectedColumns[label]}
-                            onChange={(e, checked) =>
+                            onChange={(_, checked) =>
                               handleCheckboxChange(label, checked)
                             }
                             disabled={isDefault}

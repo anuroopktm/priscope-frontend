@@ -7,7 +7,6 @@ import {
   Divider,
   MenuItem,
   TextField,
-  useTheme,
 } from "@mui/material";
 import { useState } from "react";
 
@@ -26,8 +25,6 @@ const CreateColumnModal = ({
   defaultLabel = "",
   dataTypeOptions,
 }: CreateColumnModalProps) => {
-  // const { t } = useTranslation();
-  const theme = useTheme();
 
   const [label, setLabel] = useState(defaultLabel);
   const [dataType, setDataType] = useState("");

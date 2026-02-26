@@ -1,5 +1,5 @@
 import { Box } from "@mui/material";
-import { ActionHeader } from "../scenario-builder/components/ActionHeader";
+// import { ActionHeader } from "../scenario-builder/components/ActionHeader";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import LoaderOverlay from "@/components/common/loader";
 import RequestsModal from "@/components/common/requests-modal";
@@ -55,6 +55,7 @@ import { useHandleGridEditConfirm } from "./actions/handleGridEditConfirm";
 import type { HeaderList, OpenPanel, TreeGridState } from "./types/types";
 import { useHandleEditPopover } from "./hooks/useHandleEditPopover";
 import { useSkuUpcClickable } from "./hooks/useSkuUpcClickable";
+import { ActionHeader } from "./components/header/ActionHeader";
 
 const ItemsMasterPage = () => {
   const [searchQuery, setSearchQuery] = useState("");
@@ -104,7 +105,7 @@ const ItemsMasterPage = () => {
     hasNextPage,
     isFetchingNextPage,
     isLoading: isItemsLoading,
-    isError: isListItemsError,
+    // isError: isListItemsError,
   } = useListItems({
     search: debouncedSearchQuery,
     page_size: page_size_item_master,
@@ -127,8 +128,7 @@ const ItemsMasterPage = () => {
   const { mutate: deleteItemMasterRow, isPending: deleteItemMasterRowPending } =
     useDeleteItemMasterRow();
 
-  const { hasEditItemMasterPrivilege, hasAddItemMasterPrivilege } =
-    hasItemMasterPrivileges(privileges);
+  const { hasEditItemMasterPrivilege } = hasItemMasterPrivileges(privileges);
 
   const {
     mutate: itemMasterBulkInsertAdminApproval,
@@ -392,8 +392,8 @@ const ItemsMasterPage = () => {
     handleFilterChange(grid, setFilter);
   };
 
-  const onHandleScroll = (grid: TGrid, hpos: number, vpos: number) => {
-    onScroll(grid, hpos, vpos, gridId, 200, handleLoadMore);
+  const onHandleScroll = (grid: TGrid, vpos: number) => {
+    onScroll(grid, vpos, gridId, 200, handleLoadMore);
   };
 
   const onDeleteSelection = () => {
