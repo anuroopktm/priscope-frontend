@@ -1,61 +1,60 @@
 import { Box } from "@mui/material";
 import { ActionHeader } from "../scenario-builder/components/ActionHeader";
-// import { useTreeGridInit } from "../scenario-builder/hooks/use-tree-grid-init";
-import { useCallback, useEffect, useRef, useState } from "react";
-// import { TreeGridLayout } from "../scenario-builder/constant/tree-grid-layout";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import LoaderOverlay from "@/components/common/loader";
-import RequestSuccessDialog from "@/components/common/request-notification";
 import RequestsModal from "@/components/common/requests-modal";
-import { useGetExportedFile } from "@/services/queries/common/common.queries";
 import {
   useAddBulkInsertAdminRequest,
-  // useBulkInsertItems,
   useDeleteItemMasterRow,
-  useEditItemMasterItem,
   useExportItemMasterRow,
+  useListComments,
   useListHeaders,
   useListItems,
 } from "@/services/queries/item-master/item-master.queries";
-import { openConfirmationModal } from "@/utils/getRequestConfirmationModal";
-import { useQueryClient } from "@tanstack/react-query";
 import { useDebounce } from "../../hooks/useDebounce";
 import type { SnackbarState } from "./components/columns-dropdown";
-import TableSavePopover from "./components/table-save-popover";
-import { handleValueChanged } from "./components/tree-grid/CellValue/handleValueChanged";
-import { handleFilterChange } from "./components/tree-grid/Filter/FilterChange";
-import { deleteSeletectedRows } from "./components/tree-grid/RowSelection/DeleteRowSelection";
-import { handleSelected } from "./components/tree-grid/RowSelection/RowSelection";
 import { onScroll } from "./components/tree-grid/scroll/ScrollHandler";
 import CompleteUploadFlow from "./components/upload-csv";
 import { page_size_item_master } from "./constants/itemmaster.constants";
-import { hasItemMasterPrivileges } from "./helpers/itemMasterHelpers";
 import {
   buildItemMasterTreeGridBody,
   buildItemMasterTreeGridCols,
-  getEditCellValueAdminApproval,
+  convertSavedFilter,
   getItemMasterLayout,
 } from "./helpers/itemMasterTreeGridHelperFunction";
 import type {
-  ExportItemMasterRowPayload,
-  itemMasterBodyResponseItems,
-  itemMasterBodyResponseItemsField,
   TreeGridBody,
   TreeGridHeader,
   TreeGridLayout,
 } from "./helpers/types";
 import { useTreeGridInit } from "./hooks/use-tree-grid-init";
-import type { DeleteSelectedRowPayload } from "./types/types";
+import { handleFilterChange } from "./components/tree-grid/Filter/FilterChange";
+import { handleSelected } from "./components/tree-grid/RowSelection/RowSelection";
+import { useGetExportedFile } from "@/services/queries/common/common.queries";
+import { handleValueChanged } from "./components/tree-grid/CellValue/handleValueChanged";
+import TableSavePopover from "./components/table-save-popover";
+import { hasItemMasterPrivileges } from "./helpers/itemMasterHelpers";
+import RequestSuccessDialog from "@/components/common/request-notification";
+import FileDetailsModal from "@/components/file-detail-modal";
+import { FILE_FILTER_OPTIONS } from "@/constants/file-modal.constants";
+import { INITIAL_HEADERS } from "./constants/tableHeaders.constants";
+import {
+  showColumn,
+  hideColumn,
+  addColumn,
+} from "./components/tree-grid/Columns/Columns";
+import { handleItemMasterExport } from "./actions/handleItemMasterExport";
+import { useToastStore } from "@/store/useToastStore";
+import { handleEditCellAdminRequest } from "./actions/editItemMasterAdmin";
+import { handleDeleteSelection } from "./actions/handleDeleteSelection";
+import CommentSidebar from "@/components/common/loader/comment-sidebar";
+import { focusCell, focusRow } from "./components/tree-grid/focus/FocusEvents";
+import DetailView from "./components/detail-view";
+import { DetailsModal } from "./components/detail-view-modal";
+import MainContentContainer from "@/components/common/main-content-container";
+import { useHandleGridEditConfirm } from "./actions/handleGridEditConfirm";
+import type { HeaderList, OpenPanel, TreeGridState } from "./types/types";
 
-export interface TreeGridState {
-  showSavePopover: boolean;
-  popoverPosition: { top: number; left: number };
-  changedCell: {
-    row: TRow;
-    col: string;
-    value: any;
-    oldValue: any;
-  } | null;
-}
 const ItemsMasterPage = () => {
   const [searchQuery, setSearchQuery] = useState("");
   const [filter, setFilter] = useState<Record<string, string[]>>({});
@@ -67,7 +66,6 @@ const ItemsMasterPage = () => {
   const prevSearchQueryRef = useRef<string>("");
   const treeGridHeadersRef = useRef<TreeGridHeader[]>([]);
   const [openReqestModal, setOpenRequestModal] = useState(false);
-  const [showFilesModal, setShowFilesModal] = useState<boolean>(false);
   const [showLoader, setShowLoader] = useState(false);
   const [snackbar, setSnackbar] = useState<SnackbarState>({
     message: null,
@@ -81,12 +79,22 @@ const ItemsMasterPage = () => {
   const [comment, setComment] = useState("");
   const [commentAdded, setCommentAdded] = useState(false);
   const privileges: {} = JSON.parse(localStorage.getItem("privileges") || "");
-
+  const [headerLabels, setHeaderLabels] = useState<string[]>([]);
+  const [saveFilter, setSaveFilter] = useState(false);
+  const prevFilterRef = useRef<string>("");
+  const { showToast } = useToastStore();
   const [state, setState] = useState<TreeGridState>({
     showSavePopover: false,
     popoverPosition: { top: 0, left: 0 },
     changedCell: null,
   });
+  const [selectedColumns, setSelectedColumns] = useState<
+    Record<string, boolean>
+  >({});
+  const [openPanel, setOpenPanel] = useState<OpenPanel>(null);
+  const [detailedViewId, setDetailedViewId] = useState<string>("");
+  const [isDetailViewModalOpen, setIsDetailViewModalOpen] = useState(false);
+  const { handleGridEditConfirm } = useHandleGridEditConfirm();
 
   const [
     requestSuccessNotficationVisible,
@@ -121,9 +129,6 @@ const ItemsMasterPage = () => {
 
   const { mutate: deleteItemMasterRow, isPending: deleteItemMasterRowPending } =
     useDeleteItemMasterRow();
-  const { mutateAsync: mutateItemMasterItem } = useEditItemMasterItem();
-
-  const queryClient = useQueryClient();
 
   const { hasEditItemMasterPrivilege, hasAddItemMasterPrivilege } =
     hasItemMasterPrivileges(privileges);
@@ -133,23 +138,24 @@ const ItemsMasterPage = () => {
     isPending: isitemMasterBulkInsertAdminApprovalPending,
   } = useAddBulkInsertAdminRequest();
 
+  const { mutateAsync: listComments, isPending: isCommentListingPending } =
+    useListComments();
+
+  const [showFilesModal, setShowFilesModal] = useState<boolean>(false);
+
   useEffect(() => {
-    window.TGSetEvent("OnScroll", gridId, onScroll);
+    window.TGSetEvent("OnScroll", gridId, onHandleScroll);
     window.TGSetEvent("OnSelected", gridId, onSelected);
-    window.TGSetEvent("OnFilter", gridId, handleFilterChange);
+    window.TGSetEvent("OnFilter", gridId, onHandleFilterChange);
     window.TGSetEvent("OnValueChanged", gridId, onHandleValueChanged);
-    // window.Grids.OnRightClick = handleRightClick;
     return () => {
       window.TGDelEvent("OnSelected", gridId);
       window.TGDelEvent("OnScroll", gridId);
       window.TGDelEvent("OnFilter", gridId);
       window.TGSetEvent("OnValueChanged", gridId);
-
-      // if (window.Grids?.OnRightClick === handleRightClick) {
-      //   delete window?.Grids?.OnRightClick;
-      // }
     };
   }, []);
+
   useEffect(() => {
     setShowLoader(
       isItemsLoading ||
@@ -177,6 +183,41 @@ const ItemsMasterPage = () => {
   ]);
 
   useEffect(() => {
+    if (!listHeaderData?.headers) return;
+    setHeaderLabels(listHeaderData.headers.map((h) => h.label));
+  }, [listHeaderData]);
+
+  const headerList = useMemo<HeaderList[]>(() => {
+    if (!listHeaderData?.headers) return [];
+    return listHeaderData.headers.map((header) => ({
+      name: header.name,
+      label: header.label,
+      data_type: header.data_type,
+    }));
+  }, [listHeaderData]);
+
+  useEffect(() => {
+    if (!headerList) return;
+    const initial: Record<string, boolean> = {};
+    headerList.forEach((h) => {
+      if (INITIAL_HEADERS.includes(h.label)) {
+        initial[h.label] = true;
+      } else {
+        initial[h.label] = false;
+      }
+    });
+    setSelectedColumns(initial);
+    // setSelectedColumnsForAdd(initial);
+  }, [headerList]);
+
+  useEffect(() => {
+    if (!gridInstance.current) return;
+    const lastCol = headerLabels[headerLabels.length - 1];
+    if (!lastCol) return;
+    addColumn(gridInstance.current, lastCol);
+  }, [headerLabels]);
+
+  useEffect(() => {
     if (prevSearchQueryRef.current !== debouncedSearchQuery) {
       prevSearchQueryRef.current = debouncedSearchQuery;
 
@@ -187,260 +228,33 @@ const ItemsMasterPage = () => {
   }, [debouncedSearchQuery]);
 
   useEffect(() => {
+    const filterString = JSON.stringify(filter);
+
+    if (prevFilterRef.current !== filterString) {
+      prevFilterRef.current = filterString;
+
+      if (!isInitialLoadRef.current) {
+        isSearchReplaceRef.current = true;
+      }
+    }
+  }, [filter]);
+
+  useEffect(() => {
     if (state.showSavePopover && gridInstance.current) {
       gridInstance.current.Focus(null, null);
     }
   }, [state.showSavePopover]);
 
-  const handleExport = () => {
-    if (!selectedExport && (!selectedRows || selectedRows.length === 0)) return;
-    setShowLoader(true);
-    const payload: ExportItemMasterRowPayload = {
-      module_name: "item_master",
-      feature_name: "main",
-      file_type: "csv",
-      parameters: {
-        ids: selectedExport ? ["all"] : selectedRows,
-        filter: {},
-        options: {},
-      },
-    };
-    itemMasterExportRowMutate(payload, {
-      onSuccess: (response) => {
-        setShowLoader(false);
-        setSnackbar({
-          message: "Rows exported successfully!",
-          severity: "success",
-        });
-        gridInstance?.current?.ClearSelection();
-        setSelectedRows([]);
-        setSelectedExport(false);
-        DownloadExportFile(response?.export_id, {
-          onSuccess: (res) => {
-            if (res?.download_url) {
-              const link = document.createElement("a");
-              link.href = res.download_url;
-              link.setAttribute("download", "export_file.csv");
-              document.body.appendChild(link);
-              link.click();
-              link.remove();
-            }
-          },
-          onError: (err: any) => {
-            setSnackbar({
-              message: "Failed to download file",
-              severity: "error",
-            });
-          },
-        });
-      },
-      onError: (error) => {
-        setShowLoader(false);
-        setSnackbar({
-          message: "Failed to export rows",
-          severity: "error",
-        });
-      },
-    });
-  };
-  const onHandleValueChanged = (
-    grid: TGrid,
-    row: TRow,
-    col: string,
-    val: string,
-    oldval: string,
-    // enableEditPopover: boolean,
-  ) => {
-    handleValueChanged(grid, row, col, val, oldval, gridId, setState);
-  };
+  const hasNextPageRef = useRef(hasNextPage);
+  const isFetchingNextPageRef = useRef(isFetchingNextPage);
 
-  const handleDeleteSelection = () => {
-    if (!selectedRows || selectedRows.length === 0) return;
-    const payload: DeleteSelectedRowPayload = { item_ids: selectedRows };
-    setShowLoader(true);
-    deleteItemMasterRow(payload, {
-      onSuccess: (response) => {
-        setShowLoader(false);
-        setSnackbar({
-          message: "Deleted successfully!",
-          severity: "success",
-        });
-        deleteSeletectedRows(gridInstance.current);
-        // gridInstance?.current?.deleteSeletectedRows();
-        setSelectedRows([]);
-      },
-      onError: (e) => {
-        setSnackbar({
-          message: "Failed to delete rows",
-          severity: "error",
-        });
-        setShowLoader(false);
-      },
-    });
-  };
+  useEffect(() => {
+    hasNextPageRef.current = hasNextPage;
+  }, [hasNextPage]);
 
-  const handleEditCellAdminRequest = (
-    row: TRow,
-    col: string,
-    value: string,
-    oldValue: string,
-    comment?: string | null,
-  ) => {
-    const item_id = row?.id;
-    const allItems: any =
-      itemMasterDataList?.pages.flatMap((page) => page.items) || [];
-    const finalPayload: itemMasterBodyResponseItems | undefined = allItems.find(
-      (item: any) => item.id === item_id,
-    );
-    const oldPayload = structuredClone(finalPayload);
-    if (!finalPayload) return;
-    if (finalPayload.attributes?.[col]) {
-      finalPayload.attributes[col].value = value;
-    } else {
-      (finalPayload as unknown as Record<string, unknown>)[col] = value;
-    }
-    const commentsPayload =
-      comment && comment.trim().length > 0
-        ? [
-            {
-              comment_type: "field",
-              item_field_key: col,
-              comment: comment,
-            },
-          ]
-        : undefined;
-    const adminRequestEditCellPayload = getEditCellValueAdminApproval(
-      finalPayload,
-      oldPayload,
-      commentsPayload,
-    );
-    setShowLoader(true);
-    if (!adminRequestEditCellPayload) return null;
-    itemMasterBulkInsertAdminApproval(adminRequestEditCellPayload, {
-      onSuccess: (response) => {
-        setShowLoader(false);
-        setRequestSuccessNotficationVisible(true);
-      },
-      onError: (e) => {
-        setShowLoader(false);
-        setSnackbar({
-          message: "Failed to save changes. Please try again.",
-          severity: "warning",
-        });
-      },
-    });
-  };
-
-  const handleGridEditConfirm = async (
-    row: TRow,
-    col: string,
-    value: string,
-    oldValue: string,
-    comment?: string | null,
-  ) => {
-    if (value === oldValue) return;
-    if (!hasEditItemMasterPrivilege) {
-      const result = await openConfirmationModal("edit", confirm);
-      if (result) {
-        handleEditCellAdminRequest(row, col, value, oldValue, comment);
-      } else {
-        const Grid = gridInstance.current?.getGridInstance();
-        if (Grid) {
-          const gridRow = Grid.GetRowById(row.id);
-          if (gridRow) Grid.SetValue(gridRow, col, oldValue, 1);
-        }
-      }
-      return;
-    }
-    const item_id = row?.id;
-    if (!item_id) return;
-    const allItems: itemMasterBodyResponseItems[] =
-      itemMasterDataList?.pages.flatMap((page) => page.items) || [];
-    const finalPayload: itemMasterBodyResponseItems | undefined = allItems.find(
-      (item: any) => item.id === item_id,
-    );
-    if (!finalPayload) return;
-    if (finalPayload.attributes?.[col]) {
-      finalPayload.attributes[col].value = value;
-    } else if (
-      typeof (finalPayload as any)[col] === "object" &&
-      (finalPayload as any)[col]?.value !== undefined
-    ) {
-      (
-        finalPayload as unknown as Record<
-          string,
-          itemMasterBodyResponseItemsField
-        >
-      )[col].value = value;
-    } else {
-      // Plain primitive field
-      (finalPayload as any)[col] = value;
-    }
-    const commentsPayload =
-      comment && comment.trim().length > 0
-        ? [
-            {
-              comment_type: "field",
-              item_field_key: col,
-              comment: comment,
-            },
-          ]
-        : undefined;
-    const finalPayloadWithMetadata = {
-      data: finalPayload,
-      comments: commentsPayload,
-    };
-    setShowLoader(true);
-    mutateItemMasterItem(
-      { item_id, payload: finalPayloadWithMetadata },
-      {
-        onSuccess: () => {
-          setShowLoader(false);
-          setSnackbar({
-            message: "Item updated successfully!",
-            severity: "success",
-          });
-          queryClient.invalidateQueries({ queryKey: ["item-master-history"] });
-        },
-        onError: () => {
-          setShowLoader(false);
-          setSnackbar({
-            message: "Failed to save changes. Please try again.,",
-            severity: "warning",
-          });
-        },
-      },
-    );
-  };
-  const handleLoadMore = () => {
-    if (hasNextPage && !isFetchingNextPage) {
-      fetchNextPage();
-    }
-  };
-
-  const addRowsToGrid = (newRows: any[]) => {
-    const Grid = gridInstance.current;
-    if (!Grid) return;
-    if (!Grid || !newRows?.length) return;
-
-    newRows.forEach((rowData) => {
-      const newRow = Grid.AddRow(null, null, 7, rowData.id);
-      if (!newRow) return;
-
-      Object.entries(rowData).forEach(([key, value]) => {
-        if (key === "id") return;
-        if (key === "Color") return;
-        if (value === undefined) return;
-
-        Grid.SetValue(newRow, key, value, 1);
-      });
-
-      Grid.RefreshRow(newRow);
-    });
-
-    Grid.Update();
-    gridInstance.current?.setLoading(false);
-  };
+  useEffect(() => {
+    isFetchingNextPageRef.current = isFetchingNextPage;
+  }, [isFetchingNextPage]);
 
   useEffect(() => {
     if (!itemMasterDataList || !listHeaderData?.headers.length) return;
@@ -466,7 +280,7 @@ const ItemsMasterPage = () => {
     }
 
     // const Grid = gridInstance?.current?.getGridInstance();
-    const Grid = gridInstance?.getGridInstance();
+    const Grid = gridInstance?.current;
     if (!Grid) return;
     /**  2. SEARCH REPLACE (Grid API) */
     if (isSearchReplaceRef.current) {
@@ -483,7 +297,10 @@ const ItemsMasterPage = () => {
 
       Grid.ReloadBody();
 
-      gridInstance.current?.setLoading(false);
+      // gridInstance.current?.setLoading(false);
+      if (isFetchingNextPage) return;
+      if (!hasNextPage) return;
+      fetchNextPage();
 
       isSearchReplaceRef.current = false;
       return;
@@ -497,10 +314,184 @@ const ItemsMasterPage = () => {
     addRowsToGrid(dataToAdd?.Body[0]);
   }, [itemMasterDataList, listHeaderData]);
 
-  // Optional: Function to attach event handlers after initialization
   const handleGridReady = useCallback((grid: TGrid) => {
     console.log("handleGridReady");
   }, []);
+
+  const gridInstance = useTreeGridInit(
+    gridId,
+    containerId,
+    layout,
+    data,
+    handleGridReady,
+  );
+
+  const handleSkuUpcClick = (rowId: string, col: string, value: any) => {
+    const Grid = gridInstance.current;
+    if (Grid) {
+      const gridRow = Grid.GetRowById(rowId);
+      if (!gridRow || gridRow.Kind !== "Data") return;
+    }
+    setOpenPanel((prev) => {
+      setDetailedViewId(rowId);
+      if (prev !== "detail-view") {
+        return "detail-view";
+      }
+      return prev;
+    });
+  };
+
+  const handleSkuUpcClickRef =
+    useRef<(rowId: string, col: string, value: any) => void>(handleSkuUpcClick);
+
+  useEffect(() => {
+    handleSkuUpcClickRef.current = handleSkuUpcClick;
+  });
+  useEffect(() => {
+    (window as any).onSkuUpcClick = (
+      rowId: string,
+      col: string,
+      value: any,
+    ) => {
+      handleSkuUpcClickRef.current(rowId, col, value);
+    };
+    return () => {
+      delete (window as any).onSkuUpcClick;
+    };
+  }, []);
+
+  useEffect(() => {
+    window.Grids ??= {};
+    const prev = window.Grids.OnGetHtmlValue;
+
+    window.Grids.OnGetHtmlValue = (grid: any, row: any, col: any, val: any) => {
+      if (grid.id !== gridId) {
+        return prev ? prev(grid, row, col, val) : val;
+      }
+
+      if (row?.Kind === "Header") {
+        return prev ? prev(grid, row, col, val) : val;
+      }
+
+      if ((col === "SKU" || col === "UPC") && val) {
+        const safeVal = String(val).replace(/"/g, "&quot;");
+        return `<a 
+        href="javascript:void(0)" 
+        onclick="window.onSkuUpcClick('${row.id}', '${col}', '${safeVal}')"
+        style="color: inherit; text-decoration: underline; cursor: pointer;"
+      >${safeVal}</a>`;
+      }
+
+      return prev ? prev(grid, row, col, val) : val;
+    };
+
+    return () => {
+      if (prev) {
+        window.Grids.OnGetHtmlValue = prev;
+      } else {
+        delete window.Grids.OnGetHtmlValue;
+      }
+    };
+  }, [gridId]);
+
+  const handleExport = () => {
+    handleItemMasterExport({
+      selectedExport,
+      selectedRows,
+      setShowLoader,
+      showToast,
+      gridInstance,
+      setSelectedRows,
+      setSelectedExport,
+      itemMasterExportRowMutate,
+      DownloadExportFile,
+    });
+  };
+
+  const onHandleValueChanged = (
+    grid: TGrid,
+    row: TRow,
+    col: string,
+    val: string,
+    oldval: string,
+    // enableEditPopover: boolean,
+  ) => {
+    handleValueChanged(grid, row, col, val, oldval, gridId, setState);
+  };
+
+  const onHandleFilterChange = (grid: TGrid) => {
+    handleFilterChange(grid, setFilter);
+  };
+
+  const onHandleScroll = (grid: TGrid, hpos: number, vpos: number) => {
+    onScroll(grid, hpos, vpos, gridId, 200, handleLoadMore);
+  };
+
+  const onDeleteSelection = () => {
+    handleDeleteSelection({
+      selectedRows,
+      deleteItemMasterRow,
+      gridInstance,
+      setSelectedRows,
+      setShowLoader,
+      showToast,
+    });
+  };
+
+  const onCellEditConfirm = (
+    row: TRow,
+    col: string,
+    value: string,
+    oldValue: string,
+    comment?: string,
+  ) => {
+    handleGridEditConfirm({
+      row,
+      col,
+      value,
+      oldValue,
+      comment,
+      hasEditItemMasterPrivilege,
+      confirm,
+      gridInstance,
+      itemMasterDataList,
+      itemMasterBulkInsertAdminApproval,
+      setShowLoader,
+      setRequestSuccessNotficationVisible,
+      showToast,
+      handleEditCellAdminRequest,
+    });
+  };
+
+  const handleLoadMore = () => {
+    if (hasNextPageRef.current && !isFetchingNextPageRef.current) {
+      fetchNextPage();
+    }
+  };
+
+  const addRowsToGrid = (newRows: any[]) => {
+    const Grid = gridInstance.current;
+    if (!Grid) return;
+    if (!Grid || !newRows?.length) return;
+
+    newRows.forEach((rowData) => {
+      const newRow = Grid.AddRow(null, null, 7, rowData.id);
+      if (!newRow) return;
+
+      Object.entries(rowData).forEach(([key, value]) => {
+        if (key === "id") return;
+        if (key === "Color") return;
+        if (value === undefined) return;
+
+        Grid.SetValue(newRow, key, value, 1);
+      });
+
+      Grid.RefreshRow(newRow);
+    });
+
+    Grid.Update();
+    // gridInstance.current?.setLoading(false);
+  };
 
   const handleUploadComplete = (data: any) => {
     console.log("Import completed:", data);
@@ -509,18 +500,6 @@ const ItemsMasterPage = () => {
   const handleViewLog = () => {
     console.log("View log clicked");
   };
-
-  // Initialize the grid using the dedicated hook
-  const gridInstance = useTreeGridInit(
-    gridId,
-    containerId,
-    layout,
-    data,
-    handleGridReady,
-  );
-  useEffect(() => {
-    console.log(gridInstance);
-  }, [gridInstance]);
 
   const onSelected = (grid: TGrid) => {
     handleSelected(grid, setSelectedRows);
@@ -533,7 +512,7 @@ const ItemsMasterPage = () => {
     }
     const { row, col, value, oldValue } = state.changedCell;
 
-    handleGridEditConfirm?.(row, col, value, oldValue, comment);
+    onCellEditConfirm?.(row, col, value, oldValue, comment);
     setState((prev) => ({
       ...prev,
       showSavePopover: false,
@@ -557,6 +536,48 @@ const ItemsMasterPage = () => {
     }));
   };
 
+  const handleColumnVisibility = (label: string, check: boolean) => {
+    if (check) {
+      showColumn(gridInstance.current, label);
+    } else {
+      hideColumn(gridInstance.current, label);
+    }
+  };
+
+  const handleClearAllFilters = useCallback(() => {
+    const Grid = gridInstance.current;
+    if (Grid) {
+      Grid.ChangeFilter("", "", "", 0, 0);
+    }
+    setFilter({});
+  }, []);
+
+  const applySavedFilterToFilterRow = (filter: Record<string, string[]>) => {
+    const Grid = gridInstance.current;
+    if (!Grid) return;
+    const { cols, values, operators } = convertSavedFilter(filter);
+    Grid.ChangeFilter(cols, values, operators, false, false);
+  };
+
+  const handleCommentSelect = (comment: any) => {
+    const id = comment.item_id;
+    const Grid = gridInstance.current;
+    if (comment.comment_type === "row") {
+      focusRow(Grid, id);
+    } else if (comment.comment_type === "field") {
+      const fieldKey = comment.field_key;
+      focusCell(Grid, id, fieldKey);
+    }
+  };
+
+  const handleExpandClick = useCallback(() => {
+    setIsDetailViewModalOpen(true);
+  }, []);
+
+  const togglePanel = useCallback((panel: OpenPanel) => {
+    setOpenPanel((prev) => (prev === panel ? null : panel));
+  }, []);
+
   return (
     <Box
       sx={{
@@ -575,35 +596,103 @@ const ItemsMasterPage = () => {
         onImportClick={() => setShowUploadFlow(true)}
         selectedRows={selectedRows}
         onHandleExport={handleExport}
-        handleDeleteSelection={handleDeleteSelection}
+        setSelectedExport={setSelectedExport}
+        handleDeleteSelection={onDeleteSelection}
+        headerLabels={headerLabels}
+        setHeaderLabels={setHeaderLabels}
+        selectedColumns={selectedColumns}
+        setSelectedColumns={setSelectedColumns}
+        handleColumnVisibility={handleColumnVisibility}
+        saveFilter={saveFilter}
+        setSaveFilter={setSaveFilter}
+        filter={filter}
+        saveFilterJson={setFilter}
+        onClearAllFilters={handleClearAllFilters}
+        applySavedFilterToFilterRow={applySavedFilterToFilterRow}
+        onToggleDrawer={() => togglePanel("comments")}
       />
-
-      <Box sx={{ display: "flex", position: "relative" }}>
-        {/* <MainContentContainer hasFilter={true}> */}
-        {openReqestModal && (
-          <RequestsModal
-            onClose={setOpenRequestModal}
-            targetModule={"item_master"}
-          />
-        )}
-        {/* </MainContentContainer> */}
-      </Box>
-
-      <Box
-        sx={{
-          flex: 1,
-          p: 2,
-        }}
-      >
-        <Box
-          id={containerId}
-          sx={{
-            width: "100%",
-            height: "calc(100vh - 144px)",
-          }}
+      {isDetailViewModalOpen && (
+        <DetailsModal
+          isOpen={isDetailViewModalOpen}
+          onClose={() => setIsDetailViewModalOpen(false)}
+          timelineTitle={"Timeline"}
+          item_id={detailedViewId}
         />
-      </Box>
+      )}
+      {openReqestModal && (
+        <RequestsModal
+          onClose={setOpenRequestModal}
+          targetModule="item_master"
+        />
+      )}
+      {showFilesModal && (
+        <FileDetailsModal
+          onClose={setShowFilesModal}
+          showLoader={setShowLoader}
+          showSnackBar={setSnackbar}
+          module="item_master"
+          filterOptions={FILE_FILTER_OPTIONS}
+        />
+      )}
 
+      <Box sx={{ display: "flex", position: "relative", padding: 2 }}>
+        <MainContentContainer hasFilter={true}>
+          <Box sx={{ flex: 1, padding: 2, minWidth: 0 }}>
+            <Box
+              id={containerId}
+              sx={{ width: "100%", height: "calc(100vh - 144px)" }}
+            />
+          </Box>
+        </MainContentContainer>
+        <Box
+          sx={{
+            width: openPanel === "comments" ? 300 : 0,
+            transition: "width 0.3s ease",
+            overflow: "hidden",
+            height: "calc(100vh - 147px)",
+            marginLeft: openPanel === "comments" ? 1 : 0,
+            background: "white",
+            color: "black",
+            display: "flex",
+            flexDirection: "column",
+            borderRadius: "8px 0 0 8px",
+          }}
+        >
+          {openPanel === "comments" && (
+            <CommentSidebar
+              isOpen={openPanel}
+              onClose={() => setOpenPanel(null)}
+              listComments={listComments}
+              isLoading={isCommentListingPending}
+              onCommentSelect={handleCommentSelect}
+            />
+          )}
+        </Box>
+
+        <Box
+          sx={{
+            width: openPanel === "detail-view" ? 406 : 0,
+            transition: "width 0.3s ease",
+            overflow: "hidden",
+            height: "calc(100vh - 147px)",
+            marginLeft: openPanel === "detail-view" ? 1 : 0,
+            background: "white",
+            color: "black",
+            display: "flex",
+            flexDirection: "column",
+            borderRadius: "8px 0 0 8px",
+          }}
+        >
+          {openPanel === "detail-view" && (
+            <DetailView
+              item_id={detailedViewId}
+              timelineTitle={"Timeline"}
+              onClose={() => setOpenPanel(null)}
+              onExpandClick={handleExpandClick}
+            />
+          )}
+        </Box>
+      </Box>
       {showLoader && <LoaderOverlay />}
       <CompleteUploadFlow
         open={showUploadFlow}

@@ -29,7 +29,7 @@ export default function RequestSuccessDialog({
       fullWidth={false}
       PaperProps={{
         sx: {
-          borderRadius: 8,
+          borderRadius: 1,
           padding: 2,
           width: 400,
           backgroundColor: "##FFFFFF",
@@ -45,7 +45,7 @@ export default function RequestSuccessDialog({
             fontStyle: "bold",
 
             mb: 2,
-            color: theme.custom.textColor,
+            color: "#1A2B44",
             fontSize: "14px",
           }}
         >
@@ -54,7 +54,7 @@ export default function RequestSuccessDialog({
         <Typography
           variant="body1"
           sx={{
-            color: theme.custom.textColor,
+            color: "#1A2B44",
             fontSize: "14px",
           }}
         >
@@ -67,7 +67,7 @@ export default function RequestSuccessDialog({
           onClick={handleClose}
           variant="contained"
           sx={{
-            backgroundColor: theme.custom.midnightBlue,
+            backgroundColor: "#144E72",
             color: "white",
             borderRadius: 5,
             textTransform: "none",

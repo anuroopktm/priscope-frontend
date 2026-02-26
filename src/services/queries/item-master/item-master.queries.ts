@@ -1,4 +1,3 @@
-// import { axiosInstance } from "@/shared/utils/axiosInstance";
 import { useInfiniteQuery, useMutation, useQuery } from "@tanstack/react-query";
 import type { AxiosError } from "axios";
 import { ITEM_MASTER_ENDPOINTS } from "../../../pages/items-master/constants/api.endpoints";
@@ -17,6 +16,7 @@ import type {
   Header,
   DeleteSelectedRowResponse,
   DeleteSelectedRowPayload,
+  ListCommentsPayload,
 } from "./item-master.types";
 
 import type {
@@ -36,6 +36,7 @@ import type {
   SaveFilterResponse,
 } from "../../../pages/items-master/helpers/types";
 import { axiosInstance } from "@/services/api/axiosInstance";
+import type { CommentsResponse } from "@/components/common/loader/comment-sidebar/types";
 
 export type UploadResponse = {
   upload_id: string;
@@ -353,6 +354,18 @@ export const useListHeaders = (payload: ListRequestBody) => {
       }
 
       return response.data;
+    },
+  });
+};
+
+export const useListComments = () => {
+  return useMutation<CommentsResponse, AxiosError, ListCommentsPayload>({
+    mutationFn: async (payload) => {
+      const { data } = await axiosInstance.post<CommentsResponse>(
+        ITEM_MASTER_ENDPOINTS.listComments,
+        payload,
+      );
+      return data;
     },
   });
 };

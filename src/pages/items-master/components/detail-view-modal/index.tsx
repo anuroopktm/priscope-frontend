@@ -1,5 +1,3 @@
-"use client";
-
 import React from "react";
 import {
   Dialog,
@@ -11,15 +9,15 @@ import {
 } from "@mui/material";
 import { GridCloseIcon } from "@mui/x-data-grid";
 
-import ItemDetailCard from "@/shared/components/item-detail";
-import TimelineDetail from "@/shared/components/timeline";
+import ItemDetailCard from "@/components/common/item-detail";
+import TimelineDetail from "@/components/common/timeline";
 
 import {
   useGetItemMasterById,
   useItemMasterHistory,
-} from "../../services/itemMasterService";
-import { mapItemApiToDetailView } from "../../utils/mapItemApiToDetailView";
-import { mapHistoryToTimeline } from "../../utils/mapHistoryToTimeline";
+} from "@/services/queries/item-master/item-master.queries";
+import { mapItemApiToDetailView } from "@/pages/items-master/utils/mapItemApiToDetailView";
+import { mapHistoryToTimeline } from "@/pages/items-master/utils/mapHistoryToTimeline";
 
 interface DetailsModalProps {
   isOpen: boolean;
@@ -77,7 +75,7 @@ export const DetailsModal: React.FC<DetailsModalProps> = ({
           height: "70vh",
           alignSelf: "start",
           mt: 17,
-          borderRadius: 8,
+          borderRadius: 1,
           gap: "8px",
           p: "24px",
           display: "flex",
@@ -123,7 +121,7 @@ export const DetailsModal: React.FC<DetailsModalProps> = ({
               overflowY: "auto",
               height: "100%",
               border: "1px solid #e0e0e0",
-              borderRadius: 8,
+              borderRadius: 1,
               p: 2,
               pt: 0,
               bgcolor: "white",
@@ -150,7 +148,7 @@ export const DetailsModal: React.FC<DetailsModalProps> = ({
               overflowY: "auto",
               height: "100%",
               border: "1px solid #e0e0e0",
-              borderRadius: 8,
+              borderRadius: 1,
               p: 2,
               pt: 0,
               bgcolor: "white",

@@ -1,10 +1,11 @@
 import { axiosInstance } from "@/services/api/axiosInstance";
+import { useMutation, useQuery } from "@tanstack/react-query";
+import type { AxiosError } from "axios";
 import {
   COMMON_ENDPOINTS,
   EXPORT_RATE_ENDPOINTS,
   IMPORT_RATE_ENDPOINTS,
 } from "./api.endpoints";
-
 import type {
   GlobalCurrenciesRequest,
   GlobalCurrenciesResponse,
@@ -16,9 +17,6 @@ import type {
   ListExportRequest,
   ListExportResponse,
 } from "./types/exportServices.types";
-
-import { useMutation, useQuery } from "@tanstack/react-query";
-import type { AxiosError } from "axios";
 
 // ---------------------- DOWNLOAD TEMPLATE ----------------------
 
@@ -52,9 +50,9 @@ export const useGetTemplateFile = () => {
 // ---------------------- LIST MODULE IMPORTS ----------------------
 
 export const useListModuleImports = (module_name: string) => {
-  return useQuery<any, AxiosError>({
-    queryKey: ["module-imports", module_name],
-    queryFn: async () => {
+  return useMutation<any, AxiosError>({
+    // queryKey: ["module-imports", module_name],
+    mutationFn: async () => {
       const { data } = await axiosInstance.get(
         IMPORT_RATE_ENDPOINTS.getModuleImports,
         {
@@ -64,7 +62,7 @@ export const useListModuleImports = (module_name: string) => {
       );
       return data;
     },
-    enabled: Boolean(module_name),
+    // enabled: Boolean(module_name),
   });
 };
 

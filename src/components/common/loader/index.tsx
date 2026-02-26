@@ -14,7 +14,8 @@ export default function LoaderOverlay({
       open={open}
       sx={{
         color: "primary.main",
-        zIndex: (theme) => theme.zIndex.modal + 1,
+        // zIndex: (theme) => theme.zIndex.modal + 1,
+        zIndex: 99999,
         flexDirection: "column",
       }}
     >

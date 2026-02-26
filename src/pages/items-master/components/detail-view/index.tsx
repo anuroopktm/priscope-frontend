@@ -1,18 +1,15 @@
-"use client";
-
 import React from "react";
 import { Box, IconButton, Typography, CircularProgress } from "@mui/material";
-import ItemDetailCard from "@/shared/components/item-detail";
-import TimelineDetail from "@/shared/components/timeline";
+import ItemDetailCard from "@/components/common/item-detail";
+import TimelineDetail from "@/components/common/timeline";
 import { GridCloseIcon } from "@mui/x-data-grid";
-import ExpandIcon from "@/public/images/arrow-expand.svg";
-import Image from "next/image";
+import ExpandIcon from "@/assets/items-master/arrow-expand.svg";
+import { mapItemApiToDetailView } from "@/pages/items-master/utils/mapItemApiToDetailView";
+import { mapHistoryToTimeline } from "@/pages/items-master/utils/mapHistoryToTimeline";
 import {
   useGetItemMasterById,
   useItemMasterHistory,
-} from "../../services/itemMasterService";
-import { mapItemApiToDetailView } from "../../utils/mapItemApiToDetailView";
-import { mapHistoryToTimeline } from "../../utils/mapHistoryToTimeline";
+} from "@/services/queries/item-master/item-master.queries";
 
 interface DetailViewProps {
   item_id: string;
@@ -88,7 +85,7 @@ const DetailView: React.FC<DetailViewProps> = ({
             size="small"
             sx={{ border: "1px solid #ccc", borderRadius: "8px" }}
           >
-            <Image src={ExpandIcon} alt="Expand" width={18} height={18} />
+            <img src={ExpandIcon} alt="Expand" width={18} height={18} />
           </IconButton>
 
           <IconButton
@@ -114,7 +111,7 @@ const DetailView: React.FC<DetailViewProps> = ({
             overflowY: "auto",
             height: "100%",
             border: "1px solid #e0e0e0",
-            borderRadius: 2,
+            borderRadius: 0,
             bgcolor: "white",
           }}
         >
@@ -140,7 +137,7 @@ const DetailView: React.FC<DetailViewProps> = ({
             overflowY: "auto",
             height: "100%",
             border: "1px solid #e0e0e0",
-            borderRadius: 2,
+            borderRadius: 0,
             bgcolor: "white",
           }}
         >

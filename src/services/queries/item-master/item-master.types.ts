@@ -230,3 +230,27 @@ export interface DeleteSelectedRowResponse {
 export interface DeleteSelectedRowPayload {
   item_ids: string[];
 }
+
+export interface ListCommentsPayload {
+  skip: number;
+  page_size: number;
+}
+
+export interface CommentsResponse {
+  total: number;
+  comments: CommentsResponseList[];
+}
+
+export interface CommentsResponseList {
+  id: string;
+  tenant_id: string;
+  item_id: string;
+  comment_type: string;
+  field_key: string;
+  comment: string;
+  source: string;
+  action: string;
+  action_key: string | null;
+  created_at: string;
+  created_by: CreatedBy;
+}

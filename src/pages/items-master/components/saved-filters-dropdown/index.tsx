@@ -1,5 +1,5 @@
-import BookmarkIcon from "@/public/images/bookmark-02 (1).svg";
-import CloseIcon from "@/public/images/multiplication-sign-white.svg";
+import BookmarkIcon from "@/assets/items-master/bookmark-02 (1).svg";
+import CloseIcon from "@/assets/items-master/multiplication-sign-white.svg";
 import KeyboardArrowDownRoundedIcon from "@mui/icons-material/KeyboardArrowDownRounded";
 import {
   Box,
@@ -11,10 +11,9 @@ import {
   Paper,
   Popper,
 } from "@mui/material";
-import Image from "next/image";
 import React, { useState } from "react";
-import { SavedFiltersListFilters } from "../../helpers/type";
-import { useListSavedFilter } from "../../services/itemMasterService";
+import type { SavedFiltersListFilters } from "../../helpers/types";
+import { useListSavedFilter } from "@/services/queries/item-master/item-master.queries";
 
 type Props = {
   saveFilterJson: React.Dispatch<
@@ -67,7 +66,7 @@ const SavedFiltersDropdown = ({
               fontWeight: 600,
             }}
             startIcon={
-              <Image src={BookmarkIcon} alt="Bookmark File" width={16} />
+              <img src={BookmarkIcon} alt="Bookmark File" width={16} />
             }
             endIcon={
               <Box
@@ -76,7 +75,7 @@ const SavedFiltersDropdown = ({
                   handleClickCloseSavedFilter();
                 }}
               >
-                <Image src={CloseIcon} alt="Log File" width={16} />
+                <img src={CloseIcon} alt="Log File" width={16} />
               </Box>
             }
           >
