@@ -1,5 +1,6 @@
 export const COMMON_ENDPOINTS = {
   getRateTemplate: `/v1/common/template`,
+  globalCurrencies: `/v1/global-currencies`,
 };
 
 export const IMPORT_RATE_ENDPOINTS = {

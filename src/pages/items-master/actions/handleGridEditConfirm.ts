@@ -1,4 +1,3 @@
-
 import { useEditItemMasterItem } from "@/services/queries/item-master/item-master.queries";
 import { openConfirmationModal } from "@/utils/getRequestConfirmationModal";
 import { useQueryClient } from "@tanstack/react-query";
@@ -97,7 +96,7 @@ export const useHandleGridEditConfirm = () => {
           setShowLoader(false);
           showToast?.("Failed to save changes. Please try again.", "warning");
         },
-      }
+      },
     );
   };
 

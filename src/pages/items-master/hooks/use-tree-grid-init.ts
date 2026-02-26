@@ -9,7 +9,7 @@ export const useTreeGridInit = (
 ) => {
   const gridRef = useRef<TGrid | null>(null);
   const created = useRef(false);
-  
+
   useEffect(() => {
     if (!layout || !data) return;
     if (created.current) return;

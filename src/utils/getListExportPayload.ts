@@ -1,12 +1,10 @@
 const getListExportPayload = (modules: string[]) => {
-    const payload = {
-        modules: modules,
-        status: [
-            "completed", "failed"
-        ],
-    }
+  const payload = {
+    modules: modules,
+    status: ["completed", "failed"],
+  };
 
-    return payload;
-}
+  return payload;
+};
 
 export default getListExportPayload;

@@ -25,6 +25,7 @@ export default function Menu(theme: Theme) {
       styleOverrides: {
         root: {
           color: theme.palette.primary.main,
+          backgroundColor: theme.palette.background.paper,
 
           "&:hover": {
             backgroundColor: alpha(theme.palette.primary.main, 0.2),
@@ -33,15 +34,16 @@ export default function Menu(theme: Theme) {
           "&.Mui-selected": {
             backgroundColor: theme.palette.primary.main,
             color: theme.palette.background.paper,
-
-            "&:hover": {
-              backgroundColor: alpha(theme.palette.primary.main, 0.85),
-              color: theme.palette.background.paper,
-            },
           },
 
-          "&.Mui-focusVisible": {
-            backgroundColor: alpha(theme.palette.primary.main, 0.2),
+          "&.Mui-selected.Mui-focusVisible": {
+            backgroundColor: theme.palette.primary.main,
+            color: theme.palette.background.paper,
+          },
+
+          "&.Mui-selected:hover": {
+            backgroundColor: alpha(theme.palette.primary.main, 0.8),
+            color: theme.palette.background.paper,
           },
         },
       },

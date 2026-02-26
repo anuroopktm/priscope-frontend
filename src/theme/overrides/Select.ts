@@ -11,12 +11,8 @@ export default function Select(theme: Theme) {
         select: {
           fontSize: "14px",
           fontWeight: 500,
-          padding: "7px 6px",
-          paddingRight: "40px !important",
-
-          "&:focus": {
-            backgroundColor: "transparent",
-          },
+          // padding: "7px 16px",
+          // paddingRight: "40px !important",
         },
 
         icon: {
@@ -44,10 +40,6 @@ export default function Select(theme: Theme) {
           "&.Mui-disabled": {
             backgroundColor: theme.palette.action.disabledBackground,
             color: theme.palette.text.disabled,
-          },
-
-          "&:before, &:after": {
-            display: "none",
           },
         },
       },
@@ -77,7 +69,7 @@ export default function Select(theme: Theme) {
 
         notchedOutline: {
           borderWidth: 2,
-          borderColor: theme.palette.primary.main,
+          // borderColor: theme.palette.primary.main,
         },
       },
     },

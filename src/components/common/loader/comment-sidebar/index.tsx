@@ -10,13 +10,7 @@ import {
 } from "@mui/material";
 import CloseIcon from "@mui/icons-material/Close";
 import { debounce } from "lodash";
-import {
-  useMemo,
-  useState,
-  useCallback,
-  useRef,
-  useEffect,
-} from "react";
+import { useMemo, useState, useCallback, useRef, useEffect } from "react";
 import SearchIcon from "@/assets/items-master/search-01.svg";
 import { getAvatarColor } from "@/utils/getAvatarColor";
 import type { Comment } from "./types";
@@ -95,7 +89,7 @@ const CommentSidebar = ({
         },
       });
     },
-    [listComments, pageSize]
+    [listComments, pageSize],
   );
 
   const debouncedSearch = useMemo(
@@ -105,7 +99,7 @@ const CommentSidebar = ({
         setPage(0);
         fetchComments(0, val);
       }, 500),
-    [fetchComments]
+    [fetchComments],
   );
 
   useEffect(() => {
@@ -135,7 +129,7 @@ const CommentSidebar = ({
 
       if (node) observer.current.observe(node);
     },
-    [loading, hasMore, page, fetchComments, searchValue]
+    [loading, hasMore, page, fetchComments, searchValue],
   );
 
   useEffect(() => {
@@ -198,12 +192,7 @@ const CommentSidebar = ({
             input: {
               startAdornment: (
                 <InputAdornment position="start">
-                  <img
-                    src={SearchIcon}
-                    alt="search"
-                    width={25}
-                    height={25}
-                  />
+                  <img src={SearchIcon} alt="search" width={25} height={25} />
                 </InputAdornment>
               ),
             },

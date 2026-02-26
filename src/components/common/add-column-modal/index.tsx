@@ -37,10 +37,8 @@ const CreateColumnModal = ({
 
   const handleSubmit = () => {
     const newErrors: typeof errors = {};
-    if (!label.trim())
-      newErrors.label = "Error";
-    if (!dataType)
-      newErrors.dataType = "Error";
+    if (!label.trim()) newErrors.label = "Error";
+    if (!dataType) newErrors.dataType = "Error";
 
     if (Object.keys(newErrors).length > 0) {
       setErrors(newErrors);

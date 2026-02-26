@@ -1,62 +1,59 @@
-import BookOpenIcon from "@/assets/global-header/book-open.svg?react";
-import ItemsMasterIcon from "@/assets/global-header/package.svg?react";
-import SupplierCardIcon from "@/assets/global-header/user-settings.svg?react";
-import { BuildOutlined } from "@mui/icons-material";
 import { Box, Button, MenuItem, Select, Stack } from "@mui/material";
-import { useState } from "react";
+import { useLocation, useNavigate } from "react-router-dom";
+import { HEADER_NAV } from "../constants/header.nav";
 
-export const GlobalHeaderNavigation = () => {
-  const [rateLib, setRateLib] = useState("rate-libraries");
-  const [builder, setBuilder] = useState("builder");
+const GlobalHeaderNavigation = () => {
+  const navigate = useNavigate();
+  const location = useLocation();
 
   return (
     <Stack direction="row" spacing={2} alignItems="center">
-      <Button variant="contained" startIcon={<ItemsMasterIcon />}>
-        Items Master
-      </Button>
+      {HEADER_NAV.map((item) => {
+        const Icon = item.icon;
 
-      <Select
-        value={rateLib}
-        onChange={(e) => setRateLib(e.target.value)}
-        variant="filled"
-        size="small"
-        disableUnderline
-        displayEmpty
-        renderValue={() => (
-          <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
-            <BookOpenIcon />
-            Rate Libraries
-          </Box>
-        )}
-      >
-        <MenuItem value="rate-libraries">Rate Libraries</MenuItem>
-        <MenuItem value="option-1">Option 1</MenuItem>
-      </Select>
+        if (item.type === "button") {
+          return (
+            <Button
+              key={item.label}
+              variant="contained"
+              startIcon={<Icon />}
+              onClick={() => navigate(item.path)}
+            >
+              {item.label}
+            </Button>
+          );
+        }
 
-      <Button variant="contained" startIcon={<SupplierCardIcon />}>
-        Supplier Card
-      </Button>
+        // 🔑 find active child
+        const activeItem = item.items.find(
+          (sub) => sub.path === location.pathname,
+        );
 
-      <Button variant="contained" startIcon={<SupplierCardIcon />}>
-        Customer Card
-      </Button>
-
-      <Select
-        value={builder}
-        onChange={(e) => setBuilder(e.target.value)}
-        variant="filled"
-        disableUnderline
-        displayEmpty
-        renderValue={() => (
-          <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
-            <BuildOutlined fontSize="small" />
-            Builder
-          </Box>
-        )}
-      >
-        <MenuItem value="builder">Builder</MenuItem>
-        <MenuItem value="option-1">Option 1</MenuItem>
-      </Select>
+        return (
+          <Select
+            key={item.label}
+            value={activeItem?.path ?? ""}
+            variant="filled"
+            disableUnderline
+            displayEmpty
+            // onChange={(e) => navigate(e.target.value)}
+            renderValue={() => (
+              <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
+                <Icon />
+                {item.label}
+              </Box>
+            )}
+          >
+            {item.items.map((sub) => (
+              <MenuItem key={sub.path} value={sub.path}>
+                {sub.label}
+              </MenuItem>
+            ))}
+          </Select>
+        );
+      })}
     </Stack>
   );
 };
+
+export default GlobalHeaderNavigation;

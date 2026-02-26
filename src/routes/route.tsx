@@ -5,6 +5,7 @@ import {
   EditUserPage,
   ItemsMasterPage,
   OtpPage,
+  ScenarioBuilderDetailsPage,
   ScenarioBuilderPage,
   SignInPage,
   SignUpPage,
@@ -40,8 +41,17 @@ export const routes = [
       {
         element: <MainLayout />,
         children: [
-          { element: <Navigate to="/scenario-builder" replace />, index: true },
-          { path: "scenario-builder", element: <ScenarioBuilderPage /> },
+          { index: true, element: <Navigate to="/scenario-builder" replace /> },
+          {
+            path: "scenario-builder",
+            children: [
+              { index: true, element: <ScenarioBuilderPage /> },
+              {
+                path: "details/:id",
+                element: <ScenarioBuilderDetailsPage />,
+              },
+            ],
+          },
           {
             path: "user-management",
             children: [

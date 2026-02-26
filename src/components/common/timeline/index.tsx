@@ -133,9 +133,7 @@ export const TimelineDetail: React.FC<TimelineProps> = ({
                         </Typography>
                       ))
                     ) : (
-                      <Typography variant="body2">
-                        Inserted Row
-                      </Typography>
+                      <Typography variant="body2">Inserted Row</Typography>
                     )}
 
                     {item.comment && (

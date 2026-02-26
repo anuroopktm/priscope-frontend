@@ -29,11 +29,7 @@ const ItemDetailCard: React.FC<ItemDetailCardProps> = ({ title, fields }) => {
         {/* Render all fields dynamically */}
         <Stack spacing={1.5}>
           {Object.entries(fields).map(([key, value]) => (
-            <Box
-              key={key}
-              display="flex"
-              alignItems="start"
-            >
+            <Box key={key} display="flex" alignItems="start">
               {/* Key */}
               <Typography
                 variant="body2"
@@ -67,11 +63,7 @@ const ItemDetailCard: React.FC<ItemDetailCardProps> = ({ title, fields }) => {
                   ))}
                 </Stack>
               ) : (
-                <Typography
-                  variant="body2"
-                  fontWeight={600}
-                  color="black"
-                >
+                <Typography variant="body2" fontWeight={600} color="black">
                   {value}
                 </Typography>
               )}
