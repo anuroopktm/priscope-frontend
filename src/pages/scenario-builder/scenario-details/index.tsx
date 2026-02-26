@@ -1,8 +1,10 @@
 import { useGetScenario } from "@/services/queries/scenario-builder/scenario-builder.queries";
 import { Box } from "@mui/material";
+import { useState } from "react";
 import { useParams } from "react-router-dom";
 import { useTreeGridInit } from "../tree-grid/hooks/useTreeGridInit";
 import ActionHeader from "./components/ActionHeader";
+import ItemsMasterDrawer from "./components/ItemsMasterDrawer";
 import { ScenarioDetailsLayout } from "./tree-grid/config/details-layout";
 import { ScenarioDetailsDummyData } from "./tree-grid/utils/dummy-data";
 
@@ -12,6 +14,7 @@ const gridContainerId = "TreeGrid_" + gridId;
 const ScenarioDetailsPage = () => {
   const { id } = useParams<{ id: string }>();
   const { data: scenario } = useGetScenario(id);
+  const [isDrawerOpen, setIsDrawerOpen] = useState(false);
 
   useTreeGridInit(
     gridId,
@@ -31,7 +34,10 @@ const ScenarioDetailsPage = () => {
         bgcolor: "brand.background",
       }}
     >
-      <ActionHeader title={scenario?.name} />
+      <ActionHeader
+        title={scenario?.name}
+        onAddItems={() => setIsDrawerOpen(true)}
+      />
 
       <Box
         sx={{
@@ -64,6 +70,11 @@ const ScenarioDetailsPage = () => {
           />
         </Box>
       </Box>
+
+      <ItemsMasterDrawer
+        open={isDrawerOpen}
+        onClose={() => setIsDrawerOpen(false)}
+      />
     </Box>
   );
 };

@@ -12,7 +12,7 @@ export const ScenarioDetailsLayout = {
     MinTagHeight: "350",
     ColMoving: "1",
     MainColRelative: "0",
-    NoTreeLines: "1",
+    NoTreeLines: "0",
     RelHeight: "1",
     StretchWidth: "1",
     StretchHeight: "1",

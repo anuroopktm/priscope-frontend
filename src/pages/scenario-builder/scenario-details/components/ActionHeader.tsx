@@ -4,7 +4,12 @@ import FileImportIcon from "@/assets/actions/file-import.svg?react";
 import { Box, Button, IconButton, Stack, Typography } from "@mui/material";
 import { useNavigate } from "react-router-dom";
 
-const ActionHeader = ({ title }: { title?: string }) => {
+interface ActionHeaderProps {
+  title?: string;
+  onAddItems?: () => void;
+}
+
+const ActionHeader = ({ title, onAddItems }: ActionHeaderProps) => {
   const navigate = useNavigate();
 
   const handleBack = () => navigate("/scenario-builder");
@@ -54,7 +59,7 @@ const ActionHeader = ({ title }: { title?: string }) => {
         <Button
           variant="contained"
           startIcon={<FileImportIcon />}
-          // onClick={handleNavigate}
+          onClick={onAddItems}
         >
           Add Items
         </Button>
