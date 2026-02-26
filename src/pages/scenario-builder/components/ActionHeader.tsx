@@ -10,7 +10,7 @@ interface ActionHeaderProps {
   onSearch: (value: string) => void;
 }
 
-export const ActionHeader = ({ onSearch }: ActionHeaderProps) => {
+const ActionHeader = ({ onSearch }: ActionHeaderProps) => {
   const [open, setOpen] = useState<boolean>(false);
   const { mutate: createScenario, isPending } = useCreateScenario();
 
@@ -60,3 +60,5 @@ export const ActionHeader = ({ onSearch }: ActionHeaderProps) => {
     </>
   );
 };
+
+export default ActionHeader;

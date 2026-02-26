@@ -1,22 +1,25 @@
 import { useListScenarios } from "@/services/queries/scenario-builder/scenario-builder.queries";
 import { Box } from "@mui/material";
 import { useEffect, useMemo, useState } from "react";
-import { ActionHeader } from "./components/ActionHeader";
-import DeleteConfirmModal from "./components/DeleteConfirmModal";
-import { ScenarioGridLayout } from "./tree-grid/config/layout";
-import { useTreeGridInit } from "./tree-grid/hooks/useTreeGridInit";
-import { mapScenariosToGridBody } from "./tree-grid/utils/data-mapper";
+import { useNavigate } from "react-router-dom";
+import ActionHeader from "../components/ActionHeader";
+import DeleteConfirmModal from "../components/DeleteConfirmModal";
+import { ScenarioGridLayout } from "../tree-grid/config/layout";
+import { useTreeGridInit } from "../tree-grid/hooks/useTreeGridInit";
+import { mapScenariosToGridBody } from "../tree-grid/utils/data-mapper";
 
 declare global {
   interface Window {
     handleTreeGridDelete?: (id: string) => void;
+    handleTreeGridEdit?: (id: string) => void;
   }
 }
 
 const gridId = "ScenarioGrid";
 const gridContainerId = "TreeGrid_" + gridId;
 
-const ScenarioBuilderPage = () => {
+const ScenarioListingPage = () => {
+  const navigate = useNavigate();
   const [searchTerm, setSearchTerm] = useState<string | undefined>(undefined);
   const [deleteModalOpen, setDeleteModalOpen] = useState(false);
   const [selectedRowId, setSelectedRowId] = useState<string | null>(null);
@@ -34,22 +37,22 @@ const ScenarioBuilderPage = () => {
       setDeleteModalOpen(true);
     };
 
+    window.handleTreeGridEdit = (id: string) => {
+      navigate(`/scenario-builder/details/${id}`);
+    };
+
     return () => {
       delete window.handleTreeGridDelete;
+      delete window.handleTreeGridEdit;
     };
-  }, []);
+  }, [navigate]);
 
   const gridData = useMemo(() => {
     if (!scenariosData) return null;
     return mapScenariosToGridBody(scenariosData?.scenarios);
   }, [scenariosData]);
 
-  const gridRef = useTreeGridInit(
-    gridId,
-    gridContainerId,
-    ScenarioGridLayout,
-    gridData,
-  );
+  useTreeGridInit(gridId, gridContainerId, ScenarioGridLayout, gridData);
 
   const handleDeleteConfirm = () => {
     console.log("Confirm Delete:", selectedRowId);
@@ -109,4 +112,4 @@ const ScenarioBuilderPage = () => {
   );
 };
 
-export default ScenarioBuilderPage;
+export default ScenarioListingPage;

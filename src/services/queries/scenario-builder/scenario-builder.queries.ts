@@ -4,6 +4,7 @@ import type { AxiosError } from "axios";
 import type {
   CreateScenarioRequest,
   CreateScenarioResponse,
+  ScenarioDetail,
   SearchScenariosRequest,
   SearchScenariosResponse,
 } from "./scenario-builder.types";
@@ -46,6 +47,19 @@ export const useListScenarios = (payload: SearchScenariosRequest) => {
       );
       return data;
     },
+    refetchOnWindowFocus: false,
+  });
+};
+export const useGetScenario = (scenarioId: string | undefined) => {
+  return useQuery<ScenarioDetail, AxiosError<{ detail: string | string[] }>>({
+    queryKey: ["get-scenario", scenarioId],
+    queryFn: async () => {
+      const { data } = await axiosInstance.get<ScenarioDetail>(
+        `/v1/scenario-builder/scenarios/${scenarioId}`,
+      );
+      return data;
+    },
+    enabled: !!scenarioId,
     refetchOnWindowFocus: false,
   });
 };

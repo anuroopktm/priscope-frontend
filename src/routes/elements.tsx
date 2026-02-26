@@ -4,7 +4,10 @@ export const SignInPage = lazy(() => import("@/pages/auth/sign-in"));
 export const SignUpPage = lazy(() => import("@/pages/auth/sign-up"));
 export const OtpPage = lazy(() => import("@/pages/auth/otp"));
 export const ScenarioBuilderPage = lazy(
-  () => import("@/pages/scenario-builder"),
+  () => import("@/pages/scenario-builder/list-scenarios"),
+);
+export const ScenarioBuilderDetailsPage = lazy(
+  () => import("@/pages/scenario-builder/scenario-details"),
 );
 export const UserManagementListUsersPage = lazy(
   () => import("@/pages/user-management/list-users"),

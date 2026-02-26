@@ -36,6 +36,15 @@ export interface Scenario {
   updated_at: string;
 }
 
+export interface ScenarioDetail extends Scenario {
+  tenant_id: string;
+  base_currency: string;
+  forked_from: string | null;
+  grid_data: Record<string, any>;
+  customers: CustomerPayload[];
+  updated_by: Record<string, any>;
+}
+
 export interface SearchScenariosResponse {
   total: number;
   scenarios: Scenario[];

@@ -56,7 +56,7 @@ export const ScenarioGridLayout = {
     {
       Name: "Status",
       Type: "Html",
-      RelWidth: 1,
+      RelWidth: 0,
       CanEdit: 0,
       CanFilter: 1,
     },
