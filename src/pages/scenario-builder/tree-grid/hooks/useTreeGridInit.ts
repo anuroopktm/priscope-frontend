@@ -17,50 +17,64 @@ export const useTreeGridInit = (
 
   // Create grid once
   useEffect(() => {
-    console.log(
-      "useTreeGridInit: useEffect [layout, data, gridId, containerId]",
-      { layout, data, gridId, containerId },
-    );
+    const initGrid = () => {
+      if (!layout || !data) {
+        console.log("useTreeGridInit: Missing layout or data, skipping init");
+        return;
+      }
+      if (created.current) {
+        console.log("useTreeGridInit: Grid already created, skipping init");
+        return;
+      }
+      if (!window.TreeGrid) {
+        console.error("useTreeGridInit: window.TreeGrid is NOT available!");
+        return;
+      }
 
-    if (!layout || !data) {
-      console.log("useTreeGridInit: Missing layout or data, skipping init");
-      return;
-    }
-    if (created.current) {
-      console.log("useTreeGridInit: Grid already created, skipping init");
-      return;
-    }
-    if (!window.TreeGrid) {
-      console.error("useTreeGridInit: window.TreeGrid is NOT available!");
-      return;
-    }
+      const container = document.getElementById(containerId);
+      if (!container) {
+        console.warn(
+          `useTreeGridInit: Container #${containerId} not found in DOM yet. Delaying...`,
+        );
+        return;
+      }
 
-    const source = {
-      id: gridId,
-      Layout: { Data: layout },
-      Data: { Data: data },
-      Debug: { Check: 1 },
+      const source = {
+        id: gridId,
+        Layout: { Data: layout },
+        Data: { Data: data },
+        Debug: { Check: 1 },
+      };
+
+      console.log(
+        "useTreeGridInit: Calling window.TreeGrid with source:",
+        source,
+      );
+      try {
+        const grid = window.TreeGrid(source, containerId);
+        console.log("useTreeGridInit: window.TreeGrid returned:", grid);
+        gridRef.current = grid;
+        created.current = true;
+
+        onInit?.(grid);
+      } catch (error) {
+        console.error("useTreeGridInit: Error creating TreeGrid:", error);
+      }
     };
 
-    console.log(
-      "useTreeGridInit: Calling window.TreeGrid with source:",
-      source,
-    );
-    try {
-      const grid = window.TreeGrid(source, containerId);
-      console.log("useTreeGridInit: window.TreeGrid returned:", grid);
-      gridRef.current = grid;
-      created.current = true;
-
-      onInit?.(grid);
-    } catch (error) {
-      console.error("useTreeGridInit: Error creating TreeGrid:", error);
-    }
+    // Use a small timeout to ensure DOM is ready and previous grids are disposed
+    const timer = setTimeout(initGrid, 100);
 
     return () => {
+      clearTimeout(timer);
       if (gridRef.current) {
         console.log("useTreeGridInit: Disposing grid", gridId);
-        gridRef.current.Dispose();
+        try {
+          // Force immediate disposal to clear global memory
+          gridRef.current.Dispose();
+        } catch (e) {
+          console.error("useTreeGridInit: Error disposing grid", e);
+        }
         gridRef.current = null;
         created.current = false;
       }

@@ -4,7 +4,7 @@ import FileImportIcon from "@/assets/actions/file-import.svg?react";
 import { Box, Button, IconButton, Stack, Typography } from "@mui/material";
 import { useNavigate } from "react-router-dom";
 
-const ActionHeader = ({ title }: { title: string }) => {
+const ActionHeader = ({ title }: { title?: string }) => {
   const navigate = useNavigate();
 
   const handleBack = () => navigate("/scenario-builder");
@@ -31,9 +31,11 @@ const ActionHeader = ({ title }: { title: string }) => {
           <ArrowBackIcon />
         </IconButton>
 
-        <Typography variant="subtitle1" sx={{ color: "background.default" }}>
-          {title}
-        </Typography>
+        {title && (
+          <Typography variant="subtitle1" sx={{ color: "background.default" }}>
+            {title}
+          </Typography>
+        )}
       </Box>
       <Stack direction="row" spacing={1} alignItems="center">
         <Button

@@ -1,5 +1,5 @@
 export const renderActionsCell = (id: string) => {
-  return `<div style="display: flex; gap: 12px; align-items: center; justify-content: center;">
+  return `<div style="display: flex; gap: 10px; align-items: center; justify-content: center;">
     <button 
       style="background-color: transparent; border: none; cursor: pointer; padding: 4px; border-radius: 4px; transition: background-color 0.2s;"
       onmouseover="this.style.backgroundColor='#f0f0f0'"

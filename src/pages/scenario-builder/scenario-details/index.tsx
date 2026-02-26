@@ -1,30 +1,24 @@
 import { useGetScenario } from "@/services/queries/scenario-builder/scenario-builder.queries";
-import { Box, CircularProgress } from "@mui/material";
+import { Box } from "@mui/material";
 import { useParams } from "react-router-dom";
+import { useTreeGridInit } from "../tree-grid/hooks/useTreeGridInit";
 import ActionHeader from "./components/ActionHeader";
+import { ScenarioDetailsLayout } from "./tree-grid/config/details-layout";
+import { ScenarioDetailsDummyData } from "./tree-grid/utils/dummy-data";
 
 const gridId = "ScenarioGridDetails";
 const gridContainerId = "TreeGrid_" + gridId;
 
 const ScenarioDetailsPage = () => {
   const { id } = useParams<{ id: string }>();
-  const { data: scenario, isLoading } = useGetScenario(id);
+  const { data: scenario } = useGetScenario(id);
 
-  if (isLoading) {
-    return (
-      <Box
-        sx={{
-          display: "flex",
-          justifyContent: "center",
-          alignItems: "center",
-          height: "100%",
-          bgcolor: "brand.background",
-        }}
-      >
-        <CircularProgress />
-      </Box>
-    );
-  }
+  useTreeGridInit(
+    gridId,
+    gridContainerId,
+    ScenarioDetailsLayout,
+    ScenarioDetailsDummyData,
+  );
 
   return (
     <Box
@@ -36,7 +30,7 @@ const ScenarioDetailsPage = () => {
         bgcolor: "brand.background",
       }}
     >
-      <ActionHeader title={scenario?.name || `Scenario Details - ${id}`} />
+      <ActionHeader title={scenario?.name} />
 
       <Box
         sx={{
@@ -45,6 +39,7 @@ const ScenarioDetailsPage = () => {
           p: 2,
           display: "flex",
           flexDirection: "column",
+          position: "relative",
         }}
       >
         <Box
