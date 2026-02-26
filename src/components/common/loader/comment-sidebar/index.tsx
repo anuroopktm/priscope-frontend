@@ -64,7 +64,6 @@ const CommentSidebar = <T,>({
 
   const observer = useRef<IntersectionObserver | null>(null);
 
-  // ✅ API call to load comments
   const fetchComments = useCallback(
     async (pageNum = 0, search = "") => {
       const payload: any = {

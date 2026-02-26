@@ -45,6 +45,7 @@ interface FilterProps {
   onClearAllFilters?: () => void;
   applySavedFilterToFilterRow: (filter: Record<string, string[]>) => void;
   setSelectedExport: React.Dispatch<React.SetStateAction<boolean>>;
+  onToggleDrawer: () => void;
 }
 
 export const ActionHeader = ({
@@ -68,6 +69,7 @@ export const ActionHeader = ({
   onClearAllFilters,
   applySavedFilterToFilterRow,
   setSelectedExport,
+  onToggleDrawer,
 }: FilterProps) => {
   const [openDeleteModal, setOpenDeleteModal] = useState(false);
   const [filterName, setFilterName] = useState("");
@@ -104,6 +106,10 @@ export const ActionHeader = ({
   const handleExportData = () => {
     setSelectedExport(true);
     onHandleExport();
+  };
+  const handleToggle = () => {
+    // setShowFilter((prev) => !prev);
+    onToggleDrawer?.();
   };
 
   const handleSaveFilterModal = (label: string) => {
@@ -282,7 +288,7 @@ export const ActionHeader = ({
               </Button>
 
               <Button
-              // onClick={handleToggle}
+              onClick={handleToggle}
               >
                 <img src={CommentIcon} alt="Comments" width={16} />
               </Button>

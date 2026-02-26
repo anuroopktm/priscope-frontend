@@ -230,3 +230,15 @@ export interface DeleteSelectedRowResponse {
 export interface DeleteSelectedRowPayload {
   item_ids: string[];
 }
+
+export interface TreeGridState {
+  showSavePopover: boolean;
+  popoverPosition: { top: number; left: number };
+  changedCell: {
+    row: TRow;
+    col: string;
+    value: any;
+    oldValue: any;
+  } | null;
+}
+export type OpenPanel = "comments" | "detail-view" | null;

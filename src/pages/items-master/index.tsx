@@ -6,7 +6,6 @@ import RequestsModal from "@/components/common/requests-modal";
 import {
   useAddBulkInsertAdminRequest,
   useDeleteItemMasterRow,
-  useEditItemMasterItem,
   useExportItemMasterRow,
   useListComments,
   useListHeaders,
@@ -21,13 +20,9 @@ import {
   buildItemMasterTreeGridBody,
   buildItemMasterTreeGridCols,
   convertSavedFilter,
-  getEditCellValueAdminApproval,
   getItemMasterLayout,
 } from "./helpers/itemMasterTreeGridHelperFunction";
 import type {
-  ExportItemMasterRowPayload,
-  itemMasterBodyResponseItems,
-  itemMasterBodyResponseItemsField,
   TreeGridBody,
   TreeGridHeader,
   TreeGridLayout,
@@ -36,13 +31,9 @@ import { useTreeGridInit } from "./hooks/use-tree-grid-init";
 import { handleFilterChange } from "./components/tree-grid/Filter/FilterChange";
 import { handleSelected } from "./components/tree-grid/RowSelection/RowSelection";
 import { useGetExportedFile } from "@/services/queries/common/common.queries";
-import type { DeleteSelectedRowPayload, HeaderList } from "./types/types";
-import { deleteSeletectedRows } from "./components/tree-grid/RowSelection/DeleteRowSelection";
 import { handleValueChanged } from "./components/tree-grid/CellValue/handleValueChanged";
 import TableSavePopover from "./components/table-save-popover";
 import { hasItemMasterPrivileges } from "./helpers/itemMasterHelpers";
-import { openConfirmationModal } from "@/utils/getRequestConfirmationModal";
-import { useQueryClient } from "@tanstack/react-query";
 import RequestSuccessDialog from "@/components/common/request-notification";
 import FileDetailsModal from "@/components/file-detail-modal";
 import { FILE_FILTER_OPTIONS } from "@/constants/file-modal.constants";
@@ -60,18 +51,10 @@ import CommentSidebar from "@/components/common/loader/comment-sidebar";
 import { focusCell, focusRow } from "./components/tree-grid/focus/FocusEvents";
 import DetailView from "./components/detail-view";
 import { DetailsModal } from "./components/detail-view-modal";
+import MainContentContainer from "@/components/common/main-content-container";
+import { useHandleGridEditConfirm } from "./actions/handleGridEditConfirm";
+import type { HeaderList, OpenPanel, TreeGridState } from "./types/types";
 
-export interface TreeGridState {
-  showSavePopover: boolean;
-  popoverPosition: { top: number; left: number };
-  changedCell: {
-    row: TRow;
-    col: string;
-    value: any;
-    oldValue: any;
-  } | null;
-}
-type OpenPanel = "comments" | "detail-view" | null;
 const ItemsMasterPage = () => {
   const [searchQuery, setSearchQuery] = useState("");
   const [filter, setFilter] = useState<Record<string, string[]>>({});
@@ -111,6 +94,7 @@ const ItemsMasterPage = () => {
   const [openPanel, setOpenPanel] = useState<OpenPanel>(null);
   const [detailedViewId, setDetailedViewId] = useState<string>("");
   const [isDetailViewModalOpen, setIsDetailViewModalOpen] = useState(false);
+  const { handleGridEditConfirm } = useHandleGridEditConfirm();
 
   const [
     requestSuccessNotficationVisible,
@@ -145,9 +129,6 @@ const ItemsMasterPage = () => {
 
   const { mutate: deleteItemMasterRow, isPending: deleteItemMasterRowPending } =
     useDeleteItemMasterRow();
-  const { mutateAsync: mutateItemMasterItem } = useEditItemMasterItem();
-
-  const queryClient = useQueryClient();
 
   const { hasEditItemMasterPrivilege, hasAddItemMasterPrivilege } =
     hasItemMasterPrivileges(privileges);
@@ -157,7 +138,7 @@ const ItemsMasterPage = () => {
     isPending: isitemMasterBulkInsertAdminApprovalPending,
   } = useAddBulkInsertAdminRequest();
 
-  const { mutateAsync: lisComments, isPending: isCommentListingPending } =
+  const { mutateAsync: listComments, isPending: isCommentListingPending } =
     useListComments();
 
   const [showFilesModal, setShowFilesModal] = useState<boolean>(false);
@@ -333,6 +314,86 @@ const ItemsMasterPage = () => {
     addRowsToGrid(dataToAdd?.Body[0]);
   }, [itemMasterDataList, listHeaderData]);
 
+  const handleGridReady = useCallback((grid: TGrid) => {
+    console.log("handleGridReady");
+  }, []);
+
+  const gridInstance = useTreeGridInit(
+    gridId,
+    containerId,
+    layout,
+    data,
+    handleGridReady,
+  );
+
+  const handleSkuUpcClick = (rowId: string, col: string, value: any) => {
+    const Grid = gridInstance.current;
+    if (Grid) {
+      const gridRow = Grid.GetRowById(rowId);
+      if (!gridRow || gridRow.Kind !== "Data") return;
+    }
+    setOpenPanel((prev) => {
+      setDetailedViewId(rowId);
+      if (prev !== "detail-view") {
+        return "detail-view";
+      }
+      return prev;
+    });
+  };
+
+  const handleSkuUpcClickRef =
+    useRef<(rowId: string, col: string, value: any) => void>(handleSkuUpcClick);
+
+  useEffect(() => {
+    handleSkuUpcClickRef.current = handleSkuUpcClick;
+  });
+  useEffect(() => {
+    (window as any).onSkuUpcClick = (
+      rowId: string,
+      col: string,
+      value: any,
+    ) => {
+      handleSkuUpcClickRef.current(rowId, col, value);
+    };
+    return () => {
+      delete (window as any).onSkuUpcClick;
+    };
+  }, []);
+
+  useEffect(() => {
+    window.Grids ??= {};
+    const prev = window.Grids.OnGetHtmlValue;
+
+    window.Grids.OnGetHtmlValue = (grid: any, row: any, col: any, val: any) => {
+      if (grid.id !== gridId) {
+        return prev ? prev(grid, row, col, val) : val;
+      }
+
+      if (row?.Kind === "Header") {
+        return prev ? prev(grid, row, col, val) : val;
+      }
+
+      if ((col === "SKU" || col === "UPC") && val) {
+        const safeVal = String(val).replace(/"/g, "&quot;");
+        return `<a 
+        href="javascript:void(0)" 
+        onclick="window.onSkuUpcClick('${row.id}', '${col}', '${safeVal}')"
+        style="color: inherit; text-decoration: underline; cursor: pointer;"
+      >${safeVal}</a>`;
+      }
+
+      return prev ? prev(grid, row, col, val) : val;
+    };
+
+    return () => {
+      if (prev) {
+        window.Grids.OnGetHtmlValue = prev;
+      } else {
+        delete window.Grids.OnGetHtmlValue;
+      }
+    };
+  }, [gridId]);
+
   const handleExport = () => {
     handleItemMasterExport({
       selectedExport,
@@ -346,6 +407,7 @@ const ItemsMasterPage = () => {
       DownloadExportFile,
     });
   };
+
   const onHandleValueChanged = (
     grid: TGrid,
     row: TRow,
@@ -376,92 +438,31 @@ const ItemsMasterPage = () => {
     });
   };
 
-  const handleGridEditConfirm = async (
+  const onCellEditConfirm = (
     row: TRow,
     col: string,
     value: string,
     oldValue: string,
-    comment?: string | null,
+    comment?: string,
   ) => {
-    if (value === oldValue) return;
-    if (!hasEditItemMasterPrivilege) {
-      const result = await openConfirmationModal("edit", confirm);
-      if (result) {
-        handleEditCellAdminRequest({
-          row,
-          col,
-          value,
-          oldValue,
-          comment,
-          itemMasterDataList,
-          itemMasterBulkInsertAdminApproval,
-          setShowLoader,
-          setRequestSuccessNotficationVisible,
-          showToast,
-        });
-      } else {
-        const Grid = gridInstance.current;
-        if (Grid) {
-          const gridRow = Grid.GetRowById(row.id);
-          if (gridRow) Grid.SetValue(gridRow, col, oldValue, 1);
-        }
-      }
-      return;
-    }
-    const item_id = row?.id;
-    if (!item_id) return;
-    const allItems: itemMasterBodyResponseItems[] =
-      itemMasterDataList?.pages.flatMap((page) => page.items) || [];
-    const finalPayload: itemMasterBodyResponseItems | undefined = allItems.find(
-      (item: any) => item.id === item_id,
-    );
-    if (!finalPayload) return;
-    if (finalPayload.attributes?.[col]) {
-      finalPayload.attributes[col].value = value;
-    } else if (
-      typeof (finalPayload as any)[col] === "object" &&
-      (finalPayload as any)[col]?.value !== undefined
-    ) {
-      (
-        finalPayload as unknown as Record<
-          string,
-          itemMasterBodyResponseItemsField
-        >
-      )[col].value = value;
-    } else {
-      // Plain primitive field
-      (finalPayload as any)[col] = value;
-    }
-    const commentsPayload =
-      comment && comment.trim().length > 0
-        ? [
-            {
-              comment_type: "field",
-              item_field_key: col,
-              comment: comment,
-            },
-          ]
-        : undefined;
-    const finalPayloadWithMetadata = {
-      data: finalPayload,
-      comments: commentsPayload,
-    };
-    setShowLoader(true);
-    mutateItemMasterItem(
-      { item_id, payload: finalPayloadWithMetadata },
-      {
-        onSuccess: () => {
-          setShowLoader(false);
-          showToast("Item updated successfully!", "success");
-          queryClient.invalidateQueries({ queryKey: ["item-master-history"] });
-        },
-        onError: () => {
-          setShowLoader(false);
-          showToast("Failed to save changes. Please try again.", "warning");
-        },
-      },
-    );
+    handleGridEditConfirm({
+      row,
+      col,
+      value,
+      oldValue,
+      comment,
+      hasEditItemMasterPrivilege,
+      confirm,
+      gridInstance,
+      itemMasterDataList,
+      itemMasterBulkInsertAdminApproval,
+      setShowLoader,
+      setRequestSuccessNotficationVisible,
+      showToast,
+      handleEditCellAdminRequest,
+    });
   };
+
   const handleLoadMore = () => {
     if (hasNextPageRef.current && !isFetchingNextPageRef.current) {
       fetchNextPage();
@@ -492,10 +493,6 @@ const ItemsMasterPage = () => {
     // gridInstance.current?.setLoading(false);
   };
 
-  const handleGridReady = useCallback((grid: TGrid) => {
-    console.log("handleGridReady");
-  }, []);
-
   const handleUploadComplete = (data: any) => {
     console.log("Import completed:", data);
   };
@@ -503,14 +500,6 @@ const ItemsMasterPage = () => {
   const handleViewLog = () => {
     console.log("View log clicked");
   };
-
-  const gridInstance = useTreeGridInit(
-    gridId,
-    containerId,
-    layout,
-    data,
-    handleGridReady,
-  );
 
   const onSelected = (grid: TGrid) => {
     handleSelected(grid, setSelectedRows);
@@ -523,7 +512,7 @@ const ItemsMasterPage = () => {
     }
     const { row, col, value, oldValue } = state.changedCell;
 
-    handleGridEditConfirm?.(row, col, value, oldValue, comment);
+    onCellEditConfirm?.(row, col, value, oldValue, comment);
     setState((prev) => ({
       ...prev,
       showSavePopover: false,
@@ -585,20 +574,9 @@ const ItemsMasterPage = () => {
     setIsDetailViewModalOpen(true);
   }, []);
 
-  const handleSkuUpcClick = (rowId: string, col: string, value: any) => {
-    const Grid = gridInstance.current;
-    if (Grid) {
-      const gridRow = Grid.GetRowById(rowId);
-      if (!gridRow || gridRow.Kind !== "Data") return;
-    }
-    setOpenPanel((prev) => {
-      setDetailedViewId(rowId);
-      if (prev !== "detail-view") {
-        return "detail-view";
-      }
-      return prev;
-    });
-  };
+  const togglePanel = useCallback((panel: OpenPanel) => {
+    setOpenPanel((prev) => (prev === panel ? null : panel));
+  }, []);
 
   return (
     <Box
@@ -631,8 +609,8 @@ const ItemsMasterPage = () => {
         saveFilterJson={setFilter}
         onClearAllFilters={handleClearAllFilters}
         applySavedFilterToFilterRow={applySavedFilterToFilterRow}
+        onToggleDrawer={() => togglePanel("comments")}
       />
-
       {isDetailViewModalOpen && (
         <DetailsModal
           isOpen={isDetailViewModalOpen}
@@ -641,11 +619,10 @@ const ItemsMasterPage = () => {
           item_id={detailedViewId}
         />
       )}
-
       {openReqestModal && (
         <RequestsModal
           onClose={setOpenRequestModal}
-          targetModule={"item_master"}
+          targetModule="item_master"
         />
       )}
       {showFilesModal && (
@@ -657,21 +634,65 @@ const ItemsMasterPage = () => {
           filterOptions={FILE_FILTER_OPTIONS}
         />
       )}
-      <Box
-        sx={{
-          flex: 1,
-          p: 2,
-        }}
-      >
-        <Box
-          id={containerId}
-          sx={{
-            width: "100%",
-            height: "calc(100vh - 144px)",
-          }}
-        />
-      </Box>
 
+      <Box sx={{ display: "flex", position: "relative", padding: 2 }}>
+        <MainContentContainer hasFilter={true}>
+          <Box sx={{ flex: 1, padding: 2, minWidth: 0 }}>
+            <Box
+              id={containerId}
+              sx={{ width: "100%", height: "calc(100vh - 144px)" }}
+            />
+          </Box>
+        </MainContentContainer>
+        <Box
+          sx={{
+            width: openPanel === "comments" ? 300 : 0,
+            transition: "width 0.3s ease",
+            overflow: "hidden",
+            height: "calc(100vh - 147px)",
+            marginLeft: openPanel === "comments" ? 1 : 0,
+            background: "white",
+            color: "black",
+            display: "flex",
+            flexDirection: "column",
+            borderRadius: "8px 0 0 8px",
+          }}
+        >
+          {openPanel === "comments" && (
+            <CommentSidebar
+              isOpen={openPanel}
+              onClose={() => setOpenPanel(null)}
+              listComments={listComments}
+              isLoading={isCommentListingPending}
+              onCommentSelect={handleCommentSelect}
+            />
+          )}
+        </Box>
+
+        <Box
+          sx={{
+            width: openPanel === "detail-view" ? 406 : 0,
+            transition: "width 0.3s ease",
+            overflow: "hidden",
+            height: "calc(100vh - 147px)",
+            marginLeft: openPanel === "detail-view" ? 1 : 0,
+            background: "white",
+            color: "black",
+            display: "flex",
+            flexDirection: "column",
+            borderRadius: "8px 0 0 8px",
+          }}
+        >
+          {openPanel === "detail-view" && (
+            <DetailView
+              item_id={detailedViewId}
+              timelineTitle={"Timeline"}
+              onClose={() => setOpenPanel(null)}
+              onExpandClick={handleExpandClick}
+            />
+          )}
+        </Box>
+      </Box>
       {showLoader && <LoaderOverlay />}
       <CompleteUploadFlow
         open={showUploadFlow}
@@ -686,56 +707,6 @@ const ItemsMasterPage = () => {
           setNotificationOpen={setRequestSuccessNotficationVisible}
         />
       )}
-      <Box
-        sx={{
-          width: openPanel === "comments" ? 300 : 0,
-          transition: "width 0.3s ease",
-          overflow: "hidden",
-          height: "calc(100vh - 147px)",
-          marginLeft: openPanel === "comments" ? 1 : 0,
-          background: "white",
-          color: "black",
-          display: "flex",
-          flexDirection: "column",
-          borderRadius: "8px 0 0 8px",
-        }}
-      >
-        {openPanel === "comments" && (
-          <CommentSidebar
-            isOpen={openPanel}
-            onClose={() => setOpenPanel(null)}
-            listComments={lisComments}
-            isLoading={isCommentListingPending}
-            onCommentSelect={(comment) => {
-              handleCommentSelect(comment);
-              console.log("commant selcted", comment);
-            }}
-          />
-        )}
-      </Box>
-      <Box
-        sx={{
-          width: openPanel === "detail-view" ? 406 : 0,
-          transition: "width 0.3s ease",
-          overflow: "hidden",
-          height: "calc(100vh - 147px)",
-          marginLeft: openPanel === "detail-view" ? 1 : 0,
-          background: "white",
-          color: "black",
-          display: "flex",
-          flexDirection: "column",
-          borderRadius: "8px 0 0 8px",
-        }}
-      >
-        {openPanel === "detail-view" && (
-          <DetailView
-            item_id={detailedViewId}
-            timelineTitle={"Timeline"}
-            onClose={() => setOpenPanel(null)}
-            onExpandClick={handleExpandClick}
-          />
-        )}
-      </Box>
       {state.showSavePopover && (
         <div
           style={{
