@@ -5,13 +5,11 @@ import { renderStatusBadge } from "../cells/status-badge.cell";
 export const mapScenariosToGridRows = (scenarios: Scenario[] = []) => {
   return scenarios.map((s) => ({
     id: s.id,
-    SKU: s.name,
-    UPC: s.id.slice(0, 8).toUpperCase(),
-    Description: s.sync_status || "N/A",
-    Supplier: s.created_by?.name || "N/A",
-    Customer: "N/A",
+    Name: s.created_by?.name || "N/A",
+    Email: s.created_by?.email || "N/A",
+    Label: s.name || "N/A",
     Status: renderStatusBadge(s.status),
-    Actions: renderActionsCell(),
+    Actions: renderActionsCell(String(s.id)),
   }));
 };
 

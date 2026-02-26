@@ -33,29 +33,22 @@ export const ScenarioGridLayout = {
   },
   Cols: [
     {
-      Name: "SKU",
+      Name: "Name",
       Type: "Text",
       RelWidth: 1,
       CanEdit: 1,
       CanFilter: 1,
     },
     {
-      Name: "UPC",
+      Name: "Email",
       Type: "Text",
       RelWidth: 1,
       CanEdit: 1,
       CanFilter: 1,
     },
     {
-      Name: "Description",
+      Name: "Label",
       Type: "Text",
-      RelWidth: 1,
-      CanEdit: 1,
-      CanFilter: 1,
-    },
-    {
-      Name: "Supplier",
-      Type: "Html",
       RelWidth: 1,
       CanEdit: 1,
       CanFilter: 1,
