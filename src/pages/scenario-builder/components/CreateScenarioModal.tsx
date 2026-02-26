@@ -62,8 +62,13 @@ const CreateScenarioModal = ({
     reset();
   };
 
+  const handleClose = (_e: {}, reason: "backdropClick" | "escapeKeyDown") => {
+    if (reason === "backdropClick") return;
+    onClose();
+  };
+
   return (
-    <Dialog open={open} onClose={onClose} fullWidth maxWidth="sm">
+    <Dialog open={open} onClose={handleClose} fullWidth maxWidth="sm">
       <Typography variant="h6" sx={{ color: "primary.main", px: 3, py: 2 }}>
         Scenario Builder
       </Typography>
@@ -148,7 +153,7 @@ const CreateScenarioModal = ({
             size="medium"
             type="submit"
             variant="contained"
-            disabled={isLoading}
+            loading={isLoading}
           >
             Done
           </Button>

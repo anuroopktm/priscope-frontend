@@ -17,7 +17,7 @@ export default function Button(theme: Theme) {
           style: {
             borderWidth: 1,
             borderStyle: "solid",
-            borderColor: theme.palette.primary.main,
+            borderColor: "transparent",
             color: theme.palette.common.white,
             backgroundColor: theme.palette.primary.main,
             boxShadow: "none",

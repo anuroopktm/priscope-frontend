@@ -69,7 +69,7 @@ export default function Select(theme: Theme) {
 
         notchedOutline: {
           borderWidth: 2,
-          borderColor: theme.palette.primary.main,
+          // borderColor: theme.palette.primary.main,
         },
       },
     },

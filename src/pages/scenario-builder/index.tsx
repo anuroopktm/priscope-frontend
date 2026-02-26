@@ -7,7 +7,6 @@ import { ScenarioGridLayout } from "./tree-grid/config/layout";
 import { useTreeGridInit } from "./tree-grid/hooks/useTreeGridInit";
 import { mapScenariosToGridBody } from "./tree-grid/utils/data-mapper";
 
-// Extend Window interface for the global handler
 declare global {
   interface Window {
     handleTreeGridDelete?: (id: string) => void;
@@ -22,14 +21,13 @@ const ScenarioBuilderPage = () => {
   const [deleteModalOpen, setDeleteModalOpen] = useState(false);
   const [selectedRowId, setSelectedRowId] = useState<string | null>(null);
 
-  const { data: scenariosData, refetch } = useListScenarios({
+  const { data: scenariosData } = useListScenarios({
     search: searchTerm,
     filter: {},
     page_size: 20,
     skip: 0,
   });
 
-  // Global handler for TreeGrid delete action
   useEffect(() => {
     window.handleTreeGridDelete = (id: string) => {
       setSelectedRowId(id);
@@ -55,8 +53,6 @@ const ScenarioBuilderPage = () => {
 
   const handleDeleteConfirm = () => {
     console.log("Confirm Delete:", selectedRowId);
-    // TODO: Add actual delete API call here
-    // Example: mutation.mutate(selectedRowId);
     setDeleteModalOpen(false);
   };
 

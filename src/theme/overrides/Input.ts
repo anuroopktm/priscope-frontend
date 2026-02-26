@@ -17,6 +17,7 @@ export default function Input(theme: Theme) {
           backgroundColor: theme.palette.common.white,
           transition: theme.transitions.create(["border-color", "box-shadow"]),
           "& .MuiOutlinedInput-notchedOutline": {
+            borderWidth: 0.5,
             borderColor: theme.palette.brand.border,
           },
 
