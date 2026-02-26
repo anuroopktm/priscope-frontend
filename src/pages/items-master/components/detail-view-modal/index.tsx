@@ -1,5 +1,3 @@
-"use client";
-
 import React from "react";
 import {
   Dialog,
@@ -11,15 +9,15 @@ import {
 } from "@mui/material";
 import { GridCloseIcon } from "@mui/x-data-grid";
 
-import ItemDetailCard from "@/shared/components/item-detail";
-import TimelineDetail from "@/shared/components/timeline";
+import ItemDetailCard from "@/components/common/item-detail";
+import TimelineDetail from "@/components/common/timeline";
 
 import {
   useGetItemMasterById,
   useItemMasterHistory,
-} from "../../services/itemMasterService";
-import { mapItemApiToDetailView } from "../../utils/mapItemApiToDetailView";
-import { mapHistoryToTimeline } from "../../utils/mapHistoryToTimeline";
+} from "@/services/queries/item-master/item-master.queries";
+import { mapItemApiToDetailView } from "@/pages/items-master/utils/mapItemApiToDetailView";
+import { mapHistoryToTimeline } from "@/pages/items-master/utils/mapHistoryToTimeline";
 
 interface DetailsModalProps {
   isOpen: boolean;

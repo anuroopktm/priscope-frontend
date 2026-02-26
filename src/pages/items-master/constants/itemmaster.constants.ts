@@ -9,7 +9,7 @@ export const Field_Map: Record<string, string> = {
   Customer: "customer",
 };
 
-export const page_size_item_master = 20;
+export const page_size_item_master = 50;
 
 export const allowedKeys = [
   "sku",

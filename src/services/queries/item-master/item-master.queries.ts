@@ -357,6 +357,14 @@ export const useListHeaders = (payload: ListRequestBody) => {
   });
 };
 
+export const useListComments = () =>
+  useMutation({
+    mutationFn: (payload: any) =>
+      axiosInstance.post<any>(ITEM_MASTER_ENDPOINTS.listComments, payload, {
+        timeout: 60000,
+      }),
+  });
+
 export const useItemMasterHistory = ({
   item_id,
   search = "",

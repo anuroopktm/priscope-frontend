@@ -8,6 +8,7 @@ import {
   useDeleteItemMasterRow,
   useEditItemMasterItem,
   useExportItemMasterRow,
+  useListComments,
   useListHeaders,
   useListItems,
 } from "@/services/queries/item-master/item-master.queries";
@@ -55,6 +56,10 @@ import { handleItemMasterExport } from "./actions/handleItemMasterExport";
 import { useToastStore } from "@/store/useToastStore";
 import { handleEditCellAdminRequest } from "./actions/editItemMasterAdmin";
 import { handleDeleteSelection } from "./actions/handleDeleteSelection";
+import CommentSidebar from "@/components/common/loader/comment-sidebar";
+import { focusCell, focusRow } from "./components/tree-grid/focus/FocusEvents";
+import DetailView from "./components/detail-view";
+import { DetailsModal } from "./components/detail-view-modal";
 
 export interface TreeGridState {
   showSavePopover: boolean;
@@ -66,6 +71,7 @@ export interface TreeGridState {
     oldValue: any;
   } | null;
 }
+type OpenPanel = "comments" | "detail-view" | null;
 const ItemsMasterPage = () => {
   const [searchQuery, setSearchQuery] = useState("");
   const [filter, setFilter] = useState<Record<string, string[]>>({});
@@ -102,6 +108,9 @@ const ItemsMasterPage = () => {
   const [selectedColumns, setSelectedColumns] = useState<
     Record<string, boolean>
   >({});
+  const [openPanel, setOpenPanel] = useState<OpenPanel>(null);
+  const [detailedViewId, setDetailedViewId] = useState<string>("");
+  const [isDetailViewModalOpen, setIsDetailViewModalOpen] = useState(false);
 
   const [
     requestSuccessNotficationVisible,
@@ -148,6 +157,9 @@ const ItemsMasterPage = () => {
     isPending: isitemMasterBulkInsertAdminApprovalPending,
   } = useAddBulkInsertAdminRequest();
 
+  const { mutateAsync: lisComments, isPending: isCommentListingPending } =
+    useListComments();
+
   const [showFilesModal, setShowFilesModal] = useState<boolean>(false);
 
   useEffect(() => {
@@ -155,18 +167,14 @@ const ItemsMasterPage = () => {
     window.TGSetEvent("OnSelected", gridId, onSelected);
     window.TGSetEvent("OnFilter", gridId, onHandleFilterChange);
     window.TGSetEvent("OnValueChanged", gridId, onHandleValueChanged);
-    // window.Grids.OnRightClick = handleRightClick;
     return () => {
       window.TGDelEvent("OnSelected", gridId);
       window.TGDelEvent("OnScroll", gridId);
       window.TGDelEvent("OnFilter", gridId);
       window.TGSetEvent("OnValueChanged", gridId);
-
-      // if (window.Grids?.OnRightClick === handleRightClick) {
-      //   delete window?.Grids?.OnRightClick;
-      // }
     };
   }, []);
+
   useEffect(() => {
     setShowLoader(
       isItemsLoading ||
@@ -239,7 +247,6 @@ const ItemsMasterPage = () => {
   }, [debouncedSearchQuery]);
 
   useEffect(() => {
-    console.log("filter in mian", filter);
     const filterString = JSON.stringify(filter);
 
     if (prevFilterRef.current !== filterString) {
@@ -256,6 +263,75 @@ const ItemsMasterPage = () => {
       gridInstance.current.Focus(null, null);
     }
   }, [state.showSavePopover]);
+
+  const hasNextPageRef = useRef(hasNextPage);
+  const isFetchingNextPageRef = useRef(isFetchingNextPage);
+
+  useEffect(() => {
+    hasNextPageRef.current = hasNextPage;
+  }, [hasNextPage]);
+
+  useEffect(() => {
+    isFetchingNextPageRef.current = isFetchingNextPage;
+  }, [isFetchingNextPage]);
+
+  useEffect(() => {
+    if (!itemMasterDataList || !listHeaderData?.headers.length) return;
+
+    const pages = itemMasterDataList.pages;
+    const firstPageItems = pages[0]?.items ?? [];
+    const body = buildItemMasterTreeGridBody(firstPageItems);
+    setData(body);
+
+    /** 🔹 1. VERY FIRST LOAD (React-driven) */
+    if (isInitialLoadRef.current) {
+      if (!firstPageItems.length) return;
+      const { cols } = buildItemMasterTreeGridCols(listHeaderData.headers);
+      treeGridHeadersRef.current = cols;
+
+      getItemMasterLayout(cols, listHeaderData).then(setLayout);
+      // IMPORTANT: first mount must go through React
+      setData(body);
+
+      isInitialLoadRef.current = false;
+      isSearchReplaceRef.current = false;
+      return;
+    }
+
+    // const Grid = gridInstance?.current?.getGridInstance();
+    const Grid = gridInstance?.current;
+    if (!Grid) return;
+    /**  2. SEARCH REPLACE (Grid API) */
+    if (isSearchReplaceRef.current) {
+      // setData((prev) => [...prev, ...body.Body[0]]);
+      setData((prev) => ({
+        Body: [[...(prev?.Body?.[0] ?? []), ...(body?.Body?.[0] ?? [])]],
+      }));
+
+      Grid.Source.Data.Data = {
+        Body: [body.Body[0] || []],
+      };
+
+      delete Grid.Source.Data.Url;
+
+      Grid.ReloadBody();
+
+      // gridInstance.current?.setLoading(false);
+      if (isFetchingNextPage) return;
+      if (!hasNextPage) return;
+      fetchNextPage();
+
+      isSearchReplaceRef.current = false;
+      return;
+    }
+
+    /**  3. INFINITE SCROLL (append rows) */
+    const lastPage = pages[pages.length - 1];
+    const newItems = lastPage?.items ?? [];
+
+    const dataToAdd = buildItemMasterTreeGridBody(newItems);
+    addRowsToGrid(dataToAdd?.Body[0]);
+  }, [itemMasterDataList, listHeaderData]);
 
   const handleExport = () => {
     handleItemMasterExport({
@@ -387,7 +463,7 @@ const ItemsMasterPage = () => {
     );
   };
   const handleLoadMore = () => {
-    if (hasNextPage && !isFetchingNextPage) {
+    if (hasNextPageRef.current && !isFetchingNextPageRef.current) {
       fetchNextPage();
     }
   };
@@ -415,64 +491,6 @@ const ItemsMasterPage = () => {
     Grid.Update();
     // gridInstance.current?.setLoading(false);
   };
-
-  useEffect(() => {
-    if (!itemMasterDataList || !listHeaderData?.headers.length) return;
-
-    const pages = itemMasterDataList.pages;
-    const firstPageItems = pages[0]?.items ?? [];
-    const body = buildItemMasterTreeGridBody(firstPageItems);
-    setData(body);
-
-    /** 🔹 1. VERY FIRST LOAD (React-driven) */
-    if (isInitialLoadRef.current) {
-      if (!firstPageItems.length) return;
-      const { cols } = buildItemMasterTreeGridCols(listHeaderData.headers);
-      treeGridHeadersRef.current = cols;
-
-      getItemMasterLayout(cols, listHeaderData).then(setLayout);
-      // IMPORTANT: first mount must go through React
-      setData(body);
-
-      isInitialLoadRef.current = false;
-      isSearchReplaceRef.current = false;
-      return;
-    }
-
-    // const Grid = gridInstance?.current?.getGridInstance();
-    const Grid = gridInstance?.current;
-    if (!Grid) return;
-    /**  2. SEARCH REPLACE (Grid API) */
-    if (isSearchReplaceRef.current) {
-      // setData((prev) => [...prev, ...body.Body[0]]);
-      setData((prev) => ({
-        Body: [[...(prev?.Body?.[0] ?? []), ...(body?.Body?.[0] ?? [])]],
-      }));
-
-      Grid.Source.Data.Data = {
-        Body: [body.Body[0] || []],
-      };
-
-      delete Grid.Source.Data.Url;
-
-      Grid.ReloadBody();
-
-      // gridInstance.current?.setLoading(false);
-      if (isFetchingNextPage) return;
-      if (!hasNextPage) return;
-      fetchNextPage();
-
-      isSearchReplaceRef.current = false;
-      return;
-    }
-
-    /**  3. INFINITE SCROLL (append rows) */
-    const lastPage = pages[pages.length - 1];
-    const newItems = lastPage?.items ?? [];
-
-    const dataToAdd = buildItemMasterTreeGridBody(newItems);
-    addRowsToGrid(dataToAdd?.Body[0]);
-  }, [itemMasterDataList, listHeaderData]);
 
   const handleGridReady = useCallback((grid: TGrid) => {
     console.log("handleGridReady");
@@ -551,6 +569,37 @@ const ItemsMasterPage = () => {
     const { cols, values, operators } = convertSavedFilter(filter);
     Grid.ChangeFilter(cols, values, operators, false, false);
   };
+
+  const handleCommentSelect = (comment: any) => {
+    const id = comment.item_id;
+    const Grid = gridInstance.current;
+    if (comment.comment_type === "row") {
+      focusRow(Grid, id);
+    } else if (comment.comment_type === "field") {
+      const fieldKey = comment.field_key;
+      focusCell(Grid, id, fieldKey);
+    }
+  };
+
+  const handleExpandClick = useCallback(() => {
+    setIsDetailViewModalOpen(true);
+  }, []);
+
+  const handleSkuUpcClick = (rowId: string, col: string, value: any) => {
+    const Grid = gridInstance.current;
+    if (Grid) {
+      const gridRow = Grid.GetRowById(rowId);
+      if (!gridRow || gridRow.Kind !== "Data") return;
+    }
+    setOpenPanel((prev) => {
+      setDetailedViewId(rowId);
+      if (prev !== "detail-view") {
+        return "detail-view";
+      }
+      return prev;
+    });
+  };
+
   return (
     <Box
       sx={{
@@ -583,6 +632,15 @@ const ItemsMasterPage = () => {
         onClearAllFilters={handleClearAllFilters}
         applySavedFilterToFilterRow={applySavedFilterToFilterRow}
       />
+
+      {isDetailViewModalOpen && (
+        <DetailsModal
+          isOpen={isDetailViewModalOpen}
+          onClose={() => setIsDetailViewModalOpen(false)}
+          timelineTitle={"Timeline"}
+          item_id={detailedViewId}
+        />
+      )}
 
       {openReqestModal && (
         <RequestsModal
@@ -628,6 +686,56 @@ const ItemsMasterPage = () => {
           setNotificationOpen={setRequestSuccessNotficationVisible}
         />
       )}
+      <Box
+        sx={{
+          width: openPanel === "comments" ? 300 : 0,
+          transition: "width 0.3s ease",
+          overflow: "hidden",
+          height: "calc(100vh - 147px)",
+          marginLeft: openPanel === "comments" ? 1 : 0,
+          background: "white",
+          color: "black",
+          display: "flex",
+          flexDirection: "column",
+          borderRadius: "8px 0 0 8px",
+        }}
+      >
+        {openPanel === "comments" && (
+          <CommentSidebar
+            isOpen={openPanel}
+            onClose={() => setOpenPanel(null)}
+            listComments={lisComments}
+            isLoading={isCommentListingPending}
+            onCommentSelect={(comment) => {
+              handleCommentSelect(comment);
+              console.log("commant selcted", comment);
+            }}
+          />
+        )}
+      </Box>
+      <Box
+        sx={{
+          width: openPanel === "detail-view" ? 406 : 0,
+          transition: "width 0.3s ease",
+          overflow: "hidden",
+          height: "calc(100vh - 147px)",
+          marginLeft: openPanel === "detail-view" ? 1 : 0,
+          background: "white",
+          color: "black",
+          display: "flex",
+          flexDirection: "column",
+          borderRadius: "8px 0 0 8px",
+        }}
+      >
+        {openPanel === "detail-view" && (
+          <DetailView
+            item_id={detailedViewId}
+            timelineTitle={"Timeline"}
+            onClose={() => setOpenPanel(null)}
+            onExpandClick={handleExpandClick}
+          />
+        )}
+      </Box>
       {state.showSavePopover && (
         <div
           style={{
