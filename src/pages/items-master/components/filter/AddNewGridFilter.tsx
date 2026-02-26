@@ -1,5 +1,7 @@
-import SaveIcon from "@/public/images/bookmark-02.svg";
-import CancelIcon from "@/public/images/multiplication-sign-circle.svg";
+import {
+  default as CancelIcon,
+  default as SaveIcon,
+} from "@/assets/actions/database-import.svg";
 import { theme } from "@/theme/theme";
 import { Button } from "@mui/material";
 import ColumnDropdown, { type ColumnDropdownProps } from "../columns-dropdown";

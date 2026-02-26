@@ -48,12 +48,12 @@ export const handleEditCellAdminRequest = ({
 
   const commentsPayload = comment?.trim()
     ? [
-      {
-        comment_type: "field",
-        item_field_key: col,
-        comment,
-      },
-    ]
+        {
+          comment_type: "field",
+          item_field_key: col,
+          comment,
+        },
+      ]
     : undefined;
 
   const payload = getEditCellValueAdminApproval(

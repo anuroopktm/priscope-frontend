@@ -44,12 +44,8 @@ const SystemFieldMapping: React.FC<SystemFieldMappingPropsExtended> = ({
   );
   const setSelectedField = useItemMasterStore((state) => state.setSelected);
   const clearFields = useItemMasterStore((state) => state.clearFields);
-  const {
-    data,
-    fetchNextPage,
-    hasNextPage,
-    isFetchingNextPage,
-  } = useListTemplates();
+  const { data, fetchNextPage, hasNextPage, isFetchingNextPage } =
+    useListTemplates();
   const {
     mutate: listTemplateHeaders,
     isPending: islistTemplateHeadersPending,

@@ -19,12 +19,7 @@ export const CARD_CONFIGS: readonly CardConfig[] = [
     ),
     buttonText: "Sync ERP",
     icon: (
-      <img
-        src={databaseImport}
-        alt="Database import"
-        width={20}
-        height={20}
-      />
+      <img src={databaseImport} alt="Database import" width={20} height={20} />
     ),
     image: refresh,
     imageAlt: "ERP import",

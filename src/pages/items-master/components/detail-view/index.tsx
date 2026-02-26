@@ -92,8 +92,7 @@ const DetailView: React.FC<DetailViewProps> = ({
             size="small"
             sx={{ border: "1px solid #ccc", borderRadius: "8px" }}
           >
-            X
-            {/* <GridCloseIcon fontSize="small" /> */}
+            X{/* <GridCloseIcon fontSize="small" /> */}
           </IconButton>
         </Box>
       </Box>

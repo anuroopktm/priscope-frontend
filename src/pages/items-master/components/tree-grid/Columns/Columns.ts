@@ -13,7 +13,15 @@ export const addColumn = (grid: TGrid | null, columnName: string) => {
   const show = 1;
   const type = "Text";
 
-  grid.AddCol(columnName, section, position, params as any, show, type, colCaption);
+  grid.AddCol(
+    columnName,
+    section,
+    position,
+    params as any,
+    show,
+    type,
+    colCaption,
+  );
 };
 
 export const hideColumn = (grid: TGrid | null, column: string) => {

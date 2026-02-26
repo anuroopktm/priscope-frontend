@@ -275,7 +275,7 @@ const DataMappingModal: React.FC<DataMappingModalPropsExtended> = ({
         onClose={handleClose}
         maxWidth="md"
         fullWidth
-      // PaperProps={{ sx: { borderRadius: 12 } }}
+        // PaperProps={{ sx: { borderRadius: 12 } }}
       >
         <DialogTitle sx={{ py: 2, px: 3 }}>
           <Box

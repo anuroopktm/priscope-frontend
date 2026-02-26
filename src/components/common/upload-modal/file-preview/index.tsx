@@ -72,10 +72,7 @@ const FilePreview: React.FC<FilePreviewProps> = ({
         </Box>
         <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
           {uploadState === "uploading" && (
-            <CircularProgress
-              size={20}
-              sx={{ color: theme.palette.divider }}
-            />
+            <CircularProgress size={20} sx={{ color: theme.palette.divider }} />
           )}
           {uploadState === "complete" && (
             <CheckCircleIcon

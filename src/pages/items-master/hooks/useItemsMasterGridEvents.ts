@@ -5,64 +5,64 @@ import { handleSelected } from "../components/tree-grid/RowSelection/RowSelectio
 import { onScroll } from "../components/tree-grid/scroll/ScrollHandler";
 
 export const useItemsMasterGridEvents = ({
-    gridId,
-    setFilter,
-    setSelectedRows,
-    setState,
-    fetchNextPage,
-    hasNextPage,
-    isFetchingNextPage,
+  gridId,
+  setFilter,
+  setSelectedRows,
+  setState,
+  fetchNextPage,
+  hasNextPage,
+  isFetchingNextPage,
 }: any) => {
-    const hasNextPageRef = useRef(hasNextPage);
-    const isFetchingNextPageRef = useRef(isFetchingNextPage);
+  const hasNextPageRef = useRef(hasNextPage);
+  const isFetchingNextPageRef = useRef(isFetchingNextPage);
 
-    useEffect(() => {
-        hasNextPageRef.current = hasNextPage;
-    }, [hasNextPage]);
+  useEffect(() => {
+    hasNextPageRef.current = hasNextPage;
+  }, [hasNextPage]);
 
-    useEffect(() => {
-        isFetchingNextPageRef.current = isFetchingNextPage;
-    }, [isFetchingNextPage]);
+  useEffect(() => {
+    isFetchingNextPageRef.current = isFetchingNextPage;
+  }, [isFetchingNextPage]);
 
-    const handleLoadMore = () => {
-        if (hasNextPageRef.current && !isFetchingNextPageRef.current) {
-            fetchNextPage();
-        }
+  const handleLoadMore = () => {
+    if (hasNextPageRef.current && !isFetchingNextPageRef.current) {
+      fetchNextPage();
+    }
+  };
+
+  useEffect(() => {
+    const onHandleScroll = (grid: TGrid, hpos: number, vpos: number) => {
+      onScroll(grid, hpos, vpos, gridId, 200, handleLoadMore);
     };
 
-    useEffect(() => {
-        const onHandleScroll = (grid: TGrid, hpos: number, vpos: number) => {
-            onScroll(grid, hpos, vpos, gridId, 200, handleLoadMore);
-        };
+    const onSelected = (grid: TGrid) => {
+      handleSelected(grid, setSelectedRows);
+    };
 
-        const onSelected = (grid: TGrid) => {
-            handleSelected(grid, setSelectedRows);
-        };
+    const onHandleFilterChange = (grid: TGrid) => {
+      handleFilterChange(grid, setFilter);
+    };
 
-        const onHandleFilterChange = (grid: TGrid) => {
-            handleFilterChange(grid, setFilter);
-        };
+    const onHandleValueChanged = (
+      grid: TGrid,
+      row: TRow,
+      col: string,
+      val: string,
+      oldval: string,
+    ) => {
+      handleValueChanged(grid, row, col, val, oldval, gridId, setState);
+    };
 
-        const onHandleValueChanged = (
-            grid: TGrid,
-            row: TRow,
-            col: string,
-            val: string,
-            oldval: string,
-        ) => {
-            handleValueChanged(grid, row, col, val, oldval, gridId, setState);
-        };
+    window.TGSetEvent("OnScroll", gridId, onHandleScroll);
+    window.TGSetEvent("OnSelected", gridId, onSelected);
+    window.TGSetEvent("OnFilter", gridId, onHandleFilterChange);
+    window.TGSetEvent("OnValueChanged", gridId, onHandleValueChanged);
 
-        window.TGSetEvent("OnScroll", gridId, onHandleScroll);
-        window.TGSetEvent("OnSelected", gridId, onSelected);
-        window.TGSetEvent("OnFilter", gridId, onHandleFilterChange);
-        window.TGSetEvent("OnValueChanged", gridId, onHandleValueChanged);
-
-        return () => {
-            window.TGDelEvent("OnSelected", gridId);
-            window.TGDelEvent("OnScroll", gridId);
-            window.TGDelEvent("OnFilter", gridId);
-            window.TGDelEvent("OnValueChanged", gridId);
-        };
-    }, [gridId, setFilter, setSelectedRows, setState]);
+    return () => {
+      window.TGDelEvent("OnSelected", gridId);
+      window.TGDelEvent("OnScroll", gridId);
+      window.TGDelEvent("OnFilter", gridId);
+      window.TGDelEvent("OnValueChanged", gridId);
+    };
+  }, [gridId, setFilter, setSelectedRows, setState]);
 };

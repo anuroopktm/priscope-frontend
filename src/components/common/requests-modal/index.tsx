@@ -103,10 +103,10 @@ const RequestsModal: React.FC<FileDetailsModalProps> = ({
         requestedBy: item?.requested_by?.name ?? "",
         reviewedDate: reviewedAt
           ? reviewedAt.toLocaleDateString("en-GB", {
-            day: "2-digit",
-            month: "2-digit",
-            year: "numeric",
-          })
+              day: "2-digit",
+              month: "2-digit",
+              year: "numeric",
+            })
           : null,
         comments: item.request_comments ?? "",
         requestAction: item.request_action,

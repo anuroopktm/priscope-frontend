@@ -1,28 +1,23 @@
+import {
+  default as ExportDataIcon,
+  default as ImportDataIcon,
+  default as LogFileIcon,
+  default as RequestsIcon,
+} from "@/assets/actions/database-import.svg";
+import SavedFilterIcon from "@/assets/actions/edit.svg";
+import SearchIcon from "@/assets/actions/search.svg";
+import CommentIcon from "@/assets/common/comment-02.svg";
 import LoaderOverlay from "@/components/common/loader";
 import SaveFilterModal from "@/components/common/save-filter";
 import ConfirmationDialog from "@/components/common/upload-modal/confirmation-modal";
-import SavedFilterIcon from "@/public/images/bookmark-check-01.svg";
-import CommentIcon from "@/public/images/comment.svg";
-import { default as ExportDataIcon, default as ExportIcon } from "@/public/images/export-data.svg";
-import ImportDataIcon from "@/public/images/import-data.svg";
-import LogFileIcon from "@/public/images/log-file-view.svg";
-import RequestsIcon from "@/public/images/requests.svg";
-import {
-  useSaveFilter
-} from "@/services/queries/item-master/item-master.queries";
+import { useSaveFilter } from "@/services/queries/item-master/item-master.queries";
 import { openConfirmationModal } from "@/utils/getRequestConfirmationModal";
 import AddIcon from "@mui/icons-material/Add";
 import DeleteOutlineIcon from "@mui/icons-material/DeleteOutline";
 import KeyboardArrowDownRoundedIcon from "@mui/icons-material/KeyboardArrowDownRounded";
-import {
-  Box,
-  Button,
-  InputBase,
-  useTheme
-} from "@mui/material";
+import { Box, Button, InputBase, useTheme } from "@mui/material";
 import { useQueryClient } from "@tanstack/react-query";
 import React, { useEffect, useState } from "react";
-import SearchIcon from "../../assets/searchIcon.svg";
 import AddNewItemDrawer from "../add-item";
 import type { SnackbarState } from "../columns-dropdown";
 import ColumnDropdown from "../columns-dropdown";
@@ -109,7 +104,9 @@ const Filter: React.FC<FilterProps> = ({
   const confirm = (opts: any) => Promise.resolve(window.confirm(opts.message));
   const t = (_ns: string, key: string) => {
     const parts = key.split(".");
-    return parts[parts.length - 1].replace(/([A-Z])/g, " $1").replace(/^./, (s) => s.toUpperCase());
+    return parts[parts.length - 1]
+      .replace(/([A-Z])/g, " $1")
+      .replace(/^./, (s) => s.toUpperCase());
   };
   const [showSelectedOptions, setShowSelectedOptions] = useState(false);
   const [filterName, setFilterName] = useState("");
@@ -449,7 +446,7 @@ const Filter: React.FC<FilterProps> = ({
                       fontWeight: 600,
                     }}
                     startIcon={
-                      <img src={ExportIcon} alt="Export" width={16} />
+                      <img src={ExportDataIcon} alt="Export" width={16} />
                     }
                   >
                     Export
@@ -499,12 +496,14 @@ const Filter: React.FC<FilterProps> = ({
                 </>
               ) : (
                 <AddNewGridFilter
-                  onCancel={onCancel || (() => { })}
-                  onSave={onSave || (() => { })}
+                  onCancel={onCancel || (() => {})}
+                  onSave={onSave || (() => {})}
                   selectedColumns={selectedColumnsForAdd || {}}
-                  setSelectedColumns={setSelectedColumnsForAdd || (() => { })}
+                  setSelectedColumns={setSelectedColumnsForAdd || (() => {})}
                   headerList={headerList}
-                  handleColumnVisibility={handleEmptyColumnVisibility || (() => { })}
+                  handleColumnVisibility={
+                    handleEmptyColumnVisibility || (() => {})
+                  }
                 />
               )}
             </div>

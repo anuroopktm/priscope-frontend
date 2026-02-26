@@ -64,8 +64,9 @@ const UploadDropZone: React.FC<UploadDropZoneProps> = ({
       onDragOver={handleDragOver}
       onDragLeave={handleDragLeave}
       sx={{
-        border: `1px dashed ${isDragOver ? theme.palette.primary.main : theme.palette.grey[300]
-          }`,
+        border: `1px dashed ${
+          isDragOver ? theme.palette.primary.main : theme.palette.grey[300]
+        }`,
         borderRadius: 2,
         p: 4,
         textAlign: "center",

@@ -82,24 +82,24 @@ const FileDetailsModal: React.FC<FileDetailsModalProps> = ({
   const listExportPayload = getListExportPayload([module]);
 
   const {
-    mutate: downloadErrorFile = () => { },
+    mutate: downloadErrorFile = () => {},
     isPending: errorFileDownloadPending = false,
   } = useGetModuleImportErrorFile() ?? {};
 
   const {
-    mutate: listUploads = () => { },
+    mutate: listUploads = () => {},
     isPending = false,
     isError = false,
   } = useListModuleImports(module) ?? {};
 
   const {
-    mutate: listExports = () => { },
+    mutate: listExports = () => {},
     isPending: isExpostListPending = false,
     isError: isErrorListExport = false,
   } = useListExport() ?? {};
 
   const {
-    mutate: DownloadExportFile = () => { },
+    mutate: DownloadExportFile = () => {},
     isPending: isDownloadExportPending = false,
   } = useGetExportedFile() ?? {};
 
@@ -130,7 +130,7 @@ const FileDetailsModal: React.FC<FileDetailsModalProps> = ({
                   title: item.file_name,
                   status:
                     item.status === FILE_UPLOAD_STATUS.SUCCESS ||
-                      item.status === FILE_UPLOAD_STATUS.PROCESSED
+                    item.status === FILE_UPLOAD_STATUS.PROCESSED
                       ? "Success"
                       : item.status,
                   uploadDate: formatDate(item.created_at),
@@ -155,8 +155,7 @@ const FileDetailsModal: React.FC<FileDetailsModalProps> = ({
         onError: (err: any) => {
           console.error("Error fetching uploads:", err);
         },
-      },
-      );
+      });
     }
 
     if (filterOptions.find((opt) => opt.value === TOGGLE_BUTTON[1])?.value) {

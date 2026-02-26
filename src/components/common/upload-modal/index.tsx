@@ -146,7 +146,7 @@ const UploadModal: React.FC<ExtendedUploadModalProps> = ({
           templateDownloadUrl={templateDownloadUrl}
           templateName={templateName}
           feature={feature || ""}
-          setShowLoader={setShowLoader || (() => { })}
+          setShowLoader={setShowLoader || (() => {})}
         />
         <Divider />
 

@@ -12,11 +12,13 @@ import {
 } from "@mui/material";
 import React, { useCallback } from "react";
 // import Image from "next/image";
-import CommentIcon from "@/public/images/comment.svg";
-import ExportDataIcon from "@/public/images/export-data.svg";
-import ImportDataIcon from "@/public/images/import-data.svg";
-import LogFileIcon from "@/public/images/log-file-view.svg";
-import RequestsIcon from "@/public/images/requests.svg";
+import CommentIcon from "@/assets/actions/comment.svg";
+import {
+  default as ImportDataIcon,
+  default as LogFileIcon,
+} from "@/assets/actions/database-import.svg";
+import ExportDataIcon from "@/assets/actions/export-data.svg";
+import RequestsIcon from "@/assets/actions/requests.svg";
 import AddIcon from "@mui/icons-material/Add";
 import CheckCircleOutlineOutlinedIcon from "@mui/icons-material/CheckCircleOutlineOutlined";
 import HighlightOffOutlinedIcon from "@mui/icons-material/HighlightOffOutlined";
@@ -44,10 +46,10 @@ interface ExtendedActionBarProps {
   onBulkStatusUpdate?: (status: string) => void;
   onToggleDrawer?: () => void;
   filterOptions?:
-  | { value: string; label: string }[]
-  | ((
-    t: (ns: string, key: string, options?: any) => string,
-  ) => { value: string; label: string }[]);
+    | { value: string; label: string }[]
+    | ((
+        t: (ns: string, key: string, options?: any) => string,
+      ) => { value: string; label: string }[]);
   showButtons?: {
     files?: boolean;
     add?: boolean;
@@ -78,10 +80,10 @@ interface ExtendedActionBarProps {
 const DEFAULT_FILTER_OPTIONS = (
   t: (ns: string, key: string) => string,
 ): { value: string; label: string }[] => [
-    { value: "all", label: t("common", "actionBar.filterOptions.all") },
-    { value: "enabled", label: t("common", "actionBar.filterOptions.enabled") },
-    { value: "disabled", label: t("common", "actionBar.filterOptions.disabled") },
-  ];
+  { value: "all", label: t("common", "actionBar.filterOptions.all") },
+  { value: "enabled", label: t("common", "actionBar.filterOptions.enabled") },
+  { value: "disabled", label: t("common", "actionBar.filterOptions.disabled") },
+];
 
 const ActionBar = ({
   alignment,
@@ -125,7 +127,12 @@ const ActionBar = ({
   hasExportPermission,
   hasImportPermission,
 }: ExtendedActionBarProps) => {
-  const t = (_ns: string, key: string, _options?: any) => key.split('.').pop()?.replace(/([A-Z])/g, " $1").replace(/^./, (s) => s.toUpperCase()) || key;
+  const t = (_ns: string, key: string, _options?: any) =>
+    key
+      .split(".")
+      .pop()
+      ?.replace(/([A-Z])/g, " $1")
+      .replace(/^./, (s) => s.toUpperCase()) || key;
   const theme = useTheme();
   const confirm = (opts: any) => Promise.resolve(window.confirm(opts.message));
 

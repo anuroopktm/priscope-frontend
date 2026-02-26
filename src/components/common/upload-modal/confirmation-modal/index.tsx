@@ -67,8 +67,7 @@ const ConfirmationDialog: React.FC<ConfirmationDialogProps> = ({
           disabled={loading}
           sx={{
             borderRadius: 8,
-            bgcolor:
-              theme.palette.divider || theme.palette.primary.main,
+            bgcolor: theme.palette.divider || theme.palette.primary.main,
             "&:hover": { bgcolor: "#0F3A5A" },
           }}
         >

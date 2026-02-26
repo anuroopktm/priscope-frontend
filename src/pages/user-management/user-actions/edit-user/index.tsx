@@ -98,7 +98,6 @@ const EditUserPage = () => {
     }
   };
 
-
   if (isDetailsLoading || isPrivilegesLoading || isAllPrivilegesLoading) {
     return (
       <Box
