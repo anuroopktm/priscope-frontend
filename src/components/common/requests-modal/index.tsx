@@ -168,7 +168,7 @@ const RequestsModal: React.FC<FileDetailsModalProps> = ({
       fullWidth
       PaperProps={{
         sx: {
-          borderRadius: 4,
+          borderRadius: 1,
           maxHeight: "75vh",
           minHeight: "75vh",
           maxWidth: "771px",
@@ -287,7 +287,7 @@ const RequestsModal: React.FC<FileDetailsModalProps> = ({
             ref={index === requests.length - 1 ? lastElementRef : null}
             sx={{
               borderBottom: index < requests.length - 1 ? 1 : 0,
-              borderRadius: "8px",
+              borderRadius: "1px",
               borderColor: "divider",
               background: "#ecf6fc",
               mb: 2,

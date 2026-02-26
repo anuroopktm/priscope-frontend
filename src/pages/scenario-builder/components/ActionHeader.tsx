@@ -12,7 +12,7 @@ import ColumnDropdown from "@/pages/items-master/components/columns-dropdown";
 import { useQueryClient } from "@tanstack/react-query";
 import { useSaveFilter } from "@/services/queries/item-master/item-master.queries";
 import SavedFiltersDropdown from "@/pages/items-master/components/saved-filters-dropdown";
-import CommentIcon from "@/assets/common/comment.svg";
+import CommentIcon from "@/assets/items-master/Button.svg";
 import ExportIcon from "@/assets/common/export-data.svg";
 import SavedFilterIcon from "@/assets/items-master/bookmark-check-01.svg";
 import AddIcon from "@mui/icons-material/Add";
@@ -290,7 +290,7 @@ export const ActionHeader = ({
               <Button
               onClick={handleToggle}
               >
-                <img src={CommentIcon} alt="Comments" width={16} />
+                <img src={CommentIcon} alt="Comments" />
               </Button>
             </>
           )}

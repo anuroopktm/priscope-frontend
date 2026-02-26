@@ -10,7 +10,7 @@ import type {
   ControlFields,
 } from "../../constants/upload.constants";
 import type { SystemFieldObject } from "@/pages/items-master/types/types";
-import type { SnackbarState } from "../columns-dropdown";
+import type { ToastSeverity } from "@/store/useToastStore";
 
 type ImportData = {
   systemFieldMapping: any;
@@ -23,7 +23,7 @@ type CompleteUploadFlowProps = {
   onClose: () => void;
   onImportComplete?: (data: ImportData) => void;
   onViewLog?: () => void;
-  setSnackbar: React.Dispatch<React.SetStateAction<SnackbarState>>;
+  showToast: (message: string, severity?: ToastSeverity) => void;
   isSearchReplaceRef: any;
 };
 
@@ -32,7 +32,7 @@ const CompleteUploadFlow: React.FC<CompleteUploadFlowProps> = ({
   onClose,
   onImportComplete,
   onViewLog,
-  setSnackbar,
+  showToast,
   isSearchReplaceRef,
 }) => {
   const [showFileUpload, setShowFileUpload] = useState(false);
@@ -102,7 +102,7 @@ const CompleteUploadFlow: React.FC<CompleteUploadFlowProps> = ({
         setSystemFields={setSystemFields}
         csvType={csvType}
         setCsvType={setCsvType}
-        setSnackbar={setSnackbar}
+        showToast={showToast}
       />
 
       <DataMappingModal
@@ -114,7 +114,7 @@ const CompleteUploadFlow: React.FC<CompleteUploadFlowProps> = ({
         handleBack={handleBackToMapping}
         systemFields={systemFields}
         csvType={csvType}
-        setSnackbar={setSnackbar}
+        showToast={showToast}
         isSearchReplaceRef={isSearchReplaceRef}
       />
 

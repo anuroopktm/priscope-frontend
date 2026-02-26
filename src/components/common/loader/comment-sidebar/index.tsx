@@ -21,7 +21,7 @@ import SearchIcon from "@/assets/items-master/search-01.svg";
 import { getAvatarColor } from "@/utils/getAvatarColor";
 import type { Comment } from "./types";
 
-type CommentSidebarProps<T> = {
+type CommentSidebarProps = {
   isOpen: any;
   onClose: () => void;
   isLoading?: boolean;
@@ -44,17 +44,17 @@ const formatTime = (timestamp: string) => {
   });
 };
 
-const CommentSidebar = <T,>({
+const CommentSidebar = ({
   isOpen,
   onClose,
-  isLoading = false,
+  // isLoading = false,
   error = null,
   listComments,
   title = "Comments",
   onCommentSelect,
   renderComment,
   pageSize = 50,
-}: CommentSidebarProps<T>) => {
+}: CommentSidebarProps) => {
   const [comments, setComments] = useState<Comment[]>([]);
   const [inputValue, setInputValue] = useState("");
   const [searchValue, setSearchValue] = useState("");

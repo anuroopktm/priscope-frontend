@@ -1129,7 +1129,7 @@ interface TTGrid {
     cols: any,
     values: any,
     operators: any,
-    nofilter?: string,
+    nofilter?: boolean | number,
     noclear?: boolean | number,
     filter?: TRow,
   ): void;

@@ -17,6 +17,7 @@ import { DEFAULT_VISIBLE_COLUMNS } from "../../constants/tableHeaders.constants"
 import { useQueryClient } from "@tanstack/react-query";
 import LoaderOverlay from "../../../../components/common/loader";
 import { useAddHeader } from "@/services/queries/item-master/item-master.queries";
+import { useToastStore } from "@/store/useToastStore";
 export type SnackbarState = {
   message: string | null;
   severity: AlertColor;
@@ -44,10 +45,7 @@ const ColumnDropdown: React.FC<ColumnDropdownProps> = ({
   const [search, setSearch] = useState("");
   const [showCreateColumnModal, setShowCreateColumnModal] =
     useState<boolean>(false);
-  const [snackbar, setSnackbar] = useState<SnackbarState>({
-    message: null,
-    severity: "info",
-  });
+  const { showToast } = useToastStore();
 
   const queryClient = useQueryClient();
   const { mutate: mutateAddHeader, isPending: mutateAddHeaderPending } =
@@ -89,23 +87,17 @@ const ColumnDropdown: React.FC<ColumnDropdownProps> = ({
       name: label,
     };
     mutateAddHeader(payload, {
-      onSuccess: (resp) => {
+      onSuccess: () => {
         queryClient.invalidateQueries({
           queryKey: ["listItemMasterHeaders"],
         });
         setHeaderLabels?.((prev) => [...prev, label]);
         setSelectedColumns((prev) => ({ ...prev, [label]: true }));
         handleColumnVisibility(label, true);
-        setSnackbar({
-          message: "Header added successfully!",
-          severity: "success",
-        });
+        showToast("Header added successfully!", "success");
       },
-      onError: (e) => {
-        setSnackbar({
-          message: "Failed to save changes. Please try again.,",
-          severity: "warning",
-        });
+      onError: () => {
+        showToast("Failed to save changes. Please try again.,", "warning");
       },
     });
     setSearch("");
@@ -244,10 +236,6 @@ const ColumnDropdown: React.FC<ColumnDropdownProps> = ({
           </Paper>
         </ClickAwayListener>
       </Popper>
-      {/* <AppSnackbar
-        snackbar={snackbar}
-        onClose={() => setSnackbar({ message: null, severity: "info" })}
-      /> */}
       {mutateAddHeaderPending && <LoaderOverlay />}
       {showCreateColumnModal && (
         <CreateColumnModal

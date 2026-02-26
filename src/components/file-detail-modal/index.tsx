@@ -46,7 +46,7 @@ const FILE_UPLOAD_STATUS = {
 export interface FileDetailsModalProps {
   open?: boolean;
   onClose: any;
-  showSnackBar: any;
+  showToast: any;
   showLoader: any;
   module: string;
   filterOptions: { value: string; label: string }[];
@@ -66,7 +66,7 @@ const FileDetailsModal: React.FC<FileDetailsModalProps> = ({
   open = true,
   onClose,
   showLoader,
-  showSnackBar,
+  showToast,
   module,
   filterOptions,
   defaultTab = "uploaded",
@@ -75,9 +75,9 @@ const FileDetailsModal: React.FC<FileDetailsModalProps> = ({
     module === "fx_rate" ? filterOptions[0]?.value : defaultTab || "",
   );
   const theme = useTheme();
-  const [expandedFiles, setExpandedFiles] = useState<Record<string, boolean>>(
-    {},
-  );
+  // const [expandedFiles, setExpandedFiles] = useState<Record<string, boolean>>(
+  //   {},
+  // );
   const [selectedDownloadIndex, setSelectedDownloadIndex] = useState(0);
   const [exportedData, setExportedData] = useState<SimplifiedExport[]>([]);
   const [uploadData, setUploadData] = useState([]);
@@ -117,7 +117,7 @@ const FileDetailsModal: React.FC<FileDetailsModalProps> = ({
   useEffect(() => {
     if (filterOptions.find((opt) => opt.value === TOGGLE_BUTTON[0])?.value) {
       listUploads(
-        {},
+        undefined,
         {
           onSuccess: (res: any) => {
             let uploads;
@@ -213,8 +213,8 @@ const FileDetailsModal: React.FC<FileDetailsModalProps> = ({
           link.remove();
         }
       },
-      onError: (err: any) => {
-        showSnackBar({ message: "Failed to download file", severity: "error" });
+      onError: () => {
+        showToast("Failed to download file", "error");
       },
     });
   };

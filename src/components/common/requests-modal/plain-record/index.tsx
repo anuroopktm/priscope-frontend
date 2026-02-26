@@ -18,7 +18,7 @@ export const PlainRecord = ({
         backgroundColor: "white",
         border: "1px solid",
         borderColor: "#E8E8E8",
-        borderRadius: 8,
+        borderRadius: 1,
         p: 2,
         overflow: "auto",
         scrollbarWidth: "none",

@@ -32,17 +32,17 @@ import {
   getAttributeConfigFromAvailableHeaders,
 } from "../../../helpers/itemMasterHelpers";
 import { useItemMasterStore } from "../../../store/itemMasterStore";
-import type { SnackbarState } from "../../columns-dropdown";
 import StyledStepper from "../../stepper";
 import AttributeConfiguration from "./attribute-config-step";
 import SystemFieldMapping from "./system-field-step";
+import type { ToastSeverity } from "@/store/useToastStore";
 
 interface DataMappingModalPropsExtended extends DataMappingModalProps {
   uploadId?: string;
   handleBack: () => void;
   systemFields: SystemFieldObject[] | null;
   csvType: string;
-  setSnackbar: React.Dispatch<React.SetStateAction<SnackbarState>>;
+  showToast: (message: string, severity?: ToastSeverity) => void;
   isSearchReplaceRef: any;
 }
 
@@ -55,7 +55,7 @@ const DataMappingModal: React.FC<DataMappingModalPropsExtended> = ({
   handleBack,
   systemFields,
   csvType,
-  setSnackbar,
+  showToast,
   isSearchReplaceRef,
 }) => {
   const [activeStep, setActiveStep] = useState(2);
@@ -73,7 +73,7 @@ const DataMappingModal: React.FC<DataMappingModalPropsExtended> = ({
   const [showOverwriteModal, setShowOverwriteModal] = useState(false);
 
   // Get selected data from store and API mutation
-  const selected = useItemMasterStore((state) => state.selected);
+  // const selected = useItemMasterStore((state) => state.selected);
   const controlFields = useItemMasterStore((state) => state.controlFields);
   const uploadIdFromStore = useItemMasterStore((state) => state.uploadId);
   const resetStore = useItemMasterStore((state) => state.reset);
@@ -257,7 +257,7 @@ const DataMappingModal: React.FC<DataMappingModalPropsExtended> = ({
             err.status === 404 || err.status === 400
               ? "Failed to map fields"
               : "Failed to map fields";
-          setSnackbar({ message, severity: "error" });
+          showToast(message, "error");
         },
       });
     } catch (error) {
@@ -311,7 +311,7 @@ const DataMappingModal: React.FC<DataMappingModalPropsExtended> = ({
               fieldErrors={fieldErrors}
               setSelectedTemplate={setSelectedTemplate}
               selectedTemplate={selectedTemplate}
-              setSnackbar={setSnackbar}
+              showToast={showToast}
             />
           )}
           {activeStep === 3 && (

@@ -18,44 +18,37 @@ import {
 import { useItemMasterStore } from "../../../../store/itemMasterStore";
 import type { SystemFieldMappingProps } from "@/pages/items-master/types/types";
 import { theme } from "@/theme/theme";
-import type { SnackbarState } from "../../../columns-dropdown";
+import type { ToastSeverity } from "@/store/useToastStore";
 
-// Extended props to include template name handling
 interface SystemFieldMappingPropsExtended extends SystemFieldMappingProps {
   templateName?: string;
   onTemplateNameChange?: (name: string) => void;
   fieldErrors?: Record<string, boolean>;
   setSelectedTemplate: React.Dispatch<React.SetStateAction<string>>;
   selectedTemplate: string;
-  setSnackbar: React.Dispatch<React.SetStateAction<SnackbarState>>;
+  showToast: (message: string, severity?: ToastSeverity) => void;
 }
 
 const SystemFieldMapping: React.FC<SystemFieldMappingPropsExtended> = ({
   fileName,
   systemFieldMapping,
   onSystemFieldChange,
-  saveAsTemplate,
-  onSaveAsTemplateChange,
-  templateName = "",
-  onTemplateNameChange,
   fieldErrors,
   setSelectedTemplate,
   selectedTemplate,
-  setSnackbar,
+  showToast,
 }) => {
   const getAvailableHeaders = useItemMasterStore(
     (state) => state.getAvailableHeaders,
   );
   const setSelectedField = useItemMasterStore((state) => state.setSelected);
   const clearFields = useItemMasterStore((state) => state.clearFields);
-  const selected = useItemMasterStore((state) => state.selected);
+  // const selected = useItemMasterStore((state) => state.selected);
   const {
     data,
     fetchNextPage,
     hasNextPage,
     isFetchingNextPage,
-    isLoading,
-    isError,
   } = useListTemplates();
   const {
     mutate: listTemplateHeaders,
@@ -115,7 +108,7 @@ const SystemFieldMapping: React.FC<SystemFieldMappingPropsExtended> = ({
             err.status === 404
               ? "Failed to fetch template headers"
               : "Failed to fetch template headers";
-          setSnackbar({ message, severity: "error" });
+          showToast(message, "error");
         },
       },
     );

@@ -53,17 +53,11 @@ const SavedFiltersDropdown = ({
       {selectedFilter ? (
         <>
           <Button
+            variant="contained"
             onClick={handleToggle}
             sx={{
-              padding: "8px 12px",
-              backgroundColor: "primary.main",
-              color: "white",
-              "&:hover": {
-                color: "white",
-                bgcolor: "primary.main",
-              },
-              textTransform: "none",
-              fontWeight: 600,
+              backgroundColor: "#144E72",
+              // color: "white",
             }}
             startIcon={
               <img src={BookmarkIcon} alt="Bookmark File" width={16} />

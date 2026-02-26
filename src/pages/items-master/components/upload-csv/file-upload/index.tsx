@@ -25,7 +25,7 @@ import {
 } from "@/services/queries/item-master/item-master.queries";
 import { useItemMasterStore } from "../../../store/itemMasterStore";
 import type { SystemFieldObject } from "@/pages/items-master/types/types";
-import type { SnackbarState } from "../../columns-dropdown";
+import type { ToastSeverity } from "@/store/useToastStore";
 // import AppSnackbar from "@/shared/components/action-bar/AppSnackbar";
 // import { SnackbarState } from "@/app/[lang]/(protected)/freight-rate-library/types";
 
@@ -43,7 +43,7 @@ type FileUploadModalProps = {
   >;
   csvType: string;
   setCsvType: React.Dispatch<React.SetStateAction<string>>;
-  setSnackbar: React.Dispatch<React.SetStateAction<SnackbarState>>;
+  showToast: (message: string, severity?: ToastSeverity) => void;
 };
 
 const FileUploadModal: React.FC<FileUploadModalProps> = ({
@@ -53,7 +53,7 @@ const FileUploadModal: React.FC<FileUploadModalProps> = ({
   setSystemFields,
   csvType,
   setCsvType,
-  setSnackbar,
+  showToast,
 }) => {
   const [activeStep, setActiveStep] = useState(0);
   const [uploadedFile, setUploadedFile] = useState<UploadedFile | null>(null);
@@ -101,7 +101,7 @@ const FileUploadModal: React.FC<FileUploadModalProps> = ({
             setActiveStep(1);
           }
         },
-        onError: (err) => {
+        onError: () => {
           handleFileStatusChange("");
         },
       },
@@ -161,7 +161,7 @@ const FileUploadModal: React.FC<FileUploadModalProps> = ({
           err.status === 404
             ? "Failed to fetch system fields"
             : "Failed to fetch system fields";
-        setSnackbar({ message, severity: "error" });
+        showToast(message, "error");
       },
     });
   };

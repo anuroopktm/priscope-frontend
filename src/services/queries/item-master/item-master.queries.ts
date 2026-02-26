@@ -104,7 +104,7 @@ export const useMapItemMasterFields = () => {
   return useMutation<
     MapFieldsResponse,
     AxiosError,
-    MapFieldsRequest & { upload_id: string; update_if_exists: boolean }
+    MapFieldsRequest & { upload_id: string | number; update_if_exists: boolean }
   >({
     mutationFn: async ({ payload, upload_id, update_if_exists }) => {
       const response = await axiosInstance.post<MapFieldsResponse>(

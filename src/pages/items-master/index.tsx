@@ -12,7 +12,6 @@ import {
   useListItems,
 } from "@/services/queries/item-master/item-master.queries";
 import { useDebounce } from "../../hooks/useDebounce";
-import type { SnackbarState } from "./components/columns-dropdown";
 import { onScroll } from "./components/tree-grid/scroll/ScrollHandler";
 import CompleteUploadFlow from "./components/upload-csv";
 import { page_size_item_master } from "./constants/itemmaster.constants";
@@ -54,6 +53,8 @@ import { DetailsModal } from "./components/detail-view-modal";
 import MainContentContainer from "@/components/common/main-content-container";
 import { useHandleGridEditConfirm } from "./actions/handleGridEditConfirm";
 import type { HeaderList, OpenPanel, TreeGridState } from "./types/types";
+import { useHandleEditPopover } from "./hooks/useHandleEditPopover";
+import { useSkuUpcClickable } from "./hooks/useSkuUpcClickable";
 
 const ItemsMasterPage = () => {
   const [searchQuery, setSearchQuery] = useState("");
@@ -67,10 +68,6 @@ const ItemsMasterPage = () => {
   const treeGridHeadersRef = useRef<TreeGridHeader[]>([]);
   const [openReqestModal, setOpenRequestModal] = useState(false);
   const [showLoader, setShowLoader] = useState(false);
-  const [snackbar, setSnackbar] = useState<SnackbarState>({
-    message: null,
-    severity: "info",
-  });
   const [showUploadFlow, setShowUploadFlow] = useState(false);
   const gridId = "items-master";
   const containerId = `TreeGrid_${gridId}`;
@@ -241,7 +238,7 @@ const ItemsMasterPage = () => {
 
   useEffect(() => {
     if (state.showSavePopover && gridInstance.current) {
-      gridInstance.current.Focus(null, null);
+      gridInstance.current.Focus(undefined, undefined);
     }
   }, [state.showSavePopover]);
 
@@ -314,7 +311,7 @@ const ItemsMasterPage = () => {
     addRowsToGrid(dataToAdd?.Body[0]);
   }, [itemMasterDataList, listHeaderData]);
 
-  const handleGridReady = useCallback((grid: TGrid) => {
+  const handleGridReady = useCallback(() => {
     console.log("handleGridReady");
   }, []);
 
@@ -326,7 +323,7 @@ const ItemsMasterPage = () => {
     handleGridReady,
   );
 
-  const handleSkuUpcClick = (rowId: string, col: string, value: any) => {
+  const handleSkuUpcClick = (rowId: string) => {
     const Grid = gridInstance.current;
     if (Grid) {
       const gridRow = Grid.GetRowById(rowId);
@@ -344,10 +341,10 @@ const ItemsMasterPage = () => {
   const handleSkuUpcClickRef =
     useRef<(rowId: string, col: string, value: any) => void>(handleSkuUpcClick);
 
+  // useEffect(() => {
+  // });
   useEffect(() => {
     handleSkuUpcClickRef.current = handleSkuUpcClick;
-  });
-  useEffect(() => {
     (window as any).onSkuUpcClick = (
       rowId: string,
       col: string,
@@ -360,39 +357,11 @@ const ItemsMasterPage = () => {
     };
   }, []);
 
-  useEffect(() => {
-    window.Grids ??= {};
-    const prev = window.Grids.OnGetHtmlValue;
-
-    window.Grids.OnGetHtmlValue = (grid: any, row: any, col: any, val: any) => {
-      if (grid.id !== gridId) {
-        return prev ? prev(grid, row, col, val) : val;
-      }
-
-      if (row?.Kind === "Header") {
-        return prev ? prev(grid, row, col, val) : val;
-      }
-
-      if ((col === "SKU" || col === "UPC") && val) {
-        const safeVal = String(val).replace(/"/g, "&quot;");
-        return `<a 
-        href="javascript:void(0)" 
-        onclick="window.onSkuUpcClick('${row.id}', '${col}', '${safeVal}')"
-        style="color: inherit; text-decoration: underline; cursor: pointer;"
-      >${safeVal}</a>`;
-      }
-
-      return prev ? prev(grid, row, col, val) : val;
-    };
-
-    return () => {
-      if (prev) {
-        window.Grids.OnGetHtmlValue = prev;
-      } else {
-        delete window.Grids.OnGetHtmlValue;
-      }
-    };
-  }, [gridId]);
+  useSkuUpcClickable({
+    gridId,
+    onSkuClick: handleSkuUpcClick,
+    onUpcClick: handleSkuUpcClick,
+  });
 
   const handleExport = () => {
     handleItemMasterExport({
@@ -475,7 +444,7 @@ const ItemsMasterPage = () => {
     if (!Grid || !newRows?.length) return;
 
     newRows.forEach((rowData) => {
-      const newRow = Grid.AddRow(null, null, 7, rowData.id);
+      const newRow = Grid.AddRow(undefined, undefined, 7, rowData.id);
       if (!newRow) return;
 
       Object.entries(rowData).forEach(([key, value]) => {
@@ -505,36 +474,14 @@ const ItemsMasterPage = () => {
     handleSelected(grid, setSelectedRows);
   };
 
-  const handleEditSave = () => {
-    if (!state.changedCell) return;
-    if (comment.trim().length === 0) {
-      return;
-    }
-    const { row, col, value, oldValue } = state.changedCell;
-
-    onCellEditConfirm?.(row, col, value, oldValue, comment);
-    setState((prev) => ({
-      ...prev,
-      showSavePopover: false,
-      changedCell: null,
-    }));
-    setCommentAdded(false);
-  };
-
-  const handleEditCancel = () => {
-    if (!state.changedCell) return;
-    const { row, col, value, oldValue } = state.changedCell;
-    const Grid = gridInstance.current;
-    if (Grid) {
-      const gridRow = Grid.GetRowById(row.id);
-      if (gridRow) Grid.SetValue(gridRow, col, oldValue, 1);
-    }
-    setState((prev) => ({
-      ...prev,
-      showSavePopover: false,
-      changedCell: null,
-    }));
-  };
+  const { handleEditSave, handleEditCancel } = useHandleEditPopover({
+    state,
+    comment,
+    setState,
+    setCommentAdded,
+    gridInstance,
+    onCellEditConfirm,
+  });
 
   const handleColumnVisibility = (label: string, check: boolean) => {
     if (check) {
@@ -629,7 +576,7 @@ const ItemsMasterPage = () => {
         <FileDetailsModal
           onClose={setShowFilesModal}
           showLoader={setShowLoader}
-          showSnackBar={setSnackbar}
+          showToast={showToast}
           module="item_master"
           filterOptions={FILE_FILTER_OPTIONS}
         />
@@ -699,7 +646,7 @@ const ItemsMasterPage = () => {
         onClose={() => setShowUploadFlow(false)}
         onImportComplete={handleUploadComplete}
         onViewLog={handleViewLog}
-        setSnackbar={setSnackbar}
+        showToast={showToast}
         isSearchReplaceRef={isSearchReplaceRef}
       />
       {requestSuccessNotficationVisible && (
