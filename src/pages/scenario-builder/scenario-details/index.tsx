@@ -26,6 +26,7 @@ const ScenarioDetailsPage = () => {
         display: "flex",
         flexDirection: "column",
         height: "100%",
+        width: "100%",
         minHeight: 0,
         bgcolor: "brand.background",
       }}
@@ -36,6 +37,7 @@ const ScenarioDetailsPage = () => {
         sx={{
           flex: 1,
           minHeight: 0,
+          width: "100%",
           p: 2,
           display: "flex",
           flexDirection: "column",
@@ -46,6 +48,7 @@ const ScenarioDetailsPage = () => {
           sx={{
             flex: 1,
             minHeight: 0,
+            width: "100%",
             borderRadius: 1,
             p: 2,
             bgcolor: "background.paper",
