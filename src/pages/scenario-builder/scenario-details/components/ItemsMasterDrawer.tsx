@@ -14,7 +14,7 @@ import type {
   TreeGridBody,
   TreeGridLayout,
 } from "../../../items-master/helpers/types";
-import { useTreeGridInit } from "../../tree-grid/hooks/useTreeGridInit";
+import { useTreeGridInit } from "../tree-grid/hooks/useTreeGridInit";
 
 interface ItemsMasterDrawerProps {
   open: boolean;

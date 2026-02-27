@@ -2,11 +2,11 @@ import { useListScenarios } from "@/services/queries/scenario-builder/scenario-b
 import { Box } from "@mui/material";
 import { useEffect, useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import ActionHeader from "../components/ActionHeader";
-import DeleteConfirmModal from "../components/DeleteConfirmModal";
-import { ScenarioGridLayout } from "../tree-grid/config/layout";
-import { useTreeGridInit } from "../tree-grid/hooks/useTreeGridInit";
-import { mapScenariosToGridBody } from "../tree-grid/utils/data-mapper";
+import ActionHeader from "./components/ActionHeader";
+import DeleteConfirmModal from "./components/DeleteConfirmModal";
+import { ScenarioGridLayout } from "./tree-grid/config/layout";
+import { useTreeGridInit } from "./tree-grid/hooks/useTreeGridInit";
+import { mapScenariosToGridBody } from "./tree-grid/utils/data-mapper";
 
 declare global {
   interface Window {

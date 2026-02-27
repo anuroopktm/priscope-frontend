@@ -2,10 +2,10 @@ import { useGetScenario } from "@/services/queries/scenario-builder/scenario-bui
 import { Box } from "@mui/material";
 import { useState } from "react";
 import { useParams } from "react-router-dom";
-import { useTreeGridInit } from "../tree-grid/hooks/useTreeGridInit";
 import ActionHeader from "./components/ActionHeader";
 import ItemsMasterDrawer from "./components/ItemsMasterDrawer";
 import { ScenarioDetailsLayout } from "./tree-grid/config/details-layout";
+import { useTreeGridInit } from "./tree-grid/hooks/useTreeGridInit";
 import { ScenarioDetailsDummyData } from "./tree-grid/utils/dummy-data";
 
 const gridId = "ScenarioGridDetails";
