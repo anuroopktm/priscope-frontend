@@ -1,12 +1,6 @@
-// components/common/LoaderOverlay.tsx
 import { Box, CircularProgress } from "@mui/material";
-import { useLoaderStore } from "../../store/useLoaderStore";
 
 const LoaderOverlay = () => {
-  const isLoading = useLoaderStore((state) => state.loading);
-
-  if (!isLoading) return null;
-
   return (
     <Box
       sx={{

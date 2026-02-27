@@ -11,11 +11,12 @@ import {
   useExportItemMasterRow,
 } from "@/services/queries/item-master/item-master.queries";
 import LoaderOverlay from "./loader";
-import { useLoaderStore } from "../store/useLoaderStore";
-import { handleItemMasterExport } from "../actions/handleExport";
+import { handleItemMasterExport } from "../actions/handleExportRows";
 import { useGetExportedFile } from "@/services/queries/common/common.queries";
-import ConfirmationDialog from "./confirmation-modal";
 import { handleDeleteSelected } from "../actions/handleDeleteRows";
+import DeleteConfirmModal from "./delete-confirmation-modal";
+import RequestsIcon from "@/assets/items-master/requests.svg";
+import { ItemMasterRequestsModal } from "./request-modal";
 
 interface ActionHeaderProps {
   onSearch: (value: string) => void;
@@ -25,8 +26,8 @@ interface ActionHeaderProps {
 const ActionHeader = ({ onSearch, onImportComplete }: ActionHeaderProps) => {
   const [isUploadModalOpen, setIsUploadModalOpen] = useState<boolean>(false);
   const [openDeleteModal, setOpenDeleteModal] = useState<boolean>(false);
+  const [openRequestModal, setOpenRequestModal] = useState<boolean>(false);
   const selectedRows = useItemMasterStore((state) => state.selectedRows);
-  const { loading } = useLoaderStore.getState();
 
   const {
     mutate: itemMasterExportRowMutate,
@@ -41,9 +42,12 @@ const ActionHeader = ({ onSearch, onImportComplete }: ActionHeaderProps) => {
   const handleOpenDeleteModal = () => {
     setOpenDeleteModal(true);
   };
+  const handleRequestsClick = () => {
+    setOpenRequestModal(true);
+  };
 
-  const handleCloseDeleteModal = () => {
-    setOpenDeleteModal(false);
+  const handleDeleteConfirm = () => {
+    (handleDeleteSelected({ deleteItemMasterRow }), setOpenDeleteModal(false));
   };
 
   return (
@@ -113,6 +117,15 @@ const ActionHeader = ({ onSearch, onImportComplete }: ActionHeaderProps) => {
         <>
           <Button
             variant="contained"
+            onClick={handleRequestsClick}
+            startIcon={
+              <img src={RequestsIcon} alt={"request icon"} width={16} />
+            }
+          >
+            Request
+          </Button>
+          <Button
+            variant="contained"
             startIcon={<AddIcon />}
             onClick={() => setIsUploadModalOpen(true)}
           >
@@ -126,17 +139,16 @@ const ActionHeader = ({ onSearch, onImportComplete }: ActionHeaderProps) => {
         onClose={() => setIsUploadModalOpen(false)}
         onImportComplete={onImportComplete}
       />
-      {loading && <LoaderOverlay />}
-      <ConfirmationDialog
+      {itemMasterExportRowPending && <LoaderOverlay />}
+      <DeleteConfirmModal
         open={openDeleteModal}
-        onClose={handleCloseDeleteModal}
-        onConfirm={() => {
-          (handleDeleteSelected({ deleteItemMasterRow }),
-            setOpenDeleteModal(false));
-        }}
-        message="Are you sure you want to delete selected row(s)? This action cannot be undone"
-        confirmText="Delete"
-        cancelText="Cancel"
+        onClose={() => setOpenDeleteModal(false)}
+        onConfirm={handleDeleteConfirm}
+        isLoading={deleteItemMasterRowPending}
+      />
+      <ItemMasterRequestsModal
+        open={openRequestModal}
+        onClose={() => setOpenRequestModal(false)}
       />
     </Box>
   );

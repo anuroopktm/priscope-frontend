@@ -27,7 +27,7 @@ export const buildTreeGridFilterHead = (
 
 export const ItemMasterGridLayout = (
   Cols: TreeGridHeader[],
-  headers: itemMasterHeaderResponse | undefined
+  headers: itemMasterHeaderResponse | undefined,
 ) => {
   const filterHead = buildTreeGridFilterHead(headers?.headers);
 
