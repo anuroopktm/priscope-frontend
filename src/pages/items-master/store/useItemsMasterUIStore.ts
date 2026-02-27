@@ -1,5 +1,5 @@
 import { create } from "zustand";
-import type { OpenPanel } from "../types/types";
+import type { OpenPanel } from "../../items-master-refactor/types/types";
 
 interface ItemsMasterUIStore {
   searchQuery: string;

@@ -25,7 +25,11 @@ import { INITIAL_HEADERS } from "../constants/tableHeaders.constants";
 import { hasItemMasterPrivileges } from "../helpers/itemMasterHelpers";
 import { convertSavedFilter } from "../helpers/itemMasterTreeGridHelperFunction";
 import { useItemsMasterUIStore } from "../store/useItemsMasterUIStore";
-import type { HeaderList, OpenPanel, TreeGridState } from "../types/types";
+import type {
+  HeaderList,
+  OpenPanel,
+  TreeGridState,
+} from "../../items-master-refactor/types/types";
 import { useItemsMasterGridData } from "./useItemsMasterGridData";
 import { useItemsMasterGridEvents } from "./useItemsMasterGridEvents";
 

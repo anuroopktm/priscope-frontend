@@ -1,5 +1,5 @@
 // import theme from "@/shared/styles/theme";
-import type { SystemFieldMappingProps } from "@/pages/items-master/types/types";
+import type { SystemFieldMappingProps } from "@/pages/items-master-refactor/types/types";
 import {
   useListTemplateHeaders,
   useListTemplates,

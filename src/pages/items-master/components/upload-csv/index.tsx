@@ -9,7 +9,7 @@ import type {
   UploadedFile,
   ControlFields,
 } from "../../constants/upload.constants";
-import type { SystemFieldObject } from "@/pages/items-master/types/types";
+import type { SystemFieldObject } from "@/pages/items-master-refactor/types/types";
 import type { SnackbarState } from "../columns-dropdown";
 
 type ImportData = {

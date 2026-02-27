@@ -20,7 +20,7 @@ import { Box, Button, InputBase, useTheme } from "@mui/material";
 import { useQueryClient } from "@tanstack/react-query";
 import React, { useEffect, useState } from "react";
 import { useItemsMasterUIStore } from "../../store/useItemsMasterUIStore";
-import type { OpenPanel } from "../../types/types";
+import type { OpenPanel } from "../../../items-master-refactor/types/types";
 import AddNewItemDrawer from "../add-item";
 import ColumnDropdown from "../columns-dropdown";
 import SavedFiltersDropdown from "../saved-filters-dropdown";
