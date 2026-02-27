@@ -1,68 +1,28 @@
 import {
-  useListHeaders,
-  useListItems,
-} from "@/services/queries/item-master/item-master.queries";
-import CloseIcon from "@mui/icons-material/Close";
-import { Box, Drawer, IconButton, Typography } from "@mui/material";
-import { useCallback, useEffect, useRef, useState } from "react";
-import {
   buildItemMasterTreeGridBody,
   buildItemMasterTreeGridCols,
   getItemMasterLayout,
-} from "../../../items-master/helpers/itemMasterTreeGridHelperFunction";
+} from "@/pages/items-master/helpers/itemMasterTreeGridHelperFunction";
 import type {
   TreeGridBody,
   TreeGridLayout,
-} from "../../../items-master/helpers/types";
-import { useTreeGridInit } from "../tree-grid/hooks/useTreeGridInit";
-
-interface ItemsMasterDrawerProps {
-  open: boolean;
-  onClose: () => void;
-}
+} from "@/pages/items-master/helpers/types";
+import {
+  useListHeaders,
+  useListItems,
+} from "@/services/queries/item-master/item-master.queries";
+import { Box } from "@mui/material";
+import { useCallback, useEffect, useRef, useState } from "react";
+import { useTreeGridInit } from "../../../tree-grid/hooks/useTreeGridInit";
 
 const gridId = "ItemsMasterGrid";
 const gridContainerId = "TreeGrid_" + gridId;
 
-const ItemsMasterDrawer = ({ open, onClose }: ItemsMasterDrawerProps) => {
-  return (
-    <Drawer
-      anchor="right"
-      open={open}
-      onClose={onClose}
-      PaperProps={{
-        sx: {
-          width: "90vw",
-          height: "100vh",
-          display: "flex",
-          flexDirection: "column",
-        },
-      }}
-    >
-      <Box
-        sx={{
-          p: 2,
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "space-between",
-          borderBottom: "1px solid",
-          borderColor: "divider",
-        }}
-      >
-        <Typography variant="h6">Items Master</Typography>
-        <IconButton onClick={onClose}>
-          <CloseIcon />
-        </IconButton>
-      </Box>
+interface ItemsMasterGridProps {
+  searchTerm: string;
+}
 
-      <Box sx={{ flex: 1, p: 2, minHeight: 0 }}>
-        {open && <ItemsMasterGridContent />}
-      </Box>
-    </Drawer>
-  );
-};
-
-const ItemsMasterGridContent = () => {
+const ItemsMasterGrid = ({ searchTerm }: ItemsMasterGridProps) => {
   const [layout, setLayout] = useState<TreeGridLayout | null>(null);
   const [data, setData] = useState<TreeGridBody | null>(null);
   const isInitialLoadRef = useRef(true);
@@ -79,7 +39,7 @@ const ItemsMasterGridContent = () => {
     hasNextPage,
     isFetchingNextPage,
   } = useListItems({
-    search: "",
+    search: searchTerm,
     page_size: 100,
   });
 
@@ -109,7 +69,6 @@ const ItemsMasterGridContent = () => {
     const newItems = lastPage?.items ?? [];
     const dataToAdd = buildItemMasterTreeGridBody(newItems);
 
-    // If it's the first page but grid already exists, reload body
     if (pages.length === 1) {
       grid.Source.Data.Data = {
         Body: [body.Body[0] || []],
@@ -117,7 +76,6 @@ const ItemsMasterGridContent = () => {
       if (grid.Source.Data.Url) delete grid.Source.Data.Url;
       grid.ReloadBody();
     } else {
-      // Append rows for infinite scroll
       dataToAdd?.Body[0].forEach((rowData: any) => {
         const newRow = grid.AddRow(undefined, undefined, 1, rowData.id);
         if (!newRow) return;
@@ -132,7 +90,6 @@ const ItemsMasterGridContent = () => {
   }, [itemMasterDataList, listHeaderData]);
 
   const handleGridReady = useCallback(() => {
-    // Add scroll handler for infinite loading
     window.TGSetEvent("OnScroll", gridId, (grid: TGrid) => {
       if (!grid) return;
       if (
@@ -161,7 +118,7 @@ const ItemsMasterGridContent = () => {
       id={gridContainerId}
       sx={{
         width: "100%",
-        height: "100%",
+        flex: 1,
         borderRadius: 1,
         overflow: "hidden",
         border: "1px solid",
@@ -171,4 +128,4 @@ const ItemsMasterGridContent = () => {
   );
 };
 
-export default ItemsMasterDrawer;
+export default ItemsMasterGrid;

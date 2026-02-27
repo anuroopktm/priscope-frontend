@@ -3,7 +3,7 @@ import { Box } from "@mui/material";
 import { useState } from "react";
 import { useParams } from "react-router-dom";
 import ActionHeader from "./components/ActionHeader";
-import ItemsMasterDrawer from "./components/ItemsMasterDrawer";
+import ItemsMasterDrawer from "./components/items-master-drawer/ItemsMasterDrawer";
 import { ScenarioDetailsLayout } from "./tree-grid/config/details-layout";
 import { useTreeGridInit } from "./tree-grid/hooks/useTreeGridInit";
 import { ScenarioDetailsDummyData } from "./tree-grid/utils/dummy-data";
