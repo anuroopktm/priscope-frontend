@@ -8,17 +8,20 @@ import { ItemMasterGridLayout } from "./helper";
 import { useListHeaders } from "@/services/queries/item-master/item-master.queries";
 import { buildItemMasterTreeGridCols } from "../items-master/helpers/itemMasterTreeGridHelperFunction";
 import { handleSelected } from "./tree-grid/utils/rowSelection";
+import { useItemMasterStore } from "./store/useItemMasterStore";
+import { handleFilterChange } from "./tree-grid/utils/Filter";
 
 const gridId = "ItemMasterGrid";
 const gridContainerId = "TreeGrid_" + gridId;
 
 const ItemMasterListingPage = () => {
   const [searchTerm, setSearchTerm] = useState<string>("");
+  const filter = useItemMasterStore((store) => store.filter);
 
   const { data: itemMasterData, refetch } = useListItems({
     search: searchTerm,
-    filter: {},
     page_size: 100,
+    filter: filter,
   });
 
   const { data: listHeaderData, isLoading: isListHeadersLoading } =
@@ -26,8 +29,10 @@ const ItemMasterListingPage = () => {
 
   useEffect(() => {
     window.TGSetEvent("OnSelected", gridId, onSelected);
+    window.TGSetEvent("OnFilter", gridId, handleFilterChange);
     return () => {
       window.TGDelEvent("OnSelected", gridId);
+      window.TGDelEvent("OnFilter", gridId);
     };
   }, []);
 

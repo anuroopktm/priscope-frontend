@@ -17,6 +17,11 @@ import { handleDeleteSelected } from "../actions/handleDeleteRows";
 import DeleteConfirmModal from "./delete-confirmation-modal";
 import RequestsIcon from "@/assets/items-master/requests.svg";
 import { ItemMasterRequestsModal } from "./request-modal";
+import ExportIcon from "@/assets/common/export-data.svg";
+import DatabaseImportIcon from "@/assets/items-master/database-import.svg";
+import CommentIcon from "@/assets/items-master/Button.svg";
+import SavedFilterIcon from "@/assets/items-master/bookmark-check-01.svg";
+import { handleClearAllFilters } from "../tree-grid/utils/clearGrid";
 
 interface ActionHeaderProps {
   onSearch: (value: string) => void;
@@ -28,6 +33,9 @@ const ActionHeader = ({ onSearch, onImportComplete }: ActionHeaderProps) => {
   const [openDeleteModal, setOpenDeleteModal] = useState<boolean>(false);
   const [openRequestModal, setOpenRequestModal] = useState<boolean>(false);
   const selectedRows = useItemMasterStore((state) => state.selectedRows);
+  const setSelectedExport = useItemMasterStore(
+    (state) => state.setSelectedExport,
+  );
 
   const {
     mutate: itemMasterExportRowMutate,
@@ -126,10 +134,48 @@ const ActionHeader = ({ onSearch, onImportComplete }: ActionHeaderProps) => {
           </Button>
           <Button
             variant="contained"
-            startIcon={<AddIcon />}
+            startIcon={<img src={RequestsIcon} alt={"clear"} width={16} />}
+            onClick={handleClearAllFilters}
+          >
+            Clear Filters
+          </Button>
+          <Button
+            variant="contained"
+            // disabled={!Object.keys(filter).length}
+            // onClick={handleOpenSaveFilterModal}
+            startIcon={
+              <img src={SavedFilterIcon} alt="Saved Filter" width={16} />
+            }
+          >
+            Save Filter
+          </Button>
+          <Button variant="contained" startIcon={<AddIcon />}>
+            Add Item
+          </Button>
+          <Button
+            variant="contained"
+            onClick={() => {
+              setSelectedExport(true);
+              handleItemMasterExport({
+                itemMasterExportRowMutate,
+                DownloadExportFile,
+              });
+            }}
+            startIcon={<img src={ExportIcon} alt="Export" width={16} />}
+          >
+            Export
+          </Button>
+          <Button
+            variant="contained"
+            startIcon={<img src={DatabaseImportIcon} alt="Export" width={16} />}
             onClick={() => setIsUploadModalOpen(true)}
           >
             Import Data
+          </Button>
+          <Button
+          // onClick={handleToggle}
+          >
+            <img src={CommentIcon} alt="Comments" />
           </Button>
         </>
       )}

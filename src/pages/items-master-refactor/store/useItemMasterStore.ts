@@ -7,6 +7,8 @@ interface ItemMasterStore {
   setSelectedExport: (value: boolean) => void;
   gridRef: TGrid | null;
   setGridRef: (grid: TGrid | null) => void;
+  filter: Record<string, string[]>;
+  setFilter: (filter: Record<string, string[]>) => void;
 }
 
 export const useItemMasterStore = create<ItemMasterStore>((set) => ({
@@ -18,4 +20,7 @@ export const useItemMasterStore = create<ItemMasterStore>((set) => ({
 
   gridRef: null,
   setGridRef: (grid) => set({ gridRef: grid }),
+
+  filter: {},
+  setFilter: (filter) => set({ filter }),
 }));
