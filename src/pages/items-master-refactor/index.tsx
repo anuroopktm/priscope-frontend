@@ -3,13 +3,16 @@ import { Box } from "@mui/material";
 import { useEffect, useMemo, useState } from "react";
 import ActionHeader from "./components/ActionHeader";
 import { useTreeGridInit } from "./tree-grid/hooks/useTreeGridInit";
-import { mapItemsToGridBody } from "./tree-grid/utils/data-mapper";
-import { ItemMasterGridLayout } from "./helper";
+import {
+  buildItemMasterTreeGridBody,
+  buildItemMasterTreeGridCols,
+  ItemMasterGridLayout,
+} from "./helper";
 import { useListHeaders } from "@/services/queries/item-master/item-master.queries";
-import { buildItemMasterTreeGridCols } from "../items-master/helpers/itemMasterTreeGridHelperFunction";
 import { handleSelected } from "./tree-grid/utils/rowSelection";
 import { useItemMasterStore } from "./store/useItemMasterStore";
 import { handleFilterChange } from "./tree-grid/utils/Filter";
+import { DEfAULT_VISIBLE_COLUMNS } from "./constants/headers.constants";
 
 const gridId = "ItemMasterGrid";
 const gridContainerId = "TreeGrid_" + gridId;
@@ -17,6 +20,8 @@ const gridContainerId = "TreeGrid_" + gridId;
 const ItemMasterListingPage = () => {
   const [searchTerm, setSearchTerm] = useState<string>("");
   const filter = useItemMasterStore((store) => store.filter);
+  const checkBoxList = useItemMasterStore((store) => store.checkBoxList);
+  const setCheckBoxList = useItemMasterStore((store) => store.setCheckBoxList);
 
   const { data: itemMasterData, refetch } = useListItems({
     search: searchTerm,
@@ -49,8 +54,36 @@ const ItemMasterListingPage = () => {
   const gridData = useMemo(() => {
     if (!itemMasterData) return null;
     const items = itemMasterData.pages.flatMap((page) => page.items);
-    return mapItemsToGridBody(items);
+    return buildItemMasterTreeGridBody(items);
   }, [itemMasterData]);
+
+  const headers = useMemo(() => {
+    if (!listHeaderData?.headers) return null;
+    const headers = listHeaderData?.headers.map((header) => {
+      return {
+        name: header.name,
+        label: header.label,
+        data_type: header.data_type,
+      };
+    });
+    return headers;
+  }, [listHeaderData]);
+
+  useEffect(() => {
+    if (!headers) return;
+    console.log(headers, "headers");
+    const checkBoxList: Record<string, boolean> = {};
+    headers.forEach((header) => {
+      if (DEfAULT_VISIBLE_COLUMNS.includes(header.label)) {
+        checkBoxList[header.label] = true;
+      } else {
+        checkBoxList[header.label] = false;
+      }
+    });
+    setCheckBoxList(checkBoxList);
+    console.log(checkBoxList, "checkBoxList");
+  }, [headers]);
+  console.log(headers);
 
   const onSelected = (grid: TGrid) => {
     handleSelected(grid);
@@ -73,6 +106,7 @@ const ItemMasterListingPage = () => {
       <ActionHeader
         onSearch={setSearchTerm}
         onImportComplete={() => refetch()}
+        headers={headers}
       />
 
       <Box

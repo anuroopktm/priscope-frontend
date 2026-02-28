@@ -1,6 +1,6 @@
 import AddIcon from "@/assets/actions/add.svg?react";
 import SearchTextField from "@/components/common/SearchTextField";
-import { Box, Button } from "@mui/material";
+import { Box, Button, Stack } from "@mui/material";
 import { useState } from "react";
 import UploadFileModal from "./upload-file/UploadFileModal";
 import { useItemMasterStore } from "../store/useItemMasterStore";
@@ -9,6 +9,7 @@ import DeleteOutlineIcon from "@mui/icons-material/DeleteOutline";
 import {
   useDeleteItemMasterRow,
   useExportItemMasterRow,
+  useSaveFilter,
 } from "@/services/queries/item-master/item-master.queries";
 import LoaderOverlay from "./loader";
 import { handleItemMasterExport } from "../actions/handleExportRows";
@@ -22,20 +23,36 @@ import DatabaseImportIcon from "@/assets/items-master/database-import.svg";
 import CommentIcon from "@/assets/items-master/Button.svg";
 import SavedFilterIcon from "@/assets/items-master/bookmark-check-01.svg";
 import { handleClearAllFilters } from "../tree-grid/utils/clearGrid";
+import SaveFilterModal from "./save-filter";
+import { useToastStore } from "@/store/useToastStore";
+import { useQueryClient } from "@tanstack/react-query";
+import SavedFiltersDropdown from "./saved-filters-dropdown";
+import ColumnDropdown from "./columns-dropdown";
+import type { HeaderList } from "../types/types";
 
 interface ActionHeaderProps {
   onSearch: (value: string) => void;
   onImportComplete?: () => void;
+  headers: HeaderList[] | null;
 }
 
-const ActionHeader = ({ onSearch, onImportComplete }: ActionHeaderProps) => {
+const ActionHeader = ({
+  onSearch,
+  onImportComplete,
+  headers,
+}: ActionHeaderProps) => {
   const [isUploadModalOpen, setIsUploadModalOpen] = useState<boolean>(false);
   const [openDeleteModal, setOpenDeleteModal] = useState<boolean>(false);
   const [openRequestModal, setOpenRequestModal] = useState<boolean>(false);
+  const [openSaveFilterModal, setOpenSaveFilterModal] =
+    useState<boolean>(false);
   const selectedRows = useItemMasterStore((state) => state.selectedRows);
+  const filter = useItemMasterStore((state) => state.filter);
   const setSelectedExport = useItemMasterStore(
     (state) => state.setSelectedExport,
   );
+  const showToast = useToastStore((state) => state.showToast);
+  const queryClient = useQueryClient();
 
   const {
     mutate: itemMasterExportRowMutate,
@@ -46,6 +63,9 @@ const ActionHeader = ({ onSearch, onImportComplete }: ActionHeaderProps) => {
 
   const { mutate: deleteItemMasterRow, isPending: deleteItemMasterRowPending } =
     useDeleteItemMasterRow();
+
+  const { mutate: mutateSaveFilter, isPending: mutateSaveFilterPending } =
+    useSaveFilter();
 
   const handleOpenDeleteModal = () => {
     setOpenDeleteModal(true);
@@ -58,6 +78,25 @@ const ActionHeader = ({ onSearch, onImportComplete }: ActionHeaderProps) => {
     (handleDeleteSelected({ deleteItemMasterRow }), setOpenDeleteModal(false));
   };
 
+  const handleOpenSaveFilterModal = () => {
+    setOpenSaveFilterModal(true);
+  };
+
+  const handleSaveFilterModal = (label: string) => {
+    const payload = {
+      name: label,
+      filter: filter,
+    };
+    mutateSaveFilter(payload, {
+      onSuccess: () => {
+        showToast("Filter added successfully!", "success");
+        queryClient.invalidateQueries({ queryKey: ["saved-filter"] });
+      },
+      onError: () => {
+        showToast("Failed to add filter", "error");
+      },
+    });
+  };
   return (
     <Box
       sx={{
@@ -122,7 +161,12 @@ const ActionHeader = ({ onSearch, onImportComplete }: ActionHeaderProps) => {
           </div>
         </>
       ) : (
-        <>
+        <Stack
+          direction="row"
+          spacing={0.5}
+          alignItems="center"
+          flexWrap="wrap"
+        >
           <Button
             variant="contained"
             onClick={handleRequestsClick}
@@ -142,13 +186,15 @@ const ActionHeader = ({ onSearch, onImportComplete }: ActionHeaderProps) => {
           <Button
             variant="contained"
             // disabled={!Object.keys(filter).length}
-            // onClick={handleOpenSaveFilterModal}
+            onClick={handleOpenSaveFilterModal}
             startIcon={
               <img src={SavedFilterIcon} alt="Saved Filter" width={16} />
             }
           >
             Save Filter
           </Button>
+          <SavedFiltersDropdown />
+          <ColumnDropdown headers={headers} />
           <Button variant="contained" startIcon={<AddIcon />}>
             Add Item
           </Button>
@@ -177,7 +223,7 @@ const ActionHeader = ({ onSearch, onImportComplete }: ActionHeaderProps) => {
           >
             <img src={CommentIcon} alt="Comments" />
           </Button>
-        </>
+        </Stack>
       )}
 
       <UploadFileModal
@@ -195,6 +241,11 @@ const ActionHeader = ({ onSearch, onImportComplete }: ActionHeaderProps) => {
       <ItemMasterRequestsModal
         open={openRequestModal}
         onClose={() => setOpenRequestModal(false)}
+      />
+      <SaveFilterModal
+        open={openSaveFilterModal}
+        onClose={() => setOpenSaveFilterModal(false)}
+        onSubmit={handleSaveFilterModal}
       />
     </Box>
   );

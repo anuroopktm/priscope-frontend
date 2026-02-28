@@ -1,8 +1,13 @@
+import { DEfAULT_VISIBLE_COLUMNS } from "../constants/headers.constants";
 import { baseGridCfg } from "../tree-grid/config/layout";
 import type {
+  itemMasterBodyResponseItems,
   itemMasterHeaderResponse,
   itemMasterHeaderResponseArrayList,
+  TreeGridBody,
   TreeGridHeader,
+  TreeGridHeaderList,
+  TreeGridRow,
 } from "./types";
 
 export const buildTreeGridFilterHead = (
@@ -65,4 +70,97 @@ export const ItemMasterGridLayout = (
     Head: [filterHead],
     Solid: [],
   };
+};
+
+export const buildItemMasterTreeGridCols = (
+  items: itemMasterHeaderResponseArrayList[] | undefined,
+): TreeGridHeaderList => {
+  if (!items || items.length === 0) {
+    return { cols: [] };
+  }
+  console.log(items, "===================.");
+  const cols: TreeGridHeader[] = items
+    .filter((item) => item.label !== "Color")
+    .map((item) => {
+      const col: any = {
+        Name: item.label,
+        Type: "Text",
+        RelWidth: 1,
+        CanEdit: 1,
+        CanFilter: 1,
+        Visible: DEfAULT_VISIBLE_COLUMNS.includes(item.label) ? 1 : 0,
+      };
+      return col;
+    });
+  return { cols };
+};
+
+export const buildItemMasterTreeGridBody = (
+  items: itemMasterBodyResponseItems[] | undefined,
+): TreeGridBody => {
+  if (!items || items.length === 0) {
+    return { Body: [[]] };
+  }
+  const body: TreeGridRow[] = items.map((item) => {
+    const row: TreeGridRow = { id: item.id };
+
+    (Object.keys(item) as (keyof itemMasterBodyResponseItems)[]).forEach(
+      (key) => {
+        const value = item[key];
+        if (
+          key !== "attributes" &&
+          key !== "suppliers" &&
+          key !== "customers" &&
+          key !== "id"
+        ) {
+          if (value && typeof value === "object" && "value" in value) {
+            row[value.label as string] = value.value;
+          } else if (
+            typeof value === "string" ||
+            typeof value === "number" ||
+            typeof value === "boolean"
+          ) {
+            row[key] = value;
+          }
+        } else if (key === "attributes") {
+          const attrs = item.attributes;
+          if (attrs) {
+            Object.values(attrs).forEach((attr) => {
+              if (attr.label?.toLowerCase() === "color") return;
+              if (attr.label && attr.value !== undefined) {
+                row[attr.label] = attr.value;
+              }
+            });
+          }
+        } else if (key === "suppliers") {
+          const supplier = item.suppliers?.[0];
+          if (!supplier) return;
+
+          row["Supplier Name"] = supplier.name;
+          row["Supplier Code"] = supplier.code;
+
+          if (supplier.cost) {
+            Object.entries(supplier.cost).forEach(([costKey, costValue]) => {
+              row[costKey] = costValue;
+            });
+          }
+        } else if (key === "customers") {
+          const customer = item.customers?.[0];
+          if (!customer) return;
+
+          row["Customer Name"] = customer.name;
+          row["Customer Code"] = customer.code;
+
+          if (customer.cost) {
+            Object.entries(customer.cost).forEach(([costKey, costValue]) => {
+              row[costKey] = costValue;
+            });
+          }
+        }
+      },
+    );
+
+    return row;
+  });
+  return { Body: [body] };
 };

@@ -5,46 +5,41 @@ import {
   DialogContent,
   DialogTitle,
   Divider,
-  MenuItem,
   TextField,
 } from "@mui/material";
 import { useState } from "react";
 
-type CreateColumnModalProps = {
+type SaveFilterModalProps = {
   open?: boolean;
   onClose: () => void;
-  onSubmit: (data: { label: string; dataType: string }) => void;
+  onSubmit: (label: string) => void;
   defaultLabel?: string;
-  dataTypeOptions: string[];
+  dataTypeOptions?: string[];
 };
 
-const CreateColumnModal = ({
+const SaveFilterModal = ({
   open = true,
   onClose,
   onSubmit,
   defaultLabel = "",
-  dataTypeOptions,
-}: CreateColumnModalProps) => {
-  // const { t } = useTranslation();
-  // const theme = useTheme();
-
+}: SaveFilterModalProps) => {
   const [label, setLabel] = useState(defaultLabel);
-  const [dataType, setDataType] = useState("");
+  const [_dataType, setDataType] = useState("");
   const [errors, setErrors] = useState<{ label?: string; dataType?: string }>(
     {},
   );
 
   const handleSubmit = () => {
     const newErrors: typeof errors = {};
-    if (!label.trim()) newErrors.label = "Error";
-    if (!dataType) newErrors.dataType = "Error";
+    if (!label.trim())
+      newErrors.label = "Failed to add Filter. Please try again.";
 
     if (Object.keys(newErrors).length > 0) {
       setErrors(newErrors);
       return;
     }
 
-    onSubmit({ label, dataType });
+    onSubmit(label);
     setLabel("");
     setDataType("");
     setErrors({});
@@ -79,7 +74,7 @@ const CreateColumnModal = ({
           color: "#1A2B44",
         }}
       >
-        Create new column
+        Save Filter
       </DialogTitle>
 
       <Divider />
@@ -88,7 +83,7 @@ const CreateColumnModal = ({
         sx={{ display: "flex", flexDirection: "column", gap: 2, pt: 2 }}
       >
         <TextField
-          label="Column Label"
+          label="Add Filter"
           value={label}
           onChange={(e) => {
             setLabel(e.target.value);
@@ -105,34 +100,7 @@ const CreateColumnModal = ({
             },
           }}
         />
-
-        <TextField
-          select
-          label="Data Type"
-          value={dataType}
-          onChange={(e) => {
-            setDataType(e.target.value);
-            if (errors.dataType)
-              setErrors((prev) => ({ ...prev, dataType: undefined }));
-          }}
-          variant="outlined"
-          size="small"
-          error={!!errors.dataType}
-          helperText={errors.dataType}
-          sx={{
-            "& .MuiOutlinedInput-root": {
-              borderRadius: "8px",
-            },
-          }}
-        >
-          {dataTypeOptions.map((type) => (
-            <MenuItem key={type} value={type}>
-              {type}
-            </MenuItem>
-          ))}
-        </TextField>
       </DialogContent>
-
       <DialogActions
         sx={{
           px: 3,
@@ -147,16 +115,16 @@ const CreateColumnModal = ({
             e.stopPropagation();
             handleCancel();
           }}
-          variant="outlined"
+          variant="contained"
         >
           Cancel
         </Button>
         <Button onClick={handleSubmit} variant="contained">
-          Create Column
+          Save Filter
         </Button>
       </DialogActions>
     </Dialog>
   );
 };
 
-export default CreateColumnModal;
+export default SaveFilterModal;

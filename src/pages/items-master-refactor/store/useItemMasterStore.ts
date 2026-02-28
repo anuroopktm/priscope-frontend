@@ -9,6 +9,12 @@ interface ItemMasterStore {
   setGridRef: (grid: TGrid | null) => void;
   filter: Record<string, string[]>;
   setFilter: (filter: Record<string, string[]>) => void;
+  checkBoxList: Record<string, boolean>;
+  setCheckBoxList: (
+    checkBoxList:
+      | Record<string, boolean>
+      | ((prev: Record<string, boolean>) => Record<string, boolean>),
+  ) => void;
 }
 
 export const useItemMasterStore = create<ItemMasterStore>((set) => ({
@@ -23,4 +29,11 @@ export const useItemMasterStore = create<ItemMasterStore>((set) => ({
 
   filter: {},
   setFilter: (filter) => set({ filter }),
+
+  checkBoxList: {},
+  setCheckBoxList: (update) =>
+    set((state) => ({
+      checkBoxList:
+        typeof update === "function" ? update(state.checkBoxList) : update,
+    })),
 }));
