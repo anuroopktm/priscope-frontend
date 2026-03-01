@@ -1,41 +1,42 @@
 import {
   useAddBulkInsertAdminRequest,
   useCreateItemMasterComment,
+  useListComments,
   useListHeaders,
   useListItems,
 } from "@/services/queries/item-master-refactor/item-master-refactor.queries";
 import { Box } from "@mui/material";
-import { useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import ActionHeader from "./components/ActionHeader";
 import { useTreeGridInit } from "./tree-grid/hooks/useTreeGridInit";
 import {
   buildItemMasterTreeGridBody,
   buildItemMasterTreeGridCols,
+  createItemMasterCommentPayload,
+  hasItemMasterPrivileges,
   ItemMasterGridLayout,
 } from "./helper";
-// import {
-//   useAddBulkInsertAdminRequest,
-//   useCreateItemMasterComment,
-//   useListHeaders,
-// } from "@/services/queries/item-master/item-master.queries";
 import { handleSelected } from "./tree-grid/utils/rowSelection";
 import { useItemMasterStore } from "./store/useItemMasterStore";
 import { handleFilterChange } from "./tree-grid/utils/Filter";
 import { DEfAULT_VISIBLE_COLUMNS } from "./constants/headers.constants";
-import { handleValueChanged } from "./tree-grid/CellValue/handleValueChanged";
+import { handleValueChanged } from "./tree-grid/cellvalue/handleValueChanged";
 import TableSavePopover from "./components/table-save-popover";
 import { useHandleEditPopover } from "./tree-grid/hooks/useHandleEditPopover";
 import { useHandleGridEditConfirm } from "./actions/handleGridEditConfirm";
-import {
-  createItemMasterCommentPayload,
-  hasItemMasterPrivileges,
-} from "./helper/itemMasterHelpers";
+// import {
+//   createItemMasterCommentPayload,
+//   hasItemMasterPrivileges,
+// } from "./helper/itemMasterHelpers";
 import { handleEditCellAdminRequest } from "./actions/editItemMasterAdmin";
 import RequestSuccessDialog from "@/components/common/request-notification";
-import { handleRightClick } from "./tree-grid/CellValue/handleRightClick";
+import { handleRightClick } from "./tree-grid/cellvalue/handleRightClick";
 import { useToastStore } from "@/store/useToastStore";
 import { COMMENT_TYPE } from "@/constants/comments.constants";
 import CommentsModal from "./components/comments-modal";
+import type { OpenPanel } from "./types/types";
+import CommentSidebar from "./components/comment-sidebar";
+import { focusCell, focusRow } from "./tree-grid/focus/focusEvents";
 
 const gridId = "ItemMasterGrid";
 const gridContainerId = "TreeGrid_" + gridId;
@@ -50,6 +51,7 @@ const ItemMasterListingPage = () => {
     ((comment: string) => void) | null
   >(null);
   const [showCommentModal, setShowCommentModal] = useState(false);
+  const [openPanel, setOpenPanel] = useState<OpenPanel>(null);
   const filter = useItemMasterStore((store) => store.filter);
   const setCheckBoxList = useItemMasterStore((store) => store.setCheckBoxList);
   const showSavePopover = useItemMasterStore((s) => s.showSavePopover);
@@ -76,6 +78,9 @@ const ItemMasterListingPage = () => {
 
   const { mutateAsync: createComment, isPending: createCommentPending } =
     useCreateItemMasterComment();
+
+  const { mutateAsync: listComments, isPending: isCommentListingPending } =
+    useListComments();
 
   useEffect(() => {
     window.TGSetEvent("OnSelected", gridId, onSelected);
@@ -156,13 +161,6 @@ const ItemMasterListingPage = () => {
     oldValue: string,
     comment?: string,
   ) => {
-    console.log("onCellEditConfirm called with:", {
-      row,
-      col,
-      value,
-      oldValue,
-      comment,
-    });
     handleGridEditConfirm({
       row,
       col,
@@ -186,6 +184,7 @@ const ItemMasterListingPage = () => {
     gridRef,
     onCellEditConfirm,
   });
+
   const handleConfirmComment = (
     type: string,
     id: string,
@@ -193,7 +192,6 @@ const ItemMasterListingPage = () => {
     comment: string,
   ) => {
     const payload = createItemMasterCommentPayload(type, col, comment);
-
     if (!payload) {
       console.error("Invalid comment type");
       return;
@@ -223,12 +221,27 @@ const ItemMasterListingPage = () => {
     });
     setShowCommentModal(true);
   };
+
   const onHandleRightClick = handleRightClick(gridId, [
     {
       name: "Comment on this cell",
       onClick: onClickCellComment,
     },
   ]);
+
+  const handleCommentSelect = (comment: any) => {
+    const id = comment.item_id;
+    if (comment.comment_type === "row") {
+      focusRow(gridRef, id);
+    } else if (comment.comment_type === "field") {
+      const fieldKey = comment.field_key;
+      focusCell(gridRef, id, fieldKey);
+    }
+  };
+
+  const toggleCommentsPanel = useCallback((panel: OpenPanel) => {
+    setOpenPanel((prev) => (prev === panel ? null : panel));
+  }, []);
 
   useTreeGridInit(gridId, gridContainerId, gridLayout, gridData);
 
@@ -242,42 +255,61 @@ const ItemMasterListingPage = () => {
         bgcolor: "brand.background",
         borderRadius: 1,
         overflow: "hidden",
+        position: "relative",
       }}
     >
       <ActionHeader
         onSearch={setSearchTerm}
         onImportComplete={() => refetch()}
         headers={headers}
+        onToggleCommentsPanel={() => toggleCommentsPanel("comments")}
       />
 
       <Box
         sx={{
           flex: 1,
           minHeight: 0,
-          p: 2,
+          p: 1,
           display: "flex",
-          flexDirection: "column",
+          position: "relative",
         }}
       >
         <Box
+          id={gridContainerId}
           sx={{
-            flex: 1,
-            minHeight: 0,
+            height: "100%",
+            width: "100%",
             borderRadius: 1,
-            p: 2,
-            bgcolor: "background.paper",
+          }}
+        />
+        <Box
+          sx={{
+            width: openPanel === "comments" ? 300 : 0,
+            transition: "width 0.3s ease",
+            overflow: "hidden",
+            height: "100%",
+            marginLeft: openPanel === "comments" ? 1 : 0,
+            background: "white",
+            color: "black",
+            display: "flex",
+            flexDirection: "column",
+            borderRadius: "8px 0 0 8px",
+            boxShadow:
+              openPanel === "comments" ? "0px 0px 8px rgba(0,0,0,0.1)" : "none",
+            zIndex: 2,
           }}
         >
-          <Box
-            id={gridContainerId}
-            sx={{
-              height: "100%",
-              width: "100%",
-              borderRadius: 1,
-            }}
-          />
+          {openPanel === "comments" && (
+            <CommentSidebar
+              isOpen={openPanel}
+              onClose={() => setOpenPanel(null)}
+              listComments={listComments}
+              onCommentSelect={handleCommentSelect}
+            />
+          )}
         </Box>
       </Box>
+
       {requestNotficationVisible && (
         <RequestSuccessDialog
           setNotificationOpen={setRequestNotficationVisible}
@@ -289,6 +321,7 @@ const ItemMasterListingPage = () => {
           onClose={() => setShowCommentModal(false)}
         />
       )}
+
       {showSavePopover && (
         <div
           style={{
@@ -301,7 +334,6 @@ const ItemMasterListingPage = () => {
           <TableSavePopover
             onSave={() => {
               setCommentAdded(true);
-              console.log("handleEditSave called from popover");
               handleEditSave();
               closeSavePopover();
             }}

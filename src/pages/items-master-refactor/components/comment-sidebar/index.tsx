@@ -1,4 +1,3 @@
-"use client";
 import SearchIcon from "@/assets/items-master/search-01.svg";
 import { getAvatarColor } from "@/utils/getAvatarColor";
 import CloseIcon from "@mui/icons-material/Close";
@@ -24,7 +23,7 @@ type CommentSidebarProps = {
   onCommentSelect?: (comment: Comment) => void;
   renderComment?: (comment: Comment, index: number) => React.ReactNode;
   title?: string;
-  listComments: any; // Function to call API
+  listComments: any; 
 };
 
 const formatTime = (timestamp: string) => {

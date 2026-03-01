@@ -1,5 +1,6 @@
 import {
   Button,
+  CircularProgress,
   Dialog,
   DialogActions,
   DialogContent,
@@ -15,6 +16,7 @@ type SaveFilterModalProps = {
   onSubmit: (label: string) => void;
   defaultLabel?: string;
   dataTypeOptions?: string[];
+  isLoading?: boolean;
 };
 
 const SaveFilterModal = ({
@@ -22,6 +24,7 @@ const SaveFilterModal = ({
   onClose,
   onSubmit,
   defaultLabel = "",
+  isLoading,
 }: SaveFilterModalProps) => {
   const [label, setLabel] = useState(defaultLabel);
   const [_dataType, setDataType] = useState("");
@@ -119,8 +122,15 @@ const SaveFilterModal = ({
         >
           Cancel
         </Button>
-        <Button onClick={handleSubmit} variant="contained">
-          Save Filter
+        <Button
+          onClick={handleSubmit}
+          variant="contained"
+          disabled={isLoading}
+          startIcon={
+            isLoading ? <CircularProgress size={20} color="inherit" /> : null
+          }
+        >
+          {isLoading ? "Saving..." : "Save Filter"}
         </Button>
       </DialogActions>
     </Dialog>

@@ -419,3 +419,8 @@ export interface SavedFiltersListFilters {
   description: string;
   created_by: SavedFiltersListFiltersCreatedBy;
 }
+
+export interface SkippedItem {
+  frontend_id: string;
+  [key: string]: any;
+}

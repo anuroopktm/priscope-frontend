@@ -120,4 +120,3 @@ export const baseGridCfg = {
   ClearFilterOff: "0",
   Html: 1,
 };
-

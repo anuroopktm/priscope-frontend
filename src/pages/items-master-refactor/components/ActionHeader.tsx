@@ -34,12 +34,14 @@ interface ActionHeaderProps {
   onSearch: (value: string) => void;
   onImportComplete?: () => void;
   headers: HeaderList[] | null;
+  onToggleCommentsPanel: () => void;
 }
 
 const ActionHeader = ({
   onSearch,
   onImportComplete,
   headers,
+  onToggleCommentsPanel,
 }: ActionHeaderProps) => {
   const [isUploadModalOpen, setIsUploadModalOpen] = useState<boolean>(false);
   const [openDeleteModal, setOpenDeleteModal] = useState<boolean>(false);
@@ -218,9 +220,7 @@ const ActionHeader = ({
           >
             Import Data
           </Button>
-          <Button
-          // onClick={handleToggle}
-          >
+          <Button onClick={onToggleCommentsPanel}>
             <img src={CommentIcon} alt="Comments" />
           </Button>
         </Stack>
@@ -246,6 +246,7 @@ const ActionHeader = ({
         open={openSaveFilterModal}
         onClose={() => setOpenSaveFilterModal(false)}
         onSubmit={handleSaveFilterModal}
+        isLoading={mutateSaveFilterPending}
       />
     </Box>
   );
