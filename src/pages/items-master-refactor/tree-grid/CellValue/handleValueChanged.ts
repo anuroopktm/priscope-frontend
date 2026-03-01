@@ -11,12 +11,7 @@ export const handleValueChanged = (
   const isFilterRow = row?.Def?.Name === "Filter";
   const { openSavePopover } = useItemMasterStore.getState();
 
-  if (
-    grid?.id !== gridId ||
-    oldval === val ||
-    // !enableEditPopover ||
-    isFilterRow
-  )
+  if (grid?.id !== gridId || String(oldval) === String(val) || isFilterRow)
     return;
 
   const cellElement = grid.GetCell(row, col);

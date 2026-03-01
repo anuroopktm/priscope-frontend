@@ -17,6 +17,7 @@ import { useGetExportedFile } from "@/services/queries/common/common.queries";
 import { handleDeleteSelected } from "../actions/handleDeleteRows";
 import DeleteConfirmModal from "./delete-confirmation-modal";
 import RequestsIcon from "@/assets/items-master/requests.svg";
+import LogFileIcon from "@/assets/items-master/Group.svg";
 import { ItemMasterRequestsModal } from "./request-modal";
 import ExportIcon from "@/assets/common/export-data.svg";
 import DatabaseImportIcon from "@/assets/items-master/database-import.svg";
@@ -196,6 +197,13 @@ const ActionHeader = ({
             Save Filter
           </Button>
           <SavedFiltersDropdown />
+          <Button
+            variant="contained"
+            startIcon={<img src={LogFileIcon} alt="Log File" width={16} />}
+            // onClick={handleFilesClick}
+          >
+            Files
+          </Button>
           <ColumnDropdown headers={headers} />
           <Button variant="contained" startIcon={<AddIcon />}>
             Add Item

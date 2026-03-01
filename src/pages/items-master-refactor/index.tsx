@@ -24,10 +24,6 @@ import { handleValueChanged } from "./tree-grid/cellvalue/handleValueChanged";
 import TableSavePopover from "./components/table-save-popover";
 import { useHandleEditPopover } from "./tree-grid/hooks/useHandleEditPopover";
 import { useHandleGridEditConfirm } from "./actions/handleGridEditConfirm";
-// import {
-//   createItemMasterCommentPayload,
-//   hasItemMasterPrivileges,
-// } from "./helper/itemMasterHelpers";
 import { handleEditCellAdminRequest } from "./actions/editItemMasterAdmin";
 import RequestSuccessDialog from "@/components/common/request-notification";
 import { handleRightClick } from "./tree-grid/cellvalue/handleRightClick";
@@ -37,6 +33,8 @@ import CommentsModal from "./components/comments-modal";
 import type { OpenPanel } from "./types/types";
 import CommentSidebar from "./components/comment-sidebar";
 import { focusCell, focusRow } from "./tree-grid/focus/focusEvents";
+import DetailView from "./components/detail-view";
+import { DetailsModal } from "./components/detail-view-modal";
 
 const gridId = "ItemMasterGrid";
 const gridContainerId = "TreeGrid_" + gridId;
@@ -52,6 +50,7 @@ const ItemMasterListingPage = () => {
   >(null);
   const [showCommentModal, setShowCommentModal] = useState(false);
   const [openPanel, setOpenPanel] = useState<OpenPanel>(null);
+  const [isDetailViewCell, setIsDetailViewCell] = useState(false);
   const filter = useItemMasterStore((store) => store.filter);
   const setCheckBoxList = useItemMasterStore((store) => store.setCheckBoxList);
   const showSavePopover = useItemMasterStore((s) => s.showSavePopover);
@@ -308,6 +307,29 @@ const ItemMasterListingPage = () => {
             />
           )}
         </Box>
+        <Box
+          sx={{
+            width: openPanel === "detail-view" ? 406 : 0,
+            transition: "width 0.3s ease",
+            overflow: "hidden",
+            height: "calc(100vh - 147px)",
+            marginLeft: openPanel === "detail-view" ? 1 : 0,
+            background: "white",
+            color: "black",
+            display: "flex",
+            flexDirection: "column",
+            borderRadius: "8px 0 0 8px",
+          }}
+        >
+          {openPanel === "detail-view" && (
+            <DetailView
+              item_id={""}
+              timelineTitle={"Timeline"}
+              onClose={() => setOpenPanel(null)}
+              onExpandClick={() => setIsDetailViewCell(true)}
+            />
+          )}
+        </Box>
       </Box>
 
       {requestNotficationVisible && (
@@ -319,6 +341,15 @@ const ItemMasterListingPage = () => {
         <CommentsModal
           onSubmit={onSubmitComment}
           onClose={() => setShowCommentModal(false)}
+        />
+      )}
+
+      {isDetailViewCell && (
+        <DetailsModal
+          isOpen={isDetailViewCell}
+          onClose={() => setIsDetailViewCell(false)}
+          timelineTitle={"Timeline"}
+          item_id={""}
         />
       )}
 

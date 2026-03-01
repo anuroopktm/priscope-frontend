@@ -319,6 +319,7 @@ export const useListItems = (payload: Omit<ListRequestBody, "skip">) => {
         : totalFetched;
     },
     initialPageParam: 0,
+    placeholderData: (prev) => prev,
   });
 };
 
