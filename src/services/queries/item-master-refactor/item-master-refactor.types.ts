@@ -232,7 +232,7 @@ export interface DeleteSelectedRowPayload {
 }
 
 export interface ListCommentsPayload {
-  skip: number;
+  search?: string;
   page_size: number;
 }
 

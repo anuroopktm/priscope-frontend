@@ -357,15 +357,36 @@ export const useListHeaders = (payload: ListRequestBody) => {
     },
   });
 };
-
-export const useListComments = () => {
-  return useMutation<CommentsResponse, AxiosError, ListCommentsPayload>({
-    mutationFn: async (payload) => {
-      const { data } = await axiosInstance.post<CommentsResponse>(
+export const useListComments = (payload: ListCommentsPayload) => {
+  return useInfiniteQuery({
+    queryKey: ["listComments", payload.search],
+    initialPageParam: 0,
+    queryFn: async ({ pageParam = 0 }) => {
+      const response = await axiosInstance.post<CommentsResponse>(
         `/v1/item-master/comments/search`,
-        payload,
+        {
+          search: payload.search ?? "",
+          page_size: payload.page_size,
+          skip: pageParam,
+        },
       );
-      return data;
+      return response.data;
+    },
+    getNextPageParam: (lastPage, allPages) => {
+      const total = lastPage.total ?? 0;
+
+      // Count how many comments we already loaded
+      const loadedCount = allPages.reduce(
+        (acc, page) => acc + (page.comments?.length ?? 0),
+        0,
+      );
+
+      // If we still haven't loaded everything → fetch next page
+      if (loadedCount < total) {
+        return loadedCount; // next skip value
+      }
+
+      return undefined;
     },
   });
 };

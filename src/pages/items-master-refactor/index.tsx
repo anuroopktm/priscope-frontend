@@ -1,7 +1,6 @@
 import {
   useAddBulkInsertAdminRequest,
   useCreateItemMasterComment,
-  useListComments,
   useListHeaders,
   useListItems,
 } from "@/services/queries/item-master-refactor/item-master-refactor.queries";
@@ -78,9 +77,6 @@ const ItemMasterListingPage = () => {
 
   const { mutateAsync: createComment, isPending: createCommentPending } =
     useCreateItemMasterComment();
-
-  const { mutateAsync: listComments, isPending: isCommentListingPending } =
-    useListComments();
 
   useEffect(() => {
     window.TGSetEvent("OnSelected", gridId, onSelected);
@@ -311,9 +307,7 @@ const ItemMasterListingPage = () => {
         >
           {openPanel === "comments" && (
             <CommentSidebar
-              isOpen={openPanel}
               onClose={() => setOpenPanel(null)}
-              listComments={listComments}
               onCommentSelect={handleCommentSelect}
             />
           )}
