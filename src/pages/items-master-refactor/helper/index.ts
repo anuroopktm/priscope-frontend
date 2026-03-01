@@ -164,3 +164,28 @@ export const buildItemMasterTreeGridBody = (
   });
   return { Body: [body] };
 };
+
+export const getEditCellValueAdminApproval = (
+  newData: itemMasterBodyResponseItems | undefined,
+  oldData: itemMasterBodyResponseItems | undefined,
+  comment: any,
+) => {
+  if (!newData || !oldData) return;
+  return {
+    source_module: "item_master",
+    target_module: "item_master",
+    request_action: "update",
+    request_info: [
+      {
+        old_record: {
+          data: oldData,
+        },
+        new_record: {
+          data: newData,
+          comment,
+        },
+      },
+    ],
+    request_comments: "update",
+  };
+};

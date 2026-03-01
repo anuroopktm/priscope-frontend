@@ -15,6 +15,20 @@ interface ItemMasterStore {
       | Record<string, boolean>
       | ((prev: Record<string, boolean>) => Record<string, boolean>),
   ) => void;
+  showSavePopover: boolean;
+  popoverPosition: { top: number; left: number };
+  changedCell: {
+    row: TRow;
+    col: string;
+    value: any;
+    oldValue: any;
+  } | null;
+
+  openSavePopover: (
+    position: { top: number; left: number },
+    cell: { row: TRow; col: string; value: any; oldValue: any },
+  ) => void;
+  closeSavePopover: () => void;
 }
 
 export const useItemMasterStore = create<ItemMasterStore>((set) => ({
@@ -36,4 +50,22 @@ export const useItemMasterStore = create<ItemMasterStore>((set) => ({
       checkBoxList:
         typeof update === "function" ? update(state.checkBoxList) : update,
     })),
+
+  showSavePopover: false,
+  popoverPosition: { top: 0, left: 0 },
+  changedCell: null,
+
+  openSavePopover: (position, cell) =>
+    set({
+      showSavePopover: true,
+      popoverPosition: position,
+      changedCell: cell,
+    }),
+
+  closeSavePopover: () =>
+    set({
+      showSavePopover: false,
+      popoverPosition: { top: 0, left: 0 },
+      changedCell: null,
+    }),
 }));
