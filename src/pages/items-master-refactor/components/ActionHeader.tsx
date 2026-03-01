@@ -21,7 +21,7 @@ import LogFileIcon from "@/assets/items-master/Group.svg";
 import { ItemMasterRequestsModal } from "./request-modal";
 import ExportIcon from "@/assets/common/export-data.svg";
 import DatabaseImportIcon from "@/assets/items-master/database-import.svg";
-import CommentIcon from "@/assets/items-master/Button.svg";
+import CommentIcon from "@/assets/items-master/CommentsButton.svg";
 import SavedFilterIcon from "@/assets/items-master/bookmark-check-01.svg";
 import { handleClearAllFilters } from "../tree-grid/utils/clearGrid";
 import SaveFilterModal from "./save-filter";

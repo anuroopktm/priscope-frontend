@@ -51,6 +51,7 @@ const ItemMasterListingPage = () => {
   const [showCommentModal, setShowCommentModal] = useState(false);
   const [openPanel, setOpenPanel] = useState<OpenPanel>(null);
   const [isDetailViewCell, setIsDetailViewCell] = useState(false);
+  const [detailedViewId, setDetailedViewId] = useState<string>("");
   const filter = useItemMasterStore((store) => store.filter);
   const setCheckBoxList = useItemMasterStore((store) => store.setCheckBoxList);
   const showSavePopover = useItemMasterStore((s) => s.showSavePopover);
@@ -86,11 +87,13 @@ const ItemMasterListingPage = () => {
     window.TGSetEvent("OnFilter", gridId, handleFilterChange);
     window.TGSetEvent("OnValueChanged", gridId, onHandleValueChanged);
     window.TGSetEvent("OnRightClick", gridId, onHandleRightClick);
+    window.TGSetEvent("OnClick", gridId, onCellClick);
     return () => {
       window.TGDelEvent("OnSelected", gridId);
       window.TGDelEvent("OnFilter", gridId);
       window.TGDelEvent("OnValueChanged", gridId);
       window.TGDelEvent("OnRightClick", gridId);
+      window.TGDelEvent("OnClick", gridId);
     };
   }, []);
 
@@ -195,15 +198,9 @@ const ItemMasterListingPage = () => {
       console.error("Invalid comment type");
       return;
     }
-
-    // setShowLoader(true);
-
     createComment(
       { itemMasterId: id, payload },
       {
-        onSettled: () => {
-          // setShowLoader(false);
-        },
         onSuccess: () => {
           showToast("Comment added successfully", "success");
         },
@@ -241,6 +238,20 @@ const ItemMasterListingPage = () => {
   const toggleCommentsPanel = useCallback((panel: OpenPanel) => {
     setOpenPanel((prev) => (prev === panel ? null : panel));
   }, []);
+  const handleSkuUpcClick = (rowId: string, col: string, value: string) => {
+    setDetailedViewId(rowId);
+
+    setOpenPanel((prev) => (prev === "detail-view" ? prev : "detail-view"));
+  };
+
+  const onCellClick = (grid: TGrid, row: TRow, col: string) => {
+    if (!row || row.Kind !== "Data") return;
+    if (col === "SKU" || col === "UPC") {
+      const value = row[col];
+      if (!value) return;
+      handleSkuUpcClick(row.id, col, value);
+    }
+  };
 
   useTreeGridInit(gridId, gridContainerId, gridLayout, gridData);
 
@@ -312,7 +323,8 @@ const ItemMasterListingPage = () => {
             width: openPanel === "detail-view" ? 406 : 0,
             transition: "width 0.3s ease",
             overflow: "hidden",
-            height: "calc(100vh - 147px)",
+            // height: "calc(100vh - 147px)",
+            height: "100%",
             marginLeft: openPanel === "detail-view" ? 1 : 0,
             background: "white",
             color: "black",
@@ -323,7 +335,7 @@ const ItemMasterListingPage = () => {
         >
           {openPanel === "detail-view" && (
             <DetailView
-              item_id={""}
+              item_id={detailedViewId}
               timelineTitle={"Timeline"}
               onClose={() => setOpenPanel(null)}
               onExpandClick={() => setIsDetailViewCell(true)}
@@ -349,7 +361,7 @@ const ItemMasterListingPage = () => {
           isOpen={isDetailViewCell}
           onClose={() => setIsDetailViewCell(false)}
           timelineTitle={"Timeline"}
-          item_id={""}
+          item_id={detailedViewId}
         />
       )}
 

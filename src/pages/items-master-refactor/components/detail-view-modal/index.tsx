@@ -7,7 +7,7 @@ import {
   Typography,
 } from "@mui/material";
 import React from "react";
-
+import closeIcon from "@/assets/items-master/Button.svg";
 import ItemDetailCard from "@/components/common/item-detail";
 import TimelineDetail from "@/components/common/timeline";
 
@@ -93,12 +93,8 @@ export const DetailsModal: React.FC<DetailsModalProps> = ({
           Details
         </Typography>
 
-        <IconButton
-          size="small"
-          onClick={onClose}
-          sx={{ border: "1px solid #ccc", borderRadius: "8px" }}
-        >
-          X{/* <GridCloseIcon fontSize="small" /> */}
+        <IconButton size="small" onClick={onClose}>
+          <img src={closeIcon} alt="close" />
         </IconButton>
       </Box>
 
@@ -120,7 +116,7 @@ export const DetailsModal: React.FC<DetailsModalProps> = ({
               overflowY: "auto",
               height: "100%",
               border: "1px solid #e0e0e0",
-              borderRadius: 1,
+              borderRadius: "8px",
               p: 2,
               pt: 0,
               bgcolor: "white",
@@ -147,7 +143,7 @@ export const DetailsModal: React.FC<DetailsModalProps> = ({
               overflowY: "auto",
               height: "100%",
               border: "1px solid #e0e0e0",
-              borderRadius: 1,
+              borderRadius: "8px",
               p: 2,
               pt: 0,
               bgcolor: "white",

@@ -1,4 +1,4 @@
-import ExpandIcon from "@/assets/items-master/arrow-expand.svg";
+import ExpandIcon from "@/assets/items-master/Button.svg";
 import ItemDetailCard from "@/components/common/item-detail";
 import TimelineDetail from "@/components/common/timeline";
 import { mapHistoryToTimeline } from "@/pages/items-master/utils/mapHistoryToTimeline";
@@ -9,6 +9,7 @@ import {
 } from "@/services/queries/item-master/item-master.queries";
 import { Box, CircularProgress, IconButton, Typography } from "@mui/material";
 import React from "react";
+import closeIcon from "@/assets/items-master/ButtonClose.svg";
 
 interface DetailViewProps {
   item_id: string;
@@ -78,21 +79,19 @@ const DetailView: React.FC<DetailViewProps> = ({
           Details
         </Typography>
 
-        <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
+        <Box sx={{ display: "flex", alignItems: "center", gap: 0.5 }}>
           <IconButton
             onClick={onExpandClick}
             size="small"
-            sx={{ border: "1px solid #ccc", borderRadius: "8px" }}
           >
-            <img src={ExpandIcon} alt="Expand" width={18} height={18} />
+            <img src={ExpandIcon} alt="Expand" />
           </IconButton>
 
           <IconButton
             onClick={onClose}
             size="small"
-            sx={{ border: "1px solid #ccc", borderRadius: "8px" }}
           >
-            X{/* <GridCloseIcon fontSize="small" /> */}
+            <img src={closeIcon} alt="close" />
           </IconButton>
         </Box>
       </Box>
@@ -110,7 +109,7 @@ const DetailView: React.FC<DetailViewProps> = ({
             overflowY: "auto",
             height: "100%",
             border: "1px solid #e0e0e0",
-            borderRadius: 0,
+            borderRadius: "8px",
             bgcolor: "white",
           }}
         >
@@ -136,7 +135,7 @@ const DetailView: React.FC<DetailViewProps> = ({
             overflowY: "auto",
             height: "100%",
             border: "1px solid #e0e0e0",
-            borderRadius: 0,
+            borderRadius: "8px",
             bgcolor: "white",
           }}
         >
