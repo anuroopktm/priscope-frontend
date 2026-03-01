@@ -30,6 +30,8 @@ import { useQueryClient } from "@tanstack/react-query";
 import SavedFiltersDropdown from "./saved-filters-dropdown";
 import ColumnDropdown from "./columns-dropdown";
 import type { HeaderList } from "../types/types";
+import { FILE_FILTER_OPTIONS } from "@/constants/file-modal.constants";
+import FileDetailsModal from "./file-detail-modal";
 
 interface ActionHeaderProps {
   onSearch: (value: string) => void;
@@ -49,6 +51,7 @@ const ActionHeader = ({
   const [openRequestModal, setOpenRequestModal] = useState<boolean>(false);
   const [openSaveFilterModal, setOpenSaveFilterModal] =
     useState<boolean>(false);
+  const [showFilesModal, setShowFilesModal] = useState<boolean>(false);
   const selectedRows = useItemMasterStore((state) => state.selectedRows);
   const filter = useItemMasterStore((state) => state.filter);
   const setSelectedExport = useItemMasterStore(
@@ -200,7 +203,9 @@ const ActionHeader = ({
           <Button
             variant="contained"
             startIcon={<img src={LogFileIcon} alt="Log File" width={16} />}
-            // onClick={handleFilesClick}
+            onClick={() => {
+              setShowFilesModal(true);
+            }}
           >
             Files
           </Button>
@@ -255,6 +260,13 @@ const ActionHeader = ({
         onClose={() => setOpenSaveFilterModal(false)}
         onSubmit={handleSaveFilterModal}
         isLoading={mutateSaveFilterPending}
+      />
+      <FileDetailsModal
+        open={showFilesModal}
+        onClose={() => setShowFilesModal(false)}
+        showToast={showToast}
+        module="item_master"
+        filterOptions={FILE_FILTER_OPTIONS}
       />
     </Box>
   );

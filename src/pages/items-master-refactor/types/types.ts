@@ -242,3 +242,24 @@ export interface TreeGridState {
   } | null;
 }
 export type OpenPanel = "comments" | "detail-view" | null;
+
+export interface UploadedFile {
+  id: string;
+  title: string;
+  status: string;
+  uploadDate: string;
+  uploadTime: string;
+  uploadedBy: string;
+  updatedDate: string;
+  errorFile: boolean;
+  hasUploadData: boolean;
+}
+
+  export interface ExportedFile {
+    id: string;
+    name: string;
+    created_user_name: string;
+    created_time: string;
+    created_date: string;
+    status: string;
+  }

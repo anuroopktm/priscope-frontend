@@ -6,18 +6,21 @@ import {
   DialogActions,
   Button,
   Divider,
+  CircularProgress,
 } from "@mui/material";
 
 type CommentsModalProps = {
   open?: boolean;
   onClose: () => void;
   onSubmit: ((comment: string) => void) | null;
+  isLoading?: boolean;
 };
 
 const CommentsModal = ({
   open = true,
   onClose,
   onSubmit,
+  isLoading,
 }: CommentsModalProps) => {
   const [comment, setComment] = useState("");
   const [hasError, setHasError] = useState(false);
@@ -124,6 +127,7 @@ const CommentsModal = ({
         <Button
           onClick={handleSubmit}
           variant="contained"
+          disabled={isLoading}
           sx={{
             height: "40px",
             textTransform: "none",
@@ -134,7 +138,7 @@ const CommentsModal = ({
             },
           }}
         >
-          Submit
+          {isLoading ? <CircularProgress size={20} /> : "Submit"}
         </Button>
       </DialogActions>
     </Dialog>

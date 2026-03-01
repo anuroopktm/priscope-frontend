@@ -1,6 +1,5 @@
 import {
   useAddBulkInsertAdminRequest,
-  useCreateItemMasterComment,
   useListHeaders,
   useListItems,
 } from "@/services/queries/item-master-refactor/item-master-refactor.queries";
@@ -11,7 +10,6 @@ import { useTreeGridInit } from "./tree-grid/hooks/useTreeGridInit";
 import {
   buildItemMasterTreeGridBody,
   buildItemMasterTreeGridCols,
-  createItemMasterCommentPayload,
   hasItemMasterPrivileges,
   ItemMasterGridLayout,
 } from "./helper";
@@ -26,7 +24,6 @@ import { useHandleGridEditConfirm } from "./actions/handleGridEditConfirm";
 import { handleEditCellAdminRequest } from "./actions/editItemMasterAdmin";
 import RequestSuccessDialog from "@/components/common/request-notification";
 import { handleRightClick } from "./tree-grid/cellvalue/handleRightClick";
-import { useToastStore } from "@/store/useToastStore";
 import { COMMENT_TYPE } from "@/constants/comments.constants";
 import CommentsModal from "./components/comments-modal";
 import type { OpenPanel } from "./types/types";
@@ -34,6 +31,8 @@ import CommentSidebar from "./components/comment-sidebar";
 import { focusCell, focusRow } from "./tree-grid/focus/focusEvents";
 import DetailView from "./components/detail-view";
 import { DetailsModal } from "./components/detail-view-modal";
+import { useConfirmComment } from "./actions/commentHandlers";
+import SidePanel from "./components/sidepanel/SidePanel";
 
 const gridId = "ItemMasterGrid";
 const gridContainerId = "TreeGrid_" + gridId;
@@ -59,7 +58,7 @@ const ItemMasterListingPage = () => {
   const gridRef = useItemMasterStore((s) => s.gridRef);
   const privileges: {} = JSON.parse(localStorage.getItem("privileges") || "");
   const { hasEditItemMasterPrivilege } = hasItemMasterPrivileges(privileges);
-  const showToast = useToastStore((state) => state.showToast);
+  const { handleConfirmComment, isCreatingComment } = useConfirmComment();
 
   const { data: itemMasterData, refetch } = useListItems({
     search: searchTerm,
@@ -74,9 +73,6 @@ const ItemMasterListingPage = () => {
     mutate: itemMasterBulkInsertAdminApproval,
     isPending: isitemMasterBulkInsertAdminApprovalPending,
   } = useAddBulkInsertAdminRequest();
-
-  const { mutateAsync: createComment, isPending: createCommentPending } =
-    useCreateItemMasterComment();
 
   useEffect(() => {
     window.TGSetEvent("OnSelected", gridId, onSelected);
@@ -183,29 +179,6 @@ const ItemMasterListingPage = () => {
     onCellEditConfirm,
   });
 
-  const handleConfirmComment = (
-    type: string,
-    id: string,
-    col: string,
-    comment: string,
-  ) => {
-    const payload = createItemMasterCommentPayload(type, col, comment);
-    if (!payload) {
-      console.error("Invalid comment type");
-      return;
-    }
-    createComment(
-      { itemMasterId: id, payload },
-      {
-        onSuccess: () => {
-          showToast("Comment added successfully", "success");
-        },
-        onError: () => {
-          showToast("Failed to add comment", "error");
-        },
-      },
-    );
-  };
   const onClickCellComment = (grid: TGrid, row: TRow, col: string) => {
     setOnSubmitComment(() => (comment: string) => {
       const id = row?.id || "";
@@ -270,7 +243,6 @@ const ItemMasterListingPage = () => {
         headers={headers}
         onToggleCommentsPanel={() => toggleCommentsPanel("comments")}
       />
-
       <Box
         sx={{
           flex: 1,
@@ -288,56 +260,21 @@ const ItemMasterListingPage = () => {
             borderRadius: 1,
           }}
         />
-        <Box
-          sx={{
-            width: openPanel === "comments" ? 300 : 0,
-            transition: "width 0.3s ease",
-            overflow: "hidden",
-            height: "100%",
-            marginLeft: openPanel === "comments" ? 1 : 0,
-            background: "white",
-            color: "black",
-            display: "flex",
-            flexDirection: "column",
-            borderRadius: "8px 0 0 8px",
-            boxShadow:
-              openPanel === "comments" ? "0px 0px 8px rgba(0,0,0,0.1)" : "none",
-            zIndex: 2,
-          }}
-        >
-          {openPanel === "comments" && (
-            <CommentSidebar
-              onClose={() => setOpenPanel(null)}
-              onCommentSelect={handleCommentSelect}
-            />
-          )}
-        </Box>
-        <Box
-          sx={{
-            width: openPanel === "detail-view" ? 406 : 0,
-            transition: "width 0.3s ease",
-            overflow: "hidden",
-            // height: "calc(100vh - 147px)",
-            height: "100%",
-            marginLeft: openPanel === "detail-view" ? 1 : 0,
-            background: "white",
-            color: "black",
-            display: "flex",
-            flexDirection: "column",
-            borderRadius: "8px 0 0 8px",
-          }}
-        >
-          {openPanel === "detail-view" && (
-            <DetailView
-              item_id={detailedViewId}
-              timelineTitle={"Timeline"}
-              onClose={() => setOpenPanel(null)}
-              onExpandClick={() => setIsDetailViewCell(true)}
-            />
-          )}
-        </Box>
+        <SidePanel isOpen={openPanel === "comments"} width={300}>
+          <CommentSidebar
+            onClose={() => setOpenPanel(null)}
+            onCommentSelect={handleCommentSelect}
+          />
+        </SidePanel>
+        <SidePanel isOpen={openPanel === "detail-view"} width={406}>
+          <DetailView
+            item_id={detailedViewId}
+            timelineTitle="Timeline"
+            onClose={() => setOpenPanel(null)}
+            onExpandClick={() => setIsDetailViewCell(true)}
+          />
+        </SidePanel>
       </Box>
-
       {requestNotficationVisible && (
         <RequestSuccessDialog
           setNotificationOpen={setRequestNotficationVisible}
@@ -346,6 +283,7 @@ const ItemMasterListingPage = () => {
       {showCommentModal && (
         <CommentsModal
           onSubmit={onSubmitComment}
+          isLoading={isCreatingComment}
           onClose={() => setShowCommentModal(false)}
         />
       )}
