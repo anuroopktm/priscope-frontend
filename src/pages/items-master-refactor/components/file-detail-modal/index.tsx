@@ -40,7 +40,9 @@ const FileDetailsModal: React.FC<FileDetailsModalProps> = ({
     data: uploads,
     isPending: isUploadsLoading,
     isError: isUploadsError,
-  } = useListModuleImports(module);
+  } = useListModuleImports(module, {
+    enabled: open && alignment === "uploaded",
+  });
 
   const {
     mutate: listExports,
@@ -78,7 +80,7 @@ const FileDetailsModal: React.FC<FileDetailsModalProps> = ({
         },
       );
     }
-  }, [open, isDownloaded, module, listExports, showToast]);
+  }, [open, isDownloaded, module, listExports]);
 
   const uploadData = useMemo(() => transformUploads(uploads), [uploads]);
 

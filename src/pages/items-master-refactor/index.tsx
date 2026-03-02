@@ -64,8 +64,11 @@ const ItemMasterListingPage = () => {
     filter: filter,
   });
 
-  const { data: listHeaderData } =
-    useListHeaders({ page_size: 10000, search: "", skip: 0 });
+  const { data: listHeaderData } = useListHeaders({
+    page_size: 10000,
+    search: "",
+    skip: 0,
+  });
 
   useEffect(() => {
     window.TGSetEvent("OnSelected", gridId, onSelected);
