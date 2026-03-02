@@ -118,13 +118,14 @@ export interface TreeGridBody {
 
 // layout structure type
 export interface TreeGridLayout {
-  Cfg: typeof baseGridCfg;
+  Cfg: typeof baseGridCfg & Record<string, any>;
   Def: {
     R: Record<string, string>;
   };
   Cols: TreeGridHeader[];
   Header: Record<string, string>;
   Solid: any[];
+  Panel?: any;
 }
 
 export interface TreeGridLayoutHeader {

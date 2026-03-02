@@ -1,8 +1,8 @@
 import { Box, Drawer } from "@mui/material";
-import { useState } from "react";
+import { useRef, useState } from "react";
 import DrawerActionHeader from "./components/DrawerActionHeader";
 import DrawerHeader from "./components/DrawerHeader";
-import ItemsMasterGrid from "./components/ItemsMasterGrid";
+import ItemsMasterGrid from "./tree-grid";
 
 interface ItemsMasterDrawerProps {
   open: boolean;
@@ -11,14 +11,33 @@ interface ItemsMasterDrawerProps {
 
 const ItemsMasterDrawer = ({ open, onClose }: ItemsMasterDrawerProps) => {
   const [searchTerm, setSearchTerm] = useState("");
+  const gridRef = useRef<{ getSelectedIds: () => string[] } | null>(null);
+
+  const handleClose = (
+    _event: {},
+    reason: "backdropClick" | "escapeKeyDown",
+  ) => {
+    if (reason === "backdropClick") return;
+    onClose();
+  };
+
+  const handleAddItem = () => {
+    const ids = gridRef.current?.getSelectedIds() || [];
+    console.log("Add Item clicked. Selected IDs:", ids);
+  };
+
+  const handleAddAsGroup = () => {
+    const ids = gridRef.current?.getSelectedIds() || [];
+    console.log("Add as Group clicked. Selected IDs:", ids);
+  };
 
   return (
     <Drawer
       anchor="right"
       open={open}
-      onClose={onClose}
+      onClose={handleClose}
       sx={{
-        zIndex: 3000, // Explicitly high z-index to clear any headers or fixed elements
+        zIndex: 3000,
       }}
       PaperProps={{
         sx: {
@@ -45,11 +64,11 @@ const ItemsMasterDrawer = ({ open, onClose }: ItemsMasterDrawerProps) => {
       >
         <DrawerActionHeader
           onSearch={setSearchTerm}
-          onAddItem={() => console.log("Add Item clicked")}
-          onAddAsGroup={() => console.log("Add as Group clicked")}
+          onAddItem={handleAddItem}
+          onAddAsGroup={handleAddAsGroup}
         />
 
-        {open && <ItemsMasterGrid searchTerm={searchTerm} />}
+        {open && <ItemsMasterGrid ref={gridRef} searchTerm={searchTerm} />}
       </Box>
     </Drawer>
   );
