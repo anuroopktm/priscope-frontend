@@ -23,12 +23,10 @@ import { useHandleEditPopover } from "./tree-grid/hooks/useHandleEditPopover";
 import { useHandleGridEditConfirm } from "./actions/handleGridEditConfirm";
 import { handleEditCellAdminRequest } from "./actions/editItemMasterAdmin";
 import RequestSuccessDialog from "@/components/common/request-notification";
-import { handleRightClick } from "./tree-grid/cellvalue/handleRightClick";
 import { COMMENT_TYPE } from "@/constants/comments.constants";
 import CommentsModal from "./components/comments-modal";
 import type { OpenPanel } from "./types/types";
 import CommentSidebar from "./components/comment-sidebar";
-import { focusCell, focusRow } from "./tree-grid/focus/focusEvents";
 import DetailView from "./components/detail-view";
 import { DetailsModal } from "./components/detail-view-modal";
 import { useConfirmComment } from "./actions/commentHandlers";
@@ -121,7 +119,6 @@ const ItemMasterListingPage = () => {
 
   useEffect(() => {
     if (!headers) return;
-    console.log(headers, "headers");
     const checkBoxList: Record<string, boolean> = {};
     headers.forEach((header) => {
       if (DEfAULT_VISIBLE_COLUMNS.includes(header.label)) {
@@ -203,7 +200,6 @@ const ItemMasterListingPage = () => {
 
   const handleSkuUpcClick = (rowId: string, col: string, value: string) => {
     setDetailedViewId(rowId);
-
     setOpenPanel((prev) => (prev === "detail-view" ? prev : "detail-view"));
   };
 
