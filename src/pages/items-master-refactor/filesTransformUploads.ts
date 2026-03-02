@@ -1,5 +1,5 @@
 import formatDate from "@/utils/formatDate";
-import { FILE_UPLOAD_STATUS } from "../../constants/filesmodal.constants";
+import { FILE_UPLOAD_STATUS } from "./constants/filesmodal.constants";
 
 export const transformUploads = (res: any) => {
   if (!res?.uploads) return [];

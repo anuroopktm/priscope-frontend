@@ -33,6 +33,8 @@ import DetailView from "./components/detail-view";
 import { DetailsModal } from "./components/detail-view-modal";
 import { useConfirmComment } from "./actions/commentHandlers";
 import SidePanel from "./components/sidepanel/SidePanel";
+import { getRightClickHandlers } from "./tree-grid/utils/onHandleRightClick";
+import { selectComment } from "./utils/getCommentSelection";
 
 const gridId = "ItemMasterGrid";
 const gridContainerId = "TreeGrid_" + gridId;
@@ -145,7 +147,6 @@ const ItemMasterListingPage = () => {
     handleValueChanged(grid, row, col, val, oldval, gridId);
   };
 
-  // editing cell
   const { handleGridEditConfirm } = useHandleGridEditConfirm();
 
   const onCellEditConfirm = (
@@ -187,26 +188,19 @@ const ItemMasterListingPage = () => {
     setShowCommentModal(true);
   };
 
-  const onHandleRightClick = handleRightClick(gridId, [
-    {
-      name: "Comment on this cell",
-      onClick: onClickCellComment,
-    },
-  ]);
+  const onHandleRightClick = useMemo(
+    () => getRightClickHandlers(gridId, onClickCellComment),
+    [onClickCellComment],
+  );
 
   const handleCommentSelect = (comment: any) => {
-    const id = comment.item_id;
-    if (comment.comment_type === "row") {
-      focusRow(gridRef, id);
-    } else if (comment.comment_type === "field") {
-      const fieldKey = comment.field_key;
-      focusCell(gridRef, id, fieldKey);
-    }
+    selectComment(comment);
   };
 
   const toggleCommentsPanel = useCallback((panel: OpenPanel) => {
     setOpenPanel((prev) => (prev === panel ? null : panel));
   }, []);
+
   const handleSkuUpcClick = (rowId: string, col: string, value: string) => {
     setDetailedViewId(rowId);
 
@@ -287,16 +281,12 @@ const ItemMasterListingPage = () => {
           onClose={() => setShowCommentModal(false)}
         />
       )}
-
-      {isDetailViewCell && (
-        <DetailsModal
-          isOpen={isDetailViewCell}
-          onClose={() => setIsDetailViewCell(false)}
-          timelineTitle={"Timeline"}
-          item_id={detailedViewId}
-        />
-      )}
-
+      <DetailsModal
+        isOpen={isDetailViewCell}
+        onClose={() => setIsDetailViewCell(false)}
+        timelineTitle={"Timeline"}
+        item_id={detailedViewId}
+      />
       {showSavePopover && (
         <div
           style={{

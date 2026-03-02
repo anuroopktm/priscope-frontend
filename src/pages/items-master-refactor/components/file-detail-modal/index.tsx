@@ -10,7 +10,7 @@ import { useEffect, useMemo, useState } from "react";
 import Header from "./components/Header";
 import UploadedTab from "./components/UploadedTab";
 import DownloadedTab from "./components/DownloadedTab";
-import { transformUploads } from "../../tree-grid/utils/filesTransformUploads";
+import { transformUploads } from "../../filesTransformUploads";
 import type { ExportedFile } from "../../types/types";
 
 export interface FileDetailsModalProps {

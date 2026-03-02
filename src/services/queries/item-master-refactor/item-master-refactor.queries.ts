@@ -1,4 +1,4 @@
-import { useInfiniteQuery, useMutation, useQuery } from "@tanstack/react-query";
+import { useInfiniteQuery, useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import type { AxiosError } from "axios";
 
 import { useItemMasterStore } from "../../../pages/items-master/store/itemMasterStore";
@@ -130,6 +130,7 @@ export const useListSystemFields = () => {
 };
 
 export const useCreateItemMasterComment = () => {
+  const queryClient = useQueryClient();
   return useMutation<any, AxiosError, { payload: any; itemMasterId: string }>({
     mutationFn: async ({ payload, itemMasterId }) => {
       const response = await axiosInstance.post(
@@ -139,6 +140,9 @@ export const useCreateItemMasterComment = () => {
       );
       return response.data;
     },
+    onSuccess:()=>{
+      queryClient.invalidateQueries({queryKey:["listComments"]})
+    }
   });
 };
 

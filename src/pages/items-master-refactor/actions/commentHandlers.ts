@@ -38,6 +38,6 @@ export const useConfirmComment = () => {
 
   return {
     handleConfirmComment,
-    isCreatingComment, // 👈 loader flag
+    isCreatingComment,
   };
 };
