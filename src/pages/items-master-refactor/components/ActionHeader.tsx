@@ -10,7 +10,7 @@ import {
   useDeleteItemMasterRow,
   useExportItemMasterRow,
   useSaveFilter,
-} from "@/services/queries/item-master/item-master.queries";
+} from "@/services/queries/item-master-refactor/item-master-refactor.queries";
 import LoaderOverlay from "./loader";
 import { handleItemMasterExport } from "../actions/handleExportRows";
 import { useGetExportedFile } from "@/services/queries/common/common.queries";

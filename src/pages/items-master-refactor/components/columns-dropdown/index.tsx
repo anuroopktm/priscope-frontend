@@ -16,11 +16,11 @@ import type { HeaderList } from "../../types/types";
 import { useState } from "react";
 import CreateColumnModal from "@/pages/items-master/components/add-column-modal";
 import { useQueryClient } from "@tanstack/react-query";
-import { useAddHeader } from "@/services/queries/item-master/item-master.queries";
 import { useToastStore } from "@/store/useToastStore";
 import { hideColumn, showColumn } from "../../tree-grid/columns/Columns";
 import { useItemMasterStore } from "../../store/useItemMasterStore";
 import { DEfAULT_VISIBLE_COLUMNS } from "../../constants/headers.constants";
+import { useAddHeader } from "@/services/queries/item-master-refactor/item-master-refactor.queries";
 
 export interface ColumnDropdownProps {
   headers: HeaderList[] | null;
