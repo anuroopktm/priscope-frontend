@@ -198,7 +198,7 @@ const ItemMasterListingPage = () => {
     setOpenPanel((prev) => (prev === panel ? null : panel));
   }, []);
 
-  const handleSkuUpcClick = (rowId: string, col: string, value: string) => {
+  const handleSkuUpcClick = (rowId: string) => {
     setDetailedViewId(rowId);
     setOpenPanel((prev) => (prev === "detail-view" ? prev : "detail-view"));
   };

@@ -1,7 +1,5 @@
-import {
-  STATUS_BADGE_CONFIG,
-  type StatusType,
-} from "../../constants/status-badge.constants";
+import { STATUS_BADGE_CONFIG, type StatusType } from "@/pages/scenario-builder/constants/status-badge.constants";
+
 
 export const renderStatusBadge = (status: string) => {
   const config =
