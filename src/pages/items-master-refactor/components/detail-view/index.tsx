@@ -1,6 +1,4 @@
 import ExpandIcon from "@/assets/items-master/Button.svg";
-// import ItemDetailCard from "@/components/common/item-detail";
-// import TimelineDetail from "@/components/common/timeline";
 import { Box, CircularProgress, IconButton, Typography } from "@mui/material";
 import React from "react";
 import closeIcon from "@/assets/items-master/ButtonClose.svg";

@@ -64,7 +64,7 @@ const ItemMasterListingPage = () => {
     filter: filter,
   });
 
-  const { data: listHeaderData, isLoading: isListHeadersLoading } =
+  const { data: listHeaderData } =
     useListHeaders({ page_size: 10000, search: "", skip: 0 });
 
   useEffect(() => {

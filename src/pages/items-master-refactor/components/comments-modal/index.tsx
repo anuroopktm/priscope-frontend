@@ -30,7 +30,7 @@ const CommentsModal = ({
       setHasError(true);
       return;
     }
-    onSubmit(comment);
+    onSubmit?.(comment);
     setComment("");
     setHasError(false);
     onClose();
