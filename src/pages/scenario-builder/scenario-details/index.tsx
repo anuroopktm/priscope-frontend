@@ -39,14 +39,14 @@ const ScenarioDetailsPage = () => {
     // Map Item Master rows to Scenario grid format
     const mappedItems = items.map((item) => {
       return {
-        ...item,
-        id: item.id || `new_${Math.random().toString(36).substr(2, 9)}`,
+        id: `row_${Math.random().toString(36).substr(2, 9)}`,
         Def: "R",
         A: item.Category || item.A || "",
         B: item.SKU || item.B || "",
         C: item.Description || item.C || "",
         D: item.UPC || item.D || "",
         E: item.Price || item.E || "0",
+        Selected: 0,
       };
     });
 
@@ -62,6 +62,7 @@ const ScenarioDetailsPage = () => {
           A: groupName,
           Items: mappedItems, // These will be children of the groupRow
           Expanded: "1",
+          Selected: 0,
         };
         itemsToAdd = [groupRow];
       } else {
