@@ -80,17 +80,11 @@ const DetailView: React.FC<DetailViewProps> = ({
         </Typography>
 
         <Box sx={{ display: "flex", alignItems: "center", gap: 0.5 }}>
-          <IconButton
-            onClick={onExpandClick}
-            size="small"
-          >
+          <IconButton onClick={onExpandClick} size="small">
             <img src={ExpandIcon} alt="Expand" />
           </IconButton>
 
-          <IconButton
-            onClick={onClose}
-            size="small"
-          >
+          <IconButton onClick={onClose} size="small">
             <img src={closeIcon} alt="close" />
           </IconButton>
         </Box>

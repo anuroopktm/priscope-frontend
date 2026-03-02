@@ -1,7 +1,13 @@
 import { Box, Typography } from "@mui/material";
 import { RecordGrid } from "../record-grid";
 
-export const LabeledRecord = ({ title, record }: { title: string; record: any }) => {
+export const LabeledRecord = ({
+  title,
+  record,
+}: {
+  title: string;
+  record: any;
+}) => {
   if (!record) return null;
 
   return (

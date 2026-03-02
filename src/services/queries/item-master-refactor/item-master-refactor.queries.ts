@@ -1,4 +1,9 @@
-import { useInfiniteQuery, useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import {
+  useInfiniteQuery,
+  useMutation,
+  useQuery,
+  useQueryClient,
+} from "@tanstack/react-query";
 import type { AxiosError } from "axios";
 
 import { useItemMasterStore } from "../../../pages/items-master/store/itemMasterStore";
@@ -140,9 +145,9 @@ export const useCreateItemMasterComment = () => {
       );
       return response.data;
     },
-    onSuccess:()=>{
-      queryClient.invalidateQueries({queryKey:["listComments"]})
-    }
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["listComments"] });
+    },
   });
 };
 

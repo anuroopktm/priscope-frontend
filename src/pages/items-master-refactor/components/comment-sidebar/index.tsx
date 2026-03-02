@@ -20,10 +20,7 @@ type CommentSidebarProps = {
   onCommentSelect?: (comment: Comment) => void;
 };
 
-const CommentSidebar = ({
-  onCommentSelect,
-  onClose,
-}: CommentSidebarProps) => {
+const CommentSidebar = ({ onCommentSelect, onClose }: CommentSidebarProps) => {
   const [inputValue, setInputValue] = useState("");
   const [searchValue, setSearchValue] = useState("");
 

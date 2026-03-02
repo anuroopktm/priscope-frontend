@@ -12,4 +12,3 @@ export const deleteSeletectedRows = (grid: TGrid) => {
   const rows = grid.GetSelRows();
   grid.DeleteRows(rows, 1);
 };
-

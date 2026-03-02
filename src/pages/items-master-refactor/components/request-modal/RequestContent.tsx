@@ -39,7 +39,7 @@ export const RequestContent = ({ requestInfo, requestAction }: Props) => {
 
     case "bulk_status_change": {
       const records = requestInfo.map((item: any) =>
-        transformer(item.new_record)
+        transformer(item.new_record),
       );
       return <PlainRecord record={records} multiple />;
     }

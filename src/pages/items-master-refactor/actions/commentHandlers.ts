@@ -5,16 +5,14 @@ import { useCreateItemMasterComment } from "@/services/queries/item-master-refac
 export const useConfirmComment = () => {
   const showToast = useToastStore((state) => state.showToast);
 
-  const {
-    mutate: createComment,
-    isPending: isCreatingComment,
-  } = useCreateItemMasterComment();
+  const { mutate: createComment, isPending: isCreatingComment } =
+    useCreateItemMasterComment();
 
   const handleConfirmComment = (
     type: string,
     id: string,
     col: string,
-    comment: string
+    comment: string,
   ) => {
     const payload = createItemMasterCommentPayload(type, col, comment);
 
@@ -32,7 +30,7 @@ export const useConfirmComment = () => {
         onError: () => {
           showToast("Failed to add comment", "error");
         },
-      }
+      },
     );
   };
 
