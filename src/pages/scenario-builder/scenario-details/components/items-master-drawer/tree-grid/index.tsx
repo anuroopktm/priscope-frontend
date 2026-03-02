@@ -30,6 +30,24 @@ const ItemsMasterGrid = forwardRef(
     gridInstanceRef.current = gridInstance?.current;
 
     useImperativeHandle(ref, () => ({
+      getSelectedRows: () => {
+        const grid = gridInstance?.current;
+        if (!grid) return [];
+        const selRows = grid.GetSelRows();
+        return selRows.map((row: any) => {
+          const cleanRow: any = {};
+          for (const key in row) {
+            // Only copy non-object properties to avoid circular references (like nextSibling, Parent, etc.)
+            if (
+              Object.prototype.hasOwnProperty.call(row, key) &&
+              typeof row[key] !== "object"
+            ) {
+              cleanRow[key] = row[key];
+            }
+          }
+          return cleanRow;
+        });
+      },
       getSelectedIds: () => {
         const grid = gridInstance?.current;
         if (!grid) return [];

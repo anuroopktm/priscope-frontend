@@ -7,11 +7,19 @@ import ItemsMasterGrid from "./tree-grid";
 interface ItemsMasterDrawerProps {
   open: boolean;
   onClose: () => void;
+  onAddItems: (items: any[], isGroup: boolean) => void;
 }
 
-const ItemsMasterDrawer = ({ open, onClose }: ItemsMasterDrawerProps) => {
+const ItemsMasterDrawer = ({
+  open,
+  onClose,
+  onAddItems,
+}: ItemsMasterDrawerProps) => {
   const [searchTerm, setSearchTerm] = useState("");
-  const gridRef = useRef<{ getSelectedIds: () => string[] } | null>(null);
+  const gridRef = useRef<{
+    getSelectedIds: () => string[];
+    getSelectedRows: () => any[];
+  } | null>(null);
 
   const handleClose = (
     _event: {},
@@ -22,13 +30,14 @@ const ItemsMasterDrawer = ({ open, onClose }: ItemsMasterDrawerProps) => {
   };
 
   const handleAddItem = () => {
-    const ids = gridRef.current?.getSelectedIds() || [];
-    console.log("Add Item clicked. Selected IDs:", ids);
+    const items = gridRef.current?.getSelectedRows() || [];
+    onAddItems(items, false);
   };
 
   const handleAddAsGroup = () => {
-    const ids = gridRef.current?.getSelectedIds() || [];
-    console.log("Add as Group clicked. Selected IDs:", ids);
+    const items = gridRef.current?.getSelectedRows() || [];
+    if (items.length === 0) return;
+    onAddItems(items, true);
   };
 
   return (
