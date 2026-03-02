@@ -10,7 +10,7 @@ import type {
 import {
   useListHeaders,
   useListItems,
-} from "@/services/queries/item-master/item-master.queries";
+} from "@/services/queries/item-master-refactor/item-master-refactor.queries";
 import { useEffect, useRef, useState } from "react";
 import { syncGridData } from "../utils/grid-data";
 import { enrichItemMasterLayout } from "../utils/layout-helper";

@@ -7,7 +7,6 @@ import AddAsGroupModal from "./components/items-master-drawer/components/AddAsGr
 import ItemsMasterDrawer from "./components/items-master-drawer/ItemsMasterDrawer";
 import { ScenarioDetailsLayout } from "./tree-grid/config/details-layout";
 import { useTreeGridInit } from "./tree-grid/hooks/useTreeGridInit";
-import { ScenarioDetailsDummyData } from "./tree-grid/utils/dummy-data";
 
 const gridId = "ScenarioGridDetails";
 const gridContainerId = "TreeGrid_" + gridId;
@@ -16,7 +15,7 @@ const ScenarioDetailsPage = () => {
   const { id } = useParams<{ id: string }>();
   const { data: scenario } = useGetScenario(id);
   const [isDrawerOpen, setIsDrawerOpen] = useState(false);
-  const [gridData, setGridData] = useState<any>(ScenarioDetailsDummyData);
+  const [gridData, setGridData] = useState<any>({ Body: [[]] });
   const [isGroupModalOpen, setIsGroupModalOpen] = useState(false);
   const [itemsToGroup, setItemsToGroup] = useState<any[]>([]);
 
@@ -38,14 +37,12 @@ const ScenarioDetailsPage = () => {
 
   const processAddItems = (items: any[], groupName?: string) => {
     // Map Item Master rows to Scenario grid format
-    const newRows = items.map((item) => {
-      // Create a copy of the item and ensure it has the required "Def" property for TreeGrid
-      // and map some basic fields if they exist in item master
+    const mappedItems = items.map((item) => {
       return {
         ...item,
         id: item.id || `new_${Math.random().toString(36).substr(2, 9)}`,
         Def: "R",
-        A: groupName || item.Category || item.A || "",
+        A: item.Category || item.A || "",
         B: item.SKU || item.B || "",
         C: item.Description || item.C || "",
         D: item.UPC || item.D || "",
@@ -55,9 +52,26 @@ const ScenarioDetailsPage = () => {
 
     setGridData((prev: any) => {
       const currentRows = prev?.Body?.[0] || [];
+      let itemsToAdd: any[] = [];
+
+      if (groupName) {
+        // Create a single parent row representing the group with items as children
+        const groupRow = {
+          id: `group_${Math.random().toString(36).substr(2, 9)}`,
+          Def: "Group",
+          A: groupName,
+          Items: mappedItems, // These will be children of the groupRow
+          Expanded: "1",
+        };
+        itemsToAdd = [groupRow];
+      } else {
+        // Add items individually as flat rows at the top level
+        itemsToAdd = mappedItems;
+      }
+
       return {
         ...prev,
-        Body: [[...currentRows, ...newRows]],
+        Body: [[...currentRows, ...itemsToAdd]],
       };
     });
   };
