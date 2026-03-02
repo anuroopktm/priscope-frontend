@@ -1,10 +1,10 @@
 import { useEffect, useRef } from "react";
+import { useItemMasterStore } from "../../store/useItemMasterStore";
 
 /**
  * useTreeGridInit - Handles strictly the mounting, unmounting,
  * and global registry management of the TreeGrid instance.
  */
-
 export const useTreeGridInit = (
   gridId: string,
   containerId: string,
@@ -14,6 +14,9 @@ export const useTreeGridInit = (
 ) => {
   const gridRef = useRef<TGrid | null>(null);
   const created = useRef(false);
+
+  // get setter from store
+  const setGridRefInStore = useItemMasterStore((state) => state.setGridRef);
 
   // Create grid once
   useEffect(() => {
@@ -52,8 +55,8 @@ export const useTreeGridInit = (
       );
       try {
         const grid = window.TreeGrid(source, containerId);
-        console.log("useTreeGridInit: window.TreeGrid returned:", grid);
         gridRef.current = grid;
+        setGridRefInStore(grid); // store in Zustand
         created.current = true;
 
         onInit?.(grid);
@@ -70,12 +73,12 @@ export const useTreeGridInit = (
       if (gridRef.current) {
         console.log("useTreeGridInit: Disposing grid", gridId);
         try {
-          // Force immediate disposal to clear global memory
           gridRef.current.Dispose();
         } catch (e) {
           console.error("useTreeGridInit: Error disposing grid", e);
         }
         gridRef.current = null;
+        setGridRefInStore(null); // clear store on unmount
         created.current = false;
       }
     };

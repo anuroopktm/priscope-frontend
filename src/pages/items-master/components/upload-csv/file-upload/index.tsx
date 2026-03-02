@@ -4,7 +4,7 @@ import {
   UPLOAD_STEPS,
   type UploadedFile,
 } from "@/pages/items-master/constants/upload.constants";
-import type { SystemFieldObject } from "@/pages/items-master/types/types";
+import type { SystemFieldObject } from "@/pages/items-master-refactor/types/types";
 import {
   useListSystemFields,
   useUploadItemMasterFile,

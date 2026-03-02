@@ -43,16 +43,16 @@ export const useGetTemplateFile = () => {
 // ---------------------- LIST MODULE IMPORTS ----------------------
 
 export const useListModuleImports = (module_name: string) => {
-  return useMutation<any, AxiosError>({
-    // queryKey: ["module-imports", module_name],
-    mutationFn: async () => {
+  return useQuery({
+    queryKey: ["module-imports", module_name],
+    queryFn: async () => {
       const { data } = await axiosInstance.get(`/v1/common/uploads`, {
         params: { feature: module_name },
         headers: { "Content-Type": "application/json" },
       });
       return data;
     },
-    // enabled: Boolean(module_name),
+    enabled: Boolean(module_name),
   });
 };
 

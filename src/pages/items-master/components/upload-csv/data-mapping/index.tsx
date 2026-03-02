@@ -12,7 +12,7 @@ import type {
   MapFieldsRequest,
   SystemFieldMappingData,
   SystemFieldObject,
-} from "@/pages/items-master/types/types";
+} from "@/pages/items-master-refactor/types/types";
 import { useMapItemMasterFields } from "@/services/queries/item-master/item-master.queries";
 import { Close as CloseIcon } from "@mui/icons-material";
 import {

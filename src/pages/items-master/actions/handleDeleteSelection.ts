@@ -1,4 +1,4 @@
-import type { DeleteSelectedRowPayload } from "../types/types";
+import type { DeleteSelectedRowPayload } from "../../items-master-refactor/types/types";
 
 interface HandleDeleteSelectionProps {
   selectedRows: string[];

@@ -23,5 +23,5 @@ export type Comment = {
 
 export type CommentsResponse = {
   comments: Comment[];
-  total_count?: number;
+  total?: number;
 };

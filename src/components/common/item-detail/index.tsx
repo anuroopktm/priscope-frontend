@@ -12,7 +12,6 @@ const ItemDetailCard: React.FC<ItemDetailCardProps> = ({ title, fields }) => {
   return (
     <Box>
       <CardContent>
-        {/* title */}
         {title && (
           <Typography
             variant="subtitle1"
@@ -26,7 +25,6 @@ const ItemDetailCard: React.FC<ItemDetailCardProps> = ({ title, fields }) => {
           </Typography>
         )}
 
-        {/* Render all fields dynamically */}
         <Stack spacing={1.5}>
           {Object.entries(fields).map(([key, value]) => (
             <Box key={key} display="flex" alignItems="start">
@@ -40,7 +38,6 @@ const ItemDetailCard: React.FC<ItemDetailCardProps> = ({ title, fields }) => {
                 {key}:
               </Typography>
 
-              {/* Value */}
               {Array.isArray(value) ? (
                 <Stack
                   direction="row"

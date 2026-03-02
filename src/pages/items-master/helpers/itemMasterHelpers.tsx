@@ -10,7 +10,7 @@ import { HEADERS } from "@/pages/items-master/constants/headers";
 import type {
   AttributeConfigurationData,
   SystemFieldObject,
-} from "../types/types";
+} from "../../items-master-refactor/types/types";
 
 interface SkippedItem {
   frontend_id: string;

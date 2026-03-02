@@ -14,7 +14,7 @@ import {
 } from "@mui/material";
 import React from "react";
 import { DATA_TYPES } from "@/pages/items-master/constants/data_mapping.constants";
-import type { AttributeConfigurationProps } from "@/pages/items-master/types/types";
+import type { AttributeConfigurationProps } from "@/pages/items-master-refactor/types/types";
 import { theme } from "@/theme/theme";
 
 const AttributeConfiguration: React.FC<AttributeConfigurationProps> = ({

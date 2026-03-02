@@ -141,7 +141,7 @@ export const TimelineDetail: React.FC<TimelineProps> = ({
                         sx={{
                           bgcolor: "#f5f5f5",
                           p: 1.5,
-                          borderRadius: 8,
+                          borderRadius: "8px",
                         }}
                       >
                         <Typography
