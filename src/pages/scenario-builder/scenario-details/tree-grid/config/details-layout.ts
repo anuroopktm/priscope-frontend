@@ -56,6 +56,9 @@ export const ScenarioDetailsLayout = {
       EFormula: "sum()",
       CanSelect: "1",
       PanelSelect: "1",
+      CanEdit: "0",
+      Spanned: "1",
+      ASpan: "4",
     },
     // R: {
     //   CanSelect: "0",

@@ -21,7 +21,7 @@ const DeleteConfirmModal = ({
   onClose,
 }: DeleteConfirmModalProps) => {
   const handleClose = (_e: {}, reason: "backdropClick" | "escapeKeyDown") => {
-    if (reason === "backdropClick") return;
+    if (reason === "backdropClick" || reason === "escapeKeyDown") return;
     onClose();
   };
 

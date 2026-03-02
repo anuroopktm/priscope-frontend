@@ -25,7 +25,7 @@ const ItemsMasterDrawer = ({
     _event: {},
     reason: "backdropClick" | "escapeKeyDown",
   ) => {
-    if (reason === "backdropClick") return;
+    if (reason === "backdropClick" || reason === "escapeKeyDown") return;
     onClose();
   };
 
