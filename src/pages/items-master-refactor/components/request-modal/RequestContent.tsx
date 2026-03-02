@@ -34,14 +34,15 @@ export const RequestContent = ({ requestInfo, requestAction }: Props) => {
 
     case "insert": {
       const { new_record } = requestInfo[0];
-      return <PlainRecord record={new_record} />;
+      console.log(new_record);
+      return <PlainRecord record={new_record} module="item_master" />;
     }
 
     case "bulk_status_change": {
       const records = requestInfo.map((item: any) =>
-        transformer(item.new_record)
+        transformer(item.new_record),
       );
-      return <PlainRecord record={records} multiple />;
+      return <PlainRecord record={records} module="item_master" />;
     }
 
     default: {

@@ -79,7 +79,6 @@ export const ItemMasterRequestsModal: React.FC<Props> = ({
   const requests = useMemo(() => {
     return allRequests.map((item: any) => {
       const requestedAt = new Date(item.requested_at);
-      // const reviewedAt = item.reviewed_at ? new Date(item.reviewed_at) : null;
 
       return {
         id: item.id,
