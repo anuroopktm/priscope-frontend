@@ -14,6 +14,7 @@ import {
 } from "./elements";
 import AuthGuard from "./guards/AuthGuard";
 import GuestGuard from "./guards/GuestGuard";
+import BulkInsertPage from "@/pages/items-master-refactor/Pages/bulk-insert";
 
 export const routes = [
   {
@@ -61,7 +62,16 @@ export const routes = [
               { path: "user-details/:userId", element: <UserDetailsPage /> },
             ],
           },
-          { path: "items-master", element: <ItemsMasterPage /> },
+          {
+            path: "items-master",
+            children: [
+              { index: true, element: <ItemsMasterPage /> },
+              {
+                path: "bulk-insert",
+                element: <BulkInsertPage />,
+              },
+            ],
+          },
         ],
       },
     ],

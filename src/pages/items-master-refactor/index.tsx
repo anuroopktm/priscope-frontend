@@ -1,5 +1,4 @@
 import {
-  useAddBulkInsertAdminRequest,
   useListHeaders,
   useListItems,
 } from "@/services/queries/item-master-refactor/item-master-refactor.queries";
@@ -21,7 +20,6 @@ import { handleValueChanged } from "./tree-grid/cellvalue/handleValueChanged";
 import TableSavePopover from "./components/table-save-popover";
 import { useHandleEditPopover } from "./tree-grid/hooks/useHandleEditPopover";
 import { useHandleGridEditConfirm } from "./actions/handleGridEditConfirm";
-import { handleEditCellAdminRequest } from "./actions/editItemMasterAdmin";
 import RequestSuccessDialog from "@/components/common/request-notification";
 import { COMMENT_TYPE } from "@/constants/comments.constants";
 import CommentsModal from "./components/comments-modal";
@@ -68,11 +66,6 @@ const ItemMasterListingPage = () => {
 
   const { data: listHeaderData, isLoading: isListHeadersLoading } =
     useListHeaders({ page_size: 10000, search: "", skip: 0 });
-
-  const {
-    mutate: itemMasterBulkInsertAdminApproval,
-    isPending: isitemMasterBulkInsertAdminApprovalPending,
-  } = useAddBulkInsertAdminRequest();
 
   useEffect(() => {
     window.TGSetEvent("OnSelected", gridId, onSelected);
@@ -163,9 +156,7 @@ const ItemMasterListingPage = () => {
       confirm,
       gridRef,
       itemMasterData,
-      itemMasterBulkInsertAdminApproval,
       setRequestNotficationVisible,
-      handleEditCellAdminRequest,
     });
   };
 
@@ -198,7 +189,7 @@ const ItemMasterListingPage = () => {
     setOpenPanel((prev) => (prev === panel ? null : panel));
   }, []);
 
-  const handleSkuUpcClick = (rowId: string) => {
+  const handleSkuUpcClick = (rowId: string, col: string, value: string) => {
     setDetailedViewId(rowId);
     setOpenPanel((prev) => (prev === "detail-view" ? prev : "detail-view"));
   };

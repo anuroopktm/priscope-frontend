@@ -32,6 +32,7 @@ import ColumnDropdown from "./columns-dropdown";
 import type { HeaderList } from "../types/types";
 import { FILE_FILTER_OPTIONS } from "@/constants/file-modal.constants";
 import FileDetailsModal from "./file-detail-modal";
+import { useNavigate } from "react-router-dom";
 
 interface ActionHeaderProps {
   onSearch: (value: string) => void;
@@ -46,6 +47,7 @@ const ActionHeader = ({
   headers,
   onToggleCommentsPanel,
 }: ActionHeaderProps) => {
+  const navigate = useNavigate();
   const [isUploadModalOpen, setIsUploadModalOpen] = useState<boolean>(false);
   const [openDeleteModal, setOpenDeleteModal] = useState<boolean>(false);
   const [openRequestModal, setOpenRequestModal] = useState<boolean>(false);
@@ -210,7 +212,13 @@ const ActionHeader = ({
             Files
           </Button>
           <ColumnDropdown headers={headers} />
-          <Button variant="contained" startIcon={<AddIcon />}>
+          <Button
+            variant="contained"
+            startIcon={<AddIcon />}
+            onClick={() => {
+              navigate("bulk-insert");
+            }}
+          >
             Add Item
           </Button>
           <Button

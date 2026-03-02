@@ -181,9 +181,9 @@ export interface ItemMasterBulkUploadFormattedDataItem {
   frontend_id?: string;
   sku?: string;
   upc?: string;
-  category?: string;
-  hs_code?: string;
-  description?: string;
+  category?: string | number | boolean | null | undefined | {};
+  hs_code?: string | number | boolean | null | {};
+  description?: string | number | boolean | null | {};
   source_type?: string;
   attribute?: {};
   temp_sku?: boolean;
