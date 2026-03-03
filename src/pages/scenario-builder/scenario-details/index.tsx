@@ -91,28 +91,43 @@ const ScenarioDetailsPage = () => {
   }) => {
     const grid = (window as any).Grids?.[gridId];
     if (grid && activeColumn) {
-      // Add a new column after the current one
-      // If we provide null for name, it returns the generated name
-      const newColName = grid.AddCols(1, activeColumn, 1, null, 1);
+      // Use the existing column name instead of creating a new one
+      const colName = activeColumn;
 
-      if (newColName) {
-        // Set the header caption
-        // Most TreeGrid versions have 'Header' as the main header row object
-        const headerRow = grid.Header || grid.GetRowById("Header");
-        if (headerRow) {
-          grid.SetValue(headerRow, newColName, data.label, 1);
-        } else {
-          // Fallback: search for row with Kind="Header"
-          let row = grid.GetFirst();
-          while (row) {
-            if (row.Kind === "Header") {
-              grid.SetValue(row, newColName, data.label, 1);
-              break;
-            }
-            row = grid.GetNext(row);
+      // Set the header caption
+      // Most TreeGrid versions have 'Header' as the main header row object
+      const headerRow = grid.Header || grid.GetRowById("Header");
+      if (headerRow) {
+        grid.SetValue(headerRow, colName, data.label, 1);
+      } else {
+        // Fallback: search for row with Kind="Header"
+        let row = grid.GetFirst();
+        while (row) {
+          if (row.Kind === "Header") {
+            grid.SetValue(row, colName, data.label, 1);
+            break;
           }
+          row = grid.GetNext(row);
         }
       }
+
+      // Make the column take width as per header text
+      // Wrap in setTimeout to ensure the grid has processed the SetValue first
+      setTimeout(() => {
+        // Disable RelWidth so it doesn't stretch beyond its content
+        grid.SetAttribute(null, colName, "RelWidth", 0, 1);
+        grid.SetAttribute(null, colName, "Width", null, 1); // Clear fixed width to let AutoFitCol calculate it
+
+        if (grid.AutoFitCol) {
+          grid.AutoFitCol(colName);
+        } else {
+          grid.SetWidth(colName, -1);
+        }
+
+        // Update and Render to ensure the whole grid layout (including stretch) is recalculated
+        grid.Update();
+        grid.Render();
+      }, 10);
     }
     setIsComponentAggregatorOpen(false);
     setActiveColumn(null);
