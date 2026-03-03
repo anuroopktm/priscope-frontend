@@ -152,16 +152,119 @@ const ScenarioDetailsPage = () => {
   };
 
   const handleAggregatorUpdate = (items: any[]) => {
-    console.log("Updating aggregator for:", activeCell, items);
     const grid = (window as any).Grids?.[gridId];
     if (grid && activeCell) {
-      const total = items.reduce(
-        (acc, item) => acc + (Number(item.cost) || 0),
-        0,
-      );
       const row = grid.GetRowById(activeCell.rowId);
       if (row) {
-        grid.SetValue(row, activeCell.col, total, 1);
+        // Calculate total cost for the trigger cell (Sum of Cost column)
+        const totalAmount = items.reduce(
+          (acc, item) => acc + (Number(item.cost) || 0),
+          0,
+        );
+        // Log target info
+        const targetCol = activeCell.col;
+        const targetObj = grid.Cols[targetCol];
+        // TreeGrid requires numeric Section (0=left, 1=mid, 2=right) and Position
+        const targetSec = targetObj?.Sec ?? 1;
+        const targetPos = targetObj?.Pos ?? 100;
+
+        console.log(
+          `Grid: Starting sync with target anchor [${targetCol}] at Sec: ${targetSec}, Pos: ${targetPos}`,
+        );
+
+        // Get list of all currently used item names to clean up duplicates
+        const currentItemNames = items
+          .map((i) => (i.name || "").trim().toLowerCase())
+          .filter(Boolean);
+
+        // --- PRE-SYNC CLEANUP ---
+        // Hide ANY existing columns that look like they belong to the aggregator
+        // or that have a caption matching one of our current items.
+        // This prevents the "Double Shirt" issue.
+        Object.keys(grid.Cols).forEach((c) => {
+          const caption = (grid.Header?.[c] || "")
+            .toString()
+            .trim()
+            .toLowerCase();
+          const isCompCol = c.startsWith("Comp");
+          if (isCompCol || currentItemNames.includes(caption)) {
+            console.log(`Grid: Pre-sync hide of [${c}] (${caption})`);
+            grid.HideCol(c);
+          }
+        });
+
+        // Ensure grid state is fresh
+        grid.Update();
+
+        // Process each item to create/populate columns to the left
+        items.forEach((item, index) => {
+          if (!item.name) return;
+
+          const cleanName = item.name.trim();
+          const safeName = cleanName.replace(/[^a-zA-Z0-9]/g, "").toLowerCase();
+          const colId = "Comp" + (safeName || "Item");
+
+          const insertPos = targetPos + index;
+
+          if (!grid.Cols[colId]) {
+            console.log(
+              `Grid: Adding NEW column [${colId}] for [${cleanName}] at Sec: ${targetSec}, Pos: ${insertPos}`,
+            );
+            // AddCol(col, sec, pos, width, show, type, caption)
+            grid.AddCol(
+              colId,
+              targetSec,
+              insertPos,
+              110,
+              1,
+              "Float",
+              cleanName,
+            );
+          } else {
+            console.log(`Grid: Showing existing column [${colId}]`);
+            grid.ShowCol(colId);
+          }
+
+          // Set attributes to ensure it's movable and visible
+          grid.SetAttribute(null, colId, "Caption", cleanName, 1);
+          grid.SetAttribute(null, colId, "Visible", 1, 1);
+          grid.SetAttribute(null, colId, "CanShow", 1, 1);
+          grid.SetAttribute(null, colId, "CanMove", 1, 1);
+          grid.SetAttribute(null, colId, "Type", "Float", 1);
+          grid.SetAttribute(null, colId, "Format", "$0.00", 1);
+          grid.SetAttribute(null, colId, "Width", 110, 1);
+          grid.SetAttribute(null, colId, "CanEdit", 1, 1);
+
+          // Force physical position to strictly be left of the trigger
+          console.log(
+            `Grid: Moving [${colId}] to position 0 (before) [${targetCol}]`,
+          );
+          grid.MoveCol(colId, targetCol, 0, 1);
+
+          // Sync Header Caption
+          const headerRow = grid.Header || grid.GetRowById("Header");
+          if (headerRow) {
+            grid.SetValue(headerRow, colId, cleanName, 1);
+          }
+
+          // Parse and set the value
+          const rawVal =
+            typeof item.costPerUnit === "string"
+              ? item.costPerUnit.replace(/[^0-9.]/g, "")
+              : item.costPerUnit;
+          const val = parseFloat(rawVal) || 0;
+
+          console.log(`Grid: Setting value ${val} in [${colId}]`);
+          grid.SetValue(row, colId, val, 1);
+        });
+
+        // Final summary update
+        const total = parseFloat(totalAmount as any) || 0;
+        console.log(`Grid: Setting summary total ${total} in [${targetCol}]`);
+        grid.SetValue(row, targetCol, total, 1);
+
+        grid.Update();
+        grid.Render();
       }
     }
     setIsAggregatorDrawerOpen(false);

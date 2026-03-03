@@ -2,6 +2,7 @@ import { useListCurrencies } from "@/services/queries/common/common.queries";
 import CloseIcon from "@mui/icons-material/Close";
 import { Box, Button, IconButton, Typography } from "@mui/material";
 import { useEffect, useState } from "react";
+import DeleteConfirmModal from "../../../list-scenarios/components/DeleteConfirmModal";
 import { AggregatorDrawerLayout } from "../../tree-grid/config/aggregator-drawer-layout";
 import { useTreeGridInit } from "../../tree-grid/hooks/useTreeGridInit";
 
@@ -15,19 +16,19 @@ interface ComponentAggregatorPanelProps {
 const drawerGridId = "AggregatorDrawerGrid";
 const drawerGridContainerId = "TreeGrid_" + drawerGridId;
 
-const renderDeleteIcon = (rowId: string) => {
-  return `<div style="display: flex; align-items: center; justify-content: center;">
-    <button 
-      style="background-color: transparent; border: none; cursor: pointer; padding: 4px; border-radius: 4px; transition: background-color 0.2s;"
-      onmouseover="this.style.backgroundColor='#ffebee'"
-      onmouseout="this.style.backgroundColor='transparent'"
-      onclick="window.handleDeleteAggregatorRow && window.handleDeleteAggregatorRow('${rowId}')"
+const renderDeleteIcon = (id: string) => {
+  return `
+    <div 
+      onclick="window.handleDeleteAggregatorRow && window.handleDeleteAggregatorRow('${id}')"
+      style="display: flex; justify-content: center; align-items: center; cursor: pointer; height: 100%; color: #ef4444;"
     >
-      <svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
-        <path d="M13 3.66732L12.5867 10.3507C12.4813 12.058 12.4287 12.912 12 13.526C11.7884 13.8294 11.5159 14.0855 11.2 14.278C10.562 14.6673 9.70667 14.6673 7.996 14.6673C6.28267 14.6673 5.426 14.6673 4.78667 14.2773C4.47059 14.0845 4.19814 13.8279 3.98667 13.524C3.55867 12.9093 3.50667 12.054 3.404 10.344L3 3.66732M2 3.66732H14M10.704 3.66732L10.2487 2.72865C9.94667 2.10465 9.79533 1.79332 9.53467 1.59865C9.47676 1.55553 9.41545 1.51718 9.35133 1.48398C9.06267 1.33398 8.716 1.33398 8.02333 1.33398C7.31267 1.33398 6.95733 1.33398 6.66333 1.48998C6.59834 1.52479 6.53635 1.56493 6.478 1.60998C6.21467 1.81198 6.06733 2.13532 5.77267 2.78132L5.36867 3.66732" stroke="#EF4444" stroke-linecap="round" stroke-linejoin="round"/>
+      <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M3 6h18"></path>
+        <path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"></path>
+        <path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"></path>
       </svg>
-    </button>
-  </div>`;
+    </div>
+  `;
 };
 
 const AggregatorGrid = ({ data }: { data: any }) => {
@@ -48,6 +49,9 @@ const ComponentAggregatorPanel = ({
   title = "Component aggregator",
   initialItems = [],
 }: ComponentAggregatorPanelProps) => {
+  const [deleteModalOpen, setDeleteModalOpen] = useState(false);
+  const [rowToDelete, setRowToDelete] = useState<string | null>(null);
+
   const [gridData] = useState<{ Body: any[][] }>({
     Body: [
       initialItems.length > 0
@@ -55,16 +59,7 @@ const ComponentAggregatorPanel = ({
             ...item,
             F: renderDeleteIcon(item.id),
           }))
-        : [
-            {
-              id: "row_1",
-              A: "Button",
-              B: "USD",
-              C: 4.0,
-              D: "Base UOM",
-              F: renderDeleteIcon("row_1"),
-            },
-          ],
+        : [],
     ],
   });
 
@@ -77,18 +72,25 @@ const ComponentAggregatorPanel = ({
   // Global handler for deletion
   useEffect(() => {
     (window as any).handleDeleteAggregatorRow = (rowId: string) => {
-      const grid = (window as any).Grids?.[drawerGridId];
-      if (grid) {
-        const row = grid.GetRowById(rowId);
-        if (row) {
-          grid.DeleteRow(row, 2); // 2 = delete row and remove from DOM
-        }
-      }
+      setRowToDelete(rowId);
+      setDeleteModalOpen(true);
     };
     return () => {
       delete (window as any).handleDeleteAggregatorRow;
     };
   }, []);
+
+  const handleDeleteConfirm = () => {
+    const grid = (window as any).Grids?.[drawerGridId];
+    if (grid && rowToDelete) {
+      const row = grid.GetRowById(rowToDelete);
+      if (row) {
+        grid.DeleteRow(row, 2); // 2 = delete row physically from view
+      }
+    }
+    setDeleteModalOpen(false);
+    setRowToDelete(null);
+  };
 
   // Update Currencies in Grid when API data arrives
   useEffect(() => {
@@ -128,11 +130,11 @@ const ComponentAggregatorPanel = ({
         if (row.Kind === "Data" && !row.Deleted) {
           rows.push({
             id: row.id,
-            name: row.A,
-            currency: row.B,
-            cost: row.C,
-            costFor: row.D,
-            costPerUnit: row.E,
+            name: grid.GetValue(row, "A"),
+            currency: grid.GetValue(row, "B"),
+            cost: grid.GetValue(row, "C"),
+            costFor: grid.GetValue(row, "D"),
+            costPerUnit: grid.GetValue(row, "E"),
           });
         }
         row = grid.GetNext(row);
@@ -219,6 +221,12 @@ const ComponentAggregatorPanel = ({
           Update
         </Button>
       </Box>
+
+      <DeleteConfirmModal
+        open={deleteModalOpen}
+        onClose={() => setDeleteModalOpen(false)}
+        onConfirm={handleDeleteConfirm}
+      />
     </Box>
   );
 };
