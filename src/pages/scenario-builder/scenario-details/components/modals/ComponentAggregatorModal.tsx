@@ -57,7 +57,7 @@ const ComponentAggregatorModal = ({
         variant="h6"
         sx={{ color: "#1a365d", fontWeight: "bold", px: 3, py: 2 }}
       >
-        Component aggregator ( component iterator)
+        Component aggregator
       </Typography>
       <Divider />
 
@@ -68,6 +68,7 @@ const ComponentAggregatorModal = ({
           value={label}
           onChange={(e) => setLabel(e.target.value)}
           fullWidth
+          label="Label"
           placeholder="Enter label"
           variant="outlined"
           size="small"
@@ -87,6 +88,7 @@ const ComponentAggregatorModal = ({
         </FormControl>
 
         <FormControlLabel
+          sx={{ width: "fit-content" }}
           control={
             <Checkbox
               checked={setEntireColumn}

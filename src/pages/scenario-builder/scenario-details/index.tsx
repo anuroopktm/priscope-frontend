@@ -3,6 +3,7 @@ import { Box } from "@mui/material";
 import { useState } from "react";
 import { useParams } from "react-router-dom";
 import ActionHeader from "./components/ActionHeader";
+import ComponentAggregatorDrawer from "./components/drawers/ComponentAggregatorDrawer";
 import AddAsGroupModal from "./components/items-master-drawer/components/AddAsGroupModal";
 import ItemsMasterDrawer from "./components/items-master-drawer/ItemsMasterDrawer";
 import ComponentAggregatorModal from "./components/modals/ComponentAggregatorModal";
@@ -33,6 +34,14 @@ const ScenarioDetailsPage = () => {
     useState<boolean>(false);
   const [activeColumn, setActiveColumn] = useState<string | null>(null);
 
+  // Aggregator Drawer state
+  const [isAggregatorDrawerOpen, setIsAggregatorDrawerOpen] =
+    useState<boolean>(false);
+  const [activeCell, setActiveCell] = useState<{
+    rowId: string;
+    col: string;
+  } | null>(null);
+
   const { gridData, handleEditRowConfirm, processAddItems } =
     useScenarioGridData();
 
@@ -48,11 +57,17 @@ const ScenarioDetailsPage = () => {
     setIsComponentAggregatorOpen(true);
   };
 
+  const openComponentAggregatorDrawer = (rowId: string, col: string) => {
+    setActiveCell({ rowId, col });
+    setIsAggregatorDrawerOpen(true);
+  };
+
   useScenarioGridEvents({
     gridId,
     gridData,
     openEditGroupModal,
     openComponentAggregatorModal,
+    openComponentAggregatorDrawer,
   });
 
   useTreeGridInit(gridId, gridContainerId, ScenarioDetailsLayout, gridData);
@@ -111,6 +126,9 @@ const ScenarioDetailsPage = () => {
         }
       }
 
+      // Mark the column as an aggregator column
+      grid.SetAttribute(null, colName, "AggregatorType", "Component", 1);
+
       // Make the column take width as per header text
       // Wrap in setTimeout to ensure the grid has processed the SetValue first
       setTimeout(() => {
@@ -131,6 +149,23 @@ const ScenarioDetailsPage = () => {
     }
     setIsComponentAggregatorOpen(false);
     setActiveColumn(null);
+  };
+
+  const handleAggregatorUpdate = (items: any[]) => {
+    console.log("Updating aggregator for:", activeCell, items);
+    const grid = (window as any).Grids?.[gridId];
+    if (grid && activeCell) {
+      const total = items.reduce(
+        (acc, item) => acc + (Number(item.cost) || 0),
+        0,
+      );
+      const row = grid.GetRowById(activeCell.rowId);
+      if (row) {
+        grid.SetValue(row, activeCell.col, total, 1);
+      }
+    }
+    setIsAggregatorDrawerOpen(false);
+    setActiveCell(null);
   };
 
   return (
@@ -154,31 +189,62 @@ const ScenarioDetailsPage = () => {
           flex: 1,
           minHeight: 0,
           width: "100%",
-          p: 2,
           display: "flex",
           flexDirection: "column",
           position: "relative",
+          overflow: "hidden",
         }}
       >
+        {/* Top Grid Section */}
         <Box
           sx={{
-            flex: 1,
+            flex: isAggregatorDrawerOpen ? 0.5 : 1,
             minHeight: 0,
             width: "100%",
-            borderRadius: 1,
             p: 2,
-            bgcolor: "background.paper",
+            transition: "flex 0.3s ease-in-out",
           }}
         >
           <Box
-            id={gridContainerId}
             sx={{
               height: "100%",
               width: "100%",
               borderRadius: 1,
+              p: 2,
+              bgcolor: "background.paper",
             }}
-          />
+          >
+            <Box
+              id={gridContainerId}
+              sx={{
+                height: "100%",
+                width: "100%",
+                borderRadius: 1,
+              }}
+            />
+          </Box>
         </Box>
+
+        {/* Bottom Panel Section (Split View) */}
+        {isAggregatorDrawerOpen && (
+          <Box
+            sx={{
+              flex: 0.5,
+              minHeight: 0,
+              width: "100%",
+              px: 2,
+              transition: "flex 0.3s ease-in-out",
+            }}
+          >
+            <ComponentAggregatorDrawer
+              onClose={() => {
+                setIsAggregatorDrawerOpen(false);
+                setActiveCell(null);
+              }}
+              onUpdate={handleAggregatorUpdate}
+            />
+          </Box>
+        )}
       </Box>
 
       <ItemsMasterDrawer

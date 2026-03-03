@@ -1,11 +1,15 @@
 import { useEffect } from "react";
-import { getHeaderContextMenu } from "../utils/context-menu";
+import {
+  getCellContextMenu,
+  getHeaderContextMenu,
+} from "../utils/context-menu";
 
 interface UseScenarioGridEventsProps {
   gridId: string;
   gridData: any;
   openEditGroupModal: (id: string, name: string) => void;
   openComponentAggregatorModal: (col: string) => void;
+  openComponentAggregatorDrawer: (rowId: string, col: string) => void;
 }
 
 export const useScenarioGridEvents = ({
@@ -13,6 +17,7 @@ export const useScenarioGridEvents = ({
   gridData,
   openEditGroupModal,
   openComponentAggregatorModal,
+  openComponentAggregatorDrawer,
 }: UseScenarioGridEventsProps) => {
   useEffect(() => {
     (window as any).handleTreeGridEdit = (rowId: string) => {
@@ -68,14 +73,23 @@ export const useScenarioGridEvents = ({
       console.log("Hiding (deleting) column:", col);
       grid.HideCol(col);
     };
+    (window as any).handleCalculate = (rowId: string, col: string) => {
+      openComponentAggregatorDrawer(rowId, col);
+    };
 
     const onHandleRightClick = (grid: any, row: any, col: string) => {
       if (!grid || grid.id !== gridId) return 0;
       if (row.Kind === "Header") {
         const menuItems = getHeaderContextMenu(grid, col);
-
         grid.ShowMenu(row, col, { Items: menuItems });
         return 1;
+      } else {
+        // Cell context menu
+        const menuItems = getCellContextMenu(grid, row, col);
+        if (menuItems.length > 0) {
+          grid.ShowMenu(row, col, { Items: menuItems });
+          return 1;
+        }
       }
       return 0;
     };
@@ -94,10 +108,17 @@ export const useScenarioGridEvents = ({
       delete (window as any).handleMarginComponent;
       delete (window as any).handleGeneralFormulaComponent;
       delete (window as any).handleDeleteCol;
+      delete (window as any).handleCalculate;
 
       if (window.TGDelEvent) {
         window.TGDelEvent("OnRightClick", gridId);
       }
     };
-  }, [openEditGroupModal, openComponentAggregatorModal, gridData, gridId]);
+  }, [
+    openEditGroupModal,
+    openComponentAggregatorModal,
+    openComponentAggregatorDrawer,
+    gridData,
+    gridId,
+  ]);
 };

@@ -1,9 +1,12 @@
 export const getHeaderContextMenu = (grid: any, col: string) => {
   const caption = (grid.Header?.[col] || "").toString().trim();
   const isGeneratedId = /^C\d+$/.test(col);
+  const aggregatorType = grid.GetAttribute(null, col, "AggregatorType");
 
-  // Consider it a 'Builder' column if the header is empty OR it matches the generated ID (C1, C2...)
-  const isBuilder = !caption || (isGeneratedId && caption === col);
+  // Consider it a 'Builder' column ONLY if it does NOT have an aggregator type
+  // AND either has no caption OR matches generated ID (C1, C2...)
+  const isBuilder =
+    !aggregatorType && (!caption || (isGeneratedId && caption === col));
 
   const deleteItem = {
     Name: "Delete",
@@ -54,4 +57,23 @@ export const getHeaderContextMenu = (grid: any, col: string) => {
     { Name: "-", Separator: 1 },
     deleteItem,
   ];
+};
+
+export const getCellContextMenu = (grid: any, row: any, col: string) => {
+  const aggregatorType = grid.GetAttribute(null, col, "AggregatorType");
+
+  if (aggregatorType) {
+    return [
+      { Name: "Aggregator Actions", Caption: 1, Class: "MenuCaption" },
+      {
+        Name: "Calculate",
+        OnClick: () => {
+          console.log(`Triggering calculate for ${col} (${aggregatorType})`);
+          (window as any).handleCalculate(row.id, col);
+        },
+      },
+    ];
+  }
+
+  return [];
 };
