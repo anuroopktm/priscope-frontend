@@ -43,34 +43,15 @@ export const useScenarioGridEvents = ({
 
     // Header context menu handlers
     (window as any).handleAddColRight = (grid: any, col: string) => {
-      console.log("Adding column right to:", col);
       grid.AddCols(1, col, 1, 1, 1);
     };
     (window as any).handleAddColLeft = (grid: any, col: string) => {
-      console.log("Adding column left to:", col);
       grid.AddCols(1, col, 0, 1, 1);
     };
     (window as any).handleComponentAggregator = (_grid: any, col: string) => {
-      console.log(`Header Menu: Component Aggregator for`, col);
       openComponentAggregatorModal(col);
     };
-    (window as any).handleCostAggregator = (_grid: any, col: string) => {
-      console.log(`Header Menu: Cost Aggregator for`, col);
-    };
-    (window as any).handleMarkupComponent = (_grid: any, col: string) => {
-      console.log(`Header Menu: Markup Component for`, col);
-    };
-    (window as any).handleMarginComponent = (_grid: any, col: string) => {
-      console.log(`Header Menu: Margin Component for`, col);
-    };
-    (window as any).handleGeneralFormulaComponent = (
-      _grid: any,
-      col: string,
-    ) => {
-      console.log(`Header Menu: General Formula Component for`, col);
-    };
     (window as any).handleDeleteCol = (grid: any, col: string) => {
-      console.log("Hiding (deleting) column:", col);
       grid.HideCol(col);
     };
     (window as any).handleCalculate = (rowId: string, col: string) => {

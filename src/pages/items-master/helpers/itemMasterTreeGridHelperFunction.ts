@@ -1,4 +1,6 @@
+import { v4 as uuidv4 } from "uuid";
 import { baseGridCfg } from "../constants/grid-cfg";
+import { allowedKeys, Field_Map } from "../constants/itemmaster.constants";
 import {
   type itemMasterBodyResponseItems,
   //   type itemMasterBodyResponseItemsField,
@@ -14,9 +16,6 @@ import {
   type TreeGridHeaderList,
   type TreeGridRow,
 } from "./types";
-import { v4 as uuidv4 } from "uuid";
-import { Field_Map } from "../constants/itemmaster.constants";
-import { allowedKeys } from "../constants/itemmaster.constants";
 
 const DEfAULT_VISIBLE_COLUMNS = ["SKU", "UPC", "Category", "Description"];
 
@@ -138,7 +137,7 @@ export async function getItemMasterLayout(
 ) {
   await new Promise((resolve) => setTimeout(resolve, 100));
   const filterHead = buildTreeGridFilterHead(headers?.headers);
-  console.log(filterHead, "filterheaddd");
+
   return {
     Cfg: {
       ...baseGridCfg,

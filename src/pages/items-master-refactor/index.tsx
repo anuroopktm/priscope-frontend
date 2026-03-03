@@ -1,3 +1,5 @@
+import RequestSuccessDialog from "@/components/common/request-notification";
+import { COMMENT_TYPE } from "@/constants/comments.constants";
 import {
   useAddBulkInsertAdminRequest,
   useListHeaders,
@@ -5,35 +7,31 @@ import {
 } from "@/services/queries/item-master-refactor/item-master-refactor.queries";
 import { Box } from "@mui/material";
 import { useCallback, useEffect, useMemo, useState } from "react";
+import { useConfirmComment } from "./actions/commentHandlers";
+import { handleEditCellAdminRequest } from "./actions/editItemMasterAdmin";
+import { useHandleGridEditConfirm } from "./actions/handleGridEditConfirm";
 import ActionHeader from "./components/ActionHeader";
-import { useTreeGridInit } from "./tree-grid/hooks/useTreeGridInit";
+import CommentSidebar from "./components/comment-sidebar";
+import CommentsModal from "./components/comments-modal";
+import DetailView from "./components/detail-view";
+import { DetailsModal } from "./components/detail-view-modal";
+import SidePanel from "./components/sidepanel/SidePanel";
+import TableSavePopover from "./components/table-save-popover";
+import { DEfAULT_VISIBLE_COLUMNS } from "./constants/headers.constants";
 import {
   buildItemMasterTreeGridBody,
   buildItemMasterTreeGridCols,
   hasItemMasterPrivileges,
   ItemMasterGridLayout,
 } from "./helper";
-import { handleSelected } from "./tree-grid/utils/rowSelection";
 import { useItemMasterStore } from "./store/useItemMasterStore";
-import { handleFilterChange } from "./tree-grid/utils/Filter";
-import { DEfAULT_VISIBLE_COLUMNS } from "./constants/headers.constants";
 import { handleValueChanged } from "./tree-grid/cellvalue/handleValueChanged";
-import TableSavePopover from "./components/table-save-popover";
 import { useHandleEditPopover } from "./tree-grid/hooks/useHandleEditPopover";
-import { useHandleGridEditConfirm } from "./actions/handleGridEditConfirm";
-import { handleEditCellAdminRequest } from "./actions/editItemMasterAdmin";
-import RequestSuccessDialog from "@/components/common/request-notification";
-import { handleRightClick } from "./tree-grid/cellvalue/handleRightClick";
-import { COMMENT_TYPE } from "@/constants/comments.constants";
-import CommentsModal from "./components/comments-modal";
-import type { OpenPanel } from "./types/types";
-import CommentSidebar from "./components/comment-sidebar";
-import { focusCell, focusRow } from "./tree-grid/focus/focusEvents";
-import DetailView from "./components/detail-view";
-import { DetailsModal } from "./components/detail-view-modal";
-import { useConfirmComment } from "./actions/commentHandlers";
-import SidePanel from "./components/sidepanel/SidePanel";
+import { useTreeGridInit } from "./tree-grid/hooks/useTreeGridInit";
+import { handleFilterChange } from "./tree-grid/utils/Filter";
 import { getRightClickHandlers } from "./tree-grid/utils/onHandleRightClick";
+import { handleSelected } from "./tree-grid/utils/rowSelection";
+import type { OpenPanel } from "./types/types";
 import { selectComment } from "./utils/getCommentSelection";
 
 const gridId = "ItemMasterGrid";
@@ -121,7 +119,6 @@ const ItemMasterListingPage = () => {
 
   useEffect(() => {
     if (!headers) return;
-    console.log(headers, "headers");
     const checkBoxList: Record<string, boolean> = {};
     headers.forEach((header) => {
       if (DEfAULT_VISIBLE_COLUMNS.includes(header.label)) {

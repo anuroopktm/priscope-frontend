@@ -68,7 +68,6 @@ export const getCellContextMenu = (grid: any, row: any, col: string) => {
       {
         Name: "Calculate",
         OnClick: () => {
-          console.log(`Triggering calculate for ${col} (${aggregatorType})`);
           (window as any).handleCalculate(row.id, col);
         },
       },

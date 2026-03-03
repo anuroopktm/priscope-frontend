@@ -55,7 +55,6 @@ const ScenarioListingPage = () => {
   useTreeGridInit(gridId, gridContainerId, ScenarioGridLayout, gridData);
 
   const handleDeleteConfirm = () => {
-    console.log("Confirm Delete:", selectedRowId);
     setDeleteModalOpen(false);
   };
 

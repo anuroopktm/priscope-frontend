@@ -1,6 +1,17 @@
 import { COMMENT_TYPE } from "@/constants/comments.constants";
+import {
+  PRIVILEGE_ACTIONS,
+  PRIVILEGE_MODULES,
+} from "@/constants/privileges.constants";
+import { itemMasterColumnToFieldMap } from "@/pages/items-master/constants/columnFieldMap";
+import { hasPrivilege } from "@/utils/hasPrivilege";
+import { v4 as uuidv4 } from "uuid";
 import { DEfAULT_VISIBLE_COLUMNS } from "../constants/headers.constants";
 import { baseGridCfg } from "../tree-grid/config/layout";
+import type {
+  AttributeConfigurationData,
+  SystemFieldObject,
+} from "../types/types";
 import type {
   itemMasterBodyResponseItems,
   itemMasterHeaderResponse,
@@ -11,17 +22,6 @@ import type {
   TreeGridHeaderList,
   TreeGridRow,
 } from "./types";
-import type {
-  AttributeConfigurationData,
-  SystemFieldObject,
-} from "../types/types";
-import { itemMasterColumnToFieldMap } from "@/pages/items-master/constants/columnFieldMap";
-import {
-  PRIVILEGE_ACTIONS,
-  PRIVILEGE_MODULES,
-} from "@/constants/privileges.constants";
-import { hasPrivilege } from "@/utils/hasPrivilege";
-import { v4 as uuidv4 } from "uuid";
 
 export const buildTreeGridFilterHead = (
   items: itemMasterHeaderResponseArrayList[] | undefined,
@@ -48,7 +48,6 @@ export const ItemMasterGridLayout = (
   headers: itemMasterHeaderResponse | undefined,
 ) => {
   const filterHead = buildTreeGridFilterHead(headers?.headers);
-  console.log(filterHead, "filterheaddd");
 
   return {
     Cfg: {
@@ -92,7 +91,7 @@ export const buildItemMasterTreeGridCols = (
   if (!items || items.length === 0) {
     return { cols: [] };
   }
-  console.log(items, "===================.");
+
   const cols: TreeGridHeader[] = items
     .filter((item) => item.label !== "Color")
     .map((item) => {

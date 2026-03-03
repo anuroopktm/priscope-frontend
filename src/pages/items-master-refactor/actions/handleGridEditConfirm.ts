@@ -22,21 +22,6 @@ export const useHandleGridEditConfirm = () => {
     setRequestNotficationVisible,
     handleEditCellAdminRequest,
   }: any) => {
-    console.log(
-      row,
-      col,
-      value,
-      oldValue,
-      comment,
-      hasEditItemMasterPrivilege,
-      confirm,
-      gridRef,
-      itemMasterData,
-      itemMasterBulkInsertAdminApproval,
-      setRequestNotficationVisible,
-      handleEditCellAdminRequest,
-      "parameters received in handleGridEditConfirm",
-    );
     if (value === oldValue) return;
 
     // No privilege → Admin request flow

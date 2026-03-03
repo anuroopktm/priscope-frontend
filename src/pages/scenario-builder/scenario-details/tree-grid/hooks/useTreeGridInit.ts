@@ -19,15 +19,12 @@ export const useTreeGridInit = (
   useEffect(() => {
     const initGrid = () => {
       if (!layout || !data) {
-        console.log("useTreeGridInit: Missing layout or data, skipping init");
         return;
       }
       if (created.current) {
-        console.log("useTreeGridInit: Grid already created, skipping init");
         return;
       }
       if (!window.TreeGrid) {
-        console.error("useTreeGridInit: window.TreeGrid is NOT available!");
         return;
       }
 
@@ -46,13 +43,8 @@ export const useTreeGridInit = (
         Debug: { Check: 1 },
       };
 
-      console.log(
-        "useTreeGridInit: Calling window.TreeGrid with source:",
-        source,
-      );
       try {
         const grid = window.TreeGrid(source, containerId);
-        console.log("useTreeGridInit: window.TreeGrid returned:", grid);
         gridRef.current = grid;
         created.current = true;
 
@@ -68,7 +60,6 @@ export const useTreeGridInit = (
     return () => {
       clearTimeout(timer);
       if (gridRef.current) {
-        console.log("useTreeGridInit: Disposing grid", gridId);
         try {
           // Force immediate disposal to clear global memory
           gridRef.current.Dispose();
@@ -86,7 +77,6 @@ export const useTreeGridInit = (
     const grid = gridRef.current;
     if (!grid || !data) return;
 
-    console.log("useTreeGridInit: Updating data for grid", gridId);
     grid.Source.Data.Data = data;
     grid.ReloadBody();
   }, [data]);

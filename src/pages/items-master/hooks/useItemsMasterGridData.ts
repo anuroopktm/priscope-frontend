@@ -67,9 +67,7 @@ export const useItemsMasterGridData = ({
     Grid.Update();
   }, []);
 
-  const handleGridReady = useCallback((_grid: TGrid) => {
-    console.log("handleGridReady");
-  }, []);
+  const handleGridReady = useCallback((_grid: TGrid) => {}, []);
 
   const gridInstance = useTreeGridInit(
     gridId,

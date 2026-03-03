@@ -168,10 +168,6 @@ const ScenarioDetailsPage = () => {
         const targetSec = targetObj?.Sec ?? 1;
         const targetPos = targetObj?.Pos ?? 100;
 
-        console.log(
-          `Grid: Starting sync with target anchor [${targetCol}] at Sec: ${targetSec}, Pos: ${targetPos}`,
-        );
-
         // Get list of all currently used item names to clean up duplicates
         const currentItemNames = items
           .map((i) => (i.name || "").trim().toLowerCase())
@@ -188,7 +184,6 @@ const ScenarioDetailsPage = () => {
             .toLowerCase();
           const isCompCol = c.startsWith("Comp");
           if (isCompCol || currentItemNames.includes(caption)) {
-            console.log(`Grid: Pre-sync hide of [${c}] (${caption})`);
             grid.HideCol(c);
           }
         });
@@ -207,9 +202,6 @@ const ScenarioDetailsPage = () => {
           const insertPos = targetPos + index;
 
           if (!grid.Cols[colId]) {
-            console.log(
-              `Grid: Adding NEW column [${colId}] for [${cleanName}] at Sec: ${targetSec}, Pos: ${insertPos}`,
-            );
             // AddCol(col, sec, pos, width, show, type, caption)
             grid.AddCol(
               colId,
@@ -221,7 +213,6 @@ const ScenarioDetailsPage = () => {
               cleanName,
             );
           } else {
-            console.log(`Grid: Showing existing column [${colId}]`);
             grid.ShowCol(colId);
           }
 
@@ -236,9 +227,6 @@ const ScenarioDetailsPage = () => {
           grid.SetAttribute(null, colId, "CanEdit", 1, 1);
 
           // Force physical position to strictly be left of the trigger
-          console.log(
-            `Grid: Moving [${colId}] to position 0 (before) [${targetCol}]`,
-          );
           grid.MoveCol(colId, targetCol, 0, 1);
 
           // Sync Header Caption
@@ -254,13 +242,16 @@ const ScenarioDetailsPage = () => {
               : item.costPerUnit;
           const val = parseFloat(rawVal) || 0;
 
-          console.log(`Grid: Setting value ${val} in [${colId}]`);
           grid.SetValue(row, colId, val, 1);
         });
 
         // Final summary update
         const total = parseFloat(totalAmount as any) || 0;
-        console.log(`Grid: Setting summary total ${total} in [${targetCol}]`);
+
+        // Format the trigger column as currency
+        grid.SetAttribute(null, targetCol, "Type", "Float", 1);
+        grid.SetAttribute(null, targetCol, "Format", "$0.00", 1);
+
         grid.SetValue(row, targetCol, total, 1);
 
         grid.Update();

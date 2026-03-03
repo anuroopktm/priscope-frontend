@@ -27,10 +27,7 @@ export const onGridScroll = (
 export const onGridSelect = (grid: TGrid) => {
   if (!grid) return;
   const selRows = grid.GetSelRows();
-  console.log(
-    "Selection changed. Selected IDs:",
-    selRows.map((r: any) => r.id),
-  );
+  return selRows.map((r: any) => r.id);
 };
 
 /**
