@@ -36,17 +36,10 @@ export const ScenarioDetailsLayout = {
   //   },
   // ],
   Cols: [
-    {
-      Name: "A",
-      RelWidth: "1",
-      Type: "Text",
-      Caption: "Category",
-      CanSort: "0",
-    },
+    { Name: "A", RelWidth: "1", Type: "Text", CanSort: "0" },
     { Name: "B", RelWidth: "1", Type: "Text", CanSort: "0" },
     { Name: "C", RelWidth: "1", Type: "Text", CanSort: "0" },
     { Name: "D", RelWidth: "1", Type: "Text", CanSort: "0" },
-    { Name: "E", RelWidth: "1", Type: "Float", Format: "0.00", CanSort: "0" },
   ],
   Def: {
     Group: {
@@ -66,10 +59,9 @@ export const ScenarioDetailsLayout = {
     // },
   },
   Header: {
-    A: "Category",
-    B: "SKU",
-    C: "Description",
-    D: "UPC",
-    E: "Price",
+    A: "SKU",
+    B: "Description",
+    C: "UPC",
+    D: "Price",
   },
 };
