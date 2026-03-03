@@ -7,6 +7,7 @@ import ComponentAggregatorDrawer from "./components/drawers/ComponentAggregatorD
 import AddAsGroupModal from "./components/items-master-drawer/components/AddAsGroupModal";
 import ItemsMasterDrawer from "./components/items-master-drawer/ItemsMasterDrawer";
 import ComponentAggregatorModal from "./components/modals/ComponentAggregatorModal";
+import DeleteConfirmModal from "./components/modals/DeleteConfirmModal";
 import { ScenarioDetailsLayout } from "./tree-grid/config/details-layout";
 import { useScenarioGridData } from "./tree-grid/hooks/useScenarioGridData";
 import { useScenarioGridEvents } from "./tree-grid/hooks/useScenarioGridEvents";
@@ -42,6 +43,10 @@ const ScenarioDetailsPage = () => {
     col: string;
   } | null>(null);
 
+  // Delete confirmation state
+  const [isDeleteModalOpen, setIsDeleteModalOpen] = useState<boolean>(false);
+  const [rowToDeleteId, setRowToDeleteId] = useState<string | null>(null);
+
   const { gridData, handleEditRowConfirm, processAddItems } =
     useScenarioGridData();
 
@@ -62,12 +67,20 @@ const ScenarioDetailsPage = () => {
     setIsAggregatorDrawerOpen(true);
   };
 
+  const openDeleteModal = (rowId: string) => {
+    setRowToDeleteId(rowId);
+    setIsDeleteModalOpen(true);
+  };
+
+  const isGroupToDelete = rowToDeleteId?.startsWith("group_");
+
   useScenarioGridEvents({
     gridId,
     gridData,
     openEditGroupModal,
     openComponentAggregatorModal,
     openComponentAggregatorDrawer,
+    openDeleteModal,
   });
 
   useTreeGridInit(gridId, gridContainerId, ScenarioDetailsLayout, gridData);
@@ -97,6 +110,18 @@ const ScenarioDetailsPage = () => {
     setEditingGroupId(null);
     setEditingGroupName("");
     setIsEditModalOpen(false);
+  };
+
+  const handleDeleteConfirm = () => {
+    const grid = (window as any).Grids?.[gridId];
+    if (grid && rowToDeleteId) {
+      const row = grid.GetRowById(rowToDeleteId);
+      if (row) {
+        grid.DeleteRow(row, 1);
+      }
+    }
+    setRowToDeleteId(null);
+    setIsDeleteModalOpen(false);
   };
 
   const handleComponentAggregatorConfirm = (data: {
@@ -366,6 +391,17 @@ const ScenarioDetailsPage = () => {
         open={isComponentAggregatorOpen}
         onClose={() => setIsComponentAggregatorOpen(false)}
         onConfirm={handleComponentAggregatorConfirm}
+      />
+      <DeleteConfirmModal
+        open={isDeleteModalOpen}
+        onClose={() => setIsDeleteModalOpen(false)}
+        onConfirm={handleDeleteConfirm}
+        title={isGroupToDelete ? "Delete Group" : "Delete Item"}
+        message={
+          isGroupToDelete
+            ? "Are you sure you want to delete this group and all items within it? This action cannot be undone."
+            : "Are you sure you want to delete this item? This action cannot be undone."
+        }
       />
     </Box>
   );

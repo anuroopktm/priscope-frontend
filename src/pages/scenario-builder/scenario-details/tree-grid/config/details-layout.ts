@@ -23,6 +23,7 @@ export const ScenarioDetailsLayout = {
     Selecting: "1",
     Deleting: "0",
     SelectingSingle: "0",
+    RelWidthType: "1",
   },
   // LeftCols: [
   //   {

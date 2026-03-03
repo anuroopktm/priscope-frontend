@@ -10,6 +10,7 @@ interface UseScenarioGridEventsProps {
   openEditGroupModal: (id: string, name: string) => void;
   openComponentAggregatorModal: (col: string) => void;
   openComponentAggregatorDrawer: (rowId: string, col: string) => void;
+  openDeleteModal: (rowId: string) => void;
 }
 
 export const useScenarioGridEvents = ({
@@ -18,6 +19,7 @@ export const useScenarioGridEvents = ({
   openEditGroupModal,
   openComponentAggregatorModal,
   openComponentAggregatorDrawer,
+  openDeleteModal,
 }: UseScenarioGridEventsProps) => {
   useEffect(() => {
     (window as any).handleTreeGridEdit = (rowId: string) => {
@@ -70,6 +72,9 @@ export const useScenarioGridEvents = ({
     (window as any).handleDeleteCol = (grid: any, col: string) => {
       grid.HideCol(col);
     };
+    (window as any).handleTreeGridDeleteRow = (rowId: string) => {
+      openDeleteModal(rowId);
+    };
     (window as any).handleCalculate = (rowId: string, col: string) => {
       openComponentAggregatorDrawer(rowId, col);
     };
@@ -105,6 +110,7 @@ export const useScenarioGridEvents = ({
       delete (window as any).handleMarginComponent;
       delete (window as any).handleGeneralFormulaComponent;
       delete (window as any).handleDeleteCol;
+      delete (window as any).handleTreeGridDeleteRow;
       delete (window as any).handleCalculate;
 
       if (window.TGDelEvent) {
@@ -115,6 +121,7 @@ export const useScenarioGridEvents = ({
     openEditGroupModal,
     openComponentAggregatorModal,
     openComponentAggregatorDrawer,
+    openDeleteModal,
     gridData,
     gridId,
   ]);
