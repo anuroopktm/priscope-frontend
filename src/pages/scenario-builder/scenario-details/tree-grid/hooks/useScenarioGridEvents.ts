@@ -4,49 +4,75 @@ import { getHeaderContextMenu } from "../utils/context-menu";
 interface UseScenarioGridEventsProps {
   gridId: string;
   gridData: any;
-  handleDeleteRow: (id: string) => void;
   openEditGroupModal: (id: string, name: string) => void;
+  openComponentAggregatorModal: (col: string) => void;
 }
 
 export const useScenarioGridEvents = ({
   gridId,
   gridData,
-  handleDeleteRow,
   openEditGroupModal,
+  openComponentAggregatorModal,
 }: UseScenarioGridEventsProps) => {
   useEffect(() => {
-    (window as any).handleTreeGridDelete = handleDeleteRow;
-
     (window as any).handleTreeGridEdit = (rowId: string) => {
       const currentRows = gridData?.Body?.[0] || [];
-      const targetRow = currentRows.find((r: any) => r.id === rowId);
+
+      // Recursive function to find row by ID
+      const findRecursive = (rows: any[]): any => {
+        for (const r of rows) {
+          if (r.id === rowId) return r;
+          if (r.Items) {
+            const found = findRecursive(r.Items);
+            if (found) return found;
+          }
+        }
+        return null;
+      };
+
+      const targetRow = findRecursive(currentRows);
       if (targetRow) {
         openEditGroupModal(rowId, targetRow.A || "");
       }
     };
 
-    // Header context menu handlers (placeholders)
-    const assignGlobal = (name: string, logMessage: string) => {
-      (window as any)[name] = (_grid: any, col: string) => {
-        console.log(`Header Menu: ${logMessage}`, col);
-      };
+    // Header context menu handlers
+    (window as any).handleAddColRight = (grid: any, col: string) => {
+      console.log("Adding column right to:", col);
+      grid.AddCols(1, col, 1, 1, 1);
     };
-
-    assignGlobal("handleAddColRight", "Add Column Right");
-    assignGlobal("handleAddColLeft", "Add Column Left");
-    assignGlobal("handleComponentAggregator", "Component Aggregator");
-    assignGlobal("handleCostAggregator", "Cost Aggregator");
-    assignGlobal("handleMarkupComponent", "Markup Component");
-    assignGlobal("handleMarginComponent", "Margin Component");
-    assignGlobal("handleGeneralFormulaComponent", "General Formula Component");
-    assignGlobal("handleDeleteCol", "Delete Column");
+    (window as any).handleAddColLeft = (grid: any, col: string) => {
+      console.log("Adding column left to:", col);
+      grid.AddCols(1, col, 0, 1, 1);
+    };
+    (window as any).handleComponentAggregator = (_grid: any, col: string) => {
+      console.log(`Header Menu: Component Aggregator for`, col);
+      openComponentAggregatorModal(col);
+    };
+    (window as any).handleCostAggregator = (_grid: any, col: string) => {
+      console.log(`Header Menu: Cost Aggregator for`, col);
+    };
+    (window as any).handleMarkupComponent = (_grid: any, col: string) => {
+      console.log(`Header Menu: Markup Component for`, col);
+    };
+    (window as any).handleMarginComponent = (_grid: any, col: string) => {
+      console.log(`Header Menu: Margin Component for`, col);
+    };
+    (window as any).handleGeneralFormulaComponent = (
+      _grid: any,
+      col: string,
+    ) => {
+      console.log(`Header Menu: General Formula Component for`, col);
+    };
+    (window as any).handleDeleteCol = (grid: any, col: string) => {
+      console.log("Hiding (deleting) column:", col);
+      grid.HideCol(col);
+    };
 
     const onHandleRightClick = (grid: any, row: any, col: string) => {
       if (!grid || grid.id !== gridId) return 0;
       if (row.Kind === "Header") {
-        const caption = grid.Header[col];
-        const hasText = !!(caption && caption.trim());
-        const menuItems = getHeaderContextMenu(grid, col, hasText);
+        const menuItems = getHeaderContextMenu(grid, col);
 
         grid.ShowMenu(row, col, { Items: menuItems });
         return 1;
@@ -59,7 +85,6 @@ export const useScenarioGridEvents = ({
     }
 
     return () => {
-      delete (window as any).handleTreeGridDelete;
       delete (window as any).handleTreeGridEdit;
       delete (window as any).handleAddColRight;
       delete (window as any).handleAddColLeft;
@@ -74,5 +99,5 @@ export const useScenarioGridEvents = ({
         window.TGDelEvent("OnRightClick", gridId);
       }
     };
-  }, [handleDeleteRow, openEditGroupModal, gridData, gridId]);
+  }, [openEditGroupModal, openComponentAggregatorModal, gridData, gridId]);
 };

@@ -1,5 +1,4 @@
 import { useCallback, useState } from "react";
-import { renderActionsCell } from "../cells/actions.cell";
 
 // Data types based on current structure
 export interface ScenarioRow {
@@ -22,28 +21,26 @@ export const useScenarioGridData = () => {
     Body: [[]],
   });
 
-  const handleDeleteRow = useCallback((rowId: string) => {
-    setGridData((prev) => {
-      const currentRows = prev?.Body?.[0] || [];
-      const newRows = currentRows.filter((row) => row.id !== rowId);
-      return {
-        ...prev,
-        Body: [[...newRows]],
-      };
-    });
-  }, []);
-
   const handleEditRowConfirm = useCallback(
     (newName: string, editingGroupId: string | null) => {
       if (editingGroupId) {
         setGridData((prev) => {
           const currentRows = prev?.Body?.[0] || [];
-          const newRows = currentRows.map((row) => {
-            if (row.id === editingGroupId) {
-              return { ...row, A: newName };
-            }
-            return row;
-          });
+
+          // Recursive function to update row text by ID
+          const updateRecursive = (rows: ScenarioRow[]): ScenarioRow[] => {
+            return rows.map((row) => {
+              if (row.id === editingGroupId) {
+                return { ...row, A: newName };
+              }
+              if (row.Items) {
+                return { ...row, Items: updateRecursive(row.Items) };
+              }
+              return row;
+            });
+          };
+
+          const newRows = updateRecursive(currentRows);
           return {
             ...prev,
             Body: [[...newRows]],
@@ -80,7 +77,6 @@ export const useScenarioGridData = () => {
           id: groupRowId,
           Def: "Group",
           A: groupName,
-          AHtmlPostfix: renderActionsCell(groupRowId),
           ACanEdit: 0,
           Items: mappedItems, // These will be children of the groupRow
           Expanded: "1",
@@ -101,7 +97,6 @@ export const useScenarioGridData = () => {
 
   return {
     gridData,
-    handleDeleteRow,
     handleEditRowConfirm,
     processAddItems,
   };

@@ -5,6 +5,7 @@ import { useParams } from "react-router-dom";
 import ActionHeader from "./components/ActionHeader";
 import AddAsGroupModal from "./components/items-master-drawer/components/AddAsGroupModal";
 import ItemsMasterDrawer from "./components/items-master-drawer/ItemsMasterDrawer";
+import ComponentAggregatorModal from "./components/modals/ComponentAggregatorModal";
 import { ScenarioDetailsLayout } from "./tree-grid/config/details-layout";
 import { useScenarioGridData } from "./tree-grid/hooks/useScenarioGridData";
 import { useScenarioGridEvents } from "./tree-grid/hooks/useScenarioGridEvents";
@@ -18,16 +19,21 @@ const ScenarioDetailsPage = () => {
   const { data: scenario } = useGetScenario(id);
 
   // Modals state
-  const [isDrawerOpen, setIsDrawerOpen] = useState(false);
-  const [isGroupModalOpen, setIsGroupModalOpen] = useState(false);
+  const [isDrawerOpen, setIsDrawerOpen] = useState<boolean>(false);
+  const [isGroupModalOpen, setIsGroupModalOpen] = useState<boolean>(false);
   const [itemsToGroup, setItemsToGroup] = useState<any[]>([]);
 
   // Local editing state for group renaming
-  const [isEditModalOpen, setIsEditModalOpen] = useState(false);
+  const [isEditModalOpen, setIsEditModalOpen] = useState<boolean>(false);
   const [editingGroupId, setEditingGroupId] = useState<string | null>(null);
   const [editingGroupName, setEditingGroupName] = useState<string>("");
 
-  const { gridData, handleDeleteRow, handleEditRowConfirm, processAddItems } =
+  // Component Aggregator state
+  const [isComponentAggregatorOpen, setIsComponentAggregatorOpen] =
+    useState<boolean>(false);
+  const [activeColumn, setActiveColumn] = useState<string | null>(null);
+
+  const { gridData, handleEditRowConfirm, processAddItems } =
     useScenarioGridData();
 
   // Handle Event Triggers from TreeGrid
@@ -37,11 +43,16 @@ const ScenarioDetailsPage = () => {
     setIsEditModalOpen(true);
   };
 
+  const openComponentAggregatorModal = (col: string) => {
+    setActiveColumn(col);
+    setIsComponentAggregatorOpen(true);
+  };
+
   useScenarioGridEvents({
     gridId,
     gridData,
-    handleDeleteRow,
     openEditGroupModal,
+    openComponentAggregatorModal,
   });
 
   useTreeGridInit(gridId, gridContainerId, ScenarioDetailsLayout, gridData);
@@ -71,6 +82,40 @@ const ScenarioDetailsPage = () => {
     setEditingGroupId(null);
     setEditingGroupName("");
     setIsEditModalOpen(false);
+  };
+
+  const handleComponentAggregatorConfirm = (data: {
+    label: string;
+    systemField: string;
+    setEntireColumn: boolean;
+  }) => {
+    const grid = (window as any).Grids?.[gridId];
+    if (grid && activeColumn) {
+      // Add a new column after the current one
+      // If we provide null for name, it returns the generated name
+      const newColName = grid.AddCols(1, activeColumn, 1, null, 1);
+
+      if (newColName) {
+        // Set the header caption
+        // Most TreeGrid versions have 'Header' as the main header row object
+        const headerRow = grid.Header || grid.GetRowById("Header");
+        if (headerRow) {
+          grid.SetValue(headerRow, newColName, data.label, 1);
+        } else {
+          // Fallback: search for row with Kind="Header"
+          let row = grid.GetFirst();
+          while (row) {
+            if (row.Kind === "Header") {
+              grid.SetValue(row, newColName, data.label, 1);
+              break;
+            }
+            row = grid.GetNext(row);
+          }
+        }
+      }
+    }
+    setIsComponentAggregatorOpen(false);
+    setActiveColumn(null);
   };
 
   return (
@@ -140,6 +185,12 @@ const ScenarioDetailsPage = () => {
         title="Edit Group"
         initialValue={editingGroupName}
         confirmLabel="Save"
+      />
+
+      <ComponentAggregatorModal
+        open={isComponentAggregatorOpen}
+        onClose={() => setIsComponentAggregatorOpen(false)}
+        onConfirm={handleComponentAggregatorConfirm}
       />
     </Box>
   );
