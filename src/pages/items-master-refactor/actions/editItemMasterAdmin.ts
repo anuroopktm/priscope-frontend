@@ -1,5 +1,6 @@
-
+import { useAddBulkInsertAdminRequest } from "@/services/queries/item-master-refactor/item-master-refactor.queries";
 import { getEditCellValueAdminApproval } from "../helper";
+import { useToastStore } from "@/store/useToastStore";
 
 interface HandleEditAdminParams {
   row: TRow;
@@ -8,16 +9,14 @@ interface HandleEditAdminParams {
   oldValue?: string;
   comment?: string | null;
 
-  itemMasterDataList: any;
-  itemMasterBulkInsertAdminApproval: any;
-  setShowLoader: React.Dispatch<React.SetStateAction<boolean>>;
-  setRequestSuccessNotficationVisible: React.Dispatch<
-    React.SetStateAction<boolean>
-  >;
-  showToast: (
-    msg: string,
-    type?: "success" | "error" | "warning" | "info",
-  ) => void;
+  itemMasterData: any;
+  // itemMasterBulkInsertAdminApproval: any;
+  // setShowLoader: React.Dispatch<React.SetStateAction<boolean>>;
+  setRequestNotficationVisible: React.Dispatch<React.SetStateAction<boolean>>;
+  // showToast: (
+  //   msg: string,
+  //   type?: "success" | "error" | "warning" | "info",
+  // ) => void;
 }
 
 export const handleEditCellAdminRequest = ({
@@ -25,16 +24,20 @@ export const handleEditCellAdminRequest = ({
   col,
   value,
   comment,
-  itemMasterDataList,
-  itemMasterBulkInsertAdminApproval,
-  setShowLoader,
-  setRequestSuccessNotficationVisible,
-  showToast,
+  itemMasterData,
+  // itemMasterBulkInsertAdminApproval,
+  // setShowLoader,
+  setRequestNotficationVisible,
+  // showToast,
 }: HandleEditAdminParams) => {
+  const { mutate: itemMasterBulkInsertAdminApproval } =
+    useAddBulkInsertAdminRequest();
+  const showToast = useToastStore((state) => state.showToast);
+
   const item_id = row?.id;
 
   const allItems =
-    itemMasterDataList?.pages.flatMap((page: any) => page.items) || [];
+    itemMasterData?.pages.flatMap((page: any) => page.items) || [];
 
   const finalPayload = allItems.find((item: any) => item.id === item_id);
   if (!finalPayload) return;
@@ -65,15 +68,15 @@ export const handleEditCellAdminRequest = ({
 
   if (!payload) return;
 
-  setShowLoader(true);
+  // setShowLoader(true);
 
   itemMasterBulkInsertAdminApproval(payload, {
     onSuccess: () => {
-      setShowLoader(false);
-      setRequestSuccessNotficationVisible(true);
+      // setShowLoader(false);
+      setRequestNotficationVisible(true);
     },
     onError: () => {
-      setShowLoader(false);
+      // setShowLoader(false);
       showToast("Failed to save changes. Please try again.", "warning");
     },
   });

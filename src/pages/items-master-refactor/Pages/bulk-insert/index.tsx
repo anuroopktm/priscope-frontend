@@ -154,14 +154,12 @@ const BulkInsertPage = () => {
                 row = Grid.GetNext(row);
               }
             }, 50);
-
-            Grid.ReloadBody();
           }
-          setGridData(skippedGridData);
-          showToast(
-            "Some rows were skipped. Please fix and re-save.",
-            "warning",
-          );
+          setGridData({
+            ...skippedGridData,
+            Body: [mergedBody],
+          });
+          showToast(response?.skipped_items?.[0]?.reason, "warning");
         } else {
           showToast("Items saved successfully!", "success");
           navigate("/items-master");

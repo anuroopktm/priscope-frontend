@@ -2,6 +2,7 @@ import { useEditItemMasterItem } from "@/services/queries/item-master-refactor/i
 import { useToastStore } from "@/store/useToastStore";
 import { openConfirmationModal } from "@/utils/getRequestConfirmationModal";
 import { useQueryClient } from "@tanstack/react-query";
+import { handleEditCellAdminRequest } from "./editItemMasterAdmin";
 
 export const useHandleGridEditConfirm = () => {
   const queryClient = useQueryClient();
@@ -18,15 +19,16 @@ export const useHandleGridEditConfirm = () => {
     confirm,
     gridRef,
     itemMasterData,
-    itemMasterBulkInsertAdminApproval,
+    // itemMasterBulkInsertAdminApproval,
     setRequestNotficationVisible,
-    handleEditCellAdminRequest,
+    // handleEditCellAdminRequest,
   }: any) => {
     if (value === oldValue) return;
 
     // No privilege → Admin request flow
-    if (!hasEditItemMasterPrivilege) {
+    if (!false) {
       const result = await openConfirmationModal("edit", confirm);
+      console.log(result)
 
       if (result && handleEditCellAdminRequest) {
         handleEditCellAdminRequest({
@@ -36,10 +38,10 @@ export const useHandleGridEditConfirm = () => {
           oldValue,
           comment,
           itemMasterData,
-          itemMasterBulkInsertAdminApproval,
+          // itemMasterBulkInsertAdminApproval,
           // setShowLoader,
           setRequestNotficationVisible,
-          showToast,
+          // showToast,
         });
       } else {
         const Grid = gridRef.current;
