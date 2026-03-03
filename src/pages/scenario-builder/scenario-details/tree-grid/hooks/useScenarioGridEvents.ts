@@ -51,6 +51,22 @@ export const useScenarioGridEvents = ({
     (window as any).handleComponentAggregator = (_grid: any, col: string) => {
       openComponentAggregatorModal(col);
     };
+    (window as any).handleCostAggregator = (_grid: any, col: string) => {
+      console.log(`Triggering Cost Aggregator for ${col}`);
+      // openCostAggregatorModal(col);
+    };
+    (window as any).handleMarkupComponent = (_grid: any, col: string) => {
+      console.log(`Triggering Markup Component for ${col}`);
+    };
+    (window as any).handleMarginComponent = (_grid: any, col: string) => {
+      console.log(`Triggering Margin Component for ${col}`);
+    };
+    (window as any).handleGeneralFormulaComponent = (
+      _grid: any,
+      col: string,
+    ) => {
+      console.log(`Triggering General Formula for ${col}`);
+    };
     (window as any).handleDeleteCol = (grid: any, col: string) => {
       grid.HideCol(col);
     };
