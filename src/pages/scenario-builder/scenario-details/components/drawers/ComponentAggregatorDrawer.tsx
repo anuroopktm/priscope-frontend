@@ -1,6 +1,6 @@
 import { useListCurrencies } from "@/services/queries/common/common.queries";
 import CloseIcon from "@mui/icons-material/Close";
-import { Box, Button, Divider, IconButton, Typography } from "@mui/material";
+import { Box, Button, IconButton, Typography } from "@mui/material";
 import { useEffect, useState } from "react";
 import { AggregatorDrawerLayout } from "../../tree-grid/config/aggregator-drawer-layout";
 import { useTreeGridInit } from "../../tree-grid/hooks/useTreeGridInit";
@@ -184,7 +184,6 @@ const ComponentAggregatorPanel = ({
           <CloseIcon fontSize="small" />
         </IconButton>
       </Box>
-      <Divider />
 
       {/* Grid Content */}
       <Box
@@ -195,13 +194,14 @@ const ComponentAggregatorPanel = ({
           bgcolor: "background.paper",
           position: "relative",
           p: 0,
+          borderRadius: 1,
+          overflow: "hidden",
         }}
       >
         <AggregatorGrid data={gridData} />
       </Box>
 
       {/* Footer Actions */}
-      <Divider />
       <Box
         sx={{
           pt: 2,
