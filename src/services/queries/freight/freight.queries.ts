@@ -1,6 +1,10 @@
-import { useMutation } from "@tanstack/react-query";
-import type { AxiosError } from "axios";
 import { axiosInstance } from "@/services/api/axiosInstance";
+import { useMutation, useQuery } from "@tanstack/react-query";
+import type { AxiosError } from "axios";
+import type {
+  FreightRatesSearchParams,
+  FreightRatesSearchResponse,
+} from "./freight.types";
 
 export const useListApprovalRequests = () => {
   return useMutation<
@@ -18,6 +22,19 @@ export const useListApprovalRequests = () => {
       const response = await axiosInstance.post(
         `/v1/approval-requests/search`,
         payload,
+      );
+      return response.data;
+    },
+  });
+};
+
+export const useSearchFreightRates = (params: FreightRatesSearchParams) => {
+  return useQuery<FreightRatesSearchResponse, AxiosError>({
+    queryKey: ["freight-rates", "search", params],
+    queryFn: async () => {
+      const response = await axiosInstance.post(
+        `/v1/freight-rates/search`,
+        params,
       );
       return response.data;
     },

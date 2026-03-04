@@ -1,12 +1,14 @@
 import { useGetScenario } from "@/services/queries/scenario-builder/scenario-builder.queries";
 import { Box } from "@mui/material";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
 import ActionHeader from "./components/ActionHeader";
 import ComponentAggregatorDrawer from "./components/drawers/ComponentAggregatorDrawer";
+import CostAggregatorDrawer from "./components/drawers/CostAggregatorDrawer";
 import AddAsGroupModal from "./components/items-master-drawer/components/AddAsGroupModal";
 import ItemsMasterDrawer from "./components/items-master-drawer/ItemsMasterDrawer";
 import ComponentAggregatorModal from "./components/modals/ComponentAggregatorModal";
+import CostAggregatorModal from "./components/modals/CostAggregatorModal";
 import DeleteConfirmModal from "./components/modals/DeleteConfirmModal";
 import { ScenarioDetailsLayout } from "./tree-grid/config/details-layout";
 import { useScenarioGridData } from "./tree-grid/hooks/useScenarioGridData";
@@ -33,6 +35,8 @@ const ScenarioDetailsPage = () => {
   // Component Aggregator state
   const [isComponentAggregatorOpen, setIsComponentAggregatorOpen] =
     useState<boolean>(false);
+  const [isCostAggregatorOpen, setIsCostAggregatorOpen] =
+    useState<boolean>(false);
   const [activeColumn, setActiveColumn] = useState<string | null>(null);
 
   // Aggregator Drawer state
@@ -42,6 +46,7 @@ const ScenarioDetailsPage = () => {
     rowId: string;
     col: string;
     items?: any[];
+    type?: string;
   } | null>(null);
 
   // Delete confirmation state
@@ -62,11 +67,25 @@ const ScenarioDetailsPage = () => {
     setActiveColumn(col);
     setIsComponentAggregatorOpen(true);
   };
+  const openCostAggregatorModal = (col: string) => {
+    setActiveColumn(col);
+    setIsCostAggregatorOpen(true);
+  };
 
-  const openComponentAggregatorDrawer = (rowId: string, col: string) => {
+  const openComponentAggregatorDrawer = (
+    rowId: string,
+    col: string,
+    type?: string,
+  ) => {
     const grid = (window as any).Grids?.[gridId];
     let items: any[] = [];
+    let aggregatorType = type || "Component";
+
     if (grid) {
+      if (!type) {
+        aggregatorType =
+          grid.GetAttribute(null, col, "AggregatorType") || "Component";
+      }
       const row = grid.GetRowById(rowId);
       if (row) {
         const itemsData = grid.GetAttribute(row, col, "ItemsData");
@@ -79,7 +98,7 @@ const ScenarioDetailsPage = () => {
         }
       }
     }
-    setActiveCell({ rowId, col, items });
+    setActiveCell({ rowId, col, items, type: aggregatorType });
     setIsAggregatorDrawerOpen(true);
   };
 
@@ -95,9 +114,85 @@ const ScenarioDetailsPage = () => {
     gridData,
     openEditGroupModal,
     openComponentAggregatorModal,
+    openCostAggregatorModal,
     openComponentAggregatorDrawer,
     openDeleteModal,
   });
+
+  // Handle Scenario Column Selection for Tariff
+  useEffect(() => {
+    (window as any).startScenarioColumnSelection = (
+      aggRowId: string,
+      aggGridId: string,
+    ) => {
+      const mainGridInstance = (window as any).Grids?.[gridId];
+      if (!mainGridInstance || !activeCell) return;
+
+      const targetCol = activeCell.col;
+
+      // Highlight logic
+      Object.keys(mainGridInstance.Cols).forEach((col) => {
+        const header = mainGridInstance.GetValue(mainGridInstance.Header, col);
+        if (
+          typeof header === "string" &&
+          (header.toLowerCase().includes("price") ||
+            header.toLowerCase().includes("cost")) &&
+          col !== targetCol
+        ) {
+          mainGridInstance.SetAttribute(null, col, "Background", "#FFF9C4", 1); // Light yellow highlight
+          mainGridInstance.SetAttribute(null, col, "Cursor", "pointer", 1);
+        }
+      });
+      mainGridInstance.Render();
+
+      // Temporarily register OnClick to catch the selection
+      const handleClick = (grid: any, _row: any, col: string) => {
+        if (col && col !== targetCol) {
+          const header = grid.GetValue(grid.Header, col);
+          if (
+            typeof header === "string" &&
+            (header.toLowerCase().includes("price") ||
+              header.toLowerCase().includes("cost"))
+          ) {
+            // Selected this column!
+            // Notify the aggregator drawer
+            (window as any).finishScenarioColumnSelection &&
+              (window as any).finishScenarioColumnSelection(
+                header,
+                col,
+                aggRowId,
+                aggGridId,
+              );
+
+            // Cleanup highlights
+            Object.keys(grid.Cols).forEach((c) => {
+              grid.SetAttribute(null, c, "Background", "", 1);
+              grid.SetAttribute(null, c, "Cursor", "", 1);
+            });
+            grid.Render();
+            (window as any).TGDelEvent(
+              "OnClick",
+              grid.id,
+              "ScenarioColumnSelection",
+            );
+            return true;
+          }
+        }
+        return false;
+      };
+
+      (window as any).TGAddEvent(
+        "OnClick",
+        mainGridInstance.id,
+        "ScenarioColumnSelection",
+        handleClick,
+      );
+    };
+
+    return () => {
+      delete (window as any).startScenarioColumnSelection;
+    };
+  }, [activeCell]);
 
   useTreeGridInit(gridId, gridContainerId, ScenarioDetailsLayout, gridData);
 
@@ -192,14 +287,61 @@ const ScenarioDetailsPage = () => {
     setActiveColumn(null);
   };
 
+  const handleCostAggregatorConfirm = (data: {
+    label: string;
+    systemField: string;
+    setEntireColumn: boolean;
+  }) => {
+    const grid = (window as any).Grids?.[gridId];
+    if (grid && activeColumn) {
+      const colName = activeColumn;
+      const headerRow = grid.Header || grid.GetRowById("Header");
+      if (headerRow) {
+        grid.SetValue(headerRow, colName, data.label, 1);
+      } else {
+        let row = grid.GetFirst();
+        while (row) {
+          if (row.Kind === "Header") {
+            grid.SetValue(row, colName, data.label, 1);
+            break;
+          }
+          row = grid.GetNext(row);
+        }
+      }
+
+      // Mark the column as a Cost aggregator column
+      grid.SetAttribute(null, colName, "AggregatorType", "Cost", 1);
+
+      setTimeout(() => {
+        grid.SetAttribute(null, colName, "RelWidth", 0, 1);
+        grid.SetAttribute(null, colName, "Width", null, 1);
+
+        if (grid.AutoFitCol) {
+          grid.AutoFitCol(colName);
+        } else {
+          grid.SetWidth(colName, -1);
+        }
+
+        grid.Update();
+        grid.Render();
+      }, 10);
+    }
+    setIsCostAggregatorOpen(false);
+    setActiveColumn(null);
+  };
+
   const handleAggregatorUpdate = (items: any[]) => {
     const grid = (window as any).Grids?.[gridId];
     if (grid && activeCell) {
       const row = grid.GetRowById(activeCell.rowId);
       if (row) {
         // Calculate total cost for the trigger cell (Sum of Cost column)
-        const totalAmount = items.reduce(
-          (acc, item) => acc + (Number(item.cost) || 0),
+        const totalAmount = (Array.isArray(items) ? items : []).reduce(
+          (acc, item) => {
+            const cost =
+              typeof item?.cost === "object" ? 0 : Number(item?.cost) || 0;
+            return acc + cost;
+          },
           0,
         );
         // Log target info
@@ -210,29 +352,26 @@ const ScenarioDetailsPage = () => {
         const targetPos = targetObj?.Pos ?? 100;
 
         // --- PRE-SYNC CLEANUP ---
-        // Only hide columns that belong to THIS specific aggregator column.
-        // This prevents columns from other aggregators being hidden during this update.
         Object.keys(grid.Cols).forEach((c) => {
           if (c.startsWith(`Comp_${targetCol}_`)) {
             grid.HideCol(c);
           }
         });
 
-        // Ensure grid state is fresh
         grid.Update();
 
         // Process each item to create/populate columns to the left
-        items.forEach((item, index) => {
-          if (!item.name) return;
+        (Array.isArray(items) ? items : []).forEach((item, index) => {
+          if (!item || !item.name) return;
 
-          const cleanName = item.name.trim();
+          const itemName = String(item.name || "");
+          const cleanName = itemName.trim();
           const safeName = cleanName.replace(/[^a-zA-Z0-9]/g, "").toLowerCase();
           const colId = `Comp_${targetCol}_${safeName || "Item"}`;
 
           const insertPos = targetPos + index;
 
           if (!grid.Cols[colId]) {
-            // AddCol(col, sec, pos, width, show, type, caption)
             grid.AddCol(
               colId,
               targetSec,
@@ -246,7 +385,6 @@ const ScenarioDetailsPage = () => {
             grid.ShowCol(colId);
           }
 
-          // Set attributes to ensure it's movable and visible
           grid.SetAttribute(null, colId, "Caption", cleanName, 1);
           grid.SetAttribute(null, colId, "Visible", 1, 1);
           grid.SetAttribute(null, colId, "CanShow", 1, 1);
@@ -256,35 +394,31 @@ const ScenarioDetailsPage = () => {
           grid.SetAttribute(null, colId, "Width", 110, 1);
           grid.SetAttribute(null, colId, "CanEdit", 1, 1);
 
-          // Force physical position to strictly be left of the trigger
           grid.MoveCol(colId, targetCol, 0, 1);
 
-          // Sync Header Caption
           const headerRow = grid.Header || grid.GetRowById("Header");
           if (headerRow) {
             grid.SetValue(headerRow, colId, cleanName, 1);
           }
 
-          // Parse and set the value
+          const itemCostPerUnit =
+            typeof item.costPerUnit === "object" ? 0 : item.costPerUnit;
           const rawVal =
-            typeof item.costPerUnit === "string"
-              ? item.costPerUnit.replace(/[^0-9.]/g, "")
-              : item.costPerUnit;
-          const val = parseFloat(rawVal) || 0;
+            typeof itemCostPerUnit === "string"
+              ? itemCostPerUnit.replace(/[^0-9.]/g, "")
+              : itemCostPerUnit;
+          const val = parseFloat(rawVal as any) || 0;
 
           grid.SetValue(row, colId, val, 1);
         });
 
-        // Final summary update
         const total = parseFloat(totalAmount as any) || 0;
 
-        // Format the trigger column as currency
         grid.SetAttribute(null, targetCol, "Type", "Float", 1);
         grid.SetAttribute(null, targetCol, "Format", "$0.00", 1);
 
         grid.SetValue(row, targetCol, total, 1);
 
-        // Save the raw items to the cell for persistence
         grid.SetAttribute(
           row,
           targetCol,
@@ -369,14 +503,25 @@ const ScenarioDetailsPage = () => {
               transition: "flex 0.3s ease-in-out",
             }}
           >
-            <ComponentAggregatorDrawer
-              initialItems={activeCell.items}
-              onClose={() => {
-                setIsAggregatorDrawerOpen(false);
-                setActiveCell(null);
-              }}
-              onUpdate={handleAggregatorUpdate}
-            />
+            {activeCell.type === "Cost" ? (
+              <CostAggregatorDrawer
+                initialItems={activeCell.items}
+                onClose={() => {
+                  setIsAggregatorDrawerOpen(false);
+                  setActiveCell(null);
+                }}
+                onUpdate={handleAggregatorUpdate}
+              />
+            ) : (
+              <ComponentAggregatorDrawer
+                initialItems={activeCell.items}
+                onClose={() => {
+                  setIsAggregatorDrawerOpen(false);
+                  setActiveCell(null);
+                }}
+                onUpdate={handleAggregatorUpdate}
+              />
+            )}
           </Box>
         )}
       </Box>
@@ -406,6 +551,11 @@ const ScenarioDetailsPage = () => {
         open={isComponentAggregatorOpen}
         onClose={() => setIsComponentAggregatorOpen(false)}
         onConfirm={handleComponentAggregatorConfirm}
+      />
+      <CostAggregatorModal
+        open={isCostAggregatorOpen}
+        onClose={() => setIsCostAggregatorOpen(false)}
+        onConfirm={handleCostAggregatorConfirm}
       />
       <DeleteConfirmModal
         open={isDeleteModalOpen}

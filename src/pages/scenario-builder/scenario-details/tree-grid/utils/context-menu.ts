@@ -97,11 +97,12 @@ export const getCellContextMenu = (grid: any, row: any, col: string) => {
       { Text: `<span style="${HEADER_STYLE}">Calculators</span>`, Caption: 1 },
       {
         Name: "Component aggregator",
-        OnClick: () => (window as any).handleCalculate(row.id, col),
+        OnClick: () =>
+          (window as any).handleCalculate(row.id, col, "Component"),
       },
       {
         Name: "Cost aggregator",
-        OnClick: () => (window as any).handleCalculate(row.id, col),
+        OnClick: () => (window as any).handleCalculate(row.id, col, "Cost"),
       },
       {
         Name: "Markup component",

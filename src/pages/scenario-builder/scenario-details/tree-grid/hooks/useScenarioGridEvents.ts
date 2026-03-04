@@ -9,7 +9,12 @@ interface UseScenarioGridEventsProps {
   gridData: any;
   openEditGroupModal: (id: string, name: string) => void;
   openComponentAggregatorModal: (col: string) => void;
-  openComponentAggregatorDrawer: (rowId: string, col: string) => void;
+  openCostAggregatorModal: (col: string) => void;
+  openComponentAggregatorDrawer: (
+    rowId: string,
+    col: string,
+    type?: string,
+  ) => void;
   openDeleteModal: (rowId: string) => void;
 }
 
@@ -18,6 +23,7 @@ export const useScenarioGridEvents = ({
   gridData,
   openEditGroupModal,
   openComponentAggregatorModal,
+  openCostAggregatorModal,
   openComponentAggregatorDrawer,
   openDeleteModal,
 }: UseScenarioGridEventsProps) => {
@@ -54,8 +60,7 @@ export const useScenarioGridEvents = ({
       openComponentAggregatorModal(col);
     };
     (window as any).handleCostAggregator = (_grid: any, col: string) => {
-      console.log(`Triggering Cost Aggregator for ${col}`);
-      // openCostAggregatorModal(col);
+      openCostAggregatorModal(col);
     };
     (window as any).handleMarkupComponent = (_grid: any, col: string) => {
       console.log(`Triggering Markup Component for ${col}`);
@@ -83,8 +88,12 @@ export const useScenarioGridEvents = ({
     (window as any).handleTreeGridDeleteRow = (rowId: string) => {
       openDeleteModal(rowId);
     };
-    (window as any).handleCalculate = (rowId: string, col: string) => {
-      openComponentAggregatorDrawer(rowId, col);
+    (window as any).handleCalculate = (
+      rowId: string,
+      col: string,
+      type?: string,
+    ) => {
+      openComponentAggregatorDrawer(rowId, col, type);
     };
 
     const onHandleRightClick = (grid: any, row: any, col: string) => {
@@ -128,6 +137,7 @@ export const useScenarioGridEvents = ({
   }, [
     openEditGroupModal,
     openComponentAggregatorModal,
+    openCostAggregatorModal,
     openComponentAggregatorDrawer,
     openDeleteModal,
     gridData,

@@ -1,6 +1,6 @@
-export const AggregatorDrawerLayout = {
+export const TariffDrawerLayout = {
   Cfg: {
-    CfgId: "AggregatorDrawerGrid",
+    CfgId: "TariffDrawerGrid",
     IdChars: "0123456789",
     NumberId: "1",
     Style: "White",
@@ -27,20 +27,26 @@ export const AggregatorDrawerLayout = {
   Cols: [
     {
       Name: "A",
-      Width: "300",
+      Width: "150",
       Type: "Html",
-      Caption: "Freight Cost",
+      Caption: "Tariff Rate %",
     },
     {
       Name: "B",
       Width: "200",
+      Type: "Html",
+      Caption: "Scenario Builder Column",
+    },
+    {
+      Name: "C",
+      Width: "150",
       Type: "Enum",
       Caption: "Cost for",
       Enum: "|Base UOM|Qty Per Shipment",
       EnumKeys: "|Base UOM|Qty Per Shipment",
     },
     {
-      Name: "C",
+      Name: "D",
       Width: "150",
       Type: "Float",
       Format: "$0.00",
@@ -48,11 +54,13 @@ export const AggregatorDrawerLayout = {
     },
   ],
   Header: {
-    A: "Freight Cost",
-    B: "Cost for",
-    C: "Cost per unit",
+    A: "Tariff Rate %",
+    B: "Scenario Builder Column",
+    C: "Cost for",
+    D: "Cost per unit",
     AAlign: "Left",
     BAlign: "Left",
     CAlign: "Left",
+    DAlign: "Left",
   },
 };

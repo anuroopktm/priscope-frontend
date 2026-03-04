@@ -15,7 +15,7 @@ import {
 } from "@mui/material";
 import { useState } from "react";
 
-interface ComponentAggregatorModalProps {
+interface CostAggregatorModalProps {
   open: boolean;
   onClose: () => void;
   onConfirm: (data: {
@@ -25,19 +25,19 @@ interface ComponentAggregatorModalProps {
   }) => void;
 }
 
-const ComponentAggregatorModal = ({
+const CostAggregatorModal = ({
   open,
   onClose,
   onConfirm,
-}: ComponentAggregatorModalProps) => {
+}: CostAggregatorModalProps) => {
   const [label, setLabel] = useState("");
   const [systemField, setSystemField] = useState("System Field 1");
   const [setEntireColumn, setSetEntireColumn] = useState(false);
 
   const handleConfirm = () => {
     const finalLabel = label.trim()
-      ? `${label} ( component iterator)`
-      : "( component iterator)";
+      ? `${label} ( cost iterator)`
+      : "( cost iterator)";
 
     onConfirm({ label: finalLabel, systemField, setEntireColumn });
     setLabel("");
@@ -57,7 +57,7 @@ const ComponentAggregatorModal = ({
         variant="h6"
         sx={{ color: "#1a365d", fontWeight: "bold", px: 3, py: 2 }}
       >
-        Component aggregator
+        Cost aggregator
       </Typography>
       <Divider />
 
@@ -68,7 +68,7 @@ const ComponentAggregatorModal = ({
           value={label}
           onChange={(e) => setLabel(e.target.value)}
           fullWidth
-          label="Label"
+          label=""
           placeholder="Enter label"
           variant="outlined"
           size="small"
@@ -111,4 +111,4 @@ const ComponentAggregatorModal = ({
   );
 };
 
-export default ComponentAggregatorModal;
+export default CostAggregatorModal;
