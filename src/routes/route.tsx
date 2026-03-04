@@ -15,6 +15,7 @@ import {
 import AuthGuard from "./guards/AuthGuard";
 import GuestGuard from "./guards/GuestGuard";
 import BulkInsertPage from "@/pages/items-master-refactor/Pages/bulk-insert";
+import Onboarding from "@/pages/onboarding";
 
 export const routes = [
   {
@@ -39,6 +40,7 @@ export const routes = [
     path: "/",
     element: <AuthGuard />,
     children: [
+      { path: "onboarding", element: <Onboarding /> },
       {
         element: <MainLayout />,
         children: [
