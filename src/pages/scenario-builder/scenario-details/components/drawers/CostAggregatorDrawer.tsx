@@ -17,8 +17,11 @@ import {
 import { useEffect, useMemo, useRef, useState } from "react";
 import DeleteConfirmModal from "../../../list-scenarios/components/DeleteConfirmModal";
 import { AggregatorDrawerLayout } from "../../tree-grid/config/aggregator-drawer-layout";
+import { CustomDrawerLayout } from "../../tree-grid/config/custom-drawer-layout";
 import { TariffDrawerLayout } from "../../tree-grid/config/tariff-drawer-layout";
 import { useTreeGridInit } from "../../tree-grid/hooks/useTreeGridInit";
+import CustomCalculationModal from "../modals/CustomCalculationModal";
+import CustomCostModal from "../modals/CustomCostModal";
 import FreightDrawer from "./FreightDrawer";
 import TariffDrawer from "./TariffDrawer";
 
@@ -94,6 +97,27 @@ const renderSelectedValue = (
   `;
 };
 
+const renderCalculatorIcon = (rowId: string, gridId: string) => {
+  return `
+      <div 
+        onclick="window.handleOpenCalculation && window.handleOpenCalculation('${rowId}', '${gridId}')"
+        style="display: flex; align-items: center; justify-content: center; height: 100%; cursor: pointer;">
+        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#2563eb" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <rect x="4" y="2" width="16" height="20" rx="2" ry="2"></rect>
+            <line x1="8" y1="6" x2="16" y2="6"></line>
+            <line x1="16" y1="14" x2="16" y2="18"></line>
+            <line x1="8" y1="10" x2="8" y2="10.01"></line>
+            <line x1="12" y1="10" x2="12" y2="10.01"></line>
+            <line x1="16" y1="10" x2="16" y2="10.01"></line>
+            <line x1="8" y1="14" x2="8" y2="14.01"></line>
+            <line x1="12" y1="14" x2="12" y2="14.01"></line>
+            <line x1="8" y1="18" x2="8" y2="18.01"></line>
+            <line x1="12" y1="18" x2="12" y2="18.01"></line>
+        </svg>
+      </div>
+    `;
+};
+
 const AggregatorGrid = ({
   id,
   data,
@@ -107,7 +131,11 @@ const AggregatorGrid = ({
 }) => {
   const containerId = drawerGridContainerBaseId + id;
   const layout =
-    type === "Tariff" ? TariffDrawerLayout : AggregatorDrawerLayout;
+    type === "Tariff"
+      ? TariffDrawerLayout
+      : type === "Custom"
+        ? CustomDrawerLayout
+        : AggregatorDrawerLayout;
   useTreeGridInit(id, containerId, layout, data, (_grid) => {
     (window as any).TGAddEvent("OnAfterValueChanged", id, (_grid: any) => {
       onDataChange?.();
@@ -134,6 +162,8 @@ const CostAggregatorDrawer = ({
   } | null>(null);
   const [isFreightDrawerOpen, setIsFreightDrawerOpen] = useState(false);
   const [isTariffDrawerOpen, setIsTariffDrawerOpen] = useState(false);
+  const [isCustomModalOpen, setIsCustomModalOpen] = useState(false);
+  const [isCalculationModalOpen, setIsCalculationModalOpen] = useState(false);
   const [targetGridId, setTargetGridId] = useState<string | null>(null);
   const [targetRowId, setTargetRowId] = useState<string | null>(null);
   const [totalCost, setTotalCost] = useState(0);
@@ -179,12 +209,20 @@ const CostAggregatorDrawer = ({
         let row = grid.GetFirst();
         while (row) {
           if (row.Kind === "Data" && !row.Deleted) {
-            // For Freight, cost is in column C. For Tariff, cost is in column D.
-            const costCol = section.type === "Tariff" ? "D" : "C";
+            // For Freight, cost is in column C. For Tariff, cost is in column D. For Custom, cost is in column A.
+            const costCol =
+              section.type === "Tariff"
+                ? "D"
+                : section.type === "Custom"
+                  ? "A"
+                  : "C";
             const costValue = grid.GetValue(row, costCol);
 
             // Only sum rows that have a non-zero cost or are explicitly "Change" rows
-            if (costValue !== 0 || grid.GetValue(row, "A").includes("Change")) {
+            if (
+              costValue !== 0 ||
+              String(grid.GetValue(row, "A")).includes("Change")
+            ) {
               total += Number(costValue) || 0;
             }
           }
@@ -263,9 +301,16 @@ const CostAggregatorDrawer = ({
       }
     };
 
+    (window as any).handleOpenCalculation = (rowId: string, gridId: string) => {
+      setTargetGridId(gridId);
+      setTargetRowId(rowId);
+      setIsCalculationModalOpen(true);
+    };
+
     return () => {
       delete (window as any).handleDeleteAggregatorRow;
       delete (window as any).handleOpenFreightSelection;
+      delete (window as any).handleOpenCalculation;
     };
   }, []);
 
@@ -284,12 +329,15 @@ const CostAggregatorDrawer = ({
     setRowToDelete(null);
   };
 
-  const handleAddSection = (type: "Freight" | "Tariff" | "Custom") => {
+  const handleAddSection = (
+    type: "Freight" | "Tariff" | "Custom",
+    customTitle?: string,
+  ) => {
     const id = `grid_${Date.now()}`;
     const newSection: AggregatorSection = {
       id,
       type,
-      title: type,
+      title: customTitle || type,
       items: [
         type === "Tariff"
           ? {
@@ -299,12 +347,18 @@ const CostAggregatorDrawer = ({
               C: "Base UOM",
               D: 0,
             }
-          : {
-              id: "row1",
-              A: renderSelectButton("row1", id, "A"),
-              B: "Base UOM",
-              C: 0,
-            },
+          : type === "Custom"
+            ? {
+                id: "row1",
+                A: 0,
+                B: renderCalculatorIcon("row1", id),
+              }
+            : {
+                id: "row1",
+                A: renderSelectButton("row1", id, "A"),
+                B: "Base UOM",
+                C: 0,
+              },
       ],
     };
     setSections([...sections, newSection]);
@@ -471,7 +525,8 @@ const CostAggregatorDrawer = ({
         while (row) {
           if (row.Kind === "Data" && !row.Deleted) {
             const isTariff = section.type === "Tariff";
-            const costCol = isTariff ? "D" : "C";
+            const isCustom = section.type === "Custom";
+            const costCol = isTariff ? "D" : isCustom ? "A" : "C";
             const costValueRaw = grid.GetValue(row, costCol);
             const costValue =
               typeof costValueRaw === "object" ? 0 : Number(costValueRaw) || 0;
@@ -485,16 +540,23 @@ const CostAggregatorDrawer = ({
             const isChangeRow =
               typeof colAValue === "string" && colAValue.includes("Change");
 
-            // Only include rows that have a selected rate or valid name
-            if (cleanName || isChangeRow) {
+            // For Custom, we use the section title as the name if it's the only row or just default
+            const finalName = isCustom
+              ? section.title
+              : cleanName || "Cost Item";
+
+            // Only include rows that have a selected rate or valid name or it's a custom row
+            if (cleanName || isChangeRow || isCustom) {
               allRows.push({
                 id: String(row.id),
-                name: cleanName || "Cost Item",
+                name: finalName,
                 currency: "USD",
                 cost: costValue,
                 costPerUnit: costValue,
                 costFor: String(
-                  grid.GetValue(row, isTariff ? "C" : "B") || "Base UOM",
+                  isCustom
+                    ? "Base UOM"
+                    : grid.GetValue(row, isTariff ? "C" : "B") || "Base UOM",
                 ),
               });
             }
@@ -596,7 +658,7 @@ const CostAggregatorDrawer = ({
               />
               <Chip
                 label="Custom"
-                onClick={() => handleAddSection("Custom")}
+                onClick={() => setIsCustomModalOpen(true)}
                 onDelete={() => {}}
                 deleteIcon={
                   <AddIcon style={{ fontSize: 16, color: "#1a365d" }} />
@@ -787,6 +849,37 @@ const CostAggregatorDrawer = ({
           onSelect={handleTariffSelect}
         />
       </Drawer>
+      <CustomCostModal
+        open={isCustomModalOpen}
+        onClose={() => setIsCustomModalOpen(false)}
+        onConfirm={(label: string) => handleAddSection("Custom", label)}
+      />
+      <CustomCalculationModal
+        open={isCalculationModalOpen}
+        onClose={() => setIsCalculationModalOpen(false)}
+        initialValue={(() => {
+          if (targetGridId && targetRowId) {
+            const grid = (window as any).Grids?.[targetGridId];
+            const row = grid?.GetRowById(targetRowId);
+            return row ? String(grid.GetValue(row, "A") || "") : "";
+          }
+          return "";
+        })()}
+        onConfirm={(formula: string) => {
+          if (targetGridId && targetRowId) {
+            const grid = (window as any).Grids?.[targetGridId];
+            if (grid) {
+              const row = grid.GetRowById(targetRowId);
+              if (row) {
+                // For now, we put the formula in the input box.
+                // In a real scenario, you might evaluate it or store it as an attribute.
+                grid.SetValue(row, "A", formula, 1);
+                calculateTotal();
+              }
+            }
+          }
+        }}
+      />
     </Box>
   );
 };
