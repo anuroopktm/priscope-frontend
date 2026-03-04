@@ -23,7 +23,7 @@ const fields = [
 ];
 
 const SystemFieldMappingsDetails = ({ onNext }: { onNext: () => void }) => {
-  const { updateData } = useOnboardingStore();
+  const { data, updateData } = useOnboardingStore();
 
   const {
     handleSubmit,
@@ -32,20 +32,36 @@ const SystemFieldMappingsDetails = ({ onNext }: { onNext: () => void }) => {
   } = useForm<SystemFieldMappingFormValues>({
     resolver: zodResolver(systemFieldMappingSchema),
     mode: "onChange",
+    defaultValues: data.field_mappings ?? {
+      sku: "",
+      upc: "",
+      description: "",
+      category: "",
+      hsCode: "",
+      supplierName: "",
+    },
   });
 
   const onSubmit = (data: SystemFieldMappingFormValues) => {
     updateData({ field_mappings: data });
     onNext(); // go to next step
   };
+  console.log(data);
 
   return (
     <Box
       component="form"
       onSubmit={handleSubmit(onSubmit)}
-      sx={{ width: "100%", maxWidth: 900 }}
+      sx={{
+        display: "flex",
+        flexDirection: "column",
+        gap: 2,
+        width: "100%",
+        maxWidth: 800,
+        mx: "auto",
+      }}
     >
-      <Typography
+      {/* <Typography
         sx={{
           fontSize: "16px",
           fontWeight: 600,
@@ -54,7 +70,7 @@ const SystemFieldMappingsDetails = ({ onNext }: { onNext: () => void }) => {
         }}
       >
         System field labelling
-      </Typography>
+      </Typography> */}
 
       <Box
         sx={{
@@ -118,7 +134,7 @@ const SystemFieldMappingsDetails = ({ onNext }: { onNext: () => void }) => {
           </Box>
         ))}
 
-        <Typography
+        {/* <Typography
           sx={{
             fontSize: "13px",
             color: "#4B5563",
@@ -127,11 +143,22 @@ const SystemFieldMappingsDetails = ({ onNext }: { onNext: () => void }) => {
         >
           Matching your field names ensures Priscope reads your data correctly,
           no matter what your internal labels are.
-        </Typography>
+        </Typography> */}
       </Box>
-      <Button type="submit" variant="contained">
-        Continue
-      </Button>
+      <Box
+        sx={{
+          display: "flex",
+          flexDirection: "column",
+          gap: 2,
+          width: "100%",
+          maxWidth: 500,
+          mx: "auto",
+        }}
+      >
+        <Button type="submit" variant="contained">
+          Continue
+        </Button>
+      </Box>
     </Box>
   );
 };

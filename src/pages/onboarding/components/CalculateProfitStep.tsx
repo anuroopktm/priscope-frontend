@@ -37,7 +37,7 @@ const CalculateProfitStep = ({ onNext }: { onNext: () => void }) => {
   ];
 
   const onSubmit = (formData: ProfitStepFormValues) => {
-    console.log(data)
+    console.log(data);
     updateData(formData);
     onNext();
   };
@@ -48,9 +48,10 @@ const CalculateProfitStep = ({ onNext }: { onNext: () => void }) => {
       sx={{
         display: "flex",
         flexDirection: "column",
-        gap: 1.5,
+        gap: 2,
         width: "100%",
         maxWidth: 500,
+        mx: "auto",
       }}
     >
       <FormControl component="fieldset" sx={{ width: "100%" }}>
@@ -119,7 +120,9 @@ const CalculateProfitStep = ({ onNext }: { onNext: () => void }) => {
         Both methods use your core cost and selling price data. The only
         difference is how profit is expressed.
       </Typography>
-      <Button type="submit" variant="contained" fullWidth>Continue</Button>
+      <Button type="submit" variant="contained" fullWidth>
+        Continue
+      </Button>
     </Box>
   );
 };

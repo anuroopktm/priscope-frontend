@@ -29,7 +29,7 @@ const ImpactSettings = ({ onNext }: { onNext: () => void }) => {
     updateData(formData);
     onNext();
   };
-
+console.log(data)
   const fields = [
     { name: "fx_threshold", label: "FX impact" },
     { name: "tariff_threshold", label: "Tariff impact" },
@@ -46,6 +46,7 @@ const ImpactSettings = ({ onNext }: { onNext: () => void }) => {
         gap: 2,
         width: "100%",
         maxWidth: 500,
+        mx: "auto",
       }}
     >
       {fields.map((field) => (
@@ -54,7 +55,7 @@ const ImpactSettings = ({ onNext }: { onNext: () => void }) => {
           sx={{ display: "flex", flexDirection: "column", gap: 0.75 }}
         >
           <Typography
-            sx={{ fontSize: "14px", fontWeight: 600, color: "#1A2B44" }}
+            sx={{ fontSize: "12px", fontWeight: 500, color: "#1A2B44" }}
           >
             {field.label}
           </Typography>
@@ -95,14 +96,13 @@ const ImpactSettings = ({ onNext }: { onNext: () => void }) => {
         variant="text"
         onClick={onNext}
         sx={{
-          color: "#1A2B44",
+
           textTransform: "none",
           fontWeight: 600,
           fontSize: "15px",
           py: "6px",
           "&:hover": {
             backgroundColor: "transparent",
-            textDecoration: "underline",
           },
         }}
       >

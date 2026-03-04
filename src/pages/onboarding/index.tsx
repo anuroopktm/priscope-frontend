@@ -30,13 +30,12 @@ const Onboarding = () => {
       }}
     >
       <Header />
-
       <Box
         sx={{
           display: "flex",
           alignItems: "center",
           width: "100%",
-          px: 2,
+          px: 1,
           mb: 1,
           mt: 1,
         }}
@@ -111,13 +110,12 @@ const Onboarding = () => {
       >
         <Box
           width="100%"
-          maxWidth={500}
           display="flex"
           flexDirection="column"
           alignItems="center"
           gap={1}
         >
-          <Typography fontWeight="bold" fontSize="1.5rem" textAlign="center">
+          <Typography sx={{fontSize: "18px", fontWeight: 600}} textAlign="center">
             {currentStep?.label}
           </Typography>
 
@@ -126,6 +124,10 @@ const Onboarding = () => {
               fontSize="14px"
               color="text.secondary"
               textAlign="center"
+              sx={{
+                maxWidth: 750,
+                width: "100%",
+              }}
             >
               {currentStep.description}
             </Typography>
@@ -135,7 +137,7 @@ const Onboarding = () => {
             {StepComponent && (
               <StepComponent
                 onNext={handleNext}
-                isLastStep={activeStep === steps.length - 1}
+                // isLastStep={activeStep === steps.length - 1}
               />
             )}
           </Box>

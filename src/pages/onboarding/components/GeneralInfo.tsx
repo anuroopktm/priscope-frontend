@@ -1,7 +1,54 @@
-import { Box, Button, Typography } from "@mui/material";
+import { Box, Button, CircularProgress, Typography } from "@mui/material";
 import InfoOutlinedIcon from "@mui/icons-material/InfoOutlined";
+import { useOnboardingMutation } from "@/services/queries/onboarding/onboarding.queries";
+import { useOnboardingStore } from "../store/useOnboardingStore";
 
 const GeneralInfo = ({ onNext }: { onNext: () => void }) => {
+  const { data } = useOnboardingStore();
+  const { mutate, isPending } = useOnboardingMutation();
+
+  const handleSubmit = () => {
+    const formData = new FormData();
+
+    Object.entries(data).forEach(([key, value]) => {
+      if (value === undefined || value === null || value === "") {
+        return; // skip empty values
+      }
+
+      // Convert object to JSON (like field_mappings)
+      if (typeof value === "object" && !(value instanceof File)) {
+        formData.append(key, JSON.stringify(value));
+        return;
+      }
+
+      // Convert numbers to string
+      if (typeof value === "number") {
+        formData.append(key, String(value));
+        return;
+      }
+
+      // File support
+      if (value instanceof File) {
+        formData.append(key, value);
+        return;
+      }
+
+      // Normal string
+      formData.append(key, value as string);
+      formData.append("base_currency","usd")
+    });
+
+    mutate(formData, {
+      onSuccess: (response: any) => {
+        console.log("Success 🚀", response);
+        onNext(); // move to next step after success
+      },
+      onError: (error: any) => {
+        console.error("Error ❌", error);
+      },
+    });
+  };
+
   return (
     <Box
       sx={{
@@ -9,6 +56,8 @@ const GeneralInfo = ({ onNext }: { onNext: () => void }) => {
         flexDirection: "column",
         gap: 2,
         width: "100%",
+        maxWidth: 800,
+        mx: "auto",
       }}
     >
       <Box
@@ -46,10 +95,20 @@ const GeneralInfo = ({ onNext }: { onNext: () => void }) => {
           your base setup is complete.
         </Typography>
       </Box>
-
-      <Button variant="contained" onClick={onNext} fullWidth>
-        Continue
-      </Button>
+      <Box
+        sx={{
+          display: "flex",
+          flexDirection: "column",
+          gap: 2,
+          width: "100%",
+          maxWidth: 600,
+          mx: "auto",
+        }}
+      >
+        <Button variant="contained" onClick={handleSubmit} fullWidth>
+          {isPending ? <CircularProgress size={20} /> : "Continue"}
+        </Button>
+      </Box>
     </Box>
   );
 };

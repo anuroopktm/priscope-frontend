@@ -8,7 +8,7 @@ const Header = () => {
         flexDirection: "row",
         justifyContent: "space-between",
         width: "100%",
-        p: "12px",
+        p: "5px",
       }}
     >
       <img src={Logo} alt="" />

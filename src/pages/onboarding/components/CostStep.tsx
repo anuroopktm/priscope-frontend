@@ -9,7 +9,7 @@ import {
 
 const CostStep = ({ onNext }: { onNext: () => void }) => {
   const { data, updateData } = useOnboardingStore();
-  console.log(data)
+  console.log(data);
   const {
     register,
     handleSubmit,
@@ -24,6 +24,7 @@ const CostStep = ({ onNext }: { onNext: () => void }) => {
     updateData(formData);
     onNext();
   };
+  console.log(data)
   return (
     <Box
       component="form"
@@ -31,9 +32,10 @@ const CostStep = ({ onNext }: { onNext: () => void }) => {
       sx={{
         display: "flex",
         flexDirection: "column",
-        gap: 1,
+        gap: 2,
         width: "100%",
         maxWidth: 500,
+        mx: "auto",
       }}
     >
       <Box>

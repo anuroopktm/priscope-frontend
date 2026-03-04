@@ -12,8 +12,10 @@ const SystemFieldMapping = ({ onNext }: { onNext: () => void }) => {
       sx={{
         display: "flex",
         flexDirection: "column",
-        gap: 1,
+        gap: 2,
         width: "100%",
+        mx: "auto",
+        // maxWidth: 600,
       }}
     >
       <Box
@@ -25,6 +27,8 @@ const SystemFieldMapping = ({ onNext }: { onNext: () => void }) => {
           backgroundColor: "#ffffff",
           border: "1.5px solid #D0D5DD",
           borderRadius: "10px",
+          maxWidth: 800,
+          mx: "auto",
         }}
       >
         <InfoOutlinedIcon
@@ -42,17 +46,28 @@ const SystemFieldMapping = ({ onNext }: { onNext: () => void }) => {
             lineHeight: 1.6,
           }}
         >
-          "Match your data fields to Priscope's system fields. Priscope uses
+          Match your data fields to Priscope's system fields. Priscope uses
           standard system fields like SKU, UPC, and Product Description to keep
           your data consistent. Match each Priscope field to the corresponding
-          column in your dataset — for example, if you call UPC as \"Bar Code,\"
+          column in your dataset — for example, if you call UPC as “Bar Code,”
           identify that here. Once mapped, Priscope will remember your
-          selections, and you can update them anytime in Global Settings.",
+          selections, and you can update them anytime in Global Settings.
         </Typography>
       </Box>
-      <Button type="submit" variant="contained" fullWidth>
-        Continue
-      </Button>
+      <Box
+        sx={{
+          display: "flex",
+          flexDirection: "column",
+          gap: 2,
+          width: "100%",
+          maxWidth: 600,
+          mx: "auto",
+        }}
+      >
+        <Button type="submit" variant="contained" fullWidth>
+          Continue
+        </Button>
+      </Box>
     </Box>
   );
 };

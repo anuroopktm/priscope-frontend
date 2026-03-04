@@ -44,12 +44,13 @@ const SystemIdentifier = ({ onNext }: Props) => {
     <Box
       component="form"
       onSubmit={handleSubmit(onSubmit)}
-      sx={{
+       sx={{
         display: "flex",
         flexDirection: "column",
         gap: 2,
         width: "100%",
         maxWidth: 500,
+        mx: "auto",
       }}
     >
       <Typography fontSize="14px" fontWeight={600} color="#1A2B44">

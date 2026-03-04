@@ -30,9 +30,10 @@ const SellingStep = ({ onNext }: { onNext: () => void }) => {
       sx={{
         display: "flex",
         flexDirection: "column",
-        gap: 1,
+        gap: 2,
         width: "100%",
         maxWidth: 500,
+        mx: "auto",
       }}
     >
       <Box>
