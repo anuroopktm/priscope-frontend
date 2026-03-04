@@ -1,10 +1,32 @@
-import { Box, TextField, Typography } from "@mui/material";
-import React from "react";
+import { Box, Button, TextField, Typography } from "@mui/material";
+import { useOnboardingStore } from "../store/useOnboardingStore";
+import { zodResolver } from "@hookform/resolvers/zod";
+import {
+  sellingPriceElementSchema,
+  type SellingPriceElementFormValues,
+} from "@/validations/onboarding/sellingprice.schema";
+import { useForm } from "react-hook-form";
 
-const SellingStep = () => {
+const SellingStep = ({ onNext }: { onNext: () => void }) => {
+  const { data, updateData } = useOnboardingStore();
+  const {
+    register,
+    handleSubmit,
+    formState: { errors },
+  } = useForm<SellingPriceElementFormValues>({
+    resolver: zodResolver(sellingPriceElementSchema),
+    defaultValues: {
+      core_selling_price_element: data.core_selling_price_element ?? "",
+    },
+  });
+  const onSubmit = (formData: SellingPriceElementFormValues) => {
+    updateData(formData);
+    onNext();
+  };
   return (
     <Box
       component="form"
+      onSubmit={handleSubmit(onSubmit)}
       sx={{
         display: "flex",
         flexDirection: "column",
@@ -26,7 +48,9 @@ const SellingStep = () => {
         </Typography>
         <TextField
           fullWidth
-          required
+          {...register("core_selling_price_element")}
+          error={!!errors.core_selling_price_element}
+          helperText={errors.core_selling_price_element?.message}
           sx={{
             "& .MuiOutlinedInput-root": {
               height: 40,
@@ -49,6 +73,9 @@ const SellingStep = () => {
           MAP or MSRP) for reporting or analysis, but they won’t affect GM%
         </Typography>
       </Box>
+      <Button type="submit" variant="contained" fullWidth>
+        Continue
+      </Button>
     </Box>
   );
 };

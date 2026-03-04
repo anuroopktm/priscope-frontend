@@ -1,15 +1,14 @@
-import { Box, TextField, Typography } from "@mui/material";
+import { Box, Button, Typography } from "@mui/material";
 import InfoOutlinedIcon from "@mui/icons-material/InfoOutlined";
 
-const GeneralInfo = () => {
+const GeneralInfo = ({ onNext }: { onNext: () => void }) => {
   return (
     <Box
       sx={{
         display: "flex",
         flexDirection: "column",
-        gap: 1,
+        gap: 2,
         width: "100%",
-        // maxWidth: 900,
       }}
     >
       <Box
@@ -21,8 +20,6 @@ const GeneralInfo = () => {
           backgroundColor: "#ffffff",
           border: "1.5px solid #D0D5DD",
           borderRadius: "10px",
-          //   width: "100%",
-          //   maxWidth: 700,
         }}
       >
         <InfoOutlinedIcon
@@ -33,6 +30,7 @@ const GeneralInfo = () => {
             flexShrink: 0,
           }}
         />
+
         <Typography
           sx={{
             fontSize: "13px",
@@ -40,17 +38,18 @@ const GeneralInfo = () => {
             lineHeight: 1.6,
           }}
         >
-          Fine-tune alerts per customer and supplier.   After setup, you’ll be
-          able to define custom margin ranges for each customer and
-          supplier.   These act as an extra layer of control on top of your
-          global guardrails.   When you or your team adjust prices and those
-          limits are crossed, Priscope will automatically trigger an alert in
-          your Alerts Center.  This feature activates once your base setup is
-          complete. You can manage it anytime from the customer or supplier
-          view.   Think of these as personalized alert thresholds — they help
-          you stay proactive where margins matter most.” 
+          Fine-tune alerts per customer and supplier. After setup, you’ll be
+          able to define custom margin ranges for each customer and supplier.
+          These act as an extra layer of control on top of your global
+          guardrails. When limits are crossed, Priscope will automatically
+          trigger an alert in your Alerts Center. This feature activates once
+          your base setup is complete.
         </Typography>
       </Box>
+
+      <Button variant="contained" onClick={onNext} fullWidth>
+        Continue
+      </Button>
     </Box>
   );
 };

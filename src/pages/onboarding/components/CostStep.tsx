@@ -1,9 +1,33 @@
-import { Box, TextField, Typography } from "@mui/material";
+import { Box, Button, TextField, Typography } from "@mui/material";
+import { useOnboardingStore } from "../store/useOnboardingStore";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import {
+  costStepSchema,
+  type CostStepFormValues,
+} from "@/validations/onboarding/coststep.schema";
 
-const CostStep = () => {
+const CostStep = ({ onNext }: { onNext: () => void }) => {
+  const { data, updateData } = useOnboardingStore();
+  console.log(data)
+  const {
+    register,
+    handleSubmit,
+    formState: { errors },
+  } = useForm<CostStepFormValues>({
+    resolver: zodResolver(costStepSchema),
+    defaultValues: {
+      core_cost_element: data.core_cost_element ?? "",
+    },
+  });
+  const onSubmit = (formData: CostStepFormValues) => {
+    updateData(formData);
+    onNext();
+  };
   return (
     <Box
       component="form"
+      onSubmit={handleSubmit(onSubmit)}
       sx={{
         display: "flex",
         flexDirection: "column",
@@ -25,7 +49,9 @@ const CostStep = () => {
         </Typography>
         <TextField
           fullWidth
-          required
+          {...register("core_cost_element")}
+          error={!!errors.core_cost_element}
+          helperText={errors.core_cost_element?.message}
           sx={{
             "& .MuiOutlinedInput-root": {
               height: 40,
@@ -44,10 +70,13 @@ const CostStep = () => {
           }}
         >
           This will be the reference price for all automatic GM% and margin
-          health calculations. You can still include other price fields (like
+          health calculations. You can still include other price fields (like
           MAP or MSRP) for reporting or analysis, but they won’t affect GM%.
         </Typography>
       </Box>
+      <Button type="submit" variant="contained" fullWidth>
+        Continue
+      </Button>
     </Box>
   );
 };

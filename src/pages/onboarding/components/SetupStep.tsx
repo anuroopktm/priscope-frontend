@@ -5,56 +5,79 @@ import {
   Select,
   TextField,
   Typography,
+  Button,
 } from "@mui/material";
-import React, { useState } from "react";
+import { useState } from "react";
 import { styled } from "@mui/material/styles";
 import uploadIcon from "@/assets/items-master/upload-icon.svg";
 import { ACCEPTED_FILE_TYPES } from "@/pages/items-master-refactor/constants/upload.constants";
+import { useForm, Controller } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import {
+  setupStepSchema,
+  type SetupStepFormValues,
+} from "@/validations/onboarding/setupStep.schema";
+import { useOnboardingStore } from "@/pages/onboarding/store/useOnboardingStore";
 
-const DropZone = styled(Box, {
-  shouldForwardProp: (prop) => prop !== "isDragOver",
-})<{ isDragOver: boolean }>(({ theme, isDragOver }) => ({
-  border: `1px dashed ${isDragOver ? "#144E72" : "#144E72"}`,
+const DropZone = styled(Box)<{ isDragOver: boolean }>(({ theme }) => ({
+  border: `1px dashed #144E72`,
   borderRadius: theme.shape.borderRadius,
   padding: theme.spacing(4),
   textAlign: "center",
   cursor: "pointer",
-  transition: "all 0.3s ease",
-  "&:hover": {
-    backgroundColor: theme.palette.action.hover,
-    borderColor: "#144E72",
-  },
 }));
 
-const SetupStep = () => {
+interface Props {
+  onNext: () => void;
+  isLastStep?: boolean;
+}
+
+const SetupStep = ({ onNext }: Props) => {
   const [isDragOver, setIsDragOver] = useState(false);
+  const { data, updateData } = useOnboardingStore();
+
+  const {
+    register,
+    handleSubmit,
+    control,
+    setValue,
+    formState: { errors },
+  } = useForm<SetupStepFormValues>({
+    resolver: zodResolver(setupStepSchema),
+    defaultValues: {
+      company_name: data.company_name ?? "",
+      company_website: data.company_website ?? "",
+      industry: data.industry ?? "",
+      company_size: data.company_size ?? "",
+      primary_location: data.primary_location ?? "",
+      company_logo: data.company_logo ?? null,
+    },
+  });
+  const onSubmit = (formData: SetupStepFormValues) => {
+    updateData(formData);
+    onNext();
+  };
 
   return (
     <Box
       component="form"
+      onSubmit={handleSubmit(onSubmit)}
       sx={{
         display: "flex",
         flexDirection: "column",
-        gap: 1,
+        gap: 2,
         width: "100%",
         maxWidth: 500,
         mt: 1,
       }}
     >
       <Box>
-        <Typography
-          sx={{
-            fontSize: "14px",
-            fontWeight: "normal",
-            color: "#000000",
-            mb: 1,
-          }}
-        >
-          Company Name *
-        </Typography>
+        <Typography mb={1}>Company Name *</Typography>
         <TextField
           fullWidth
-          required
+          {...register("company_name")}
+          error={!!errors.company_name}
+          helperText={errors.company_name?.message}
           sx={{
             "& .MuiOutlinedInput-root": {
               height: 40,
@@ -67,76 +90,44 @@ const SetupStep = () => {
       </Box>
 
       <Box>
-        <Typography
-          sx={{
-            fontSize: "14px",
-            fontWeight: "normal",
-            color: "#000000",
-            mb: 1,
-          }}
-        >
-          Upload Company Logo (optional)
-        </Typography>
+        <Typography mb={1}>Upload Company Logo (optional)</Typography>
         <DropZone
           isDragOver={isDragOver}
-          onDragOver={(e: React.DragEvent) => {
+          onDragOver={(e) => {
             e.preventDefault();
             setIsDragOver(true);
           }}
           onDragLeave={() => setIsDragOver(false)}
-          onDrop={(e: React.DragEvent) => {
+          onDrop={(e) => {
             e.preventDefault();
             setIsDragOver(false);
-            const droppedFile = e.dataTransfer.files[0];
-            // if (droppedFile && isValidFileType(droppedFile))
-            //   handleFileUpload(droppedFile);
+            const file = e.dataTransfer.files[0];
+            if (file) setValue("company_logo", file);
           }}
           onClick={() => document.getElementById("file-input")?.click()}
         >
-          <Box sx={{ display: "flex", justifyContent: "center", mb: 1 }}>
-            <img src={uploadIcon} alt="upload" width={35} height={35} />
-          </Box>
-          <Typography
-            sx={{
-              fontSize: "14px",
-              fontWeight: "normal",
-              color: "#000000",
-              mb: 1,
-            }}
-          >
-            Drag and drop CSV/Excel File
-          </Typography>
+          <img src={uploadIcon} width={35} height={35} />
+          <Typography mt={1}>Drag and drop file</Typography>
           <input
             id="file-input"
             type="file"
+            hidden
             accept={ACCEPTED_FILE_TYPES}
-            // onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
-            //   e.target.files?.[0] && handleFileUpload(e.target.files[0])
-            // }
-            style={{ display: "none" }}
+            onChange={(e) => {
+              const file = e.target.files?.[0];
+              if (file) setValue("company_logo", file);
+            }}
           />
         </DropZone>
-        {/* {formData.companyLogo && (
-          <Typography variant="caption" display="block" mt={0.5}>
-            Selected file: {formData.companyLogo.name}
-          </Typography>
-        )} */}
       </Box>
 
       <Box>
-        <Typography
-          sx={{
-            fontSize: "14px",
-            fontWeight: "normal",
-            color: "#000000",
-            mb: 1,
-          }}
-        >
-          Company Website (optional)
-        </Typography>
+        <Typography mb={1}>Company Website</Typography>
         <TextField
           fullWidth
-          required
+          {...register("company_website")}
+          error={!!errors.company_website}
+          helperText={errors.company_website?.message}
           sx={{
             "& .MuiOutlinedInput-root": {
               height: 40,
@@ -149,73 +140,64 @@ const SetupStep = () => {
       </Box>
 
       <Box>
-        <Typography
-          sx={{
-            fontSize: "14px",
-            fontWeight: "normal",
-            color: "#000000",
-            mb: 1,
-          }}
-        >
-          Industry (optional)
-        </Typography>
+        <Typography mb={1}>Industry</Typography>
         <FormControl fullWidth size="small">
-          <Select>
-            <MenuItem value="">Select an industry</MenuItem>
-            <MenuItem value="Tech">Tech</MenuItem>
-            <MenuItem value="Finance">Finance</MenuItem>
-            <MenuItem value="Healthcare">Healthcare</MenuItem>
-          </Select>
+          <Controller
+            name="industry"
+            control={control}
+            render={({ field }) => (
+              <Select {...field}>
+                <MenuItem value="">Select an industry</MenuItem>
+                <MenuItem value="Tech">Tech</MenuItem>
+                <MenuItem value="Finance">Finance</MenuItem>
+                <MenuItem value="Healthcare">Healthcare</MenuItem>
+              </Select>
+            )}
+          />
         </FormControl>
       </Box>
 
       <Box>
-        <Typography
-          sx={{
-            fontSize: "14px",
-            fontWeight: "normal",
-            color: "#000000",
-            mb: 1,
-          }}
-        >
-          Company Size (optional)
-        </Typography>
+        <Typography mb={1}>Company Size</Typography>
         <FormControl fullWidth size="small">
-          <Select>
-            <MenuItem value="">Select company size</MenuItem>
-            <MenuItem value="1-10">1-10</MenuItem>
-            <MenuItem value="11-50">11-50</MenuItem>
-            <MenuItem value="51-200">51-200</MenuItem>
-            <MenuItem value="201-500">201-500</MenuItem>
-            <MenuItem value="500+">500+</MenuItem>
-          </Select>
+          <Controller
+            name="company_size"
+            control={control}
+            render={({ field }) => (
+              <Select {...field}>
+                <MenuItem value="">Select company size</MenuItem>
+                <MenuItem value="1-10">1-10</MenuItem>
+                <MenuItem value="11-50">11-50</MenuItem>
+                <MenuItem value="51-200">51-200</MenuItem>
+                <MenuItem value="201-500">201-500</MenuItem>
+                <MenuItem value="500+">500+</MenuItem>
+              </Select>
+            )}
+          />
         </FormControl>
       </Box>
 
       <Box>
-        <Typography
-          sx={{
-            fontSize: "14px",
-            fontWeight: "normal",
-            color: "#000000",
-            mb: 1,
-          }}
-        >
-          Primary Location (optional)
-        </Typography>
+        <Typography mb={1}>Primary Location</Typography>
         <FormControl fullWidth size="small">
-          <Select>
-            <MenuItem value="" disabled>
-              Select Primary Location
-            </MenuItem>
-            {/* {headers.map((h) => (
-              <MenuItem key={h} value={h}>
-                {h}
-              </MenuItem>
-            ))} */}
-          </Select>
+          <Controller
+            name="primary_location"
+            control={control}
+            render={({ field }) => (
+              <Select {...field}>
+                <MenuItem value="">Select Primary Location</MenuItem>
+                <MenuItem value="USA">USA</MenuItem>
+                <MenuItem value="UK">UK</MenuItem>
+                <MenuItem value="India">India</MenuItem>
+              </Select>
+            )}
+          />
         </FormControl>
       </Box>
+
+      <Button type="submit" variant="contained" fullWidth>
+        Continue
+      </Button>
     </Box>
   );
 };

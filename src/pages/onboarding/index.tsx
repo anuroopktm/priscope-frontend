@@ -1,7 +1,7 @@
-import { Box, Button, Typography } from "@mui/material";
+import { Box, Typography } from "@mui/material";
 import { useState } from "react";
 import Header from "./components/Header";
-import { steps } from "@/constants/onboarding.constants";
+import { steps } from "@/pages/onboarding/constants/onboarding.constants";
 import BackArrow from "@/assets/onboarding/Frame 22.svg";
 
 const Onboarding = () => {
@@ -10,10 +10,15 @@ const Onboarding = () => {
   const handleNext = () => {
     if (activeStep < steps.length - 1) {
       setActiveStep((prev) => prev + 1);
-    } else {
-      alert("All steps completed!");
     }
   };
+
+  const handleBack = () => {
+    if (activeStep > 0) {
+      setActiveStep((prev) => prev - 1);
+    }
+  };
+
   const currentStep = steps[activeStep];
   const StepComponent = currentStep?.component;
 
@@ -25,6 +30,7 @@ const Onboarding = () => {
       }}
     >
       <Header />
+
       <Box
         sx={{
           display: "flex",
@@ -35,16 +41,10 @@ const Onboarding = () => {
           mt: 1,
         }}
       >
-        <Box
-          sx={{
-            width: 36,
-            height: 36,
-            flexShrink: 0,
-          }}
-        >
+        <Box sx={{ width: 36, height: 36, flexShrink: 0 }}>
           {activeStep > 0 && (
             <Box
-              onClick={() => setActiveStep((prev) => prev - 1)}
+              onClick={handleBack}
               sx={{
                 width: "100%",
                 height: "100%",
@@ -118,21 +118,27 @@ const Onboarding = () => {
           gap={1}
         >
           <Typography fontWeight="bold" fontSize="1.5rem" textAlign="center">
-            {steps[activeStep].label}
+            {currentStep?.label}
           </Typography>
-          {steps[activeStep].description && (
+
+          {currentStep?.description && (
             <Typography
               fontSize="14px"
               color="text.secondary"
               textAlign="center"
             >
-              {steps[activeStep].description}
+              {currentStep.description}
             </Typography>
           )}
-          <Box width="100%">{StepComponent && <StepComponent />}</Box>
-          <Button fullWidth variant="contained" onClick={handleNext}>
-            {activeStep === steps.length - 1 ? "Finish" : "Continue"}
-          </Button>
+
+          <Box width="100%">
+            {StepComponent && (
+              <StepComponent
+                onNext={handleNext}
+                isLastStep={activeStep === steps.length - 1}
+              />
+            )}
+          </Box>
         </Box>
       </Box>
     </Box>

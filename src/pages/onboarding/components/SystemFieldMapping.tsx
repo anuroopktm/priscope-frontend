@@ -1,15 +1,19 @@
-import { Box, Typography } from "@mui/material";
+import { Box, Button, Typography } from "@mui/material";
 import InfoOutlinedIcon from "@mui/icons-material/InfoOutlined";
 
-const SystemFieldMapping = () => {
+const SystemFieldMapping = ({ onNext }: { onNext: () => void }) => {
+  const handleSubmit = () => {
+    onNext();
+  };
   return (
     <Box
+      onSubmit={handleSubmit}
+      component="form"
       sx={{
         display: "flex",
         flexDirection: "column",
         gap: 1,
         width: "100%",
-        // maxWidth: 900,
       }}
     >
       <Box
@@ -21,8 +25,6 @@ const SystemFieldMapping = () => {
           backgroundColor: "#ffffff",
           border: "1.5px solid #D0D5DD",
           borderRadius: "10px",
-        //   width: "100%",
-        //   maxWidth: 700,
         }}
       >
         <InfoOutlinedIcon
@@ -48,6 +50,9 @@ const SystemFieldMapping = () => {
           selections, and you can update them anytime in Global Settings.",
         </Typography>
       </Box>
+      <Button type="submit" variant="contained" fullWidth>
+        Continue
+      </Button>
     </Box>
   );
 };

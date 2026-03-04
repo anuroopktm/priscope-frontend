@@ -1,4 +1,3 @@
-import AddDataStep from "@/pages/onboarding/components/AddDataStep";
 import CalculateProfitStep from "@/pages/onboarding/components/CalculateProfitStep";
 import CostStep from "@/pages/onboarding/components/CostStep";
 import ImpactSettings from "@/pages/onboarding/components/ImpactSettings";
@@ -6,6 +5,8 @@ import SellingStep from "@/pages/onboarding/components/SellingStep";
 import SetupStep from "@/pages/onboarding/components/SetupStep";
 import SystemFieldMapping from "@/pages/onboarding/components/SystemFieldMapping";
 import SystemIdentifier from "@/pages/onboarding/components/SystemIdentifier";
+import GeneralInfo from "../components/GeneralInfo";
+import SystemFieldMappingsDetails from "../components/SystemFieldMappingsDetails";
 
   export const steps = [
     {
@@ -36,6 +37,10 @@ import SystemIdentifier from "@/pages/onboarding/components/SystemIdentifier";
       component: SystemFieldMapping,
     },
     {
+      label: "Map Your System Fields",
+      component: SystemFieldMappingsDetails,
+    },
+    {
       label: "Identify Your Unique Identifier",
       description:
         "System identifier field (SKU or UPC). The selected option will be mandatory for item entry, uploads, and ERP sync",
@@ -43,14 +48,13 @@ import SystemIdentifier from "@/pages/onboarding/components/SystemIdentifier";
     },
     {
       label: "Alert Configuration",
-
       component: ImpactSettings,
     },
     {
       label: "General Info",
       description:
         "Priscope can watch for changes in FX rates, tariffs, and freight that might affect your margins. You can decide how sensitive those alerts should be. When a change moves your overall or customer-level gross margin by more than the percentage you set, Priscope will create an alert in your Alerts Center so you can review and adjust pricing if needed.",
-      component: AddDataStep,
+      component: GeneralInfo,
     },
     {
       label: "Alert Configuration",
