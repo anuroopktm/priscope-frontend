@@ -3,7 +3,7 @@ const SYSTEM_COLS = ["A", "B", "C", "D", "E"];
 
 // Text style for menu section headers (e.g., "Builder", "Calculators")
 const HEADER_STYLE =
-  "display: block; color: #888; font-size: 11px; text-align: left; margin: 0 0 2px 4px; font-weight: 600; pointer-events: none;";
+  "display: block; color: #888; font-size: 11px; text-align: left; margin: -6px 8px; font-weight: 600; pointer-events: none;";
 
 // Trash icon SVG used in Delete menu item
 const DELETE_ICON =
@@ -81,7 +81,7 @@ export const getCellContextMenu = (grid: any, row: any, col: string) => {
   // 1. If assigned to an aggregator -> Show Calculate
   if (aggregatorType) {
     return [
-      { Text: `<span style="${HEADER_STYLE}">Actions</span>`, Caption: 1 },
+      // { Text: `<span style="${HEADER_STYLE}">Actions</span>`, Caption: 1 },
       {
         Name: "Calculate",
         OnClick: () => {
