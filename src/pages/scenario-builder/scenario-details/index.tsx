@@ -41,6 +41,7 @@ const ScenarioDetailsPage = () => {
   const [activeCell, setActiveCell] = useState<{
     rowId: string;
     col: string;
+    items?: any[];
   } | null>(null);
 
   // Delete confirmation state
@@ -63,7 +64,22 @@ const ScenarioDetailsPage = () => {
   };
 
   const openComponentAggregatorDrawer = (rowId: string, col: string) => {
-    setActiveCell({ rowId, col });
+    const grid = (window as any).Grids?.[gridId];
+    let items: any[] = [];
+    if (grid) {
+      const row = grid.GetRowById(rowId);
+      if (row) {
+        const itemsData = grid.GetAttribute(row, col, "ItemsData");
+        if (itemsData) {
+          try {
+            items = JSON.parse(itemsData);
+          } catch (e) {
+            console.error("Error parsing ItemsData:", e);
+          }
+        }
+      }
+    }
+    setActiveCell({ rowId, col, items });
     setIsAggregatorDrawerOpen(true);
   };
 
@@ -193,22 +209,11 @@ const ScenarioDetailsPage = () => {
         const targetSec = targetObj?.Sec ?? 1;
         const targetPos = targetObj?.Pos ?? 100;
 
-        // Get list of all currently used item names to clean up duplicates
-        const currentItemNames = items
-          .map((i) => (i.name || "").trim().toLowerCase())
-          .filter(Boolean);
-
         // --- PRE-SYNC CLEANUP ---
-        // Hide ANY existing columns that look like they belong to the aggregator
-        // or that have a caption matching one of our current items.
-        // This prevents the "Double Shirt" issue.
+        // Only hide columns that belong to THIS specific aggregator column.
+        // This prevents columns from other aggregators being hidden during this update.
         Object.keys(grid.Cols).forEach((c) => {
-          const caption = (grid.Header?.[c] || "")
-            .toString()
-            .trim()
-            .toLowerCase();
-          const isCompCol = c.startsWith("Comp");
-          if (isCompCol || currentItemNames.includes(caption)) {
+          if (c.startsWith(`Comp_${targetCol}_`)) {
             grid.HideCol(c);
           }
         });
@@ -222,7 +227,7 @@ const ScenarioDetailsPage = () => {
 
           const cleanName = item.name.trim();
           const safeName = cleanName.replace(/[^a-zA-Z0-9]/g, "").toLowerCase();
-          const colId = "Comp" + (safeName || "Item");
+          const colId = `Comp_${targetCol}_${safeName || "Item"}`;
 
           const insertPos = targetPos + index;
 
@@ -278,6 +283,15 @@ const ScenarioDetailsPage = () => {
         grid.SetAttribute(null, targetCol, "Format", "$0.00", 1);
 
         grid.SetValue(row, targetCol, total, 1);
+
+        // Save the raw items to the cell for persistence
+        grid.SetAttribute(
+          row,
+          targetCol,
+          "ItemsData",
+          JSON.stringify(items),
+          1,
+        );
 
         grid.Update();
         grid.Render();
@@ -345,7 +359,7 @@ const ScenarioDetailsPage = () => {
         </Box>
 
         {/* Bottom Panel Section (Split View) */}
-        {isAggregatorDrawerOpen && (
+        {isAggregatorDrawerOpen && activeCell && (
           <Box
             sx={{
               flex: 0.5,
@@ -356,6 +370,7 @@ const ScenarioDetailsPage = () => {
             }}
           >
             <ComponentAggregatorDrawer
+              initialItems={activeCell.items}
               onClose={() => {
                 setIsAggregatorDrawerOpen(false);
                 setActiveCell(null);

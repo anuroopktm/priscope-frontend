@@ -70,7 +70,15 @@ export const useScenarioGridEvents = ({
       console.log(`Triggering General Formula for ${col}`);
     };
     (window as any).handleDeleteCol = (grid: any, col: string) => {
+      // Hide the column itself
       grid.HideCol(col);
+
+      // Hide all associated component columns if this was an aggregator
+      Object.keys(grid.Cols).forEach((c) => {
+        if (c.startsWith(`Comp_${col}_`)) {
+          grid.HideCol(c);
+        }
+      });
     };
     (window as any).handleTreeGridDeleteRow = (rowId: string) => {
       openDeleteModal(rowId);
