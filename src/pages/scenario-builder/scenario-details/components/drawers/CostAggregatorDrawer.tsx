@@ -49,7 +49,9 @@ const renderSelectButton = (
 ) => {
   const isSelected = name !== "Select" && name != null;
   const nameStr = typeof name === "string" ? name : String(name || "");
-  return `
+
+  if (!isSelected) {
+    return `
       <div style="display: flex; align-items: center; gap: 8px; height: 100%; padding: 0 8px;">
         <button 
           onclick="window.handleOpenFreightSelection && window.handleOpenFreightSelection('${rowId}', '${gridId}', '${col}')"
@@ -57,11 +59,35 @@ const renderSelectButton = (
           onmouseover="this.style.background='#BAE6FD'"
           onmouseout="this.style.background='#E0F2FE'"
         >
-          ${isSelected ? "Change" : "Select"}
+          Select
         </button>
-        ${isSelected ? `<span style="font-size: 13px; color: #1e3a8a; font-weight: 600; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">${nameStr}</span>` : ""}
       </div>
     `;
+  }
+
+  console.log(
+    "renderSelectButton running - isSelected:",
+    isSelected,
+    "name:",
+    name,
+  );
+  return `
+    <div 
+      onclick="window.handleOpenFreightSelection && window.handleOpenFreightSelection('${rowId}', '${gridId}', '${col}')"
+      style="display: flex; align-items: center; justify-content: flex-start; gap: 12px; height: 100%; padding: 0 12px; cursor: pointer;"
+      data-scenario-selected="true"
+    >
+      <div style="background: #E0F2FE; border-radius: 4px; width: 22px; height: 22px; display: flex; align-items: center; justify-content: center; color: #0369A1;">
+        <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M21 2v6h-6"></path>
+          <path d="M3 12a9 9 0 0 1 15-6.7L21 8"></path>
+          <path d="M3 22v-6h6"></path>
+          <path d="M21 12a9 9 0 0 1-15 6.7L3 16"></path>
+        </svg>
+      </div>
+      <span style="font-size: 13px; color: #1e3a8a; font-weight: 600; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">${nameStr}</span>
+    </div>
+  `;
 };
 
 const renderSelectedValue = (
@@ -83,6 +109,7 @@ const renderSelectedValue = (
     <div 
       onclick="window.handleOpenFreightSelection && window.handleOpenFreightSelection('${rowId}', '${gridId}', 'A')"
       style="display: flex; align-items: center; justify-content: flex-end; gap: 12px; height: 100%; padding: 0 12px; cursor: pointer;"
+      data-scenario-selected="true"
     >
       <div style="background: #E0F2FE; border-radius: 4px; width: 22px; height: 22px; display: flex; align-items: center; justify-content: center; color: #0369A1;">
         <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
@@ -218,11 +245,16 @@ const CostAggregatorDrawer = ({
                   : "C";
             const costValue = grid.GetValue(row, costCol);
 
-            // Only sum rows that have a non-zero cost or are explicitly "Change" rows
-            if (
-              costValue !== 0 ||
-              String(grid.GetValue(row, "A")).includes("Change")
-            ) {
+            // Only sum rows that have a non-zero cost or have a selected value
+            const colAValue = String(grid.GetValue(row, "A") || "");
+            const colBValue = String(grid.GetValue(row, "B") || "");
+            const isDataSelected =
+              colAValue.includes("data-scenario-selected") ||
+              colBValue.includes("data-scenario-selected") ||
+              colAValue.includes("SVG") ||
+              colBValue.includes("SVG");
+
+            if (costValue !== 0 || isDataSelected) {
               total += Number(costValue) || 0;
             }
           }
@@ -558,45 +590,79 @@ const CostAggregatorDrawer = ({
     sections.forEach((section) => {
       const grid = (window as any).Grids?.[section.id];
       if (grid) {
+        // First pass: count valid data rows (excluding the trailing Select row)
+        let dataRowCount = 0;
         let row = grid.GetFirst();
         while (row) {
           if (row.Kind === "Data" && !row.Deleted) {
+            const colAValue = String(grid.GetValue(row, "A") || "");
+            const isSelectRow =
+              colAValue.includes("Select") &&
+              !colAValue.includes("data-scenario-selected");
+            if (!isSelectRow) {
+              dataRowCount++;
+            }
+          }
+          row = grid.GetNext(row);
+        }
+
+        // Second pass: process rows
+        let currentItemIndex = 1;
+        row = grid.GetFirst();
+        while (row) {
+          if (row.Kind === "Data" && !row.Deleted) {
             const isTariff = section.type === "Tariff";
+            const isFreight = section.type === "Freight";
             const isCustom = section.type === "Custom";
             const costCol = isTariff ? "D" : isCustom ? "A" : "C";
             const costValueRaw = grid.GetValue(row, costCol);
             const costValue =
               typeof costValueRaw === "object" ? 0 : Number(costValueRaw) || 0;
 
+            const colAValue = String(grid.GetValue(row, "A") || "");
+            const isSelectRow =
+              colAValue.includes("Select") &&
+              !colAValue.includes("data-scenario-selected");
+
+            if (isSelectRow) {
+              row = grid.GetNext(row);
+              continue;
+            }
+
             // Get clean name from attribute
             const cleanNameRaw = grid.GetAttribute(row, "A", "CleanName");
             const cleanName =
               typeof cleanNameRaw === "string" ? cleanNameRaw : null;
 
-            const colAValue = grid.GetValue(row, "A");
-            const isChangeRow =
-              typeof colAValue === "string" && colAValue.includes("Change");
-
-            // For Custom, we use the section title as the name if it's the only row or just default
-            const finalName = isCustom
-              ? section.title
-              : cleanName || "Cost Item";
-
-            // Only include rows that have a selected rate or valid name or it's a custom row
-            if (cleanName || isChangeRow || isCustom) {
-              allRows.push({
-                id: String(row.id),
-                name: finalName,
-                currency: "USD",
-                cost: costValue,
-                costPerUnit: costValue,
-                costFor: String(
-                  isCustom
-                    ? "Base UOM"
-                    : grid.GetValue(row, isTariff ? "C" : "B") || "Base UOM",
-                ),
-              });
+            // For Custom, we use the section title
+            // For Tariff/Freight, we use the specified naming logic
+            let finalName = "";
+            if (isCustom) {
+              finalName = section.title;
+            } else if (isTariff || isFreight) {
+              const typeName = isTariff ? "Tariff" : "Freight";
+              if (currentItemIndex === 1) {
+                finalName = typeName;
+              } else {
+                finalName = `${typeName} ${currentItemIndex}`;
+              }
+              currentItemIndex++;
+            } else {
+              finalName = cleanName || "Cost Item";
             }
+
+            allRows.push({
+              id: String(row.id),
+              name: finalName,
+              currency: "USD",
+              cost: costValue,
+              costPerUnit: costValue,
+              costFor: String(
+                isCustom
+                  ? "Base UOM"
+                  : grid.GetValue(row, isTariff ? "C" : "B") || "Base UOM",
+              ),
+            });
           }
           row = grid.GetNext(row);
         }

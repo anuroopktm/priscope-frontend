@@ -386,9 +386,10 @@ const ScenarioDetailsPage = () => {
         const targetPos = targetObj?.Pos ?? 100;
 
         // --- PRE-SYNC CLEANUP ---
+        // Delete existing columns so they don't persist when naming changes (e.g. from "Tariff" to "Tariff 1")
         Object.keys(grid.Cols).forEach((c) => {
           if (c.startsWith(`Comp_${targetCol}_`)) {
-            grid.HideCol(c);
+            grid.DelCol(c);
           }
         });
 
