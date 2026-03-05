@@ -16,6 +16,8 @@ interface UseScenarioGridEventsProps {
     type?: string,
   ) => void;
   openDeleteModal: (rowId: string) => void;
+  openMarkupComponentModal: (col: string) => void;
+  openMarginComponentModal: (col: string) => void;
 }
 
 export const useScenarioGridEvents = ({
@@ -26,6 +28,8 @@ export const useScenarioGridEvents = ({
   openCostAggregatorModal,
   openComponentAggregatorDrawer,
   openDeleteModal,
+  openMarkupComponentModal,
+  openMarginComponentModal,
 }: UseScenarioGridEventsProps) => {
   useEffect(() => {
     (window as any).handleTreeGridEdit = (rowId: string) => {
@@ -63,10 +67,10 @@ export const useScenarioGridEvents = ({
       openCostAggregatorModal(col);
     };
     (window as any).handleMarkupComponent = (_grid: any, col: string) => {
-      console.log(`Triggering Markup Component for ${col}`);
+      openMarkupComponentModal(col);
     };
     (window as any).handleMarginComponent = (_grid: any, col: string) => {
-      console.log(`Triggering Margin Component for ${col}`);
+      openMarginComponentModal(col);
     };
     (window as any).handleGeneralFormulaComponent = (
       _grid: any,
@@ -140,6 +144,8 @@ export const useScenarioGridEvents = ({
     openCostAggregatorModal,
     openComponentAggregatorDrawer,
     openDeleteModal,
+    openMarkupComponentModal,
+    openMarginComponentModal,
     gridData,
     gridId,
   ]);

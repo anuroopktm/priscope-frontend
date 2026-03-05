@@ -5,11 +5,13 @@ import { useParams } from "react-router-dom";
 import ActionHeader from "./components/ActionHeader";
 import ComponentAggregatorDrawer from "./components/drawers/ComponentAggregatorDrawer";
 import CostAggregatorDrawer from "./components/drawers/CostAggregatorDrawer";
+import MarginMarkupDrawer from "./components/drawers/MarginMarkupDrawer";
 import AddAsGroupModal from "./components/items-master-drawer/components/AddAsGroupModal";
 import ItemsMasterDrawer from "./components/items-master-drawer/ItemsMasterDrawer";
 import ComponentAggregatorModal from "./components/modals/ComponentAggregatorModal";
 import CostAggregatorModal from "./components/modals/CostAggregatorModal";
 import DeleteConfirmModal from "./components/modals/DeleteConfirmModal";
+import MarginMarkupModal from "./components/modals/MarginMarkupModal";
 import { ScenarioDetailsLayout } from "./tree-grid/config/details-layout";
 import { useScenarioGridData } from "./tree-grid/hooks/useScenarioGridData";
 import { useScenarioGridEvents } from "./tree-grid/hooks/useScenarioGridEvents";
@@ -52,6 +54,12 @@ const ScenarioDetailsPage = () => {
   // Delete confirmation state
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState<boolean>(false);
   const [rowToDeleteId, setRowToDeleteId] = useState<string | null>(null);
+
+  // Margin/Markup state
+  const [isMarginMarkupModalOpen, setIsMarginMarkupModalOpen] = useState(false);
+  const [marginMarkupType, setMarginMarkupType] = useState<"Margin" | "Markup">(
+    "Margin",
+  );
 
   const { gridData, handleEditRowConfirm, processAddItems } =
     useScenarioGridData();
@@ -107,6 +115,57 @@ const ScenarioDetailsPage = () => {
     setIsDeleteModalOpen(true);
   };
 
+  const openMarkupComponentModal = (col: string) => {
+    setActiveColumn(col);
+    setMarginMarkupType("Markup");
+    setIsMarginMarkupModalOpen(true);
+  };
+
+  const openMarginComponentModal = (col: string) => {
+    setActiveColumn(col);
+    setMarginMarkupType("Margin");
+    setIsMarginMarkupModalOpen(true);
+  };
+
+  const handleMarginMarkupConfirm = (data: {
+    label: string;
+    mapping: string;
+    entireColumn: boolean;
+  }) => {
+    const grid = (window as any).Grids?.[gridId];
+    if (grid && activeColumn) {
+      const colName = activeColumn;
+      const fullLabel = `${data.label} (${marginMarkupType} iterator)`;
+      const headerRow = grid.Header || grid.GetRowById("Header");
+      if (headerRow) {
+        grid.SetValue(headerRow, colName, fullLabel, 1);
+      }
+      grid.SetAttribute(null, colName, "AggregatorType", marginMarkupType, 1);
+      grid.SetAttribute(null, colName, "Mapping", data.mapping, 1);
+      grid.SetAttribute(
+        null,
+        colName,
+        "EntireColumn",
+        data.entireColumn ? 1 : 0,
+        1,
+      );
+
+      setTimeout(() => {
+        grid.SetAttribute(null, colName, "RelWidth", 0, 1);
+        grid.SetAttribute(null, colName, "Width", null, 1);
+        if (grid.AutoFitCol) {
+          grid.AutoFitCol(colName);
+        } else {
+          grid.SetWidth(colName, -1);
+        }
+        grid.Update();
+        grid.Render();
+      }, 10);
+
+      grid.Update();
+    }
+  };
+
   const isGroupToDelete = rowToDeleteId?.startsWith("group_");
 
   useScenarioGridEvents({
@@ -117,6 +176,8 @@ const ScenarioDetailsPage = () => {
     openCostAggregatorModal,
     openComponentAggregatorDrawer,
     openDeleteModal,
+    openMarkupComponentModal,
+    openMarginComponentModal,
   });
 
   // Handle Scenario Column Selection for Tariff
@@ -280,16 +341,17 @@ const ScenarioDetailsPage = () => {
       const colName = activeColumn;
 
       // Set the header caption
+      const fullLabel = `${data.label} (Component iterator)`;
       // Most TreeGrid versions have 'Header' as the main header row object
       const headerRow = grid.Header || grid.GetRowById("Header");
       if (headerRow) {
-        grid.SetValue(headerRow, colName, data.label, 1);
+        grid.SetValue(headerRow, colName, fullLabel, 1);
       } else {
         // Fallback: search for row with Kind="Header"
         let row = grid.GetFirst();
         while (row) {
           if (row.Kind === "Header") {
-            grid.SetValue(row, colName, data.label, 1);
+            grid.SetValue(row, colName, fullLabel, 1);
             break;
           }
           row = grid.GetNext(row);
@@ -329,14 +391,15 @@ const ScenarioDetailsPage = () => {
     const grid = (window as any).Grids?.[gridId];
     if (grid && activeColumn) {
       const colName = activeColumn;
+      const fullLabel = `${data.label} (Cost iterator)`;
       const headerRow = grid.Header || grid.GetRowById("Header");
       if (headerRow) {
-        grid.SetValue(headerRow, colName, data.label, 1);
+        grid.SetValue(headerRow, colName, fullLabel, 1);
       } else {
         let row = grid.GetFirst();
         while (row) {
           if (row.Kind === "Header") {
-            grid.SetValue(row, colName, data.label, 1);
+            grid.SetValue(row, colName, fullLabel, 1);
             break;
           }
           row = grid.GetNext(row);
@@ -399,8 +462,13 @@ const ScenarioDetailsPage = () => {
         (Array.isArray(items) ? items : []).forEach((item, index) => {
           if (!item || !item.name) return;
 
-          // If type is Custom, skip column creation in top panel
-          if (item.type === "Custom") return;
+          // If type is Custom, Margin or Markup, skip column creation in top panel
+          if (
+            item.type === "Custom" ||
+            item.type === "Margin" ||
+            item.type === "Markup"
+          )
+            return;
 
           const itemName = String(item.name || "");
           const cleanName = itemName.trim();
@@ -551,6 +619,17 @@ const ScenarioDetailsPage = () => {
                 }}
                 onUpdate={handleAggregatorUpdate}
               />
+            ) : activeCell.type === "Margin" || activeCell.type === "Markup" ? (
+              <MarginMarkupDrawer
+                type={activeCell.type as "Margin" | "Markup"}
+                initialItems={activeCell.items}
+                mainRowId={activeCell.rowId}
+                onClose={() => {
+                  setIsAggregatorDrawerOpen(false);
+                  setActiveCell(null);
+                }}
+                onUpdate={handleAggregatorUpdate}
+              />
             ) : (
               <ComponentAggregatorDrawer
                 initialItems={activeCell.items}
@@ -606,6 +685,13 @@ const ScenarioDetailsPage = () => {
             ? "Are you sure you want to delete this group and all items within it? This action cannot be undone."
             : "Are you sure you want to delete this item? This action cannot be undone."
         }
+      />
+
+      <MarginMarkupModal
+        open={isMarginMarkupModalOpen}
+        onClose={() => setIsMarginMarkupModalOpen(false)}
+        onConfirm={handleMarginMarkupConfirm}
+        type={marginMarkupType}
       />
     </Box>
   );
