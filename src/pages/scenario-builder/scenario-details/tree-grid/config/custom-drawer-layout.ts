@@ -34,7 +34,7 @@ export const CustomDrawerLayout = {
     },
     {
       Name: "B",
-      Width: "40",
+      Width: "120",
       Type: "Html",
       Caption: "",
       CanEdit: "0",
@@ -44,6 +44,6 @@ export const CustomDrawerLayout = {
     A: "Custom input",
     B: "",
     AAlign: "Left",
-    BAlign: "Center",
+    BAlign: "Right",
   },
 };

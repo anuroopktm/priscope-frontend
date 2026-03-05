@@ -181,18 +181,13 @@ const CustomCalculationModal = ({
               sx={{
                 borderRadius: "4px",
                 height: "32px",
-                fontWeight: token.type === "operator" ? "bold" : "normal",
-                bgcolor:
-                  token.type === "column"
-                    ? "#1e293b"
-                    : token.type === "numeric"
-                      ? "#e2e8f0"
-                      : "white",
-                color: token.type === "column" ? "white" : "#1e293b",
-                border:
-                  token.type === "operator" ? "1px solid #cbd5e1" : "none",
+                fontWeight: "bold",
+                bgcolor: "#e2e8f0",
+                color: "#1e293b",
+                border: "1px solid #e2e8f0",
                 "& .MuiChip-deleteIcon": {
-                  color: token.type === "column" ? "white" : "inherit",
+                  color: "#1e293b",
+                  fontSize: "16px",
                 },
               }}
             />

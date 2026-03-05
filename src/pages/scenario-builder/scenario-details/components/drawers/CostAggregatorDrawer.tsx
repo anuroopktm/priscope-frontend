@@ -125,23 +125,32 @@ const renderSelectedValue = (
   `;
 };
 
-const renderCalculatorIcon = (rowId: string, gridId: string) => {
+const renderCalculatorIcon = (
+  rowId: string,
+  gridId: string,
+  value?: number,
+) => {
+  const formattedValue =
+    value != null && !isNaN(value) ? `$${value.toFixed(2)}` : "";
   return `
       <div 
         onclick="window.handleOpenCalculation && window.handleOpenCalculation('${rowId}', '${gridId}')"
-        style="display: flex; align-items: center; justify-content: center; height: 100%; cursor: pointer;">
-        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#2563eb" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-            <rect x="4" y="2" width="16" height="20" rx="2" ry="2"></rect>
-            <line x1="8" y1="6" x2="16" y2="6"></line>
-            <line x1="16" y1="14" x2="16" y2="18"></line>
-            <line x1="8" y1="10" x2="8" y2="10.01"></line>
-            <line x1="12" y1="10" x2="12" y2="10.01"></line>
-            <line x1="16" y1="10" x2="16" y2="10.01"></line>
-            <line x1="8" y1="14" x2="8" y2="14.01"></line>
-            <line x1="12" y1="14" x2="12" y2="14.01"></line>
-            <line x1="8" y1="18" x2="8" y2="18.01"></line>
-            <line x1="12" y1="18" x2="12" y2="18.01"></line>
-        </svg>
+        style="display: flex; align-items: center; justify-content: flex-end; gap: 8px; height: 100%; cursor: pointer; padding-right: 8px;">
+        ${formattedValue ? `<span style="font-size: 13px; color: #1e293b; font-weight: 600;">${formattedValue}</span>` : ""}
+        <div style="display: flex; align-items: center; justify-content: center; width: 24px; height: 24px;">
+          <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#2563eb" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <rect x="4" y="2" width="16" height="20" rx="2" ry="2"></rect>
+              <line x1="8" y1="6" x2="16" y2="6"></line>
+              <line x1="16" y1="14" x2="16" y2="18"></line>
+              <line x1="8" y1="10" x2="8" y2="10.01"></line>
+              <line x1="12" y1="10" x2="12" y2="10.01"></line>
+              <line x1="16" y1="10" x2="16" y2="10.01"></line>
+              <line x1="8" y1="14" x2="8" y2="14.01"></line>
+              <line x1="12" y1="14" x2="12" y2="14.01"></line>
+              <line x1="8" y1="18" x2="8" y2="18.01"></line>
+              <line x1="12" y1="18" x2="12" y2="18.01"></line>
+          </svg>
+        </div>
       </div>
     `;
 };
@@ -239,13 +248,14 @@ const CostAggregatorDrawer = ({
         while (row) {
           if (row.Kind === "Data" && !row.Deleted) {
             // For Freight, cost is in column C. For Tariff, cost is in column D. For Custom, cost is in column A.
-            const costCol =
-              section.type === "Tariff"
-                ? "D"
-                : section.type === "Custom"
-                  ? "A"
-                  : "C";
-            const costValue = grid.GetValue(row, costCol);
+            let costValue = 0;
+            if (section.type === "Custom") {
+              costValue =
+                parseFloat(grid.GetAttribute(row, "A", "Result")) || 0;
+            } else {
+              const costCol = section.type === "Tariff" ? "D" : "C";
+              costValue = grid.GetValue(row, costCol);
+            }
 
             // Only sum rows that have a non-zero cost or have a selected value
             const colAValue = String(grid.GetValue(row, "A") || "");
@@ -1018,11 +1028,13 @@ const CostAggregatorDrawer = ({
 
                 // Evaluate formula
                 let evalStr = formula;
+                let firstSourceValue = 0;
                 const matches = evalStr.match(/\[(.*?)\]/g);
                 if (matches) {
-                  matches.forEach((match) => {
+                  matches.forEach((match, index) => {
                     const colName = match.slice(1, -1);
                     const val = mainGrid.GetValue(mainRow, colName) || 0;
+                    if (index === 0) firstSourceValue = val;
                     evalStr = evalStr.replace(match, String(val));
                   });
                 }
@@ -1031,8 +1043,16 @@ const CostAggregatorDrawer = ({
                   // Basic evaluation for simple arithmetic
                   // eslint-disable-next-line no-eval
                   const result = Number(eval(evalStr)) || 0;
-                  // Store the result in the cell
-                  grid.SetValue(row, "A", result, 1);
+                  // Store the source value in A and the result in B (via icon renderer)
+                  grid.SetValue(row, "A", firstSourceValue, 1);
+                  grid.SetValue(
+                    row,
+                    "B",
+                    renderCalculatorIcon(row.id, grid.id, result),
+                    1,
+                  );
+                  // Preserve original result for calculations
+                  grid.SetAttribute(row, "A", "Result", result, 1);
                   // Preserve the formula in an attribute for re-editing
                   grid.SetAttribute(row, "A", "Formula", formula, 1);
                   calculateTotal();
