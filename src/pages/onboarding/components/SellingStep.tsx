@@ -39,7 +39,7 @@ const SellingStep = ({ onNext }: { onNext: () => void }) => {
       <Box>
         <Typography
           sx={{
-            fontSize: "14px",
+            fontSize: "12px",
             fontWeight: "normal",
             color: "#000000",
             mb: 1,

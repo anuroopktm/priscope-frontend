@@ -75,7 +75,6 @@ const SetupStep = ({ onNext }: Props) => {
         mx: "auto",
       }}
     >
-      {/* Company Name */}
       <Box>
         <Typography fontSize={12} mb={1}>
           Company Name *
@@ -89,7 +88,6 @@ const SetupStep = ({ onNext }: Props) => {
         />
       </Box>
 
-      {/* Company Website */}
       <Box>
         <Typography fontSize={12} mb={1}>
           Company Website *
@@ -103,7 +101,6 @@ const SetupStep = ({ onNext }: Props) => {
         />
       </Box>
 
-      {/* Industry */}
       <Box>
         <Typography fontSize={12} mb={1}>
           Industry *
@@ -127,7 +124,6 @@ const SetupStep = ({ onNext }: Props) => {
         </FormControl>
       </Box>
 
-      {/* Company Size */}
       <Box>
         <Typography fontSize={12} mb={1}>
           Company Size *
@@ -153,7 +149,6 @@ const SetupStep = ({ onNext }: Props) => {
         </FormControl>
       </Box>
 
-      {/* Primary Location */}
       <Box>
         <Typography fontSize={12} mb={1}>
           Primary Location *
@@ -177,7 +172,6 @@ const SetupStep = ({ onNext }: Props) => {
         </FormControl>
       </Box>
 
-      {/* Logo Upload */}
       <Box>
         <Typography fontSize={12} mb={1}>
           Upload Company Logo (optional)
@@ -225,17 +219,6 @@ const SetupStep = ({ onNext }: Props) => {
                   field.onChange(file);
                 }}
               />
-
-              {/* {logoFile && (
-                <Button
-                  size="small"
-                  color="error"
-                  sx={{ mt: 1 }}
-                  onClick={() => field.onChange(undefined)}
-                >
-                  Remove
-                </Button>
-              )} */}
 
               {errors.company_logo && (
                 <FormHelperText error>

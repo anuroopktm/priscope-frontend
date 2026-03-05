@@ -1,17 +1,11 @@
 import { Box, Typography, TextField, Button } from "@mui/material";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-// import {
-//   systemFieldMappingSchema,
-//   SystemFieldMappingFormValues,
-// } from "@/validations/systemFieldMapping.validation";
-import { useEffect } from "react";
 import { useOnboardingStore } from "../store/useOnboardingStore";
 import {
   systemFieldMappingSchema,
   type SystemFieldMappingFormValues,
 } from "@/validations/onboarding/systemFieldMapping.validation";
-// import { useOnboardingStore } from "@/store/onboarding.store";
 
 const fields = [
   { label: "SKU", name: "sku" },
@@ -44,9 +38,8 @@ const SystemFieldMappingsDetails = ({ onNext }: { onNext: () => void }) => {
 
   const onSubmit = (data: SystemFieldMappingFormValues) => {
     updateData({ field_mappings: data });
-    onNext(); // go to next step
+    onNext();
   };
-  console.log(data);
 
   return (
     <Box
@@ -55,22 +48,21 @@ const SystemFieldMappingsDetails = ({ onNext }: { onNext: () => void }) => {
       sx={{
         display: "flex",
         flexDirection: "column",
-        gap: 2,
+        gap: 1,
         width: "100%",
         maxWidth: 800,
         mx: "auto",
       }}
     >
-      {/* <Typography
+      <Typography
         sx={{
-          fontSize: "16px",
+          fontSize: "12px",
           fontWeight: 600,
           color: "#1A2B44",
-          mb: 2,
         }}
       >
         System field labelling
-      </Typography> */}
+      </Typography>
 
       <Box
         sx={{
@@ -133,18 +125,20 @@ const SystemFieldMappingsDetails = ({ onNext }: { onNext: () => void }) => {
             />
           </Box>
         ))}
-
-        {/* <Typography
-          sx={{
-            fontSize: "13px",
-            color: "#4B5563",
-            mt: 1,
-          }}
-        >
-          Matching your field names ensures Priscope reads your data correctly,
-          no matter what your internal labels are.
-        </Typography> */}
       </Box>
+      <Typography
+        sx={{
+          display:'flex',
+          flexDirection:'column',
+          alignItems:'center',
+          fontSize: "13px",
+          color: "#4B5563",
+          mt: 1,
+        }}
+      >
+        Matching your field names ensures Priscope reads your data correctly, no
+        matter what your internal labels are.
+      </Typography>
       <Box
         sx={{
           display: "flex",

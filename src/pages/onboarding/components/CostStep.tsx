@@ -9,7 +9,6 @@ import {
 
 const CostStep = ({ onNext }: { onNext: () => void }) => {
   const { data, updateData } = useOnboardingStore();
-  console.log(data);
   const {
     register,
     handleSubmit,
@@ -24,7 +23,6 @@ const CostStep = ({ onNext }: { onNext: () => void }) => {
     updateData(formData);
     onNext();
   };
-  console.log(data)
   return (
     <Box
       component="form"
@@ -41,7 +39,7 @@ const CostStep = ({ onNext }: { onNext: () => void }) => {
       <Box>
         <Typography
           sx={{
-            fontSize: "14px",
+            fontSize: "12px",
             fontWeight: "normal",
             color: "#000000",
             mb: 1,

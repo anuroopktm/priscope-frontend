@@ -37,7 +37,6 @@ const CalculateProfitStep = ({ onNext }: { onNext: () => void }) => {
   ];
 
   const onSubmit = (formData: ProfitStepFormValues) => {
-    console.log(data);
     updateData(formData);
     onNext();
   };

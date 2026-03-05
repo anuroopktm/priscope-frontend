@@ -15,7 +15,6 @@ const SystemFieldMapping = ({ onNext }: { onNext: () => void }) => {
         gap: 2,
         width: "100%",
         mx: "auto",
-        // maxWidth: 600,
       }}
     >
       <Box
@@ -60,7 +59,7 @@ const SystemFieldMapping = ({ onNext }: { onNext: () => void }) => {
           flexDirection: "column",
           gap: 2,
           width: "100%",
-          maxWidth: 600,
+          maxWidth: 500,
           mx: "auto",
         }}
       >

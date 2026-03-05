@@ -2,49 +2,45 @@ import { Box, Button, CircularProgress, Typography } from "@mui/material";
 import InfoOutlinedIcon from "@mui/icons-material/InfoOutlined";
 import { useOnboardingMutation } from "@/services/queries/onboarding/onboarding.queries";
 import { useOnboardingStore } from "../store/useOnboardingStore";
+import { useToastStore } from "@/store/useToastStore";
 
 const GeneralInfo = ({ onNext }: { onNext: () => void }) => {
   const { data } = useOnboardingStore();
   const { mutate, isPending } = useOnboardingMutation();
+  const showToast = useToastStore((store) => store.showToast);
 
   const handleSubmit = () => {
     const formData = new FormData();
 
     Object.entries(data).forEach(([key, value]) => {
       if (value === undefined || value === null || value === "") {
-        return; // skip empty values
+        return;
       }
-
-      // Convert object to JSON (like field_mappings)
       if (typeof value === "object" && !(value instanceof File)) {
         formData.append(key, JSON.stringify(value));
         return;
       }
-
-      // Convert numbers to string
       if (typeof value === "number") {
         formData.append(key, String(value));
         return;
       }
-
-      // File support
       if (value instanceof File) {
         formData.append(key, value);
         return;
       }
-
-      // Normal string
       formData.append(key, value as string);
-      formData.append("base_currency","usd")
+      formData.append("base_currency", "usd");
     });
 
     mutate(formData, {
       onSuccess: (response: any) => {
         console.log("Success 🚀", response);
-        onNext(); // move to next step after success
+        showToast("Onboarding completed successfully", "success");
+        onNext();
       },
       onError: (error: any) => {
         console.error("Error ❌", error);
+        showToast("Onboarding failed", "error");
       },
     });
   };

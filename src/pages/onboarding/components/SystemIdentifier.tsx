@@ -31,8 +31,8 @@ const SystemIdentifier = ({ onNext }: Props) => {
     });
 
   const onSubmit = (formData: SystemIdentifierFormValues) => {
-    updateData(formData); // save to store
-    onNext(); // go to next step
+    updateData(formData); 
+    onNext(); 
   };
 
   const options = [
