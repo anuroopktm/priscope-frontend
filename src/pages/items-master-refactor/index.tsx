@@ -31,6 +31,7 @@ import { useConfirmComment } from "./actions/commentHandlers";
 import SidePanel from "./components/sidepanel/SidePanel";
 import { getRightClickHandlers } from "./tree-grid/utils/onHandleRightClick";
 import { selectComment } from "./utils/getCommentSelection";
+import AdminRequestConfirmationModal from "./components/admin-request-confirmation-modal";
 
 const gridId = "ItemMasterGrid";
 const gridContainerId = "TreeGrid_" + gridId;
@@ -48,6 +49,10 @@ const ItemMasterListingPage = () => {
   const [openPanel, setOpenPanel] = useState<OpenPanel>(null);
   const [isDetailViewCell, setIsDetailViewCell] = useState(false);
   const [detailedViewId, setDetailedViewId] = useState<string>("");
+  const [
+    openAdminRequestConfirmationModal,
+    setOpenAdminRequestConfirmationModal,
+  ] = useState(false);
   const filter = useItemMasterStore((store) => store.filter);
   const setCheckBoxList = useItemMasterStore((store) => store.setCheckBoxList);
   const showSavePopover = useItemMasterStore((s) => s.showSavePopover);
@@ -55,7 +60,8 @@ const ItemMasterListingPage = () => {
   const closeSavePopover = useItemMasterStore((s) => s.closeSavePopover);
   const gridRef = useItemMasterStore((s) => s.gridRef);
   const privileges: {} = JSON.parse(localStorage.getItem("privileges") || "");
-  const { hasEditItemMasterPrivilege } = hasItemMasterPrivileges(privileges);
+  const { hasEditItemMasterPrivilege, hasAddItemMasterPrivilege } =
+    hasItemMasterPrivileges(privileges);
   const { handleConfirmComment, isCreatingComment } = useConfirmComment();
 
   const { data: itemMasterData, refetch } = useListItems({
@@ -94,6 +100,12 @@ const ItemMasterListingPage = () => {
     if (!cols.length || !listHeaderData) return null;
     return ItemMasterGridLayout(cols, listHeaderData);
   }, [cols, listHeaderData]);
+
+  useEffect(() => {
+    if (showSavePopover && gridRef) {
+      gridRef.Focus(null, null);
+    }
+  }, [showSavePopover]);
 
   const gridData = useMemo(() => {
     if (!itemMasterData) return null;
@@ -141,7 +153,7 @@ const ItemMasterListingPage = () => {
   };
 
   const { handleGridEditConfirm } = useHandleGridEditConfirm();
-  
+
   const onCellEditConfirm = (
     row: TRow,
     col: string,
@@ -156,10 +168,12 @@ const ItemMasterListingPage = () => {
       oldValue,
       comment,
       hasEditItemMasterPrivilege,
-      confirm,
+      // confirm,
       gridRef,
       itemMasterData,
       setRequestNotficationVisible,
+      openAdminRequestConfirmationModal,
+      setOpenAdminRequestConfirmationModal
     });
   };
 
@@ -226,6 +240,7 @@ const ItemMasterListingPage = () => {
         onImportComplete={() => refetch()}
         headers={headers}
         onToggleCommentsPanel={() => toggleCommentsPanel("comments")}
+        hasAddItemMasterPrivilege={hasAddItemMasterPrivilege}
       />
       <Box
         sx={{
@@ -276,6 +291,25 @@ const ItemMasterListingPage = () => {
         onClose={() => setIsDetailViewCell(false)}
         timelineTitle={"Timeline"}
         item_id={detailedViewId}
+      />
+      <AdminRequestConfirmationModal
+        open={openAdminRequestConfirmationModal}
+        onClose={() => setOpenAdminRequestConfirmationModal(false)}
+        title="Admin Approval Required!"
+        description="You don’t have permission to edit data, but you can suggest editing data. Once approved by the admin, you can download it from ‘Files’"
+        actions={[
+          {
+            label: "Cancel",
+            variant: "outlined",
+            onClick: () => setOpenAdminRequestConfirmationModal(false),
+          },
+          {
+            label: "Understood",
+            onClick: () => {
+              setOpenAdminRequestConfirmationModal(false);
+            },
+          },
+        ]}
       />
       {showSavePopover && (
         <div

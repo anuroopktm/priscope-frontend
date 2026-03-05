@@ -1,13 +1,14 @@
 import { useEditItemMasterItem } from "@/services/queries/item-master-refactor/item-master-refactor.queries";
 import { useToastStore } from "@/store/useToastStore";
-import { openConfirmationModal } from "@/utils/getRequestConfirmationModal";
 import { useQueryClient } from "@tanstack/react-query";
-import { handleEditCellAdminRequest } from "./editItemMasterAdmin";
+import { useHandleEditCellAdminRequest } from "./editItemMasterAdmin";
+// import { handleEditCellAdminRequest } from "./editItemMasterAdmin";
 
 export const useHandleGridEditConfirm = () => {
   const queryClient = useQueryClient();
   const { mutate } = useEditItemMasterItem();
   const showToast = useToastStore((state) => state.showToast);
+  const { handleEditCellAdminRequest } = useHandleEditCellAdminRequest();
 
   const handleGridEditConfirm = async ({
     row,
@@ -16,21 +17,24 @@ export const useHandleGridEditConfirm = () => {
     oldValue,
     comment,
     hasEditItemMasterPrivilege,
-    confirm,
+    // confirm,
     gridRef,
     itemMasterData,
     // itemMasterBulkInsertAdminApproval,
     setRequestNotficationVisible,
+    setOpenAdminRequestConfirmationModal,
+    openAdminRequestConfirmationModal,
+
     // handleEditCellAdminRequest,
   }: any) => {
     if (value === oldValue) return;
 
     // No privilege → Admin request flow
-    if (!false) {
-      const result = await openConfirmationModal("edit", confirm);
-      console.log(result)
+    if (!hasEditItemMasterPrivilege) {
+      // const result = await openConfirmationModal("edit", confirm);
+      setOpenAdminRequestConfirmationModal(true);
 
-      if (result && handleEditCellAdminRequest) {
+      if (handleEditCellAdminRequest && openAdminRequestConfirmationModal) {
         handleEditCellAdminRequest({
           row,
           col,

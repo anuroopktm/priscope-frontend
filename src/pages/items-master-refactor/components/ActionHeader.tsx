@@ -33,12 +33,14 @@ import type { HeaderList } from "../types/types";
 import { FILE_FILTER_OPTIONS } from "@/constants/file-modal.constants";
 import FileDetailsModal from "./file-detail-modal";
 import { useNavigate } from "react-router-dom";
+import AdminRequestConfirmationModal from "./admin-request-confirmation-modal";
 
 interface ActionHeaderProps {
   onSearch: (value: string) => void;
   onImportComplete?: () => void;
   headers: HeaderList[] | null;
   onToggleCommentsPanel: () => void;
+  hasAddItemMasterPrivilege: boolean;
 }
 
 const ActionHeader = ({
@@ -46,6 +48,7 @@ const ActionHeader = ({
   onImportComplete,
   headers,
   onToggleCommentsPanel,
+  hasAddItemMasterPrivilege,
 }: ActionHeaderProps) => {
   const navigate = useNavigate();
   const [isUploadModalOpen, setIsUploadModalOpen] = useState<boolean>(false);
@@ -54,6 +57,10 @@ const ActionHeader = ({
   const [openSaveFilterModal, setOpenSaveFilterModal] =
     useState<boolean>(false);
   const [showFilesModal, setShowFilesModal] = useState<boolean>(false);
+  const [
+    openAdminRequestConfirmationModal,
+    setOpenAdminRequestConfirmationModal,
+  ] = useState<boolean>(false);
   const selectedRows = useItemMasterStore((state) => state.selectedRows);
   const filter = useItemMasterStore((state) => state.filter);
   const setSelectedExport = useItemMasterStore(
@@ -88,6 +95,14 @@ const ActionHeader = ({
 
   const handleOpenSaveFilterModal = () => {
     setOpenSaveFilterModal(true);
+  };
+
+  const handleBulkInsert = () => {
+    if (hasAddItemMasterPrivilege) {
+      navigate("bulk-insert");
+    } else {
+      setOpenAdminRequestConfirmationModal(true);
+    }
   };
 
   const handleSaveFilterModal = (label: string) => {
@@ -215,9 +230,7 @@ const ActionHeader = ({
           <Button
             variant="contained"
             startIcon={<AddIcon />}
-            onClick={() => {
-              navigate("bulk-insert");
-            }}
+            onClick={handleBulkInsert}
           >
             Add Item
           </Button>
@@ -275,6 +288,26 @@ const ActionHeader = ({
         showToast={showToast}
         module="item_master"
         filterOptions={FILE_FILTER_OPTIONS}
+      />
+      <AdminRequestConfirmationModal
+        open={openAdminRequestConfirmationModal}
+        onClose={() => setOpenAdminRequestConfirmationModal(false)}
+        title="Admin Approval Required!"
+        description="You don’t have permission to add rates, but you can suggest changes for admin approval. They will take effect once approved."
+        actions={[
+          {
+            label: "Cancel",
+            variant: "outlined",
+            onClick: () => setOpenAdminRequestConfirmationModal(false),
+          },
+          {
+            label: "Understood",
+            onClick: () => {
+              setOpenAdminRequestConfirmationModal(false);
+              navigate("bulk-insert");
+            },
+          },
+        ]}
       />
     </Box>
   );

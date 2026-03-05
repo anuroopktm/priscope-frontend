@@ -31,6 +31,10 @@ export const useHandleEditPopover = ({
     if (!changedCell || comment.trim().length === 0) return;
 
     const { row, col, value, oldValue } = changedCell;
+    if (gridRef) {
+      const gridRow = gridRef.GetRowById(row.id);
+      if (gridRow) gridRef.SetValue(gridRow, col, value, 1);
+    }
     onCellEditConfirm?.(row, col, value, oldValue, comment);
 
     closeSavePopover();
