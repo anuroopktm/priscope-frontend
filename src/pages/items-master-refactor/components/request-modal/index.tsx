@@ -168,7 +168,15 @@ export const ItemMasterRequestsModal: React.FC<Props> = ({
                 "& .MuiToggleButton-root": {
                   color: theme.palette.brand.tertiary,
                   fontWeight: 600,
+                  "&:hover": {
+                    bgcolor: theme.palette.brand.tertiary,
+                    color: "white",
+                  },
                   "&.Mui-selected": {
+                    bgcolor: theme.palette.brand.tertiary,
+                    color: "white",
+                  },
+                  "&:not(.Mui-selected):hover": {
                     bgcolor: theme.palette.brand.tertiary,
                     color: "white",
                   },

@@ -2,7 +2,6 @@ import { useEditItemMasterItem } from "@/services/queries/item-master-refactor/i
 import { useToastStore } from "@/store/useToastStore";
 import { useQueryClient } from "@tanstack/react-query";
 import { useHandleEditCellAdminRequest } from "./editItemMasterAdmin";
-// import { handleEditCellAdminRequest } from "./editItemMasterAdmin";
 
 export const useHandleGridEditConfirm = () => {
   const queryClient = useQueryClient();
@@ -17,21 +16,15 @@ export const useHandleGridEditConfirm = () => {
     oldValue,
     comment,
     hasEditItemMasterPrivilege,
-    // confirm,
     gridRef,
     itemMasterData,
-    // itemMasterBulkInsertAdminApproval,
     setRequestNotficationVisible,
     setOpenAdminRequestConfirmationModal,
     openAdminRequestConfirmationModal,
-
-    // handleEditCellAdminRequest,
   }: any) => {
     if (value === oldValue) return;
 
-    // No privilege → Admin request flow
     if (!hasEditItemMasterPrivilege) {
-      // const result = await openConfirmationModal("edit", confirm);
       setOpenAdminRequestConfirmationModal(true);
 
       if (handleEditCellAdminRequest && openAdminRequestConfirmationModal) {
@@ -42,10 +35,7 @@ export const useHandleGridEditConfirm = () => {
           oldValue,
           comment,
           itemMasterData,
-          // itemMasterBulkInsertAdminApproval,
-          // setShowLoader,
           setRequestNotficationVisible,
-          // showToast,
         });
       } else {
         const Grid = gridRef.current;
@@ -57,7 +47,6 @@ export const useHandleGridEditConfirm = () => {
       return;
     }
 
-    // Normal edit flow
     const item_id = row?.id;
     if (!item_id) return;
 
@@ -88,18 +77,14 @@ export const useHandleGridEditConfirm = () => {
       comments: commentsPayload,
     };
 
-    // setShowLoader(true);
-
     mutate(
       { item_id, payload: finalPayloadWithMetadata },
       {
         onSuccess: () => {
-          // setShowLoader(false);
           showToast?.("Item updated successfully!", "success");
           queryClient.invalidateQueries({ queryKey: ["item-master-history"] });
         },
         onError: () => {
-          // setShowLoader(false);
           showToast?.("Failed to save changes. Please try again.", "warning");
         },
       },

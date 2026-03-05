@@ -151,6 +151,7 @@ export const useCreateItemMasterComment = () => {
 };
 
 export const useEditItemMasterItem = () => {
+  const queryClient = useQueryClient();
   return useMutation<
     EditItemMasterColResponse,
     AxiosError<{ detail: string | string[] }>,
@@ -162,6 +163,9 @@ export const useEditItemMasterItem = () => {
         payload,
       );
       return response.data;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["listComments"] });
     },
   });
 };
