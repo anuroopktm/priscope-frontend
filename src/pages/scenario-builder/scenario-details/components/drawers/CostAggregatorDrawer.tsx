@@ -251,6 +251,16 @@ const CostAggregatorDrawer = ({
     setAnchorEl(null);
   };
 
+  // Bridge for global handlers to access latest state
+  const handlersBridgeRef = useRef({
+    calculateTotal,
+    sections,
+  });
+
+  useEffect(() => {
+    handlersBridgeRef.current = { calculateTotal, sections };
+  }, [calculateTotal, sections]);
+
   // Global handlers
   useEffect(() => {
     (window as any).handleDeleteAggregatorRow = (
@@ -268,11 +278,12 @@ const CostAggregatorDrawer = ({
       setTargetGridId(gridId);
       setTargetRowId(rowId);
 
-      const section = sectionsRef.current.find((s: any) => s.id === gridId);
+      const section = handlersBridgeRef.current.sections.find(
+        (s: any) => s.id === gridId,
+      );
       if (section?.type === "Tariff") {
         if (col === "B") {
           // Logic for Scenario Builder Column selection
-          // This will be handled in the next step
           (window as any).startScenarioColumnSelection &&
             (window as any).startScenarioColumnSelection(rowId, gridId);
           return;
@@ -283,20 +294,39 @@ const CostAggregatorDrawer = ({
       }
     };
 
+    const recalculateTariffRow = (grid: any, row: any) => {
+      const rate = parseFloat(grid.GetAttribute(row, "A", "RateValue")) || 0;
+      const sourceValue =
+        parseFloat(grid.GetAttribute(row, "B", "SourceValue")) || 0;
+      const costPerUnit = (rate / 100) * sourceValue;
+      grid.SetValue(row, "D", costPerUnit, 1);
+    };
+
     (window as any).finishScenarioColumnSelection = (
-      colCaption: string,
+      _colCaption: string,
       colName: string,
       rowId: string,
       gridId: string,
+      value: any,
     ) => {
       const grid = (window as any).Grids?.[gridId];
       if (grid) {
         const row = grid.GetRowById(rowId);
         if (row) {
-          grid.SetValue(row, "B", colCaption, 1);
-          // Optionally store colName as an attribute if needed for calculation logic
+          const formattedValue =
+            typeof value === "number" ? `$${value.toFixed(2)}` : String(value);
+          grid.SetValue(
+            row,
+            "B",
+            renderSelectButton(rowId, gridId, "B", formattedValue),
+            1,
+          );
           grid.SetAttribute(row, "B", "SourceColumn", colName, 1);
+          grid.SetAttribute(row, "B", "SourceValue", value, 1);
+
+          recalculateTariffRow(grid, row);
           grid.RefreshRow(row);
+          handlersBridgeRef.current.calculateTotal();
         }
       }
     };
@@ -310,6 +340,7 @@ const CostAggregatorDrawer = ({
     return () => {
       delete (window as any).handleDeleteAggregatorRow;
       delete (window as any).handleOpenFreightSelection;
+      delete (window as any).finishScenarioColumnSelection;
       delete (window as any).handleOpenCalculation;
     };
   }, []);
@@ -473,7 +504,13 @@ const CostAggregatorDrawer = ({
               1,
             );
             grid.SetAttribute(row, "A", "CleanName", rate.name, 1);
-            grid.SetValue(row, "D", rate.cost, 1);
+            grid.SetAttribute(row, "A", "RateValue", rate.cost, 1);
+
+            const sourceValue =
+              parseFloat(grid.GetAttribute(row, "B", "SourceValue")) || 0;
+            const costPerUnit = (rate.cost / 100) * sourceValue;
+            grid.SetValue(row, "D", costPerUnit, 1);
+
             grid.SetValue(row, "C", "Base UOM", 1);
             grid.RefreshRow(row);
           }
@@ -600,7 +637,15 @@ const CostAggregatorDrawer = ({
         >
           {title}
         </Typography>
-        <IconButton onClick={onClose} size="small" sx={{ color: "#64748b" }}>
+        <IconButton
+          onClick={() => {
+            (window as any).clearScenarioColumnHighlights &&
+              (window as any).clearScenarioColumnHighlights();
+            onClose();
+          }}
+          size="small"
+          sx={{ color: "#64748b" }}
+        >
           <CloseIcon fontSize="small" />
         </IconButton>
       </Box>
@@ -739,6 +784,13 @@ const CostAggregatorDrawer = ({
                   size="small"
                   sx={{ color: "grey.500" }}
                   onClick={() => {
+                    const sectionToRemove = sections.find(
+                      (s) => s.id === section.id,
+                    );
+                    if (sectionToRemove?.type === "Tariff") {
+                      (window as any).clearScenarioColumnHighlights &&
+                        (window as any).clearScenarioColumnHighlights();
+                    }
                     setSections(sections.filter((s) => s.id !== section.id));
                   }}
                 >
@@ -796,7 +848,15 @@ const CostAggregatorDrawer = ({
           borderColor: "grey.100",
         }}
       >
-        <Button size="small" variant="outlined" onClick={onClose}>
+        <Button
+          size="small"
+          variant="outlined"
+          onClick={() => {
+            (window as any).clearScenarioColumnHighlights &&
+              (window as any).clearScenarioColumnHighlights();
+            onClose();
+          }}
+        >
           Cancel
         </Button>
         <Button size="small" variant="contained" onClick={handleDone}>

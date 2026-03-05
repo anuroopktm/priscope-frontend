@@ -121,6 +121,19 @@ const ScenarioDetailsPage = () => {
 
   // Handle Scenario Column Selection for Tariff
   useEffect(() => {
+    const clearHighlights = (grid: any) => {
+      if (!grid) return;
+      Object.keys(grid.Cols).forEach((c) => {
+        grid.SetAttribute(null, c, "Background", "", 1);
+        grid.SetAttribute(null, c, "Cursor", "", 1);
+      });
+      grid.Render();
+
+      if (window.TGDelEvent) {
+        window.TGDelEvent("OnClick", grid.id);
+      }
+    };
+
     (window as any).startScenarioColumnSelection = (
       aggRowId: string,
       aggGridId: string,
@@ -128,16 +141,13 @@ const ScenarioDetailsPage = () => {
       const mainGridInstance = (window as any).Grids?.[gridId];
       if (!mainGridInstance || !activeCell) return;
 
-      const targetCol = activeCell.col;
-
       // Highlight logic
       Object.keys(mainGridInstance.Cols).forEach((col) => {
         const header = mainGridInstance.GetValue(mainGridInstance.Header, col);
         if (
           typeof header === "string" &&
           (header.toLowerCase().includes("price") ||
-            header.toLowerCase().includes("cost")) &&
-          col !== targetCol
+            header.toLowerCase().includes("cost"))
         ) {
           mainGridInstance.SetAttribute(null, col, "Background", "#FFF9C4", 1); // Light yellow highlight
           mainGridInstance.SetAttribute(null, col, "Cursor", "pointer", 1);
@@ -146,51 +156,75 @@ const ScenarioDetailsPage = () => {
       mainGridInstance.Render();
 
       // Temporarily register OnClick to catch the selection
-      const handleClick = (grid: any, _row: any, col: string) => {
-        if (col && col !== targetCol) {
+      const handleClick = (grid: any, row: any, col: string) => {
+        console.log("ScenarioColumnSelection clicked:", {
+          rowId: row?.id,
+          col,
+          rowKind: row?.Kind,
+        });
+        if (row && row.Kind === "Data" && col) {
           const header = grid.GetValue(grid.Header, col);
+          console.log("Column header:", header);
           if (
             typeof header === "string" &&
             (header.toLowerCase().includes("price") ||
               header.toLowerCase().includes("cost"))
           ) {
             // Selected this column!
-            // Notify the aggregator drawer
-            (window as any).finishScenarioColumnSelection &&
-              (window as any).finishScenarioColumnSelection(
-                header,
-                col,
-                aggRowId,
-                aggGridId,
-              );
+            // Retrieve value safely
+            let value = grid.GetValue(row, col);
+            console.log("Raw cell value:", value);
 
-            // Cleanup highlights
-            Object.keys(grid.Cols).forEach((c) => {
-              grid.SetAttribute(null, c, "Background", "", 1);
-              grid.SetAttribute(null, c, "Cursor", "", 1);
-            });
-            grid.Render();
-            (window as any).TGDelEvent(
-              "OnClick",
-              grid.id,
-              "ScenarioColumnSelection",
-            );
-            return true;
+            // If it's a string, try to strip currency symbols for calculation
+            if (typeof value === "string") {
+              const cleanVal = value.replace(/[^0-9.]/g, "");
+              if (cleanVal && !isNaN(parseFloat(cleanVal))) {
+                value = parseFloat(cleanVal);
+              }
+            }
+
+            console.log("Cleaned cell value:", value);
+
+            if (value != null) {
+              console.log("Triggering finishScenarioColumnSelection");
+              if ((window as any).finishScenarioColumnSelection) {
+                (window as any).finishScenarioColumnSelection(
+                  header,
+                  col,
+                  aggRowId,
+                  aggGridId,
+                  value,
+                );
+
+                clearHighlights(grid);
+                return true;
+              } else {
+                console.error("finishScenarioColumnSelection not found!");
+              }
+            }
           }
         }
         return false;
       };
 
-      (window as any).TGAddEvent(
-        "OnClick",
-        mainGridInstance.id,
-        "ScenarioColumnSelection",
-        handleClick,
-      );
+      // Use TGSetEvent to safely overwrite the OnClick handler
+      console.log("Registering OnClick for grid:", mainGridInstance.id);
+      if (window.TGSetEvent) {
+        window.TGSetEvent("OnClick", mainGridInstance.id, handleClick);
+      }
+    };
+
+    // Expose clearHighlights globally so it can be called from the drawer
+    (window as any).clearScenarioColumnHighlights = () => {
+      const mainGridInstance = (window as any).Grids?.[gridId];
+      if (mainGridInstance) {
+        clearHighlights(mainGridInstance);
+      }
     };
 
     return () => {
       delete (window as any).startScenarioColumnSelection;
+      delete (window as any).clearScenarioColumnHighlights;
     };
   }, [activeCell]);
 
