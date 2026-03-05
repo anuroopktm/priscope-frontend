@@ -30,6 +30,7 @@ interface CostAggregatorDrawerProps {
   onUpdate: (items: any[]) => void;
   title?: string;
   initialItems?: any[];
+  mainRowId?: string;
 }
 
 interface AggregatorSection {
@@ -181,6 +182,7 @@ const CostAggregatorDrawer = ({
   onUpdate,
   title = "Cost aggregator",
   initialItems = [],
+  mainRowId,
 }: CostAggregatorDrawerProps) => {
   const [deleteModalOpen, setDeleteModalOpen] = useState(false);
   const [rowToDelete, setRowToDelete] = useState<{
@@ -983,24 +985,61 @@ const CostAggregatorDrawer = ({
       <CustomCalculationModal
         open={isCalculationModalOpen}
         onClose={() => setIsCalculationModalOpen(false)}
+        gridId="ScenarioGridDetails"
+        targetRowId={mainRowId}
         initialValue={(() => {
           if (targetGridId && targetRowId) {
             const grid = (window as any).Grids?.[targetGridId];
             const row = grid?.GetRowById(targetRowId);
-            return row ? String(grid.GetValue(row, "A") || "") : "";
+            // Prefer the stored formula attribute
+            return row
+              ? String(grid.GetAttribute(row, "A", "Formula") || "")
+              : "";
           }
           return "";
         })()}
-        onConfirm={(formula: string) => {
-          if (targetGridId && targetRowId) {
+        onConfirm={(formula: string, label?: string) => {
+          if (targetGridId && targetRowId && mainRowId) {
             const grid = (window as any).Grids?.[targetGridId];
-            if (grid) {
+            const mainGrid = (window as any).Grids?.["ScenarioGridDetails"];
+            if (grid && mainGrid) {
               const row = grid.GetRowById(targetRowId);
-              if (row) {
-                // For now, we put the formula in the input box.
-                // In a real scenario, you might evaluate it or store it as an attribute.
-                grid.SetValue(row, "A", formula, 1);
-                calculateTotal();
+              const mainRow = mainGrid.GetRowById(mainRowId);
+              if (row && mainRow) {
+                // Update header if label is provided
+                if (label) {
+                  if (grid.Header) {
+                    grid.SetValue(grid.Header, "A", label, 1);
+                  } else {
+                    grid.SetAttribute(null, "A", "Caption", label, 1);
+                  }
+                  grid.Render();
+                }
+
+                // Evaluate formula
+                let evalStr = formula;
+                const matches = evalStr.match(/\[(.*?)\]/g);
+                if (matches) {
+                  matches.forEach((match) => {
+                    const colName = match.slice(1, -1);
+                    const val = mainGrid.GetValue(mainRow, colName) || 0;
+                    evalStr = evalStr.replace(match, String(val));
+                  });
+                }
+
+                try {
+                  // Basic evaluation for simple arithmetic
+                  // eslint-disable-next-line no-eval
+                  const result = Number(eval(evalStr)) || 0;
+                  // Store the result in the cell
+                  grid.SetValue(row, "A", result, 1);
+                  // Preserve the formula in an attribute for re-editing
+                  grid.SetAttribute(row, "A", "Formula", formula, 1);
+                  calculateTotal();
+                } catch (e) {
+                  console.error("Formula eval failed:", e);
+                  grid.SetValue(row, "A", 0, 1);
+                }
               }
             }
           }

@@ -40,7 +40,7 @@ export const ScenarioDetailsLayout = {
     { Name: "A", RelWidth: "1", Type: "Text", CanSort: "0" },
     { Name: "B", RelWidth: "1", Type: "Text", CanSort: "0" },
     { Name: "C", RelWidth: "1", Type: "Text", CanSort: "0" },
-    { Name: "D", RelWidth: "1", Type: "Text", CanSort: "0" },
+    { Name: "D", RelWidth: "1", Type: "Float", Format: "$0.00", CanSort: "0" },
   ],
   Def: {
     Group: {

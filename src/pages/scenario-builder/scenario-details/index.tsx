@@ -541,6 +541,7 @@ const ScenarioDetailsPage = () => {
             {activeCell.type === "Cost" ? (
               <CostAggregatorDrawer
                 initialItems={activeCell.items}
+                mainRowId={activeCell.rowId}
                 onClose={() => {
                   setIsAggregatorDrawerOpen(false);
                   setActiveCell(null);

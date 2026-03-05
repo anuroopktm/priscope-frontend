@@ -28,9 +28,10 @@ interface Token {
 interface CustomCalculationModalProps {
   open: boolean;
   onClose: () => void;
-  onConfirm: (formula: string) => void;
+  onConfirm: (formula: string, label?: string) => void;
   initialValue?: string;
   gridId?: string; // ScenarioGridDetails
+  targetRowId?: string | null;
 }
 
 const CustomCalculationModal = ({
@@ -39,6 +40,7 @@ const CustomCalculationModal = ({
   onConfirm,
   initialValue = "",
   gridId = "ScenarioGridDetails",
+  targetRowId = null,
 }: CustomCalculationModalProps) => {
   const [tokens, setTokens] = useState<Token[]>([]);
   const [selectedColumn, setSelectedColumn] = useState("");
@@ -46,34 +48,38 @@ const CustomCalculationModal = ({
 
   // Sync tokens when modal opens (simple parsing)
   useEffect(() => {
-    if (open && initialValue) {
-      // Split by spaces and attempt to reconstruct tokens
-      const initialTokens: Token[] = initialValue
-        .split(" ")
-        .filter((v) => v.trim() !== "")
-        .map((v, i) => {
-          let type: Token["type"] = "operator";
-          let label = v;
+    if (open) {
+      if (initialValue) {
+        // Split by spaces and attempt to reconstruct tokens
+        const initialTokens: Token[] = initialValue
+          .split(" ")
+          .filter((v) => v.trim() !== "")
+          .map((v, i) => {
+            let type: Token["type"] = "operator";
+            let label = v;
 
-          if (v.startsWith("[") && v.endsWith("]")) {
-            type = "column";
-            label = v.slice(1, -1);
-          } else if (!isNaN(Number(v))) {
-            type = "numeric";
-          }
+            if (v.startsWith("[") && v.endsWith("]")) {
+              type = "column";
+              const colName = v.slice(1, -1);
+              const grid = (window as any).Grids?.[gridId];
+              label = grid?.Header?.[colName] || colName;
+            } else if (!isNaN(Number(v))) {
+              type = "numeric";
+            }
 
-          return {
-            id: `init-${i}-${Date.now()}`,
-            type,
-            value: v,
-            label,
-          };
-        });
-      setTokens(initialTokens);
-    } else if (open) {
-      setTokens([]);
+            return {
+              id: `init-${i}-${Date.now()}`,
+              type,
+              value: v,
+              label,
+            };
+          });
+        setTokens(initialTokens);
+      } else {
+        setTokens([]);
+      }
     }
-  }, [open, initialValue]);
+  }, [open]); // Only run when open state changes
 
   const columns = useMemo(() => {
     const grid = (window as any).Grids?.[gridId];
@@ -87,12 +93,15 @@ const CustomCalculationModal = ({
         type: grid.GetAttribute(null, name, "Type"),
       }))
       .filter((col: any) => {
+        const type = String(col.type || "").toLowerCase();
+        const isNumeric = type === "float" || type === "int";
         return (
           col.caption &&
           typeof col.caption === "string" &&
           col.caption.trim() !== "" &&
           col.type !== "Panel" &&
-          col.name !== "Panel"
+          col.name !== "Panel" &&
+          isNumeric
         );
       });
   }, [open, gridId]);
@@ -123,8 +132,9 @@ const CustomCalculationModal = ({
   };
 
   const handleConfirm = () => {
-    const expression = tokens.map((t) => t.value).join(" ");
-    onConfirm(expression);
+    const formula = tokens.map((t) => t.value).join(" ");
+    const columnToken = tokens.find((t) => t.type === "column");
+    onConfirm(formula.trim(), columnToken?.label);
     setTokens([]);
     onClose();
   };
@@ -207,11 +217,22 @@ const CustomCalculationModal = ({
               <Select
                 value={selectedColumn}
                 onChange={(e: any) => {
-                  const val = e.target.value as string;
-                  if (val) {
-                    const col = columns.find((c: any) => c.name === val);
-                    const label = col?.caption || val;
-                    addToExpression("column", `[${label}]`, label);
+                  const colName = e.target.value as string;
+                  if (colName) {
+                    const colObj = columns.find((c: any) => c.name === colName);
+                    const label = colObj?.caption || colName;
+                    const grid = (window as any).Grids?.[gridId];
+
+                    if (grid && targetRowId) {
+                      const row = grid.GetRowById(targetRowId);
+                      if (row) {
+                        addToExpression("column", `[${colName}]`, label);
+                      } else {
+                        addToExpression("column", `[${colName}]`, label);
+                      }
+                    } else {
+                      addToExpression("column", `[${colName}]`, label);
+                    }
                     setSelectedColumn("");
                   }
                 }}
