@@ -206,36 +206,7 @@ const CostAggregatorDrawer = ({
   const [targetRowId, setTargetRowId] = useState<string | null>(null);
   const [totalCost, setTotalCost] = useState(0);
 
-  const [sections, setSections] = useState<AggregatorSection[]>(() => {
-    const initialSectionId = "initial";
-    if (initialItems.length > 0) {
-      const mappedItems = initialItems.map((item) => ({
-        ...item,
-        A: renderSelectedValue(item.cost, item.id, initialSectionId),
-        B: item.B || "Base UOM",
-        C: item.cost,
-      }));
-
-      // Add trailing select row
-      mappedItems.push({
-        id: `empty_${Date.now()}`,
-        A: renderSelectButton(`empty_${Date.now()}`, initialSectionId, "A"),
-        B: "Base UOM",
-        C: 0,
-      });
-
-      return [
-        {
-          id: initialSectionId,
-          type: "Freight",
-          title: "Freight",
-          items: mappedItems,
-        },
-      ];
-    } else {
-      return [];
-    }
-  });
+  const [sections, setSections] = useState<AggregatorSection[]>([]);
 
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
 
@@ -626,10 +597,19 @@ const CostAggregatorDrawer = ({
             const isTariff = section.type === "Tariff";
             const isFreight = section.type === "Freight";
             const isCustom = section.type === "Custom";
-            const costCol = isTariff ? "D" : isCustom ? "A" : "C";
-            const costValueRaw = grid.GetValue(row, costCol);
-            const costValue =
-              typeof costValueRaw === "object" ? 0 : Number(costValueRaw) || 0;
+
+            let costValue = 0;
+            if (isCustom) {
+              const resAttr = grid.GetAttribute(row, "A", "Result");
+              costValue = Number(resAttr) || 0;
+            } else {
+              const costCol = isTariff ? "D" : "C";
+              const costValueRaw = grid.GetValue(row, costCol);
+              costValue =
+                typeof costValueRaw === "object"
+                  ? 0
+                  : Number(costValueRaw) || 0;
+            }
 
             const colAValue = String(grid.GetValue(row, "A") || "");
             const isSelectRow =
@@ -666,6 +646,7 @@ const CostAggregatorDrawer = ({
             allRows.push({
               id: String(row.id),
               name: finalName,
+              type: section.type, // Added to distinguish Custom vs others
               currency: "USD",
               cost: costValue,
               costPerUnit: costValue,

@@ -399,6 +399,9 @@ const ScenarioDetailsPage = () => {
         (Array.isArray(items) ? items : []).forEach((item, index) => {
           if (!item || !item.name) return;
 
+          // If type is Custom, skip column creation in top panel
+          if (item.type === "Custom") return;
+
           const itemName = String(item.name || "");
           const cleanName = itemName.trim();
           const safeName = cleanName.replace(/[^a-zA-Z0-9]/g, "").toLowerCase();
