@@ -341,17 +341,15 @@ const ScenarioDetailsPage = () => {
       const colName = activeColumn;
 
       // Set the header caption
-      const fullLabel = `${data.label} (Component iterator)`;
-      // Most TreeGrid versions have 'Header' as the main header row object
       const headerRow = grid.Header || grid.GetRowById("Header");
       if (headerRow) {
-        grid.SetValue(headerRow, colName, fullLabel, 1);
+        grid.SetValue(headerRow, colName, data.label, 1);
       } else {
         // Fallback: search for row with Kind="Header"
         let row = grid.GetFirst();
         while (row) {
           if (row.Kind === "Header") {
-            grid.SetValue(row, colName, fullLabel, 1);
+            grid.SetValue(row, colName, data.label, 1);
             break;
           }
           row = grid.GetNext(row);
@@ -391,15 +389,14 @@ const ScenarioDetailsPage = () => {
     const grid = (window as any).Grids?.[gridId];
     if (grid && activeColumn) {
       const colName = activeColumn;
-      const fullLabel = `${data.label} (Cost iterator)`;
       const headerRow = grid.Header || grid.GetRowById("Header");
       if (headerRow) {
-        grid.SetValue(headerRow, colName, fullLabel, 1);
+        grid.SetValue(headerRow, colName, data.label, 1);
       } else {
         let row = grid.GetFirst();
         while (row) {
           if (row.Kind === "Header") {
-            grid.SetValue(row, colName, fullLabel, 1);
+            grid.SetValue(row, colName, data.label, 1);
             break;
           }
           row = grid.GetNext(row);
@@ -571,7 +568,8 @@ const ScenarioDetailsPage = () => {
         {/* Top Grid Section */}
         <Box
           sx={{
-            flex: isAggregatorDrawerOpen ? 0.5 : 1,
+            flex: 1,
+            // flex: isAggregatorDrawerOpen ? 0.5 : 1,
             minHeight: 0,
             width: "100%",
             p: 2,
@@ -602,7 +600,7 @@ const ScenarioDetailsPage = () => {
         {isAggregatorDrawerOpen && activeCell && (
           <Box
             sx={{
-              flex: 0.5,
+              // flex: 1,
               minHeight: 0,
               width: "100%",
               px: 2,

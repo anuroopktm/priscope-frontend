@@ -27,7 +27,9 @@ export const MarginMarkupDrawerLayout = {
     {
       Name: "A",
       Width: "150",
-      Type: "Html",
+      Type: "Text",
+      CanEdit: "1",
+      EmptyValue: "Enter %",
       Caption: "Margin %",
     },
     {

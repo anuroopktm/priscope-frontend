@@ -181,7 +181,11 @@ const AggregatorGrid = ({
   return (
     <Box
       id={containerId}
-      sx={{ height: "auto", width: "650px", minHeight: "68px" }}
+      sx={{
+        height: "140px",
+        width: "100%",
+        "& .TGMain": { border: "none" },
+      }}
     />
   );
 };
@@ -858,11 +862,9 @@ const CostAggregatorDrawer = ({
               </Stack>
               <Box
                 sx={{
-                  border: "1px solid #e2e8f0",
                   borderRadius: 1,
                   overflow: "hidden",
                   width: "fit-content",
-                  bgcolor: "white",
                 }}
               >
                 <GridWrapper

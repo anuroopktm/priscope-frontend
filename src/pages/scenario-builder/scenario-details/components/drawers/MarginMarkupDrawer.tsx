@@ -1,15 +1,5 @@
-import BookmarkAddIcon from "@mui/icons-material/BookmarkAdd";
 import CloseIcon from "@mui/icons-material/Close";
-import KeyboardArrowDownIcon from "@mui/icons-material/KeyboardArrowDown";
-import {
-  Box,
-  Button,
-  IconButton,
-  Menu,
-  MenuItem,
-  Stack,
-  Typography,
-} from "@mui/material";
+import { Box, Button, IconButton, Stack, Typography } from "@mui/material";
 import { useEffect, useMemo, useState } from "react";
 import { MarginMarkupDrawerLayout } from "../../tree-grid/config/margin-markup-drawer-layout";
 import { useTreeGridInit } from "../../tree-grid/hooks/useTreeGridInit";
@@ -65,21 +55,6 @@ const renderSelectButton = (
   `;
 };
 
-const renderInputCell = (value: any, rowId: string, col: string) => {
-  const val = value || "";
-  return `
-      <div style="padding: 0 8px; height: 100%; display: flex; align-items: center;">
-        <input 
-          type="text" 
-          value="${val}" 
-          placeholder="Enter %"
-          oninput="window.handleMarginMarkupInput && window.handleMarginMarkupInput('${rowId}', '${col}', this.value)"
-          style="width: 100%; border: none; outline: none; background: transparent; font-size: 13px; color: #1e3a8a;"
-        />
-      </div>
-    `;
-};
-
 const MarginMarkupDrawer = ({
   onClose,
   onUpdate,
@@ -88,14 +63,20 @@ const MarginMarkupDrawer = ({
   mainRowId,
   gridId = "MarginMarkupDrawerGrid",
 }: MarginMarkupDrawerProps) => {
-  const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
   const [data, setData] = useState<any[]>(
     initialItems.length > 0
       ? initialItems
-      : [{ id: "1", percent: "", column: "Select", value: 0 }],
+      : [{ id: "1", percent: "", column: "Select", columnValue: 0, value: 0 }],
   );
 
   const title = type === "Margin" ? "Margin Component" : "Markup Component";
+
+  const calculateTotal = (percentStr: string, baseValue: number) => {
+    const percent = parseFloat(percentStr) || 0;
+    // Both Margin and Markup now use the same simple percentage formula as requested:
+    // (percent / 100) * baseValue
+    return (baseValue * percent) / 100;
+  };
 
   const updatedLayout = useMemo(() => {
     const layout = JSON.parse(JSON.stringify(MarginMarkupDrawerLayout));
@@ -109,8 +90,15 @@ const MarginMarkupDrawer = ({
       Body: [
         data.map((item) => ({
           id: item.id,
-          A: renderInputCell(item.percent, item.id, "A"),
-          B: renderSelectButton(item.id, gridId, "B", item.column),
+          A: item.percent,
+          B: renderSelectButton(
+            item.id,
+            gridId,
+            "B",
+            typeof item.columnValue === "number" && item.column !== "Select"
+              ? `$${item.columnValue.toFixed(2)}`
+              : item.column,
+          ),
           C: item.value || 0,
         })),
       ],
@@ -128,17 +116,28 @@ const MarginMarkupDrawer = ({
       }
     };
 
-    (window as any).handleMarginMarkupInput = (
-      rowId: string,
-      _col: string,
-      value: string,
+    const onAfterValueChanged = (
+      grid: any,
+      row: any,
+      col: string,
+      val: any,
     ) => {
-      setData((prev) =>
-        prev.map((item) =>
-          item.id === rowId ? { ...item, percent: value } : item,
-        ),
-      );
+      if (grid.id === gridId && col === "A") {
+        const percent = String(val || "");
+        setData((prev) => {
+          const item = prev.find((i) => i.id === row.id);
+          if (item) {
+            const total = calculateTotal(percent, item.columnValue || 0);
+            grid.SetValue(row, "C", total, 1);
+          }
+          return prev;
+        });
+      }
     };
+
+    if (window.TGSetEvent) {
+      window.TGSetEvent("OnAfterValueChanged", gridId, onAfterValueChanged);
+    }
 
     (window as any).finishScenarioColumnSelection = (
       name: string,
@@ -148,47 +147,55 @@ const MarginMarkupDrawer = ({
       value: number,
     ) => {
       setData((prev) =>
-        prev.map((item) =>
-          item.id === rowId
-            ? { ...item, column: name, columnId: colId, columnValue: value }
-            : item,
-        ),
+        prev.map((item) => {
+          if (item.id === rowId) {
+            const grid = (window as any).Grids?.[gridId];
+            const row = grid?.GetRowById(rowId);
+            const currentPercent = row ? String(row.A || "") : item.percent;
+
+            const val = calculateTotal(currentPercent, value);
+            return {
+              ...item,
+              column: name,
+              columnId: colId,
+              columnValue: value,
+              percent: currentPercent,
+              value: val,
+            };
+          }
+          return item;
+        }),
       );
     };
 
     return () => {
       delete (window as any).handleOpenColumnSelection;
-      delete (window as any).handleMarginMarkupInput;
       delete (window as any).finishScenarioColumnSelection;
+      if (window.TGDelEvent) {
+        window.TGDelEvent("OnAfterValueChanged", gridId);
+      }
       if ((window as any).clearScenarioColumnHighlights) {
         (window as any).clearScenarioColumnHighlights();
       }
     };
   }, [gridId]);
 
-  const calculateTotal = (percentStr: string, baseValue: number) => {
-    const percent = parseFloat(percentStr) || 0;
-    if (type === "Margin") {
-      // Calculation for margin: (baseValue / (1 - margin%)) - baseValue
-      // Or simply: baseValue / (1 - percent/100) * (percent/100)
-      return baseValue / (1 - percent / 100) - baseValue;
-    } else {
-      // Markup = baseValue * markup%
-      return (baseValue * percent) / 100;
-    }
-  };
-
   const handleDone = () => {
+    const grid = (window as any).Grids?.[gridId];
+
     const finalItems = data.map((item) => {
-      const val = calculateTotal(item.percent, item.columnValue || 0);
+      const row = grid?.GetRowById(item.id);
+      const finalPercent = row ? String(row.A || "") : item.percent;
+      const finalCost = row ? Number(row.C || 0) : item.value;
+
       return {
         id: item.id,
-        name: `${type} (${item.percent}%)`,
-        percent: item.percent,
+        name: `${type} (${finalPercent}%)`,
+        percent: finalPercent,
         column: item.column,
         columnId: item.columnId,
-        cost: val,
-        costPerUnit: val,
+        cost: finalCost,
+        costPerUnit: finalCost,
         type,
       };
     });
@@ -206,100 +213,89 @@ const MarginMarkupDrawer = ({
   return (
     <Box
       sx={{
-        height: "100%",
+        height: "fit-content",
         display: "flex",
         flexDirection: "column",
-        bgcolor: "#f8fafc",
-        borderTop: "1px solid #e2e8f0",
-        borderRadius: "12px 12px 0 0",
-        overflow: "hidden",
+        bgcolor: "background.paper",
+        borderTopLeftRadius: 8,
+        borderTopRightRadius: 8,
+        overflowY: "auto",
+        borderTop: 1,
+        borderColor: "divider",
       }}
     >
       <Box
         sx={{
-          p: 2,
           display: "flex",
-          justifyContent: "space-between",
           alignItems: "center",
-          borderBottom: "1px solid #e2e8f0",
-          bgcolor: "#fff",
+          justifyContent: "space-between",
+          px: 2,
+          py: 1,
+          flexShrink: 0,
         }}
       >
-        <Typography variant="h6" sx={{ fontWeight: "bold", color: "#1a365d" }}>
+        <Typography
+          variant="subtitle1"
+          sx={{ fontWeight: "bold", color: "#1a365d" }}
+        >
           {title}
         </Typography>
-        <IconButton onClick={onClose} size="small">
-          <CloseIcon />
+        <IconButton
+          onClick={() => {
+            if ((window as any).clearScenarioColumnHighlights) {
+              (window as any).clearScenarioColumnHighlights();
+            }
+            onClose();
+          }}
+          size="small"
+          sx={{ color: "#64748b" }}
+        >
+          <CloseIcon fontSize="small" />
         </IconButton>
       </Box>
 
-      <Box sx={{ p: 3, flex: 1, overflow: "auto" }}>
+      <Box
+        sx={{
+          px: 2,
+          py: 1.5,
+          borderTop: 1,
+          borderColor: "grey.200",
+          display: "flex",
+          flexDirection: "column",
+          gap: 2,
+          flexShrink: 0,
+        }}
+      >
+        <Box sx={{ display: "flex", alignItems: "center", gap: 2 }}>
+          <Typography
+            variant="subtitle2"
+            sx={{ fontWeight: "bold", color: "#1a365d" }}
+          >
+            Calculate - Cost aggregator
+          </Typography>
+        </Box>
+      </Box>
+
+      <Box
+        sx={{
+          px: 3,
+          pb: 1,
+          display: "flex",
+          flexDirection: "column",
+          gap: 3,
+        }}
+      >
         <Box
           sx={{
-            bgcolor: "#fff",
-            borderRadius: "8px",
-            border: "1px solid #e2e8f0",
-            p: 2,
-            mb: 3,
+            borderRadius: 1,
+            overflow: "hidden",
+            width: "fit-content",
           }}
         >
           <Box
-            sx={{
-              display: "flex",
-              justifyContent: "space-between",
-              alignItems: "center",
-              mb: 2,
-            }}
-          >
-            <Typography
-              variant="subtitle2"
-              sx={{ fontWeight: "bold", color: "#1e40af" }}
-            >
-              Calculate - Cost aggregator
-            </Typography>
-            <Stack direction="row" spacing={2}>
-              <Button
-                size="small"
-                endIcon={<KeyboardArrowDownIcon />}
-                onClick={(e) => setAnchorEl(e.currentTarget)}
-                sx={{
-                  textTransform: "none",
-                  color: "#64748b",
-                  fontWeight: 600,
-                }}
-              >
-                Saved Template
-              </Button>
-              <Menu
-                anchorEl={anchorEl}
-                open={Boolean(anchorEl)}
-                onClose={() => setAnchorEl(null)}
-              >
-                <MenuItem onClick={() => setAnchorEl(null)}>
-                  Default Template
-                </MenuItem>
-              </Menu>
-              <Button
-                variant="contained"
-                startIcon={<BookmarkAddIcon />}
-                size="small"
-                sx={{
-                  bgcolor: "#114a70",
-                  textTransform: "none",
-                  borderRadius: "6px",
-                  px: 2,
-                  "&:hover": { bgcolor: "#0d3a58" },
-                }}
-              >
-                Save Template
-              </Button>
-            </Stack>
-          </Box>
-
-          <Box
             id="MarginMarkupDrawerContainer"
             sx={{
-              height: "140px",
+              height: "70px",
               width: "100%",
               "& .TGMain": { border: "none" },
             }}
@@ -308,31 +304,18 @@ const MarginMarkupDrawer = ({
 
         <Stack direction="row" spacing={2} sx={{ mt: 2 }}>
           <Button
+            size="small"
             variant="outlined"
-            onClick={onClose}
-            sx={{
-              borderRadius: "8px",
-              color: "#114a70",
-              borderColor: "#114a70",
-              textTransform: "none",
-              fontWeight: "bold",
-              px: 3,
+            onClick={() => {
+              if ((window as any).clearScenarioColumnHighlights) {
+                (window as any).clearScenarioColumnHighlights();
+              }
+              onClose();
             }}
           >
             Cancel
           </Button>
-          <Button
-            variant="contained"
-            onClick={handleDone}
-            sx={{
-              borderRadius: "8px",
-              bgcolor: "#114a70",
-              "&:hover": { bgcolor: "#0d3a58" },
-              textTransform: "none",
-              fontWeight: "bold",
-              px: 4,
-            }}
-          >
+          <Button size="small" variant="contained" onClick={handleDone}>
             Done
           </Button>
         </Stack>
