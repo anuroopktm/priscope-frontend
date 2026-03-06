@@ -7,9 +7,14 @@ import { useNavigate } from "react-router-dom";
 interface ActionHeaderProps {
   title?: string;
   onAddItems?: () => void;
+  onSaveAsDraft?: () => void;
 }
 
-const ActionHeader = ({ title, onAddItems }: ActionHeaderProps) => {
+const ActionHeader = ({
+  title,
+  onAddItems,
+  onSaveAsDraft,
+}: ActionHeaderProps) => {
   const navigate = useNavigate();
 
   const handleBack = () => navigate("/scenario-builder");
@@ -43,16 +48,13 @@ const ActionHeader = ({ title, onAddItems }: ActionHeaderProps) => {
         )}
       </Box>
       <Stack direction="row" spacing={1} alignItems="center">
-        <Button
-          variant="contained"
-          // onClick={handleNavigate}
-        >
+        <Button variant="contained" onClick={onSaveAsDraft}>
           Save as draft
         </Button>
         <Button
           variant="contained"
           startIcon={<DatabaseImportIcon />}
-          // onClick={handleNavigate}
+        // onClick={handleNavigate}
         >
           Export
         </Button>
@@ -65,7 +67,7 @@ const ActionHeader = ({ title, onAddItems }: ActionHeaderProps) => {
         </Button>
         <Button
           variant="contained"
-          // onClick={handleNavigate}
+        // onClick={handleNavigate}
         >
           Publish
         </Button>

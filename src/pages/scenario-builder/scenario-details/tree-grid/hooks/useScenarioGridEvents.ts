@@ -1,4 +1,5 @@
 import { useEffect } from "react";
+import { useScenarioStore } from "../../store/useScenarioStore";
 import {
   getCellContextMenu,
   getHeaderContextMenu,
@@ -7,32 +8,16 @@ import {
 interface UseScenarioGridEventsProps {
   gridId: string;
   gridData: any;
-  openEditGroupModal: (id: string, name: string) => void;
-  openComponentAggregatorModal: (col: string) => void;
-  openCostAggregatorModal: (col: string) => void;
-  openComponentAggregatorDrawer: (
-    rowId: string,
-    col: string,
-    type?: string,
-  ) => void;
-  openDeleteModal: (rowId: string) => void;
-  openMarkupComponentModal: (col: string) => void;
-  openMarginComponentModal: (col: string) => void;
 }
 
 export const useScenarioGridEvents = ({
   gridId,
   gridData,
-  openEditGroupModal,
-  openComponentAggregatorModal,
-  openCostAggregatorModal,
-  openComponentAggregatorDrawer,
-  openDeleteModal,
-  openMarkupComponentModal,
-  openMarginComponentModal,
 }: UseScenarioGridEventsProps) => {
   useEffect(() => {
     (window as any).handleTreeGridEdit = (rowId: string) => {
+      const { setEditingGroupId, setEditingGroupName, setIsEditModalOpen } =
+        useScenarioStore.getState();
       const currentRows = gridData?.Body?.[0] || [];
 
       // Recursive function to find row by ID
@@ -49,7 +34,9 @@ export const useScenarioGridEvents = ({
 
       const targetRow = findRecursive(currentRows);
       if (targetRow) {
-        openEditGroupModal(rowId, targetRow.A || "");
+        setEditingGroupId(rowId);
+        setEditingGroupName(targetRow.A || "");
+        setIsEditModalOpen(true);
       }
     };
 
@@ -61,16 +48,36 @@ export const useScenarioGridEvents = ({
       grid.AddCols(1, col, 0, 1, 1);
     };
     (window as any).handleComponentAggregator = (_grid: any, col: string) => {
-      openComponentAggregatorModal(col);
+      const { setActiveColumn, setIsComponentAggregatorOpen } =
+        useScenarioStore.getState();
+      setActiveColumn(col);
+      setIsComponentAggregatorOpen(true);
     };
     (window as any).handleCostAggregator = (_grid: any, col: string) => {
-      openCostAggregatorModal(col);
+      const { setActiveColumn, setIsCostAggregatorOpen } =
+        useScenarioStore.getState();
+      setActiveColumn(col);
+      setIsCostAggregatorOpen(true);
     };
     (window as any).handleMarkupComponent = (_grid: any, col: string) => {
-      openMarkupComponentModal(col);
+      const {
+        setActiveColumn,
+        setIsMarginMarkupModalOpen,
+        setMarginMarkupType,
+      } = useScenarioStore.getState();
+      setActiveColumn(col);
+      setMarginMarkupType("Markup");
+      setIsMarginMarkupModalOpen(true);
     };
     (window as any).handleMarginComponent = (_grid: any, col: string) => {
-      openMarginComponentModal(col);
+      const {
+        setActiveColumn,
+        setIsMarginMarkupModalOpen,
+        setMarginMarkupType,
+      } = useScenarioStore.getState();
+      setActiveColumn(col);
+      setMarginMarkupType("Margin");
+      setIsMarginMarkupModalOpen(true);
     };
     (window as any).handleGeneralFormulaComponent = (
       _grid: any,
@@ -90,14 +97,47 @@ export const useScenarioGridEvents = ({
       });
     };
     (window as any).handleTreeGridDeleteRow = (rowId: string) => {
-      openDeleteModal(rowId);
+      const { setRowToDeleteId, setIsDeleteModalOpen } =
+        useScenarioStore.getState();
+      setRowToDeleteId(rowId);
+      setIsDeleteModalOpen(true);
     };
     (window as any).handleCalculate = (
       rowId: string,
       col: string,
       type?: string,
     ) => {
-      openComponentAggregatorDrawer(rowId, col, type);
+      const { setActiveCell, setIsAggregatorDrawerOpen } =
+        useScenarioStore.getState();
+      const grid = (window as any).Grids?.[gridId];
+      let items: any[] = [];
+      let aggregatorType = type || "Component";
+
+      if (grid) {
+        if (!type) {
+          aggregatorType =
+            grid.GetAttribute(null, col, "AggregatorType") || "Component";
+        }
+        const row = grid.GetRowById(rowId);
+        if (row) {
+          const itemsData = grid.GetAttribute(row, col, "ItemsData");
+          if (itemsData) {
+            try {
+              items = JSON.parse(itemsData);
+            } catch (e) {
+              console.error("Failed to parse items data", e);
+            }
+          }
+        }
+      }
+
+      setActiveCell({
+        rowId,
+        col,
+        items,
+        type: aggregatorType,
+      });
+      setIsAggregatorDrawerOpen(true);
     };
 
     const onHandleRightClick = (grid: any, row: any, col: string) => {
@@ -138,15 +178,5 @@ export const useScenarioGridEvents = ({
         window.TGDelEvent("OnRightClick", gridId);
       }
     };
-  }, [
-    openEditGroupModal,
-    openComponentAggregatorModal,
-    openCostAggregatorModal,
-    openComponentAggregatorDrawer,
-    openDeleteModal,
-    openMarkupComponentModal,
-    openMarginComponentModal,
-    gridData,
-    gridId,
-  ]);
+  }, [gridData, gridId]);
 };

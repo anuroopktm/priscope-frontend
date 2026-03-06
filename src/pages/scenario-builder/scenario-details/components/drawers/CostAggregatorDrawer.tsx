@@ -194,7 +194,7 @@ const CostAggregatorDrawer = ({
   onClose,
   onUpdate,
   title = "Cost aggregator",
-  initialItems = [],
+  initialItems: _initialItems = [],
   mainRowId,
 }: CostAggregatorDrawerProps) => {
   const [deleteModalOpen, setDeleteModalOpen] = useState(false);

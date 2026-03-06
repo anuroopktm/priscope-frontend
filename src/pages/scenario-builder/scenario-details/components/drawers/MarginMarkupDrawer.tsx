@@ -60,7 +60,7 @@ const MarginMarkupDrawer = ({
   onUpdate,
   type,
   initialItems = [],
-  mainRowId,
+  mainRowId: _mainRowId,
   gridId = "MarginMarkupDrawerGrid",
 }: MarginMarkupDrawerProps) => {
   const [data, setData] = useState<any[]>(
@@ -109,7 +109,7 @@ const MarginMarkupDrawer = ({
     (window as any).handleOpenColumnSelection = (
       rowId: string,
       _gridId: string,
-      col: string,
+      _col: string,
     ) => {
       if ((window as any).startScenarioColumnSelection) {
         (window as any).startScenarioColumnSelection(rowId, gridId);
@@ -119,10 +119,10 @@ const MarginMarkupDrawer = ({
     const onAfterValueChanged = (
       grid: any,
       row: any,
-      col: string,
+      _col: string,
       val: any,
     ) => {
-      if (grid.id === gridId && col === "A") {
+      if (grid.id === gridId && _col === "A") {
         const percent = String(val || "");
         setData((prev) => {
           const item = prev.find((i) => i.id === row.id);
