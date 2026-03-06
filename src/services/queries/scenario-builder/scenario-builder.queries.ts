@@ -10,7 +10,9 @@ import type {
   SaveScenarioGridRequest,
   SaveScenarioGridResponse,
   ScenarioComment,
+  ScenarioCommentListResponse,
   ScenarioDetail,
+  SearchScenarioCommentsRequest,
   SearchScenariosRequest,
   SearchScenariosResponse,
 } from "./scenario-builder.types";
@@ -36,7 +38,32 @@ export const useCreateScenarioComment = () => {
       queryClient.invalidateQueries({
         queryKey: ["get-scenario", scenario_id],
       });
+      // Invalidate comments list
+      queryClient.invalidateQueries({
+        queryKey: ["list-scenario-comments", scenario_id],
+      });
     },
+  });
+};
+
+export const useListScenarioComments = (
+  scenarioId: string | undefined,
+  payload: SearchScenarioCommentsRequest,
+) => {
+  return useQuery<
+    ScenarioCommentListResponse,
+    AxiosError<{ detail: string | string[] }>
+  >({
+    queryKey: ["list-scenario-comments", scenarioId, payload],
+    queryFn: async () => {
+      const { data } = await axiosInstance.post<ScenarioCommentListResponse>(
+        `/v1/scenario-builder/scenarios/${scenarioId}/comments/list`,
+        payload,
+      );
+      return data;
+    },
+    enabled: !!scenarioId,
+    refetchOnWindowFocus: false,
   });
 };
 

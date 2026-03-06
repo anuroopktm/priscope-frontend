@@ -82,6 +82,26 @@ export interface ScenarioComment {
   scenario_id: string;
   cell_ref: string;
   comment: string;
-  created_by: Record<string, any>;
+  created_by: {
+    name?: string;
+    email?: string;
+    status?: string;
+    user_id?: string;
+    is_admin?: boolean;
+    tenant_id?: string;
+    avatar?: string;
+  };
   created_at: string;
+}
+
+export interface SearchScenarioCommentsRequest {
+  search?: string;
+  cell_ref?: string;
+  page_size?: number;
+  skip?: number;
+}
+
+export interface ScenarioCommentListResponse {
+  total: number;
+  comments: ScenarioComment[];
 }
