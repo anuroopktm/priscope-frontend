@@ -1,14 +1,18 @@
-import { Box, Button, TextField, Typography } from "@mui/material";
+import { Box, Button, IconButton, TextField, Typography } from "@mui/material";
 import { useOnboardingStore } from "../store/useOnboardingStore";
-import { useForm } from "react-hook-form";
+import { useForm, Controller } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import {
   costStepSchema,
   type CostStepFormValues,
 } from "@/validations/onboarding/coststep.schema";
+import { useState } from "react";
+import CloseIcon from "@mui/icons-material/Close";
+import addCircle from "@/assets/onboarding/add-circle.svg";
 
 const CostStep = ({ onNext }: { onNext: () => void }) => {
   const { data, updateData } = useOnboardingStore();
+
   const {
     register,
     handleSubmit,
@@ -17,12 +21,29 @@ const CostStep = ({ onNext }: { onNext: () => void }) => {
     resolver: zodResolver(costStepSchema),
     defaultValues: {
       core_cost_element: data.core_cost_element ?? "",
+      additional_cost_elements: data.additional_cost_elements ?? [],
     },
   });
+
+  const [additionalCosts, setAdditionalCosts] = useState(
+    data.additional_cost_elements ?? [],
+  );
+
+  const addCostElement = () => {
+    setAdditionalCosts([...additionalCosts, ""]);
+  };
+
+  const handleAdditionalCostChange = (index: number, value: string) => {
+    const updated = [...additionalCosts];
+    updated[index] = value;
+    setAdditionalCosts(updated);
+  };
+
   const onSubmit = (formData: CostStepFormValues) => {
-    updateData(formData);
+    updateData({ ...formData, additional_cost_elements: additionalCosts });
     onNext();
   };
+
   return (
     <Box
       component="form"
@@ -37,14 +58,7 @@ const CostStep = ({ onNext }: { onNext: () => void }) => {
       }}
     >
       <Box>
-        <Typography
-          sx={{
-            fontSize: "12px",
-            fontWeight: "normal",
-            color: "#000000",
-            mb: 1,
-          }}
-        >
+        <Typography sx={{ fontSize: "12px", mb: 1 }}>
           Core Cost Element
         </Typography>
         <TextField
@@ -55,25 +69,64 @@ const CostStep = ({ onNext }: { onNext: () => void }) => {
           sx={{
             "& .MuiOutlinedInput-root": {
               height: 40,
-              "& input": {
-                padding: "12px 14px",
-              },
+              "& input": { padding: "12px 14px" },
             },
           }}
         />
-        <Typography
-          sx={{
-            fontSize: "11px",
-            fontWeight: "normal",
-            color: "#1A2B44",
-            mt: 1,
-          }}
-        >
-          This will be the reference price for all automatic GM% and margin
-          health calculations. You can still include other price fields (like
-          MAP or MSRP) for reporting or analysis, but they won’t affect GM%.
+        <Typography sx={{ fontSize: "11px", mt: 1 }}>
+          This will be the reference price for all automatic GM% calculations.
         </Typography>
       </Box>
+
+      {/* Additional Cost Elements */}
+      <Box>
+        <Box
+          onClick={addCostElement}
+          sx={{
+            display: "flex",
+            alignItems: "center",
+            flexDirection: "row",
+            gap: 1,
+            // justifyContent: "center"
+            lineHeight: 1,
+          }}
+        >
+          <img src={addCircle} alt="" style={{ height: "100%" }} />
+          <Typography sx={{ fontSize: "12px"}}>
+            Additional Cost Elements
+          </Typography>
+        </Box>
+        {additionalCosts.map((value, index) => (
+          <Box key={index} sx={{ display: "flex", gap: 1, mt: 1 }}>
+            <TextField
+              fullWidth
+              value={value}
+              sx={{
+                "& .MuiOutlinedInput-root": {
+                  height: 40,
+                  "& input": { padding: "12px 14px" },
+                },
+              }}
+              placeholder="e.g., freight, duty, testing fees"
+              onChange={(e) =>
+                handleAdditionalCostChange(index, e.target.value)
+              }
+            />
+            <IconButton
+              color="error"
+              onClick={() =>
+                setAdditionalCosts(
+                  additionalCosts.filter((_, i) => i !== index),
+                )
+              }
+              size="small"
+            >
+              <CloseIcon fontSize="small" />
+            </IconButton>
+          </Box>
+        ))}
+      </Box>
+
       <Button type="submit" variant="contained" fullWidth>
         Continue
       </Button>

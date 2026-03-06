@@ -33,13 +33,11 @@ const GeneralInfo = ({ onNext }: { onNext: () => void }) => {
     });
 
     mutate(formData, {
-      onSuccess: (response: any) => {
-        console.log("Success 🚀", response);
+      onSuccess: () => {
         showToast("Onboarding completed successfully", "success");
         onNext();
       },
-      onError: (error: any) => {
-        console.error("Error ❌", error);
+      onError: () => {
         showToast("Onboarding failed", "error");
       },
     });

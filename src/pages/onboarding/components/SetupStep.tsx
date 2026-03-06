@@ -199,11 +199,11 @@ const SetupStep = ({ onNext }: Props) => {
               >
                 <img src={uploadIcon} width={35} height={35} />
                 {logoFile ? (
-                  <Typography mt={1} fontWeight={500}>
+                  <Typography mt={1} fontSize={12} mb={1}>
                     {logoFile.name}
                   </Typography>
                 ) : (
-                  <Typography mt={1}>
+                  <Typography mt={1} fontSize={12} mb={1}>
                     Link or drag and drop Company Logo
                   </Typography>
                 )}

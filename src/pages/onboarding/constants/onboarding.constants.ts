@@ -7,6 +7,7 @@ import SystemFieldMapping from "@/pages/onboarding/components/SystemFieldMapping
 import SystemIdentifier from "@/pages/onboarding/components/SystemIdentifier";
 import GeneralInfo from "../components/GeneralInfo";
 import SystemFieldMappingsDetails from "../components/SystemFieldMappingsDetails";
+import AddItemMasterData from "../components/AddItemMasterData";
 
 export const steps = [
   {
@@ -55,5 +56,9 @@ export const steps = [
   {
     label: "General Info",
     component: GeneralInfo,
+  },
+   {
+    label: "Would you like to start by adding data?",
+    component:  AddItemMasterData,
   },
 ];

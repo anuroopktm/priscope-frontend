@@ -11,7 +11,7 @@ interface OnboardingStore {
     company_logo: File | null;
     field_mappings: Record<string, string> | null;
     core_cost_element: string;
-    additional_cost_elements: string | null;
+    additional_cost_elements: string[] | null;
     core_selling_price_element: string;
     additional_selling_price_elements: string | null;
     profitability_mode: string | null;
