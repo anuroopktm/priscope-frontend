@@ -1,4 +1,5 @@
 import ArrowBackIcon from "@/assets/actions/arrow-left.svg?react";
+import CommentIcon from "@/assets/actions/comment.svg?react";
 import DatabaseImportIcon from "@/assets/actions/database-import.svg?react";
 import FileImportIcon from "@/assets/actions/file-import.svg?react";
 import {
@@ -12,6 +13,7 @@ import {
 } from "@mui/material";
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { useScenarioStore } from "../store/useScenarioStore";
 
 // Use the same ID as in the page component
 const THE_GRID_ID = "ScenarioGridDetails";
@@ -40,6 +42,9 @@ const ActionHeader = ({
   selectedRowsCount = 0,
 }: ActionHeaderProps) => {
   const navigate = useNavigate();
+  const setIsCommentsSidebarOpen = useScenarioStore(
+    (state) => state.setIsCommentsSidebarOpen,
+  );
   const [exportAnchorEl, setExportAnchorEl] = useState<null | HTMLElement>(
     null,
   );
@@ -141,6 +146,17 @@ const ActionHeader = ({
             Partial Publish ({selectedRowsCount})
           </Button>
         )}
+        <IconButton
+          onClick={() => setIsCommentsSidebarOpen(true)}
+          sx={{
+            borderRadius: 1,
+            width: 38,
+            height: 38,
+            "&:hover": { bgcolor: "#0C4468" },
+          }}
+        >
+          <CommentIcon style={{ color: "white" }} />
+        </IconButton>
       </Stack>
     </Box>
   );
