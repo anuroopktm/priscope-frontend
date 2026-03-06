@@ -25,8 +25,6 @@ const ScenarioDrawers = ({ gridId }: ScenarioDrawersProps) => {
     })),
   );
 
-  if (!isAggregatorDrawerOpen || !activeCell) return null;
-
   const handleUpdate = (items: any[]) =>
     handleAggregatorUpdate({ gridId }, items);
 
@@ -36,38 +34,42 @@ const ScenarioDrawers = ({ gridId }: ScenarioDrawersProps) => {
   };
 
   return (
-    <Box
-      sx={{
-        flex: 0.5,
-        minHeight: 0,
-        width: "100%",
-        px: 2,
-        transition: "flex 0.3s ease-in-out",
-      }}
-    >
-      {activeCell.type === "Cost" ? (
-        <CostAggregatorDrawer
-          initialItems={activeCell.items}
-          mainRowId={activeCell.rowId}
-          onClose={handleClose}
-          onUpdate={handleUpdate}
-        />
-      ) : activeCell.type === "Margin" || activeCell.type === "Markup" ? (
-        <MarginMarkupDrawer
-          type={activeCell.type as "Margin" | "Markup"}
-          initialItems={activeCell.items}
-          mainRowId={activeCell.rowId}
-          onClose={handleClose}
-          onUpdate={handleUpdate}
-        />
-      ) : (
-        <ComponentAggregatorDrawer
-          initialItems={activeCell.items}
-          onClose={handleClose}
-          onUpdate={handleUpdate}
-        />
+    <>
+      {isAggregatorDrawerOpen && activeCell && (
+        <Box
+          sx={{
+            flex: 0.5,
+            minHeight: 0,
+            width: "100%",
+            px: 2,
+            transition: "flex 0.3s ease-in-out",
+          }}
+        >
+          {activeCell.type === "Cost" ? (
+            <CostAggregatorDrawer
+              initialItems={activeCell.items}
+              mainRowId={activeCell.rowId}
+              onClose={handleClose}
+              onUpdate={handleUpdate}
+            />
+          ) : activeCell.type === "Margin" || activeCell.type === "Markup" ? (
+            <MarginMarkupDrawer
+              type={activeCell.type as "Margin" | "Markup"}
+              initialItems={activeCell.items}
+              mainRowId={activeCell.rowId}
+              onClose={handleClose}
+              onUpdate={handleUpdate}
+            />
+          ) : (
+            <ComponentAggregatorDrawer
+              initialItems={activeCell.items}
+              onClose={handleClose}
+              onUpdate={handleUpdate}
+            />
+          )}
+        </Box>
       )}
-    </Box>
+    </>
   );
 };
 

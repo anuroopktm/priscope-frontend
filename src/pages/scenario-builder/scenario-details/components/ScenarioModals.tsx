@@ -1,3 +1,6 @@
+import { useCreateScenarioComment } from "@/services/queries/scenario-builder/scenario-builder.queries";
+import { useToastStore } from "@/store/useToastStore";
+import { useParams } from "react-router-dom";
 import { useShallow } from "zustand/react/shallow";
 import {
   handleComponentAggregatorConfirm,
@@ -13,6 +16,7 @@ import {
 import { useScenarioStore } from "../store/useScenarioStore";
 import ItemsMasterDrawer from "./items-master-drawer/ItemsMasterDrawer";
 import AddAsGroupModal from "./items-master-drawer/components/AddAsGroupModal";
+import CommentModal from "./modals/CommentModal";
 import ComponentAggregatorModal from "./modals/ComponentAggregatorModal";
 import CostAggregatorModal from "./modals/CostAggregatorModal";
 import DeleteConfirmModal from "./modals/DeleteConfirmModal";
@@ -30,6 +34,11 @@ const ScenarioModals = ({
   processAddItems,
   handleEditRowConfirm,
 }: ScenarioModalsProps) => {
+  const { id: scenarioId } = useParams<{ id: string }>();
+  const showToast = useToastStore((state) => state.showToast);
+  const { mutate: addComment, isPending: isAddingComment } =
+    useCreateScenarioComment();
+
   const {
     isDrawerOpen,
     setIsDrawerOpen,
@@ -48,6 +57,10 @@ const ScenarioModals = ({
     isMarginMarkupModalOpen,
     setIsMarginMarkupModalOpen,
     marginMarkupType,
+    isCommentModalOpen,
+    setIsCommentModalOpen,
+    commentModalCell,
+    setCommentModalCell,
   } = useScenarioStore(
     useShallow((state) => ({
       isDrawerOpen: state.isDrawerOpen,
@@ -67,6 +80,10 @@ const ScenarioModals = ({
       isMarginMarkupModalOpen: state.isMarginMarkupModalOpen,
       setIsMarginMarkupModalOpen: state.setIsMarginMarkupModalOpen,
       marginMarkupType: state.marginMarkupType,
+      isCommentModalOpen: state.isCommentModalOpen,
+      setIsCommentModalOpen: state.setIsCommentModalOpen,
+      commentModalCell: state.commentModalCell,
+      setCommentModalCell: state.setCommentModalCell,
     })),
   );
 
@@ -91,6 +108,30 @@ const ScenarioModals = ({
 
   const handleMarginMarkupConfirmCb = (data: any) =>
     handleMarginMarkupConfirm({ gridId }, data);
+
+  const handleCommentModalConfirm = (comment: string) => {
+    if (!scenarioId || !commentModalCell) return;
+
+    addComment(
+      {
+        scenario_id: scenarioId,
+        payload: {
+          cell_ref: `${commentModalCell.rowId}:${commentModalCell.col}`,
+          comment: comment.trim(),
+        },
+      },
+      {
+        onSuccess: () => {
+          showToast("Comment added successfully", "success");
+          setIsCommentModalOpen(false);
+          setCommentModalCell(null);
+        },
+        onError: () => {
+          showToast("Failed to add comment", "error");
+        },
+      },
+    );
+  };
 
   return (
     <>
@@ -147,6 +188,13 @@ const ScenarioModals = ({
       />
 
       <ScenarioCommentPopover />
+
+      <CommentModal
+        open={isCommentModalOpen}
+        onClose={() => setIsCommentModalOpen(false)}
+        onConfirm={handleCommentModalConfirm}
+        isLoading={isAddingComment}
+      />
     </>
   );
 };

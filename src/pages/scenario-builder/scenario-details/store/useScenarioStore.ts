@@ -59,6 +59,16 @@ interface ScenarioStoreState {
   setCommentCell: (
     cell: { rowId: string; col: string; rect?: DOMRect } | null,
   ) => void;
+
+  // Comment Modal (from context menu)
+  isCommentModalOpen: boolean;
+  setIsCommentModalOpen: (isOpen: boolean) => void;
+  commentModalCell: { rowId: string; col: string } | null;
+  setCommentModalCell: (cell: { rowId: string; col: string } | null) => void;
+
+  // Comments Sidebar
+  isCommentsSidebarOpen: boolean;
+  setIsCommentsSidebarOpen: (isOpen: boolean) => void;
 }
 
 export const useScenarioStore = create<ScenarioStoreState>((set) => ({
@@ -106,4 +116,12 @@ export const useScenarioStore = create<ScenarioStoreState>((set) => ({
   setIsCommentPopoverOpen: (isOpen) => set({ isCommentPopoverOpen: isOpen }),
   commentCell: null,
   setCommentCell: (cell) => set({ commentCell: cell }),
+
+  isCommentModalOpen: false,
+  setIsCommentModalOpen: (isOpen) => set({ isCommentModalOpen: isOpen }),
+  commentModalCell: null,
+  setCommentModalCell: (cell) => set({ commentModalCell: cell }),
+
+  isCommentsSidebarOpen: false,
+  setIsCommentsSidebarOpen: (isOpen) => set({ isCommentsSidebarOpen: isOpen }),
 }));

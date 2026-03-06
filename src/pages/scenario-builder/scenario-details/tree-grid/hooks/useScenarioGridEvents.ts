@@ -1,4 +1,4 @@
-import { useEffect } from "react";
+import { useEffect, useRef } from "react";
 import { useScenarioStore } from "../../store/useScenarioStore";
 import { renderStatusBadge } from "../cells/status-badge.cell";
 import {
@@ -17,11 +17,17 @@ export const useScenarioGridEvents = ({
   gridData,
   onSelectionChange,
 }: UseScenarioGridEventsProps) => {
+  const gridDataRef = useRef(gridData);
+
+  useEffect(() => {
+    gridDataRef.current = gridData;
+  }, [gridData]);
+
   useEffect(() => {
     (window as any).handleTreeGridEdit = (rowId: string) => {
       const { setEditingGroupId, setEditingGroupName, setIsEditModalOpen } =
         useScenarioStore.getState();
-      const currentRows = gridData?.Body?.[0] || [];
+      const currentRows = gridDataRef.current?.Body?.[0] || [];
 
       // Recursive function to find row by ID
       const findRecursive = (rows: any[]): any => {
@@ -143,6 +149,98 @@ export const useScenarioGridEvents = ({
       setIsAggregatorDrawerOpen(true);
     };
 
+    const enterPressedRef = { current: false };
+
+    const handleGlobalKeyDown = (e: KeyboardEvent) => {
+      if (e.key === "Enter") {
+        enterPressedRef.current = true;
+      } else {
+        enterPressedRef.current = false;
+      }
+    };
+
+    // Use capture phase to ensure we catch it before TreeGrid does any magic
+    document.addEventListener("keydown", handleGlobalKeyDown, true);
+
+    const onHandleEditFinish = (
+      grid: any,
+      row: any,
+      col: string,
+      save: any,
+      val: any,
+    ) => {
+      if (grid.id !== gridId) return val;
+
+      // Only trigger if saved (save === 1) AND Enter was the reason
+      const wasEnter = enterPressedRef.current;
+      enterPressedRef.current = false; // Reset immediately
+
+      if (save !== 1 || !wasEnter) {
+        return val;
+      }
+
+      // Exclude Header, Filter, Space rows
+      if (
+        row.Kind === "Header" ||
+        row.Kind === "Filter" ||
+        row.Kind === "Space"
+      ) {
+        return val;
+      }
+
+      // Get cell coordinates
+      const cellElement = grid.GetCell(row, col);
+      if (!cellElement) {
+        return val;
+      }
+
+      const rect = cellElement.getBoundingClientRect();
+      const { setCommentCell, setIsCommentPopoverOpen } =
+        useScenarioStore.getState();
+
+      setCommentCell({
+        rowId: row.id,
+        col: col,
+        rect: {
+          top: rect.top,
+          left: rect.left,
+          width: rect.width,
+          height: rect.height,
+        } as any,
+      });
+
+      // Brief delay to ensure the grid finishes its internal state update
+      setTimeout(() => {
+        setIsCommentPopoverOpen(true);
+      }, 150);
+
+      return val;
+    };
+
+    (window as any).handleCommentFromMenu = (
+      _grid: any,
+      row: any,
+      col: string,
+    ) => {
+      const { setCommentModalCell, setIsCommentModalOpen } =
+        useScenarioStore.getState();
+      setCommentModalCell({ rowId: row.id, col });
+      setIsCommentModalOpen(true);
+    };
+
+    const onGetHtmlValue = (grid: any, row: any, col: string, val: string) => {
+      if (grid.id !== gridId) return val;
+      if (row.Kind === "Header") return val;
+
+      if (col === "is_published") {
+        const isPublished = parseInt(val) === 1;
+        const status = isPublished ? "published" : "draft";
+
+        return renderStatusBadge(status);
+      }
+      return val;
+    };
+
     const onHandleRightClick = (grid: any, row: any, col: string) => {
       if (!grid || grid.id !== gridId) return 0;
       if (row.Kind === "Header") {
@@ -166,76 +264,16 @@ export const useScenarioGridEvents = ({
       onSelectionChange?.(selRows.length);
     };
 
-    const onHandleEditFinish = (
-      grid: any,
-      row: any,
-      col: string,
-      _save: any,
-      val: any,
-    ) => {
-      if (grid.id !== gridId) return val;
-
-      // Exclude Header, Filter, Space rows
-      if (
-        row.Kind === "Header" ||
-        row.Kind === "Filter" ||
-        row.Kind === "Space"
-      ) {
-        return val;
-      }
-
-      // Get cell coordinates using standard DOM method on the cell element
-      const cellElement = grid.GetCell(row, col);
-      if (!cellElement) {
-        return val;
-      }
-
-      const rect = cellElement.getBoundingClientRect();
-
-      const { setCommentCell, setIsCommentPopoverOpen } =
-        useScenarioStore.getState();
-
-      setCommentCell({
-        rowId: row.id,
-        col: col,
-        rect: {
-          top: rect.top,
-          left: rect.left,
-          width: rect.width,
-          height: rect.height,
-        } as any,
-      });
-
-      // Brief delay to ensure the grid finishes its internal state update
-      setTimeout(() => {
-        setIsCommentPopoverOpen(true);
-      }, 100);
-
-      return val;
-    };
-
-    const onGetHtmlValue = (grid: any, row: any, col: string, val: string) => {
-      if (grid.id !== gridId) return val;
-      if (row.Kind === "Header") return val;
-
-      if (col === "is_published") {
-        const isPublished = parseInt(val) === 1;
-        const status = isPublished ? "published" : "draft";
-
-        return renderStatusBadge(status);
-      }
-      return val;
-    };
-
     if (window.TGSetEvent) {
       window.TGSetEvent("OnRightClick", gridId, onHandleRightClick);
       window.TGSetEvent("OnSelect", gridId, onHandleSelect);
       window.TGSetEvent("OnGetHtmlValue", gridId, onGetHtmlValue);
-      window.TGSetEvent("OnAfterEdit", gridId, onHandleEditFinish);
       window.TGSetEvent("OnEndEdit", gridId, onHandleEditFinish);
     }
 
     return () => {
+      document.removeEventListener("keydown", handleGlobalKeyDown, true);
+
       delete (window as any).handleTreeGridEdit;
       delete (window as any).handleAddColRight;
       delete (window as any).handleAddColLeft;
@@ -247,14 +285,14 @@ export const useScenarioGridEvents = ({
       delete (window as any).handleDeleteCol;
       delete (window as any).handleTreeGridDeleteRow;
       delete (window as any).handleCalculate;
+      delete (window as any).handleCommentFromMenu;
 
       if (window.TGDelEvent) {
         window.TGDelEvent("OnRightClick", gridId);
         window.TGDelEvent("OnSelect", gridId);
         window.TGDelEvent("OnGetHtmlValue", gridId);
-        window.TGDelEvent("OnAfterEdit", gridId);
         window.TGDelEvent("OnEndEdit", gridId);
       }
     };
-  }, [gridData, gridId, onSelectionChange]);
+  }, [gridId, onSelectionChange]);
 };

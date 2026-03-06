@@ -88,6 +88,11 @@ export const getCellContextMenu = (grid: any, row: any, col: string) => {
           (window as any).handleCalculate(row.id, col);
         },
       },
+      { Name: "-", Separator: 1 },
+      {
+        Name: "Comment",
+        OnClick: () => (window as any).handleCommentFromMenu(grid, row, col),
+      },
     ] as any[];
   }
 
@@ -111,6 +116,11 @@ export const getCellContextMenu = (grid: any, row: any, col: string) => {
       {
         Name: "Margin component",
         OnClick: () => (window as any).handleCalculate(row.id, col),
+      },
+      { Name: "-", Separator: 1 },
+      {
+        Name: "Comment",
+        OnClick: () => (window as any).handleCommentFromMenu(grid, row, col),
       },
     ] as any[];
   }
@@ -137,6 +147,11 @@ export const getCellContextMenu = (grid: any, row: any, col: string) => {
     {
       Name: "General formula component",
       OnClick: () => (window as any).handleGeneralFormulaComponent(grid, col),
+    },
+    { Name: "-", Separator: 1 },
+    {
+      Name: "Comment",
+      OnClick: () => (window as any).handleCommentFromMenu(grid, row, col),
     },
   ] as any[];
 };
