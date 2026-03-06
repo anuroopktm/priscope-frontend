@@ -51,6 +51,14 @@ interface ScenarioStoreState {
   setIsDeleteModalOpen: (isOpen: boolean) => void;
   rowToDeleteId: string | null;
   setRowToDeleteId: (id: string | null) => void;
+
+  // Inline Comment Popover
+  isCommentPopoverOpen: boolean;
+  setIsCommentPopoverOpen: (isOpen: boolean) => void;
+  commentCell: { rowId: string; col: string; rect?: DOMRect } | null;
+  setCommentCell: (
+    cell: { rowId: string; col: string; rect?: DOMRect } | null,
+  ) => void;
 }
 
 export const useScenarioStore = create<ScenarioStoreState>((set) => ({
@@ -93,4 +101,9 @@ export const useScenarioStore = create<ScenarioStoreState>((set) => ({
   setIsDeleteModalOpen: (isOpen) => set({ isDeleteModalOpen: isOpen }),
   rowToDeleteId: null,
   setRowToDeleteId: (id) => set({ rowToDeleteId: id }),
+
+  isCommentPopoverOpen: false,
+  setIsCommentPopoverOpen: (isOpen) => set({ isCommentPopoverOpen: isOpen }),
+  commentCell: null,
+  setCommentCell: (cell) => set({ commentCell: cell }),
 }));

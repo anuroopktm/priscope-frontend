@@ -71,3 +71,17 @@ export interface PartialPublishScenarioRequest {
   scenario_id: string;
   row_ids: string[];
 }
+
+export interface CreateScenarioCommentRequest {
+  cell_ref: string;
+  comment: string;
+}
+
+export interface ScenarioComment {
+  id: string;
+  scenario_id: string;
+  cell_ref: string;
+  comment: string;
+  created_by: Record<string, any>;
+  created_at: string;
+}

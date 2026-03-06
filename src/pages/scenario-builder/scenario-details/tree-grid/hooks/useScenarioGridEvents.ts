@@ -166,6 +166,54 @@ export const useScenarioGridEvents = ({
       onSelectionChange?.(selRows.length);
     };
 
+    const onHandleEditFinish = (
+      grid: any,
+      row: any,
+      col: string,
+      _save: any,
+      val: any,
+    ) => {
+      if (grid.id !== gridId) return val;
+
+      // Exclude Header, Filter, Space rows
+      if (
+        row.Kind === "Header" ||
+        row.Kind === "Filter" ||
+        row.Kind === "Space"
+      ) {
+        return val;
+      }
+
+      // Get cell coordinates using standard DOM method on the cell element
+      const cellElement = grid.GetCell(row, col);
+      if (!cellElement) {
+        return val;
+      }
+
+      const rect = cellElement.getBoundingClientRect();
+
+      const { setCommentCell, setIsCommentPopoverOpen } =
+        useScenarioStore.getState();
+
+      setCommentCell({
+        rowId: row.id,
+        col: col,
+        rect: {
+          top: rect.top,
+          left: rect.left,
+          width: rect.width,
+          height: rect.height,
+        } as any,
+      });
+
+      // Brief delay to ensure the grid finishes its internal state update
+      setTimeout(() => {
+        setIsCommentPopoverOpen(true);
+      }, 100);
+
+      return val;
+    };
+
     const onGetHtmlValue = (grid: any, row: any, col: string, val: string) => {
       if (grid.id !== gridId) return val;
       if (row.Kind === "Header") return val;
@@ -183,6 +231,8 @@ export const useScenarioGridEvents = ({
       window.TGSetEvent("OnRightClick", gridId, onHandleRightClick);
       window.TGSetEvent("OnSelect", gridId, onHandleSelect);
       window.TGSetEvent("OnGetHtmlValue", gridId, onGetHtmlValue);
+      window.TGSetEvent("OnAfterEdit", gridId, onHandleEditFinish);
+      window.TGSetEvent("OnEndEdit", gridId, onHandleEditFinish);
     }
 
     return () => {
@@ -202,6 +252,8 @@ export const useScenarioGridEvents = ({
         window.TGDelEvent("OnRightClick", gridId);
         window.TGDelEvent("OnSelect", gridId);
         window.TGDelEvent("OnGetHtmlValue", gridId);
+        window.TGDelEvent("OnAfterEdit", gridId);
+        window.TGDelEvent("OnEndEdit", gridId);
       }
     };
   }, [gridData, gridId, onSelectionChange]);

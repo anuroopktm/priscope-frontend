@@ -2,16 +2,43 @@ import { axiosInstance } from "@/services/api/axiosInstance";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import type { AxiosError } from "axios";
 import type {
+  CreateScenarioCommentRequest,
   CreateScenarioRequest,
   CreateScenarioResponse,
   PartialPublishScenarioRequest,
   PublishScenarioResponse,
   SaveScenarioGridRequest,
   SaveScenarioGridResponse,
+  ScenarioComment,
   ScenarioDetail,
   SearchScenariosRequest,
   SearchScenariosResponse,
 } from "./scenario-builder.types";
+
+export const useCreateScenarioComment = () => {
+  const queryClient = useQueryClient();
+
+  return useMutation<
+    ScenarioComment,
+    AxiosError<{ detail: string | string[] }>,
+    { scenario_id: string; payload: CreateScenarioCommentRequest }
+  >({
+    mutationKey: ["create-scenario-comment"],
+    mutationFn: async ({ scenario_id, payload }) => {
+      const { data } = await axiosInstance.post<ScenarioComment>(
+        `/v1/scenario-builder/scenarios/${scenario_id}/comments`,
+        payload,
+      );
+      return data;
+    },
+    onSuccess: (_, { scenario_id }) => {
+      // Invalidate get-scenario to potentially show indicators if they come from there
+      queryClient.invalidateQueries({
+        queryKey: ["get-scenario", scenario_id],
+      });
+    },
+  });
+};
 
 export const usePublishScenario = () => {
   const queryClient = useQueryClient();

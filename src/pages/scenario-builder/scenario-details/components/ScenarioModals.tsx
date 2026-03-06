@@ -17,6 +17,7 @@ import ComponentAggregatorModal from "./modals/ComponentAggregatorModal";
 import CostAggregatorModal from "./modals/CostAggregatorModal";
 import DeleteConfirmModal from "./modals/DeleteConfirmModal";
 import MarginMarkupModal from "./modals/MarginMarkupModal";
+import ScenarioCommentPopover from "./modals/ScenarioCommentPopover";
 
 interface ScenarioModalsProps {
   gridId: string;
@@ -144,6 +145,8 @@ const ScenarioModals = ({
         onConfirm={handleMarginMarkupConfirmCb}
         type={marginMarkupType}
       />
+
+      <ScenarioCommentPopover />
     </>
   );
 };
