@@ -1,4 +1,8 @@
-import { useListScenarios } from "@/services/queries/scenario-builder/scenario-builder.queries";
+import {
+  useDeleteScenario,
+  useListScenarios,
+} from "@/services/queries/scenario-builder/scenario-builder.queries";
+import { useToastStore } from "@/store/useToastStore";
 import { Box } from "@mui/material";
 import { useEffect, useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
@@ -23,6 +27,7 @@ const ScenarioListingPage = () => {
   const [searchTerm, setSearchTerm] = useState<string | undefined>(undefined);
   const [deleteModalOpen, setDeleteModalOpen] = useState(false);
   const [selectedRowId, setSelectedRowId] = useState<string | null>(null);
+  const showToast = useToastStore((state) => state.showToast);
 
   const { data: scenariosData } = useListScenarios({
     search: searchTerm,
@@ -30,6 +35,8 @@ const ScenarioListingPage = () => {
     page_size: 20,
     skip: 0,
   });
+
+  const { mutate: deleteScenario, isPending: isDeleting } = useDeleteScenario();
 
   useEffect(() => {
     window.handleTreeGridDelete = (id: string) => {
@@ -55,7 +62,18 @@ const ScenarioListingPage = () => {
   useTreeGridInit(gridId, gridContainerId, ScenarioGridLayout, gridData);
 
   const handleDeleteConfirm = () => {
-    setDeleteModalOpen(false);
+    if (!selectedRowId) return;
+
+    deleteScenario(selectedRowId, {
+      onSuccess: () => {
+        showToast("Scenario deleted successfully", "success");
+        setDeleteModalOpen(false);
+        setSelectedRowId(null);
+      },
+      onError: () => {
+        showToast("Failed to delete scenario", "error");
+      },
+    });
   };
 
   return (
@@ -106,6 +124,7 @@ const ScenarioListingPage = () => {
         open={deleteModalOpen}
         onClose={() => setDeleteModalOpen(false)}
         onConfirm={handleDeleteConfirm}
+        isLoading={isDeleting}
       />
     </>
   );

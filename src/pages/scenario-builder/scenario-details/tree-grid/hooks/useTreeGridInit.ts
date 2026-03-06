@@ -86,7 +86,7 @@ export const useTreeGridInit = (
         }
       }
     };
-  }, [gridId, containerId]);
+  }, [gridId, containerId, layout]);
 
   // Update data WITHOUT recreating grid
   useEffect(() => {

@@ -1,5 +1,6 @@
 import { useEffect } from "react";
 import { useScenarioStore } from "../../store/useScenarioStore";
+import { renderStatusBadge } from "../cells/status-badge.cell";
 import {
   getCellContextMenu,
   getHeaderContextMenu,
@@ -8,11 +9,13 @@ import {
 interface UseScenarioGridEventsProps {
   gridId: string;
   gridData: any;
+  onSelectionChange?: (count: number) => void;
 }
 
 export const useScenarioGridEvents = ({
   gridId,
   gridData,
+  onSelectionChange,
 }: UseScenarioGridEventsProps) => {
   useEffect(() => {
     (window as any).handleTreeGridEdit = (rowId: string) => {
@@ -157,8 +160,29 @@ export const useScenarioGridEvents = ({
       return 0;
     };
 
+    const onHandleSelect = (grid: any) => {
+      if (!grid || grid.id !== gridId) return;
+      const selRows = grid.GetSelRows();
+      onSelectionChange?.(selRows.length);
+    };
+
+    const onGetHtmlValue = (grid: any, row: any, col: string, val: string) => {
+      if (grid.id !== gridId) return val;
+      if (row.Kind === "Header") return val;
+
+      if (col === "is_published") {
+        const isPublished = parseInt(val) === 1;
+        const status = isPublished ? "published" : "draft";
+
+        return renderStatusBadge(status);
+      }
+      return val;
+    };
+
     if (window.TGSetEvent) {
       window.TGSetEvent("OnRightClick", gridId, onHandleRightClick);
+      window.TGSetEvent("OnSelect", gridId, onHandleSelect);
+      window.TGSetEvent("OnGetHtmlValue", gridId, onGetHtmlValue);
     }
 
     return () => {
@@ -176,7 +200,9 @@ export const useScenarioGridEvents = ({
 
       if (window.TGDelEvent) {
         window.TGDelEvent("OnRightClick", gridId);
+        window.TGDelEvent("OnSelect", gridId);
+        window.TGDelEvent("OnGetHtmlValue", gridId);
       }
     };
-  }, [gridData, gridId]);
+  }, [gridData, gridId, onSelectionChange]);
 };

@@ -9,17 +9,17 @@ interface StatusBadgeConfig {
 export const STATUS_BADGE_CONFIG: Record<StatusType, StatusBadgeConfig> = {
   published: {
     label: "Published",
-    backgroundColor: "#1FC16B1A",
-    textColor: "#147D46",
+    backgroundColor: "#E6F4EA",
+    textColor: "#107548",
   },
   partially_published: {
     label: "Partially Published",
-    backgroundColor: "#FFDB431A",
-    textColor: "#8C7100",
+    backgroundColor: "#FEF7E0",
+    textColor: "#B05A00",
   },
   draft: {
     label: "Draft",
-    backgroundColor: "#1A2B441A",
-    textColor: "#144E72",
+    backgroundColor: "#E8EEF3",
+    textColor: "#1F3E5A",
   },
 };

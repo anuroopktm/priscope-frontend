@@ -59,3 +59,15 @@ export interface SaveScenarioGridResponse {
   message: string;
   id: string;
 }
+
+export interface PublishScenarioResponse {
+  id: string;
+  status: string;
+  published_rows: number;
+  message: string;
+}
+
+export interface PartialPublishScenarioRequest {
+  scenario_id: string;
+  row_ids: string[];
+}

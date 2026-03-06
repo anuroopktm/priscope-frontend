@@ -10,6 +10,7 @@ export interface ScenarioRow {
   C?: string;
   D?: string;
   E?: string;
+  is_published?: number;
   Selected?: number;
   ACanEdit?: number;
   AHtmlPostfix?: string;
@@ -69,6 +70,7 @@ export const useScenarioGridData = () => {
         B: item.Description || item.B || "",
         C: item.UPC || item.C || "",
         D: item.Price || item.D || "0",
+        is_published: 0,
         Selected: 0,
       };
     });
@@ -91,6 +93,7 @@ export const useScenarioGridData = () => {
           </div>`,
           Items: mappedItems, // These will be children of the groupRow
           Expanded: "1",
+          is_published: 0,
           Selected: 0,
         };
         itemsToAdd = [groupRow];

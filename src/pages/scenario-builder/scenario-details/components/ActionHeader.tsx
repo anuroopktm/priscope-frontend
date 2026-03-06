@@ -13,12 +13,19 @@ import {
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 
+// Use the same ID as in the page component
+const THE_GRID_ID = "ScenarioGridDetails";
+
 interface ActionHeaderProps {
   title?: string;
   onAddItems?: () => void;
   onSaveAsDraft?: () => void;
   onExport?: (format: string) => void;
+  onPublish?: () => void;
+  onPartialPublish?: (rowIds: string[]) => void;
   isSaving?: boolean;
+  isPublishing?: boolean;
+  selectedRowsCount?: number;
 }
 
 const ActionHeader = ({
@@ -26,7 +33,11 @@ const ActionHeader = ({
   onAddItems,
   onSaveAsDraft,
   onExport,
+  onPublish,
+  onPartialPublish,
   isSaving,
+  isPublishing,
+  selectedRowsCount = 0,
 }: ActionHeaderProps) => {
   const navigate = useNavigate();
   const [exportAnchorEl, setExportAnchorEl] = useState<null | HTMLElement>(
@@ -110,12 +121,26 @@ const ActionHeader = ({
         >
           Add Items
         </Button>
-        <Button
-          variant="contained"
-          // onClick={handleNavigate}
-        >
-          Publish
+        <Button variant="contained" onClick={onPublish} disabled={isPublishing}>
+          {isPublishing ? "Publishing..." : "Publish"}
         </Button>
+        {selectedRowsCount > 0 && (
+          <Button
+            variant="contained"
+            color="secondary"
+            onClick={() => {
+              const grid = (window as any).Grids?.[THE_GRID_ID];
+              if (grid) {
+                const selRows = grid.GetSelRows();
+                const rowIds = selRows.map((row: any) => row.id);
+                onPartialPublish?.(rowIds);
+              }
+            }}
+            disabled={isPublishing}
+          >
+            Partial Publish ({selectedRowsCount})
+          </Button>
+        )}
       </Stack>
     </Box>
   );

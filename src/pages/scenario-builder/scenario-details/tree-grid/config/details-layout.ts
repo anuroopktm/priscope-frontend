@@ -46,7 +46,15 @@ export const ScenarioDetailsLayout = {
     { Name: "A", RelWidth: "1", Type: "Text", CanSort: "0" },
     { Name: "B", RelWidth: "1", Type: "Text", CanSort: "0" },
     { Name: "C", RelWidth: "1", Type: "Text", CanSort: "0" },
-    { Name: "D", RelWidth: "1", Type: "Float", Format: "$0.00", CanSort: "0" },
+    {
+      Name: "is_published",
+      Width: "80",
+      Type: "Html",
+      CanEdit: "0",
+      CanSort: "0",
+      Align: "Center",
+    },
+    { Name: "D", Width: "100", Type: "Float", Format: "$0.00", CanSort: "0" },
   ],
   Def: {
     Group: {
@@ -59,6 +67,7 @@ export const ScenarioDetailsLayout = {
       CanEdit: "0",
       Spanned: "1",
       ASpan: "4",
+      is_publishedVisible: "0",
     },
     // R: {
     //   CanSelect: "0",
@@ -70,5 +79,6 @@ export const ScenarioDetailsLayout = {
     B: "Description",
     C: "UPC",
     D: "Price",
+    is_published: "Status",
   },
 };
