@@ -14,72 +14,96 @@ export const useTreeGridInit = (
 ) => {
   const gridRef = useRef<TGrid | null>(null);
   const created = useRef(false);
+  const dataRef = useRef(data);
+  const layoutRef = useRef(layout);
+
+  // Sync refs so initGrid always sees the latest values even if captured in closure
+  useEffect(() => {
+    dataRef.current = data;
+    layoutRef.current = layout;
+  }, [data, layout]);
 
   // Create grid once
   useEffect(() => {
     const initGrid = () => {
-      if (!layout || !data) {
-        return;
-      }
-      if (created.current) {
-        return;
-      }
-      if (!window.TreeGrid) {
-        return;
-      }
+      if (!layoutRef.current || !dataRef.current) return;
+      if (created.current) return;
+      if (!window.TreeGrid) return;
 
       const container = document.getElementById(containerId);
       if (!container) {
-        console.warn(
-          `useTreeGridInit: Container #${containerId} not found in DOM yet. Delaying...`,
-        );
+        console.warn(`useTreeGridInit: Container #${containerId} not found.`);
         return;
+      }
+
+      // 🚨 CRITICAL: Dispose any existing grid with the same ID before creating a new one.
+      // This solves issues with "stale" or "zombie" grids during hot-reloads/navigation.
+      const existingGrid = (window as any).Grids?.[gridId];
+      if (existingGrid) {
+        try {
+          console.log(`Disposing existing grid before init: ${gridId}`);
+          existingGrid.Dispose();
+        } catch (e) {
+          console.error("Error disposing existing grid:", e);
+        }
       }
 
       const source = {
         id: gridId,
-        Layout: { Data: layout },
-        Data: { Data: data },
+        Layout: { Data: layoutRef.current },
+        Data: { Data: dataRef.current },
         Debug: { Check: 1 },
       };
 
       try {
+        console.log(`Creating TreeGrid: ${gridId}`);
         const grid = window.TreeGrid(source, containerId);
         gridRef.current = grid;
         created.current = true;
-
         onInit?.(grid);
       } catch (error) {
         console.error("useTreeGridInit: Error creating TreeGrid:", error);
       }
     };
 
-    // Use a small timeout to ensure DOM is ready and previous grids are disposed
-    const timer = setTimeout(initGrid, 100);
+    const timer = setTimeout(initGrid, 150); // Slightly longer delay to ensure DOM is settled
 
     return () => {
       clearTimeout(timer);
-      if (gridRef.current) {
+      const grid = gridRef.current || (window as any).Grids?.[gridId];
+      if (grid) {
         try {
-          // Force immediate disposal to clear global memory
-          gridRef.current.Dispose();
+          console.log(`Cleaning up grid: ${gridId}`);
+          grid.Dispose();
         } catch (e) {
           console.error("useTreeGridInit: Error disposing grid", e);
         }
         gridRef.current = null;
         created.current = false;
+        // Ensure the ID is removed from the global registry
+        if ((window as any).Grids) {
+          delete (window as any).Grids[gridId];
+        }
       }
     };
-  }, [layout, gridId, containerId, !!data]); // depend on data existence, not content
+  }, [gridId, containerId]);
 
   // Update data WITHOUT recreating grid
   useEffect(() => {
-    const grid = gridRef.current;
-    if (!grid || !data) return;
+    const grid = gridRef.current || (window as any).Grids?.[gridId];
+    if (!grid) return;
 
-    grid.Source.Data.Data = data;
-    grid.ReloadBody();
-  }, [data]);
+    // Check if we have real data to sync (not just an initial/empty state)
+    const hasData = data?.Body && data.Body[0]?.length > 0;
+    const isCurrentlyEmpty = !grid.GetFirst();
+
+    if (hasData || !isCurrentlyEmpty) {
+      console.log(`Syncing data update for ${gridId}:`, data);
+      grid.Source.Data.Data = data;
+      // ReloadBody is faster and keeps the current scroll position/focus if possible
+      grid.ReloadBody();
+    }
+  }, [data, gridId]);
 
   return gridRef;
 };

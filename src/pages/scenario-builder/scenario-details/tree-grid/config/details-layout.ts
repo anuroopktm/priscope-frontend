@@ -24,6 +24,11 @@ export const ScenarioDetailsLayout = {
     Deleting: "0",
     SelectingSingle: "0",
     RelWidthType: "1",
+    Export: "2",
+    ExportFormat: "XLSX",
+    ExportRows: "Visible",
+    ExportCols: "Visible",
+    ExportAction: "download",
   },
   // LeftCols: [
   //   {
@@ -37,6 +42,7 @@ export const ScenarioDetailsLayout = {
   //   },
   // ],
   Cols: [
+    { Name: "itemId", Visible: "0" },
     { Name: "A", RelWidth: "1", Type: "Text", CanSort: "0" },
     { Name: "B", RelWidth: "1", Type: "Text", CanSort: "0" },
     { Name: "C", RelWidth: "1", Type: "Text", CanSort: "0" },

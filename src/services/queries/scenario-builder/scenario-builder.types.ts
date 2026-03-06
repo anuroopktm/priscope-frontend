@@ -49,3 +49,13 @@ export interface SearchScenariosResponse {
   total: number;
   scenarios: Scenario[];
 }
+
+export interface SaveScenarioGridRequest {
+  scenario_id: string;
+  grid_data: any;
+}
+
+export interface SaveScenarioGridResponse {
+  message: string;
+  id: string;
+}

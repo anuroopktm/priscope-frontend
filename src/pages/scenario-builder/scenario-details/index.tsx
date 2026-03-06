@@ -1,4 +1,8 @@
-import { useGetScenario } from "@/services/queries/scenario-builder/scenario-builder.queries";
+import {
+  useGetScenario,
+  useSaveScenarioGrid,
+} from "@/services/queries/scenario-builder/scenario-builder.queries";
+import { useToastStore } from "@/store/useToastStore";
 import { Box } from "@mui/material";
 import { useEffect } from "react";
 import { useParams } from "react-router-dom";
@@ -7,6 +11,7 @@ import ScenarioDrawers from "./components/ScenarioDrawers";
 import ScenarioModals from "./components/ScenarioModals";
 import { useScenarioStore } from "./store/useScenarioStore";
 import { ScenarioDetailsLayout } from "./tree-grid/config/details-layout";
+import type { ScenarioRow } from "./tree-grid/hooks/useScenarioGridData";
 import { useScenarioGridData } from "./tree-grid/hooks/useScenarioGridData";
 import { useScenarioGridEvents } from "./tree-grid/hooks/useScenarioGridEvents";
 import { useTreeGridInit } from "./tree-grid/hooks/useTreeGridInit";
@@ -25,15 +30,53 @@ const ScenarioDetailsPage = () => {
   const setIsDrawerOpen = useScenarioStore((state) => state.setIsDrawerOpen);
   const activeCell = useScenarioStore((state) => state.activeCell);
 
-  const { gridData, handleEditRowConfirm, processAddItems } =
+  const { gridData, setGridData, handleEditRowConfirm, processAddItems } =
     useScenarioGridData();
 
+  useEffect(() => {
+    if (scenario?.grid_data?.Body) {
+      console.log("Syncing scenario grid_data from API:", scenario.grid_data);
+      setGridData(scenario.grid_data as { Body: ScenarioRow[][] });
+    }
+  }, [scenario, setGridData]);
+
+  const { mutate: saveScenarioGrid, isPending: isSaving } =
+    useSaveScenarioGrid();
+  const showToast = useToastStore((state) => state.showToast);
+
   const handleSaveAsDraft = () => {
-    console.log("Scenario Grid Data:", gridData);
+    if (!id) return;
+
+    saveScenarioGrid(
+      { scenario_id: id, grid_data: gridData },
+      {
+        onSuccess: (response) => {
+          showToast(
+            response?.message || "Scenario saved as draft successfully",
+            "success",
+          );
+        },
+        onError: () => {
+          showToast("Failed to save scenario", "error");
+        },
+      },
+    );
+  };
+
+  const handleExport = (format: string) => {
     const grid = (window as any).Grids?.[SCENARIO_BUILDER_GRID_ID];
     if (grid) {
-      // If there are changes in the grid that haven't been synced yet
-      console.log("Current TreeGrid Changes:", grid.GetChanges());
+      // Map excel to XLSX for TreeGrid
+      const type = format === "excel" ? "XLSX" : "CSV";
+
+      // Set properties to bypass the export configuration dialog
+      grid.ExportFormat = type;
+      grid.ExportType = type;
+      grid.ExportRows = "Visible"; // Or "All" depending on preference
+      grid.ExportCols = "Visible";
+
+      // Trigger the export action
+      grid.ActionExport();
     }
   };
 
@@ -81,6 +124,8 @@ const ScenarioDetailsPage = () => {
         title={scenario?.name}
         onAddItems={() => setIsDrawerOpen(true)}
         onSaveAsDraft={handleSaveAsDraft}
+        onExport={handleExport}
+        isSaving={isSaving}
       />
 
       <Box

@@ -3,6 +3,7 @@ import { useCallback, useState } from "react";
 // Data types based on current structure
 export interface ScenarioRow {
   id: string;
+  itemId?: string;
   Def: string;
   A: string;
   B?: string;
@@ -62,11 +63,12 @@ export const useScenarioGridData = () => {
     const mappedItems: ScenarioRow[] = items.map((item) => {
       return {
         id: `row_${Math.random().toString(36).substr(2, 9)}`,
+        itemId: item.id || "",
         Def: "R",
-        A: item.SKU || item.B || "",
-        B: item.Description || item.C || "",
-        C: item.UPC || item.D || "",
-        D: item.Price || item.E || "0",
+        A: item.SKU || item.A || "",
+        B: item.Description || item.B || "",
+        C: item.UPC || item.C || "",
+        D: item.Price || item.D || "0",
         Selected: 0,
       };
     });
@@ -106,6 +108,7 @@ export const useScenarioGridData = () => {
 
   return {
     gridData,
+    setGridData,
     handleEditRowConfirm,
     processAddItems,
   };

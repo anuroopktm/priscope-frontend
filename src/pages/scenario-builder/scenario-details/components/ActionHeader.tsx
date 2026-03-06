@@ -1,23 +1,52 @@
 import ArrowBackIcon from "@/assets/actions/arrow-left.svg?react";
 import DatabaseImportIcon from "@/assets/actions/database-import.svg?react";
 import FileImportIcon from "@/assets/actions/file-import.svg?react";
-import { Box, Button, IconButton, Stack, Typography } from "@mui/material";
+import {
+  Box,
+  Button,
+  IconButton,
+  Menu,
+  MenuItem,
+  Stack,
+  Typography,
+} from "@mui/material";
+import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 
 interface ActionHeaderProps {
   title?: string;
   onAddItems?: () => void;
   onSaveAsDraft?: () => void;
+  onExport?: (format: string) => void;
+  isSaving?: boolean;
 }
 
 const ActionHeader = ({
   title,
   onAddItems,
   onSaveAsDraft,
+  onExport,
+  isSaving,
 }: ActionHeaderProps) => {
   const navigate = useNavigate();
+  const [exportAnchorEl, setExportAnchorEl] = useState<null | HTMLElement>(
+    null,
+  );
 
   const handleBack = () => navigate("/scenario-builder");
+
+  const handleExportClick = (event: React.MouseEvent<HTMLButtonElement>) => {
+    setExportAnchorEl(event.currentTarget);
+  };
+
+  const handleExportClose = () => {
+    setExportAnchorEl(null);
+  };
+
+  const handleExportOption = (format: string) => {
+    onExport?.(format);
+    handleExportClose();
+  };
 
   return (
     <Box
@@ -48,16 +77,32 @@ const ActionHeader = ({
         )}
       </Box>
       <Stack direction="row" spacing={1} alignItems="center">
-        <Button variant="contained" onClick={onSaveAsDraft}>
-          Save as draft
+        <Button variant="contained" onClick={onSaveAsDraft} disabled={isSaving}>
+          {isSaving ? "Saving..." : "Save as draft"}
         </Button>
         <Button
           variant="contained"
           startIcon={<DatabaseImportIcon />}
-        // onClick={handleNavigate}
+          onClick={handleExportClick}
         >
           Export
         </Button>
+        <Menu
+          anchorEl={exportAnchorEl}
+          open={Boolean(exportAnchorEl)}
+          onClose={handleExportClose}
+          anchorOrigin={{
+            vertical: "bottom",
+            horizontal: "right",
+          }}
+          transformOrigin={{
+            vertical: "top",
+            horizontal: "right",
+          }}
+        >
+          <MenuItem onClick={() => handleExportOption("csv")}>CSV</MenuItem>
+          <MenuItem onClick={() => handleExportOption("excel")}>Excel</MenuItem>
+        </Menu>
         <Button
           variant="contained"
           startIcon={<FileImportIcon />}
@@ -67,7 +112,7 @@ const ActionHeader = ({
         </Button>
         <Button
           variant="contained"
-        // onClick={handleNavigate}
+          // onClick={handleNavigate}
         >
           Publish
         </Button>

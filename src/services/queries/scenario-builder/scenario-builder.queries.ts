@@ -4,10 +4,36 @@ import type { AxiosError } from "axios";
 import type {
   CreateScenarioRequest,
   CreateScenarioResponse,
+  SaveScenarioGridRequest,
+  SaveScenarioGridResponse,
   ScenarioDetail,
   SearchScenariosRequest,
   SearchScenariosResponse,
 } from "./scenario-builder.types";
+
+export const useSaveScenarioGrid = () => {
+  const queryClient = useQueryClient();
+
+  return useMutation<
+    SaveScenarioGridResponse,
+    AxiosError<{ detail: string | string[] }>,
+    SaveScenarioGridRequest
+  >({
+    mutationKey: ["save-scenario-grid"],
+    mutationFn: async ({ scenario_id, grid_data }) => {
+      const { data } = await axiosInstance.put<SaveScenarioGridResponse>(
+        `/v1/scenario-builder/scenarios/${scenario_id}/grid`,
+        { grid_data },
+      );
+      return data;
+    },
+    onSuccess: (_, { scenario_id }) => {
+      queryClient.invalidateQueries({
+        queryKey: ["get-scenario", scenario_id],
+      });
+    },
+  });
+};
 
 export const useCreateScenario = () => {
   const queryClient = useQueryClient();
