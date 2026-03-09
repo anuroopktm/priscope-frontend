@@ -74,11 +74,13 @@ const CostStep = ({ onNext }: { onNext: () => void }) => {
           }}
         />
         <Typography sx={{ fontSize: "11px", mt: 1 }}>
-          This will be the reference price for all automatic GM% calculations.
+          {/* This will be the reference price for all automatic GM% calculations. */}
+          This will become Priscope’s reference point for all gross margin (GM%)
+          calculations. You can also tag other cost fields (like Freight, Duty,
+          or Testing Fees) for reference, but they won’t affect automatic GM%.
         </Typography>
       </Box>
 
-      {/* Additional Cost Elements */}
       <Box>
         <Box
           onClick={addCostElement}
@@ -92,7 +94,7 @@ const CostStep = ({ onNext }: { onNext: () => void }) => {
           }}
         >
           <img src={addCircle} alt="" style={{ height: "100%" }} />
-          <Typography sx={{ fontSize: "12px"}}>
+          <Typography sx={{ fontSize: "12px" }}>
             Additional Cost Elements
           </Typography>
         </Box>
@@ -126,6 +128,10 @@ const CostStep = ({ onNext }: { onNext: () => void }) => {
           </Box>
         ))}
       </Box>
+      <Typography sx={{ fontSize: "11px", mt: 1 }}>
+        The primary cost field should reflect your base cost per unit — it
+        drives all gross margin calculations.
+      </Typography>
 
       <Button type="submit" variant="contained" fullWidth>
         Continue

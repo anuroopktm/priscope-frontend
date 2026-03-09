@@ -14,6 +14,9 @@ const fields = [
   { label: "Category", name: "category" },
   { label: "HS Code", name: "hsCode" },
   { label: "Supplier Name", name: "supplierName" },
+  { label: "Supplier Code", name: "supplierCode" },
+  { label: "Customer Name", name: "customerName" },
+  { label: "Customer Code", name: "customerCode" },
 ];
 
 const SystemFieldMappingsDetails = ({ onNext }: { onNext: () => void }) => {
@@ -128,9 +131,9 @@ const SystemFieldMappingsDetails = ({ onNext }: { onNext: () => void }) => {
       </Box>
       <Typography
         sx={{
-          display:'flex',
-          flexDirection:'column',
-          alignItems:'center',
+          display: "flex",
+          flexDirection: "column",
+          alignItems: "center",
           fontSize: "13px",
           color: "#4B5563",
           mt: 1,

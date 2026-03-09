@@ -13,7 +13,7 @@ interface OnboardingStore {
     core_cost_element: string;
     additional_cost_elements: string[] | null;
     core_selling_price_element: string;
-    additional_selling_price_elements: string | null;
+    additional_selling_price_elements: string[] | null;
     profitability_mode: string | null;
     system_identifier: string;
     fx_threshold: number | null;
