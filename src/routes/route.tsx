@@ -16,6 +16,8 @@ import AuthGuard from "./guards/AuthGuard";
 import GuestGuard from "./guards/GuestGuard";
 import BulkInsertPage from "@/pages/items-master-refactor/Pages/bulk-insert";
 import Onboarding from "@/pages/onboarding";
+import TenantSignUp from "@/pages/auth/tenent-sign-up";
+import TenantOtpPage from "@/pages/auth/tenent-otp-page";
 
 export const routes = [
   {
@@ -33,6 +35,14 @@ export const routes = [
       {
         path: "otp",
         element: <OtpPage />,
+      },
+      {
+        path: "tenant-sign-up",
+        element: <TenantSignUp />,
+      },
+      {
+        path: "tenant-otp",
+        element: <TenantOtpPage />,
       },
     ],
   },
