@@ -90,21 +90,15 @@ const ActionHeader = ({ onSearch, selectedScenarioId }: ActionHeaderProps) => {
         <SearchTextField onSearch={onSearch} />
 
         <Box sx={{ display: "flex", alignItems: "center", gap: 2 }}>
-          <Button
-            variant="outlined"
-            startIcon={<AccountTreeIcon />}
-            onClick={() => setForkOpen(true)}
-            disabled={!selectedScenarioId}
-            sx={{
-              bgcolor: "background.paper",
-              "&:hover": {
-                bgcolor: "grey.100",
-              },
-            }}
-          >
-            Fork
-          </Button>
-
+          {selectedScenarioId && (
+            <Button
+              variant="contained"
+              startIcon={<AccountTreeIcon />}
+              onClick={() => setForkOpen(true)}
+            >
+              Fork
+            </Button>
+          )}
           <Button
             variant="contained"
             startIcon={<AddIcon />}
