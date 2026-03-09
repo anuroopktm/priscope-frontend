@@ -1,5 +1,6 @@
 import { useCreateScenarioComment } from "@/services/queries/scenario-builder/scenario-builder.queries";
 import { useToastStore } from "@/store/useToastStore";
+import { getErrorMessage } from "@/utils/error-helper";
 import CheckIcon from "@mui/icons-material/Check";
 import CloseIcon from "@mui/icons-material/Close";
 import {
@@ -58,8 +59,8 @@ const ScenarioCommentPopover = () => {
           showToast("Comment added successfully", "success");
           handleClose();
         },
-        onError: () => {
-          showToast("Failed to add comment", "error");
+        onError: (error) => {
+          showToast(getErrorMessage(error, "Failed to add comment"), "error");
         },
       },
     );

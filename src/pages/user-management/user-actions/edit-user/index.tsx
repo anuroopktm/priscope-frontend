@@ -6,6 +6,7 @@ import {
   useUpdateUser,
 } from "@/services/user-management/user-management.queries";
 import { useToastStore } from "@/store/useToastStore";
+import { getErrorMessage } from "@/utils/error-helper";
 import {
   manageUserSchema,
   type ManageUserFormValues,
@@ -91,10 +92,7 @@ const EditUserPage = () => {
       showToast("User updated successfully", "success");
       navigate(`/user-management/user-details/${userId}`);
     } catch (error: any) {
-      showToast(
-        error.response?.data?.detail || "Failed to update user",
-        "error",
-      );
+      showToast(getErrorMessage(error, "Failed to update user"), "error");
     }
   };
 

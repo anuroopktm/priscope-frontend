@@ -4,6 +4,7 @@ import {
   useInviteUser,
 } from "@/services/user-management/user-management.queries";
 import { useToastStore } from "@/store/useToastStore";
+import { getErrorMessage } from "@/utils/error-helper";
 import {
   manageUserSchema,
   type ManageUserFormValues,
@@ -63,10 +64,7 @@ const CreateUserPage = () => {
           setShowModal(true);
         },
         onError: (error) => {
-          showToast(
-            error.response?.data?.detail || "Failed to invite user",
-            "error",
-          );
+          showToast(getErrorMessage(error, "Failed to invite user"), "error");
         },
       },
     );
@@ -93,7 +91,7 @@ const CreateUserPage = () => {
         },
         onError: (error) => {
           showToast(
-            error.response?.data?.detail || "Failed to create template",
+            getErrorMessage(error, "Failed to create template"),
             "error",
           );
         },
@@ -118,8 +116,11 @@ const CreateUserPage = () => {
         onSuccess: () => {
           handleCreateInvitation();
         },
-        onError: () => {
-          showToast("Failed to check template", "error");
+        onError: (error) => {
+          showToast(
+            getErrorMessage(error, "Failed to check template"),
+            "error",
+          );
         },
       },
     );

@@ -24,12 +24,12 @@ export const ScenarioGridLayout = {
     ShowDeleted: "0",
     AutoUpdate: "1",
     CanMove: "2",
-    Sorting: "0",
-    FilterLap: "1",
-    Html: "1",
-    Filter: "1",
+    SelectionMode: "1",
+    Selecting: "1",
+    Panel: "1",
     Toolbar: "0",
-    Panel: "0",
+    Status: "0",
+    PageBar: "0",
   },
   Cols: [
     {

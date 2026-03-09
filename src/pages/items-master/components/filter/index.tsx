@@ -12,6 +12,7 @@ import SaveFilterModal from "@/components/common/save-filter";
 import ConfirmationDialog from "@/components/common/upload-modal/confirmation-modal";
 import { useSaveFilter } from "@/services/queries/item-master/item-master.queries";
 import { useToastStore } from "@/store/useToastStore";
+import { getErrorMessage } from "@/utils/error-helper";
 import { openConfirmationModal } from "@/utils/getRequestConfirmationModal";
 import AddIcon from "@mui/icons-material/Add";
 import DeleteOutlineIcon from "@mui/icons-material/DeleteOutline";
@@ -179,8 +180,8 @@ const Filter: React.FC<FilterProps> = ({
         showToast("Filter added successfully!", "success");
         queryClient.invalidateQueries({ queryKey: ["saved-filter"] });
       },
-      onError: () => {
-        showToast("Failed to add filter", "error");
+      onError: (error) => {
+        showToast(getErrorMessage(error, "Failed to add filter"), "error");
       },
     });
   };

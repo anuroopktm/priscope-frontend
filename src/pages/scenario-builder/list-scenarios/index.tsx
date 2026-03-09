@@ -3,6 +3,7 @@ import {
   useListScenarios,
 } from "@/services/queries/scenario-builder/scenario-builder.queries";
 import { useToastStore } from "@/store/useToastStore";
+import { getErrorMessage } from "@/utils/error-helper";
 import { Box } from "@mui/material";
 import { useEffect, useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
@@ -27,6 +28,7 @@ const ScenarioListingPage = () => {
   const [searchTerm, setSearchTerm] = useState<string | undefined>(undefined);
   const [deleteModalOpen, setDeleteModalOpen] = useState(false);
   const [selectedRowId, setSelectedRowId] = useState<string | null>(null);
+  const [selectedForFork, setSelectedForFork] = useState<string | null>(null);
   const showToast = useToastStore((state) => state.showToast);
 
   const { data: scenariosData } = useListScenarios({
@@ -37,6 +39,22 @@ const ScenarioListingPage = () => {
   });
 
   const { mutate: deleteScenario, isPending: isDeleting } = useDeleteScenario();
+
+  const handleGridInit = (grid: any) => {
+    if (window.TGSetEvent) {
+      window.TGSetEvent(
+        "OnSelect",
+        gridId,
+        (grid: any, row: any, deselect: boolean) => {
+          if (deselect) {
+            setSelectedForFork(null);
+          } else {
+            setSelectedForFork(row.id);
+          }
+        },
+      );
+    }
+  };
 
   useEffect(() => {
     window.handleTreeGridDelete = (id: string) => {
@@ -51,6 +69,9 @@ const ScenarioListingPage = () => {
     return () => {
       delete window.handleTreeGridDelete;
       delete window.handleTreeGridEdit;
+      if (window.TGDelEvent) {
+        window.TGDelEvent("OnSelect", gridId);
+      }
     };
   }, [navigate]);
 
@@ -59,7 +80,13 @@ const ScenarioListingPage = () => {
     return mapScenariosToGridBody(scenariosData?.scenarios);
   }, [scenariosData]);
 
-  useTreeGridInit(gridId, gridContainerId, ScenarioGridLayout, gridData);
+  useTreeGridInit(
+    gridId,
+    gridContainerId,
+    ScenarioGridLayout,
+    gridData,
+    handleGridInit,
+  );
 
   const handleDeleteConfirm = () => {
     if (!selectedRowId) return;
@@ -70,8 +97,8 @@ const ScenarioListingPage = () => {
         setDeleteModalOpen(false);
         setSelectedRowId(null);
       },
-      onError: () => {
-        showToast("Failed to delete scenario", "error");
+      onError: (error) => {
+        showToast(getErrorMessage(error, "Failed to delete scenario"), "error");
       },
     });
   };
@@ -89,7 +116,10 @@ const ScenarioListingPage = () => {
           overflow: "hidden",
         }}
       >
-        <ActionHeader onSearch={setSearchTerm} />
+        <ActionHeader
+          onSearch={setSearchTerm}
+          selectedScenarioId={selectedForFork}
+        />
 
         <Box
           sx={{

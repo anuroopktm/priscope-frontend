@@ -5,6 +5,7 @@ import SocialAuthButtons from "@/pages/auth/common/SocialAuthButtons";
 import { useUserLogin } from "@/services/queries/auth/sign-in/sign-in.queries";
 import { useToastStore } from "@/store/useToastStore";
 import { encryptData } from "@/utils/encryption";
+import { getErrorMessage } from "@/utils/error-helper";
 import {
   signInSchema,
   type SignInSchema,
@@ -60,8 +61,10 @@ const SignInForm = () => {
         },
         onError: (error) => {
           showToast(
-            error.response?.data.detail ||
+            getErrorMessage(
+              error,
               "Login failed. Please check your credentials.",
+            ),
             "error",
           );
         },

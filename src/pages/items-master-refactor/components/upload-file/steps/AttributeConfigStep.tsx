@@ -1,6 +1,7 @@
 import { useMapItemMasterFields } from "@/services/queries/item-master-refactor/item-master-refactor.queries";
 import type { MapFieldsRequestBody } from "@/services/queries/item-master-refactor/item-master-refactor.types";
 import { useToastStore } from "@/store/useToastStore";
+import { getErrorMessage } from "@/utils/error-helper";
 import { InsertDriveFile as FileIconFilled } from "@mui/icons-material";
 import {
   Box,
@@ -81,7 +82,7 @@ const AttributeConfigStep = forwardRef<
           handleClose();
         },
         onError: (err: any) =>
-          showToast(err.message || "Mapping failed", "error"),
+          showToast(getErrorMessage(err, "Mapping failed"), "error"),
       },
     );
   };

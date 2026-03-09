@@ -1,4 +1,5 @@
 "use client";
+import { getErrorMessage } from "@/utils/error-helper";
 import {
   Alert,
   Box,
@@ -109,7 +110,10 @@ const UploadModal: React.FC<ExtendedUploadModalProps> = ({
       }
     } catch (error) {
       setUploadState("error");
-      const errorMessage = "Upload failed. Please try again.";
+      const errorMessage = getErrorMessage(
+        error,
+        "Upload failed. Please try again.",
+      );
 
       setErrorMessage(errorMessage);
       showToast(errorMessage, "error");

@@ -1,5 +1,6 @@
 import { useEditItemMasterItem } from "@/services/queries/item-master-refactor/item-master-refactor.queries";
 import { useToastStore } from "@/store/useToastStore";
+import { getErrorMessage } from "@/utils/error-helper";
 import { openConfirmationModal } from "@/utils/getRequestConfirmationModal";
 import { useQueryClient } from "@tanstack/react-query";
 
@@ -92,9 +93,12 @@ export const useHandleGridEditConfirm = () => {
           showToast?.("Item updated successfully!", "success");
           queryClient.invalidateQueries({ queryKey: ["item-master-history"] });
         },
-        onError: () => {
+        onError: (error) => {
           // setShowLoader(false);
-          showToast?.("Failed to save changes. Please try again.", "warning");
+          showToast?.(
+            getErrorMessage(error, "Failed to save changes. Please try again."),
+            "error",
+          );
         },
       },
     );

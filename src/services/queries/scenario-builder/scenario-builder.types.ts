@@ -69,7 +69,8 @@ export interface PublishScenarioResponse {
 
 export interface PartialPublishScenarioRequest {
   scenario_id: string;
-  row_ids: string[];
+  item_ids: string[];
+  group_ids?: string[];
 }
 
 export interface CreateScenarioCommentRequest {
@@ -104,4 +105,17 @@ export interface SearchScenarioCommentsRequest {
 export interface ScenarioCommentListResponse {
   total: number;
   comments: ScenarioComment[];
+}
+
+export interface ForkScenarioRequest {
+  scenario_id: string;
+  name: string;
+}
+
+export interface ForkScenarioResponse {
+  id: string;
+  name: string;
+  forked_from: string;
+  status: string;
+  message: string;
 }

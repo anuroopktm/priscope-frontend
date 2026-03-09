@@ -64,10 +64,11 @@ const CommentModal = ({
         <Button
           size="small"
           variant="contained"
-          disabled={isLoading || !commentText.trim()}
+          disabled={!commentText.trim()}
+          loading={isLoading}
           onClick={handleSubmit}
         >
-          {isLoading ? "Submitting..." : "Submit"}
+          Submit
         </Button>
       </DialogActions>
     </Dialog>

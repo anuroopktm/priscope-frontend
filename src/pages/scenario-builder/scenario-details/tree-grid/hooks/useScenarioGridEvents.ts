@@ -229,11 +229,15 @@ export const useScenarioGridEvents = ({
     };
 
     const onGetHtmlValue = (grid: any, row: any, col: string, val: string) => {
-      if (grid.id !== gridId) return val;
-      if (row.Kind === "Header") return val;
+      if (!grid || grid.id !== gridId) return val;
+      if (!row || row.Kind !== "Data") return val;
 
       if (col === "is_published") {
-        const isPublished = parseInt(val) === 1;
+        // Hiding status for child rows (nested rows have Level > 0)
+        // Group rows are typically Level 0 (top-level)
+        if (row.Level > 0) return "";
+
+        const isPublished = String(val) === "1";
         const status = isPublished ? "published" : "draft";
 
         return renderStatusBadge(status);
@@ -258,15 +262,23 @@ export const useScenarioGridEvents = ({
       return 0;
     };
 
-    const onHandleSelect = (grid: any) => {
+    const updateSelectionCount = (grid: any) => {
       if (!grid || grid.id !== gridId) return;
-      const selRows = grid.GetSelRows();
-      onSelectionChange?.(selRows.length);
+      // Small delay to let TreeGrid finish updating the internal selection state
+      setTimeout(() => {
+        const selRows = grid.GetSelRows();
+        onSelectionChange?.(selRows.length);
+      }, 50);
     };
 
     if (window.TGSetEvent) {
       window.TGSetEvent("OnRightClick", gridId, onHandleRightClick);
-      window.TGSetEvent("OnSelect", gridId, onHandleSelect);
+      window.TGSetEvent("OnSelect", gridId, (grid: any) =>
+        updateSelectionCount(grid),
+      );
+      window.TGSetEvent("OnSelectAll", gridId, (grid: any) =>
+        updateSelectionCount(grid),
+      );
       window.TGSetEvent("OnGetHtmlValue", gridId, onGetHtmlValue);
       window.TGSetEvent("OnEndEdit", gridId, onHandleEditFinish);
     }
@@ -290,6 +302,7 @@ export const useScenarioGridEvents = ({
       if (window.TGDelEvent) {
         window.TGDelEvent("OnRightClick", gridId);
         window.TGDelEvent("OnSelect", gridId);
+        window.TGDelEvent("OnSelectAll", gridId);
         window.TGDelEvent("OnGetHtmlValue", gridId);
         window.TGDelEvent("OnEndEdit", gridId);
       }

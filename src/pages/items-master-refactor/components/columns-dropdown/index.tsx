@@ -1,3 +1,7 @@
+import CreateColumnModal from "@/pages/items-master/components/add-column-modal";
+import { useAddHeader } from "@/services/queries/item-master/item-master.queries";
+import { useToastStore } from "@/store/useToastStore";
+import { getErrorMessage } from "@/utils/error-helper";
 import KeyboardArrowDownRoundedIcon from "@mui/icons-material/KeyboardArrowDownRounded";
 import {
   Box,
@@ -12,15 +16,12 @@ import {
   Typography,
   useTheme,
 } from "@mui/material";
-import type { HeaderList } from "../../types/types";
-import { useState } from "react";
-import CreateColumnModal from "@/pages/items-master/components/add-column-modal";
 import { useQueryClient } from "@tanstack/react-query";
-import { useAddHeader } from "@/services/queries/item-master/item-master.queries";
-import { useToastStore } from "@/store/useToastStore";
-import { hideColumn, showColumn } from "../../tree-grid/columns/Columns";
-import { useItemMasterStore } from "../../store/useItemMasterStore";
+import { useState } from "react";
 import { DEfAULT_VISIBLE_COLUMNS } from "../../constants/headers.constants";
+import { useItemMasterStore } from "../../store/useItemMasterStore";
+import { hideColumn, showColumn } from "../../tree-grid/Columns/Columns";
+import type { HeaderList } from "../../types/types";
 
 export interface ColumnDropdownProps {
   headers: HeaderList[] | null;
@@ -92,8 +93,11 @@ const ColumnDropdown = ({ headers }: ColumnDropdownProps) => {
         handleColumnVisibility(label, true);
         showToast("Column added successfully!", "success");
       },
-      onError: () => {
-        showToast("Failed to add column. Please try again.", "error");
+      onError: (error) => {
+        showToast(
+          getErrorMessage(error, "Failed to add column. Please try again."),
+          "error",
+        );
       },
     });
     setSearch("");

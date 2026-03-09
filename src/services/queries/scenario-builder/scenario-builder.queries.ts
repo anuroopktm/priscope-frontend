@@ -5,6 +5,8 @@ import type {
   CreateScenarioCommentRequest,
   CreateScenarioRequest,
   CreateScenarioResponse,
+  ForkScenarioRequest,
+  ForkScenarioResponse,
   PartialPublishScenarioRequest,
   PublishScenarioResponse,
   SaveScenarioGridRequest,
@@ -99,10 +101,10 @@ export const usePartialPublishScenario = () => {
     PartialPublishScenarioRequest
   >({
     mutationKey: ["partial-publish-scenario"],
-    mutationFn: async ({ scenario_id, row_ids }) => {
+    mutationFn: async ({ scenario_id, item_ids, group_ids }) => {
       const { data } = await axiosInstance.post<PublishScenarioResponse>(
         `/v1/scenario-builder/scenarios/${scenario_id}/publish/partial`,
-        { row_ids },
+        { item_ids, group_ids },
       );
       return data;
     },
@@ -212,4 +214,29 @@ export const useDeleteScenario = () => {
       },
     },
   );
+};
+
+export const useForkScenario = () => {
+  const queryClient = useQueryClient();
+
+  return useMutation<
+    ForkScenarioResponse,
+    AxiosError<{ detail: string | string[] }>,
+    ForkScenarioRequest
+  >({
+    mutationKey: ["fork-scenario"],
+    mutationFn: async ({ scenario_id, name }) => {
+      const { data } = await axiosInstance.post<ForkScenarioResponse>(
+        `/v1/scenario-builder/scenarios/${scenario_id}/fork`,
+        { name },
+      );
+      return data;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({
+        queryKey: ["list-scenarios"],
+        exact: false,
+      });
+    },
+  });
 };

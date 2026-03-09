@@ -1,5 +1,6 @@
 import { useListSystemFields } from "@/services/queries/item-master-refactor/item-master-refactor.queries";
 import { useToastStore } from "@/store/useToastStore";
+import { getErrorMessage } from "@/utils/error-helper";
 import {
   Box,
   FormControl,
@@ -50,7 +51,11 @@ const SetControlFieldStep = forwardRef<SetControlFieldStepRef>((_, ref) => {
           setValue("systemFieldMapping", initialMapping);
           setValue("activeStep", 2);
         },
-        onError: () => showToast("Failed to fetch system fields", "error"),
+        onError: (error) =>
+          showToast(
+            getErrorMessage(error, "Failed to fetch system fields"),
+            "error",
+          ),
       });
     },
     isPending,

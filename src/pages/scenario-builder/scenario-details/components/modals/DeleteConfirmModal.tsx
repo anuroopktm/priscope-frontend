@@ -55,11 +55,11 @@ const DeleteConfirmModal = ({
         <Button
           size="medium"
           variant="contained"
-          disabled={isLoading}
+          loading={isLoading}
           onClick={onConfirm}
           sx={{ minWidth: 100 }}
         >
-          {isLoading ? "Deleting..." : "Delete"}
+          Delete
         </Button>
       </DialogActions>
     </Dialog>

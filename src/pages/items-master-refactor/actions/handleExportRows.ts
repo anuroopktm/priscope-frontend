@@ -1,7 +1,8 @@
-import type { MutateOptions } from "@tanstack/react-query";
-import { useItemMasterStore } from "../store/useItemMasterStore";
 import { useToastStore } from "@/store/useToastStore";
+import { getErrorMessage } from "@/utils/error-helper";
+import type { MutateOptions } from "@tanstack/react-query";
 import type { ExportItemMasterRowPayload } from "../helper/types";
+import { useItemMasterStore } from "../store/useItemMasterStore";
 
 interface HandleItemMasterExportParams {
   itemMasterExportRowMutate: (
@@ -62,15 +63,15 @@ export const handleItemMasterExport = ({
             link.remove();
           }
         },
-        onError: () => {
+        onError: (error) => {
           //   setLoading(false);
-          showToast("Failed to download file", "error");
+          showToast(getErrorMessage(error, "Failed to download file"), "error");
         },
       });
     },
-    onError: () => {
+    onError: (error) => {
       //   setLoading(false);
-      showToast("Failed to export rows", "error");
+      showToast(getErrorMessage(error, "Failed to export rows"), "error");
     },
   });
 };

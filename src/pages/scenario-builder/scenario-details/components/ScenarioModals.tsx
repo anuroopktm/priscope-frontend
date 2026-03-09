@@ -1,5 +1,6 @@
 import { useCreateScenarioComment } from "@/services/queries/scenario-builder/scenario-builder.queries";
 import { useToastStore } from "@/store/useToastStore";
+import { getErrorMessage } from "@/utils/error-helper";
 import { useParams } from "react-router-dom";
 import { useShallow } from "zustand/react/shallow";
 import {
@@ -126,8 +127,8 @@ const ScenarioModals = ({
           setIsCommentModalOpen(false);
           setCommentModalCell(null);
         },
-        onError: () => {
-          showToast("Failed to add comment", "error");
+        onError: (error) => {
+          showToast(getErrorMessage(error, "Failed to add comment"), "error");
         },
       },
     );

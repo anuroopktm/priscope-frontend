@@ -15,7 +15,6 @@ import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useScenarioStore } from "../store/useScenarioStore";
 
-// Use the same ID as in the page component
 const THE_GRID_ID = "ScenarioGridDetails";
 
 interface ActionHeaderProps {
@@ -24,7 +23,7 @@ interface ActionHeaderProps {
   onSaveAsDraft?: () => void;
   onExport?: (format: string) => void;
   onPublish?: () => void;
-  onPartialPublish?: (rowIds: string[]) => void;
+  onPartialPublish?: (itemIds: string[], groupIds: string[]) => void;
   isSaving?: boolean;
   isPublishing?: boolean;
   selectedRowsCount?: number;
@@ -126,8 +125,13 @@ const ActionHeader = ({
         >
           Add Items
         </Button>
-        <Button variant="contained" onClick={onPublish} disabled={isPublishing}>
-          {isPublishing ? "Publishing..." : "Publish"}
+        <Button
+          variant="contained"
+          onClick={onPublish}
+          loading={isPublishing}
+          sx={{ minWidth: "90px" }}
+        >
+          Publish
         </Button>
         {selectedRowsCount > 0 && (
           <Button
@@ -137,11 +141,41 @@ const ActionHeader = ({
               const grid = (window as any).Grids?.[THE_GRID_ID];
               if (grid) {
                 const selRows = grid.GetSelRows();
-                const rowIds = selRows.map((row: any) => row.id);
-                onPartialPublish?.(rowIds);
+                const itemIdSet = new Set<string>();
+                const groupIdSet = new Set<string>();
+
+                const collectItemIdsRecursive = (parentRow: any) => {
+                  let child = parentRow.firstChild;
+                  while (child) {
+                    if (child.itemId) {
+                      itemIdSet.add(child.itemId);
+                    }
+                    if (child.firstChild) {
+                      collectItemIdsRecursive(child);
+                    }
+                    child = child.nextSibling;
+                  }
+                };
+
+                selRows.forEach((row: any) => {
+                  // If it's a group or has children, it's a group
+                  if (row.Def?.Name === "Group" || row.firstChild) {
+                    groupIdSet.add(row.id);
+                    collectItemIdsRecursive(row);
+                  } else {
+                    // Top-level individual item
+                    itemIdSet.add(row.itemId || row.id);
+                  }
+                });
+
+                onPartialPublish?.(
+                  Array.from(itemIdSet),
+                  Array.from(groupIdSet),
+                );
               }
             }}
-            disabled={isPublishing}
+            loading={isPublishing}
+            sx={{ minWidth: "150px" }}
           >
             Partial Publish ({selectedRowsCount})
           </Button>

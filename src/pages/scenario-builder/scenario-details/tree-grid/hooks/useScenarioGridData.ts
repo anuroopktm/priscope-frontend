@@ -12,6 +12,8 @@ export interface ScenarioRow {
   E?: string;
   is_published?: number;
   Selected?: number;
+  CanSelect?: number;
+  PanelSelect?: number;
   ACanEdit?: number;
   AHtmlPostfix?: string;
   Items?: ScenarioRow[];
@@ -72,6 +74,8 @@ export const useScenarioGridData = () => {
         D: item.Price || item.D || "0",
         is_published: 0,
         Selected: 0,
+        CanSelect: groupName ? 0 : 1,
+        PanelSelect: groupName ? 0 : 1,
       };
     });
 
@@ -95,6 +99,7 @@ export const useScenarioGridData = () => {
           Expanded: "1",
           is_published: 0,
           Selected: 0,
+          CanSelect: 1,
         };
         itemsToAdd = [groupRow];
       } else {

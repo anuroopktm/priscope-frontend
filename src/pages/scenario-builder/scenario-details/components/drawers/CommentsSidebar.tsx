@@ -62,26 +62,15 @@ const CommentsSidebar = () => {
 
     if (grid) {
       const targetRow = grid.GetRowById(rowId);
+
       if (targetRow) {
-        // Clear previous cell-level highlight if exists
-        const lastCell = (window as any).lastCommentHighlightedCell;
-        if (lastCell) {
-          const lastRow = grid.GetRowById(lastCell.rowId);
-          if (lastRow) {
-            grid.SetAttribute(lastRow, lastCell.colName, "Background", "", 1);
-            grid.SetAttribute(lastRow, lastCell.colName, "TextStyle", "", 1);
-            grid.RefreshRow(lastRow);
-          }
-        }
+        // 1. Focus the cell (gives the visual indicator without selecting for publish)
+        grid.Focus(targetRow, colName, null, null, 2);
 
-        // Apply distinct highlight (Light Yellow background + Strong Border)
-        grid.SetAttribute(targetRow, colName, "Background", "#FFF9C4", 1);
-        (window as any).lastCommentHighlightedCell = { rowId, colName };
-
-        // Focus and Scroll
-        grid.Focus(targetRow, colName, null, null, 1);
+        // 2. Scroll the cell into view
         grid.ScrollIntoView(targetRow, colName);
-        grid.RefreshRow(targetRow);
+      } else {
+        console.warn(`Row not found: ${rowId}`);
       }
     }
   };
@@ -95,6 +84,7 @@ const CommentsSidebar = () => {
         flexDirection: "column",
         bgcolor: "background.paper",
         borderRadius: 1,
+        overflow: "hidden",
       }}
     >
       {/* Header */}
@@ -182,8 +172,12 @@ const CommentsSidebar = () => {
                     width: "100%",
                     p: 2,
                     borderRadius: 2,
-                    bgcolor: index % 2 === 0 ? "#F1F5F9" : "transparent",
-                    border: index % 2 === 0 ? "none" : "1px solid #E2E8F0",
+                    bgcolor: "#F1F5F9",
+                    border: "1px solid #E2E8F0",
+                    transition: "all 0.2s ease-in-out",
+                    "&:hover": {
+                      bgcolor: "#E2E8F0",
+                    },
                   }}
                 >
                   <Stack direction="row" spacing={1.5}>
