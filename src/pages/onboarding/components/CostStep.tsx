@@ -1,6 +1,6 @@
 import { Box, Button, IconButton, TextField, Typography } from "@mui/material";
 import { useOnboardingStore } from "../store/useOnboardingStore";
-import { useForm, Controller } from "react-hook-form";
+import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import {
   costStepSchema,

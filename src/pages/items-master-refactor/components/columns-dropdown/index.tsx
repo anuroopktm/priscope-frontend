@@ -100,9 +100,6 @@ const ColumnDropdown = ({ headers }: ColumnDropdownProps) => {
     setAnchorEl(null);
   };
 
-  console.log("grid", grid);
-  console.log("grid current", grid?.current);
-  console.log("ShowCol exists", grid?.ShowCol);
   return (
     <>
       <Button

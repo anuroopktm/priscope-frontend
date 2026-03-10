@@ -75,6 +75,7 @@ export type MapFieldsRequestBody = {
   control_fields: Record<string, string>;
   system_fields: SystemField[];
   attributes: AttributeField[];
+  type:string
 };
 
 export type MapFieldsResponse = {

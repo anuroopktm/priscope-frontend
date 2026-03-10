@@ -190,6 +190,7 @@ const ItemMasterListingPage = () => {
   });
 
   const onClickCellComment = (grid: TGrid, row: TRow, col: string) => {
+    if(!grid) return
     setOnSubmitComment(() => (comment: string) => {
       const id = row?.id || "";
       handleConfirmComment(COMMENT_TYPE.CELL, id, col, comment);
@@ -210,17 +211,18 @@ const ItemMasterListingPage = () => {
     setOpenPanel((prev) => (prev === panel ? null : panel));
   }, []);
 
-  const handleSkuUpcClick = (rowId: string, col: string, value: string) => {
+  const handleSkuUpcClick = (rowId: string) => {
     setDetailedViewId(rowId);
     setOpenPanel((prev) => (prev === "detail-view" ? prev : "detail-view"));
   };
 
   const onCellClick = (grid: TGrid, row: TRow, col: string) => {
+    if (!grid) return;
     if (!row || row.Kind !== "Data") return;
     if (col === "SKU" || col === "UPC") {
       const value = row[col];
       if (!value) return;
-      handleSkuUpcClick(row.id, col, value);
+      handleSkuUpcClick(row.id);
     }
   };
 

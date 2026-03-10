@@ -8,9 +8,8 @@ import {
   DialogTitle,
   FormControlLabel,
   Typography,
-  useTheme,
 } from "@mui/material";
-import React, { useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import { createPortal } from "react-dom";
 
 interface ConfirmDialogProps {
@@ -36,7 +35,6 @@ export function ConfirmDialog({
   onConfirm,
   onCancel,
 }: ConfirmDialogProps) {
-  const theme = useTheme();
   const [mounted, setMounted] = useState(false);
   const [dontShowAgain, setDontShowAgain] = useState(false);
 
@@ -62,17 +60,14 @@ export function ConfirmDialog({
       <DialogTitle sx={{ textAlign: "center", pb: 1 }}>
         <Typography
           fontWeight="700"
-          sx={{ color:"#1A2B44", fontSize: "14px" }}
+          sx={{ color: "#1A2B44", fontSize: "14px" }}
         >
           {header}
         </Typography>
       </DialogTitle>
 
       <DialogContent sx={{ textAlign: "center", py: 2 }}>
-        <Typography
-          variant="body1"
-          sx={{ color:"#1A2B44", fontSize: "14px" }}
-        >
+        <Typography variant="body1" sx={{ color: "#1A2B44", fontSize: "14px" }}>
           {message}
         </Typography>
       </DialogContent>
@@ -101,7 +96,7 @@ export function ConfirmDialog({
               textTransform: "none",
               fontWeight: 600,
               borderColor: "#144E72",
-              color:"#1A2B44",
+              color: "#1A2B44",
               height: "40px",
             }}
           >
@@ -138,10 +133,7 @@ export function ConfirmDialog({
               />
             }
             label={
-              <Typography
-                variant="body2"
-                sx={{ color:"#1A2B44" }}
-              >
+              <Typography variant="body2" sx={{ color: "#1A2B44" }}>
                 {checkboxLabel}
               </Typography>
             }
