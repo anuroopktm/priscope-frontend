@@ -1,6 +1,6 @@
 import AddIcon from "@/assets/actions/add.svg?react";
 import SearchTextField from "@/components/common/SearchTextField";
-import { Box, Button, Stack } from "@mui/material";
+import { Box, Button, MenuItem, Select, Stack } from "@mui/material";
 import { useState } from "react";
 import UploadFileModal from "./upload-file/UploadFileModal";
 import { useItemMasterStore } from "../store/useItemMasterStore";
@@ -34,6 +34,7 @@ import { FILE_FILTER_OPTIONS } from "@/constants/file-modal.constants";
 import FileDetailsModal from "./file-detail-modal";
 import { useNavigate } from "react-router-dom";
 import AdminRequestConfirmationModal from "./admin-request-confirmation-modal";
+import { builderItem } from "../constants/builderItem.constants";
 
 interface ActionHeaderProps {
   onSearch: (value: string) => void;
@@ -41,7 +42,7 @@ interface ActionHeaderProps {
   headers: HeaderList[] | null;
   onToggleCommentsPanel: () => void;
   hasAddItemMasterPrivilege: boolean;
-  isUploadModalOpen :boolean;
+  isUploadModalOpen: boolean;
   setIsUploadModalOpen: (open: boolean) => void;
 }
 
@@ -52,7 +53,7 @@ const ActionHeader = ({
   onToggleCommentsPanel,
   hasAddItemMasterPrivilege,
   isUploadModalOpen,
-  setIsUploadModalOpen
+  setIsUploadModalOpen,
 }: ActionHeaderProps) => {
   const navigate = useNavigate();
   const [openDeleteModal, setOpenDeleteModal] = useState<boolean>(false);
@@ -138,7 +139,7 @@ const ActionHeader = ({
 
       {selectedRows.length > 0 ? (
         <>
-          <div>
+          <Stack direction="row" spacing={0.5} alignItems="center">
             <Button
               onClick={handleOpenDeleteModal}
               disabled={false}
@@ -159,6 +160,25 @@ const ActionHeader = ({
             >
               Delete Selected
             </Button>
+            <Select
+              value=""
+              variant="filled"
+              disableUnderline
+              displayEmpty
+              onChange={(e: any) => navigate(e.target.value)}
+              renderValue={() => (
+                <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
+                  <img src={builderItem.icon} width={16} />
+                  {builderItem.label}
+                </Box>
+              )}
+            >
+              {builderItem.items.map((sub) => (
+                <MenuItem key={sub.path} value={sub.path}>
+                  {sub.label}
+                </MenuItem>
+              ))}
+            </Select>
 
             <Button
               onClick={() =>
@@ -184,7 +204,7 @@ const ActionHeader = ({
             >
               Export Selected
             </Button>
-          </div>
+          </Stack>
         </>
       ) : (
         <Stack
