@@ -233,9 +233,7 @@ export const useScenarioGridEvents = ({
       if (!row || row.Kind !== "Data") return val;
 
       if (col === "is_published") {
-        // Hiding status for child rows (nested rows have Level > 0)
-        // Group rows are typically Level 0 (top-level)
-        if (row.Level > 0) return "";
+        if (row.Def?.Name === "Group") return "";
 
         const isPublished = String(val) === "1";
         const status = isPublished ? "published" : "draft";

@@ -127,17 +127,8 @@ const ActionHeader = ({
         </Button>
         <Button
           variant="contained"
-          onClick={onPublish}
-          loading={isPublishing}
-          sx={{ minWidth: "90px" }}
-        >
-          Publish
-        </Button>
-        {selectedRowsCount > 0 && (
-          <Button
-            variant="contained"
-            color="secondary"
-            onClick={() => {
+          onClick={() => {
+            if (selectedRowsCount > 0) {
               const grid = (window as any).Grids?.[THE_GRID_ID];
               if (grid) {
                 const selRows = grid.GetSelRows();
@@ -158,12 +149,10 @@ const ActionHeader = ({
                 };
 
                 selRows.forEach((row: any) => {
-                  // If it's a group or has children, it's a group
                   if (row.Def?.Name === "Group" || row.firstChild) {
                     groupIdSet.add(row.id);
                     collectItemIdsRecursive(row);
                   } else {
-                    // Top-level individual item
                     itemIdSet.add(row.itemId || row.id);
                   }
                 });
@@ -173,13 +162,15 @@ const ActionHeader = ({
                   Array.from(groupIdSet),
                 );
               }
-            }}
-            loading={isPublishing}
-            sx={{ minWidth: "150px" }}
-          >
-            Partial Publish ({selectedRowsCount})
-          </Button>
-        )}
+            } else {
+              onPublish?.();
+            }
+          }}
+          loading={isPublishing}
+          sx={{ minWidth: "90px" }}
+        >
+          {selectedRowsCount > 0 ? `Publish (${selectedRowsCount})` : "Publish"}
+        </Button>
         <IconButton
           onClick={() => setIsCommentsSidebarOpen(true)}
           sx={{

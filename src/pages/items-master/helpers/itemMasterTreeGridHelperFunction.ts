@@ -17,8 +17,6 @@ import {
   type TreeGridRow,
 } from "./types";
 
-const DEfAULT_VISIBLE_COLUMNS = ["SKU", "UPC", "Category", "Description"];
-
 export const buildItemMasterTreeGridCols = (
   items: itemMasterHeaderResponseArrayList[] | undefined,
 ): TreeGridHeaderList => {
@@ -29,12 +27,12 @@ export const buildItemMasterTreeGridCols = (
     .filter((item) => item.label !== "Color")
     .map((item) => {
       const col: any = {
-        Name: item.label,
+        Name: item.name,
         Type: "Text",
-        RelWidth: 1,
+        RelWidth: 0,
         CanEdit: 1,
         CanFilter: 1,
-        Visible: DEfAULT_VISIBLE_COLUMNS.includes(item.label) ? 1 : 0,
+        Visible: 1,
       };
       return col;
     });
@@ -122,10 +120,10 @@ export const buildTreeGridFilterHead = (
   items?.forEach((item) => {
     if (item.filter_type === "dropdown" && item.distinct_values?.length) {
       const values = item.distinct_values.filter((v) => v && v.trim() !== "");
-      filterRow[`${item.label}Type`] = "Enum";
-      filterRow[`${item.label}Enum`] = "|" + values.join("|");
-      filterRow[`${item.label}FilterOff`] = "(All)";
-      filterRow[`${item.label}Range`] = 1;
+      filterRow[`${item.name}Type`] = "Enum";
+      filterRow[`${item.name}Enum`] = "|" + values.join("|");
+      filterRow[`${item.name}FilterOff`] = "(All)";
+      filterRow[`${item.name}Range`] = 1;
     }
   });
   return filterRow;
@@ -152,18 +150,17 @@ export async function getItemMasterLayout(
     },
     Cols: Cols,
     Header: {
-      SKU: "SKU",
-      UPC: "UPC",
-      Category: "Category",
-      Description: "Description",
-      SortIcons: "2",
-      SKUButton: "Defaults",
-      UPCButton: "Defaults",
-      CategoryButton: "Defaults",
-      DescriptionsButton: "Defaults",
-      QuantityButton: "Defaults",
-      FilterBtn: "Filter",
-      FilterBtnButton: "Filter",
+      ...headers?.headers.reduce(
+        (acc, header) => {
+          acc[header.name] = header.label;
+          acc[`${header.name}Color`] = "#FFF";
+          // acc[`${header.name}Background`] = "#00c3ff";
+          acc[`${header.name}Align`] = "Center";
+          acc[`${header.name}Button`] = "Defaults";
+          return acc;
+        },
+        {} as Record<string, string>,
+      ),
     },
     Actions: {
       OnClickSide:

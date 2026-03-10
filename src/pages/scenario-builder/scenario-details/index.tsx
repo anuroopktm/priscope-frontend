@@ -7,7 +7,7 @@ import {
 import { useToastStore } from "@/store/useToastStore";
 import { getErrorMessage } from "@/utils/error-helper";
 import { Box } from "@mui/material";
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useParams } from "react-router-dom";
 import ActionHeader from "./components/ActionHeader";
 import CommentsSidebar from "./components/drawers/CommentsSidebar";
@@ -25,6 +25,13 @@ import {
   unregisterGridHighlightsGlobals,
 } from "./utils/gridHighlights";
 
+declare global {
+  interface Window {
+    handleTreeGridDeleteRow?: (id: string) => void;
+    handleTreeGridEdit?: (id: string) => void;
+  }
+}
+
 export const SCENARIO_BUILDER_GRID_ID = "ScenarioGridDetails";
 const gridContainerId = "TreeGrid_" + SCENARIO_BUILDER_GRID_ID;
 
@@ -36,9 +43,118 @@ const ScenarioDetailsPage = () => {
   const isCommentsSidebarOpen = useScenarioStore(
     (state) => state.isCommentsSidebarOpen,
   );
+  const setEditingGroupId = useScenarioStore(
+    (state) => state.setEditingGroupId,
+  );
+  const setEditingGroupName = useScenarioStore(
+    (state) => state.setEditingGroupName,
+  );
+  const setIsEditModalOpen = useScenarioStore(
+    (state) => state.setIsEditModalOpen,
+  );
+  const setRowToDeleteId = useScenarioStore((state) => state.setRowToDeleteId);
+  const setIsDeleteModalOpen = useScenarioStore(
+    (state) => state.setIsDeleteModalOpen,
+  );
+  const {
+    gridData,
+    setGridData,
+    handleEditRowConfirm,
+    handleDeleteRow,
+    prepareAddItems,
+  } = useScenarioGridData();
 
-  const { gridData, setGridData, handleEditRowConfirm, processAddItems } =
-    useScenarioGridData();
+  const { mutate: saveScenarioGrid, isPending: isSaving } =
+    useSaveScenarioGrid();
+  const { mutate: publishScenario, isPending: isFullPublishing } =
+    usePublishScenario();
+  const { mutate: partialPublishScenario, isPending: isPartialPublishing } =
+    usePartialPublishScenario();
+
+  const isPublishing = isFullPublishing || isPartialPublishing;
+  const showToast = useToastStore((state) => state.showToast);
+
+  const [selectedRowsCount, setSelectedRowsCount] = useState(0);
+
+  const handleSaveAsDraft = useCallback(
+    (
+      dataToSave?: any,
+      onSuccess?: () => void,
+      onError?: (error: any) => void,
+    ) => {
+      if (!id) return;
+
+      saveScenarioGrid(
+        { scenario_id: id, grid_data: dataToSave || gridData },
+        {
+          onSuccess: (response) => {
+            showToast(
+              response?.message || "Scenario saved as draft successfully",
+              "success",
+            );
+            if (onSuccess) onSuccess();
+          },
+          onError: (error) => {
+            showToast(
+              getErrorMessage(error, "Failed to save scenario"),
+              "error",
+            );
+            if (onError) onError(error);
+          },
+        },
+      );
+    },
+    [id, gridData, saveScenarioGrid, showToast],
+  );
+
+  const handleEditRowConfirmWrapped = useCallback(
+    (newName: string, rowId: string | null) => {
+      handleEditRowConfirm(newName, rowId, (newData) => {
+        handleSaveAsDraft(newData);
+      });
+    },
+    [handleEditRowConfirm, handleSaveAsDraft],
+  );
+
+  const handleDeleteRowConfirm = useCallback(
+    (rowId: string) => {
+      handleDeleteRow(rowId, (newData) => {
+        handleSaveAsDraft(newData);
+      });
+    },
+    [handleDeleteRow, handleSaveAsDraft],
+  );
+
+  const handleProcessAddItems = useCallback(
+    (items: any[], groupName?: string, selectedHeaders?: string[]) => {
+      const newState = prepareAddItems(
+        gridData,
+        items,
+        groupName,
+        selectedHeaders,
+      );
+
+      handleSaveAsDraft(
+        newState,
+        () => {
+          // Success: update grid and close drawer
+          setGridData(newState);
+          setIsDrawerOpen(false);
+        },
+        () => {
+          // Error: don't add to grid, but still close drawer according to user request
+          setIsDrawerOpen(false);
+        },
+      );
+    },
+    [
+      prepareAddItems,
+      gridData,
+      handleSaveAsDraft,
+      setGridData,
+      setIsDrawerOpen,
+    ],
+  );
 
   useEffect(() => {
     if (scenario?.grid_data?.Body) {
@@ -48,10 +164,11 @@ const ScenarioDetailsPage = () => {
 
       // Helper to recursively set CanSelect and PanelSelect
       const processRow = (row: ScenarioRow, level: number): ScenarioRow => {
+        const isPublished = String(row.is_published) === "1";
         const updatedRow = {
           ...row,
-          CanSelect: level === 0 ? 1 : 0,
-          PanelSelect: level === 0 ? 1 : 0,
+          CanSelect: isPublished ? 0 : 1,
+          PanelSelect: isPublished ? 0 : 1,
         };
         if (updatedRow.Items) {
           updatedRow.Items = updatedRow.Items.map((child) =>
@@ -68,18 +185,6 @@ const ScenarioDetailsPage = () => {
       setGridData({ ...rawData, Body: transformedBody });
     }
   }, [scenario, setGridData]);
-
-  const { mutate: saveScenarioGrid, isPending: isSaving } =
-    useSaveScenarioGrid();
-  const { mutate: publishScenario, isPending: isFullPublishing } =
-    usePublishScenario();
-  const { mutate: partialPublishScenario, isPending: isPartialPublishing } =
-    usePartialPublishScenario();
-
-  const isPublishing = isFullPublishing || isPartialPublishing;
-  const showToast = useToastStore((state) => state.showToast);
-
-  const [selectedRowsCount, setSelectedRowsCount] = useState(0);
 
   const handlePublish = useCallback(() => {
     if (!id) return;
@@ -128,25 +233,6 @@ const ScenarioDetailsPage = () => {
     [id, partialPublishScenario, showToast],
   );
 
-  const handleSaveAsDraft = () => {
-    if (!id) return;
-
-    saveScenarioGrid(
-      { scenario_id: id, grid_data: gridData },
-      {
-        onSuccess: (response) => {
-          showToast(
-            response?.message || "Scenario saved as draft successfully",
-            "success",
-          );
-        },
-        onError: (error) => {
-          showToast(getErrorMessage(error, "Failed to save scenario"), "error");
-        },
-      },
-    );
-  };
-
   const handleExport = (format: string) => {
     const grid = (window as any).Grids?.[SCENARIO_BUILDER_GRID_ID];
     if (grid) {
@@ -177,12 +263,125 @@ const ScenarioDetailsPage = () => {
     };
   }, [activeCell]);
 
-  useTreeGridInit(
-    SCENARIO_BUILDER_GRID_ID,
-    gridContainerId,
-    ScenarioDetailsLayout,
-    gridData,
-  );
+  useEffect(() => {
+    window.handleTreeGridEdit = (id: string) => {
+      setEditingGroupId(id);
+      const grid = (window as any).Grids?.[SCENARIO_BUILDER_GRID_ID];
+      if (grid) {
+        const row = grid.GetRowById(id);
+        if (row) {
+          setEditingGroupName(row.A || "");
+        }
+      }
+      setIsEditModalOpen(true);
+    };
+
+    window.handleTreeGridDeleteRow = (id: string) => {
+      setRowToDeleteId(id);
+      setIsDeleteModalOpen(true);
+    };
+
+    return () => {
+      delete window.handleTreeGridEdit;
+      delete window.handleTreeGridDeleteRow;
+    };
+  }, [
+    setEditingGroupId,
+    setEditingGroupName,
+    setIsEditModalOpen,
+    setRowToDeleteId,
+    setIsDeleteModalOpen,
+  ]);
+
+  const layoutRef = useRef({
+    key: "",
+    layout: ScenarioDetailsLayout,
+  });
+
+  const layout = useMemo(() => {
+    if (!gridData?.Body?.[0]) return ScenarioDetailsLayout;
+
+    const initialColNames = ScenarioDetailsLayout.Cols.map((c: any) => c.Name);
+    const extraColsSet = new Set<string>();
+
+    const collectKeys = (rows: ScenarioRow[]) => {
+      rows.forEach((row) => {
+        Object.keys(row).forEach((key) => {
+          if (
+            !initialColNames.includes(key) &&
+            ![
+              "id",
+              "itemId",
+              "Def",
+              "Items",
+              "Expanded",
+              "Selected",
+              "CanSelect",
+              "PanelSelect",
+              "ACanEdit",
+              "AHtmlPostfix",
+              "is_published",
+              "Kind",
+              "Level",
+              "D",
+            ].includes(key)
+          ) {
+            extraColsSet.add(key);
+          }
+        });
+        if (row.Items) collectKeys(row.Items);
+      });
+    };
+
+    collectKeys(gridData.Body[0]);
+
+    if (extraColsSet.size === 0) return ScenarioDetailsLayout;
+
+    const extraColsKey = Array.from(extraColsSet).sort().join(",");
+
+    if (layoutRef.current.key === extraColsKey) {
+      return layoutRef.current.layout;
+    }
+
+    const statusColIndex = ScenarioDetailsLayout.Cols.findIndex(
+      (c) => c.Name === "is_published",
+    );
+    const baseCols = [...ScenarioDetailsLayout.Cols];
+    let statusCol: any = null;
+    if (statusColIndex > -1) {
+      statusCol = baseCols.splice(statusColIndex, 1)[0];
+    }
+
+    const newCols = [...baseCols];
+    const newHeader: any = { ...ScenarioDetailsLayout.Header };
+
+    extraColsSet.forEach((colName) => {
+      newCols.push({
+        Name: colName,
+        RelWidth: "1",
+        Type: "Text",
+        CanSort: "0",
+      });
+      newHeader[colName] = colName;
+    });
+
+    if (statusCol) {
+      newCols.push(statusCol);
+    }
+
+    const newLayout = {
+      ...ScenarioDetailsLayout,
+      Cols: newCols,
+      Header: newHeader,
+    };
+
+    layoutRef.current = {
+      key: extraColsKey,
+      layout: newLayout,
+    };
+
+    return newLayout;
+  }, [gridData]);
 
   return (
     <Box
@@ -281,11 +480,29 @@ const ScenarioDetailsPage = () => {
       </Box>
       <ScenarioModals
         gridId={SCENARIO_BUILDER_GRID_ID}
-        processAddItems={processAddItems}
-        handleEditRowConfirm={handleEditRowConfirm}
+        processAddItems={handleProcessAddItems}
+        handleEditRowConfirm={handleEditRowConfirmWrapped}
+        handleDeleteRowConfirm={handleDeleteRowConfirm}
       />
+      {(() => {
+        // This is a trick to re-init treegrid when layout changes
+        return (
+          <TreeGridIniter
+            gridId={SCENARIO_BUILDER_GRID_ID}
+            containerId={gridContainerId}
+            layout={layout}
+            data={gridData}
+          />
+        );
+      })()}
     </Box>
   );
+};
+
+// Helper component to handle TreeGrid init and updates
+const TreeGridIniter = ({ gridId, containerId, layout, data }: any) => {
+  useTreeGridInit(gridId, containerId, layout, data);
+  return null;
 };
 
 export default ScenarioDetailsPage;

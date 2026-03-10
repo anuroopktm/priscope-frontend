@@ -102,9 +102,20 @@ export const usePartialPublishScenario = () => {
   >({
     mutationKey: ["partial-publish-scenario"],
     mutationFn: async ({ scenario_id, item_ids, group_ids }) => {
+      const payload: any = {};
+      const cleanItemIds = (item_ids || []).filter(
+        (id) => id && id.trim() !== "",
+      );
+      const cleanGroupIds = (group_ids || []).filter(
+        (id) => id && id.trim() !== "",
+      );
+
+      if (cleanItemIds.length > 0) payload.item_ids = cleanItemIds;
+      if (cleanGroupIds.length > 0) payload.group_ids = cleanGroupIds;
+
       const { data } = await axiosInstance.post<PublishScenarioResponse>(
         `/v1/scenario-builder/scenarios/${scenario_id}/publish/partial`,
-        { item_ids, group_ids },
+        payload,
       );
       return data;
     },

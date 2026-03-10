@@ -18,6 +18,7 @@ export interface ScenarioRow {
   AHtmlPostfix?: string;
   Items?: ScenarioRow[];
   Expanded?: string;
+  [key: string]: any;
 }
 
 const EDIT_ICON =
@@ -31,7 +32,11 @@ export const useScenarioGridData = () => {
   });
 
   const handleEditRowConfirm = useCallback(
-    (newName: string, editingGroupId: string | null) => {
+    (
+      newName: string,
+      editingGroupId: string | null,
+      onUpdated?: (newData: any) => void,
+    ) => {
       if (editingGroupId) {
         setGridData((prev) => {
           const currentRows = prev?.Body?.[0] || [];
@@ -50,41 +55,93 @@ export const useScenarioGridData = () => {
           };
 
           const newRows = updateRecursive(currentRows);
-          return {
+          const newState = {
             ...prev,
             Body: [[...newRows]],
           };
+
+          if (onUpdated) {
+            setTimeout(() => onUpdated(newState), 0);
+          }
+
+          return newState;
         });
       }
     },
     [],
   );
 
-  const processAddItems = useCallback((items: any[], groupName?: string) => {
-    // Map Item Master rows to Scenario grid format
-    // New Structure: A: SKU, B: Description, C: UPC, D: Price
-    const mappedItems: ScenarioRow[] = items.map((item) => {
-      return {
-        id: `row_${Math.random().toString(36).substr(2, 9)}`,
-        itemId: item.id || "",
-        Def: "R",
-        A: item.SKU || item.A || "",
-        B: item.Description || item.B || "",
-        C: item.UPC || item.C || "",
-        D: item.Price || item.D || "0",
-        is_published: 0,
-        Selected: 0,
-        CanSelect: groupName ? 0 : 1,
-        PanelSelect: groupName ? 0 : 1,
-      };
-    });
+  const handleDeleteRow = useCallback(
+    (rowId: string, onDeleted?: (newData: any) => void) => {
+      setGridData((prev) => {
+        const currentRows = prev?.Body?.[0] || [];
 
-    setGridData((prev) => {
-      const currentRows = prev?.Body?.[0] || [];
+        const deleteRecursive = (rows: ScenarioRow[]): ScenarioRow[] => {
+          return rows
+            .filter((row) => row.id !== rowId)
+            .map((row) => {
+              if (row.Items) {
+                return { ...row, Items: deleteRecursive(row.Items) };
+              }
+              return row;
+            });
+        };
+
+        const newRows = deleteRecursive(currentRows);
+        const newState = {
+          ...prev,
+          Body: [[...newRows]],
+        };
+
+        if (onDeleted) {
+          setTimeout(() => onDeleted(newState), 0);
+        }
+
+        return newState;
+      });
+    },
+    [],
+  );
+
+  const prepareAddItems = useCallback(
+    (
+      prevData: { Body: ScenarioRow[][] },
+      items: any[],
+      groupName?: string,
+      selectedHeaders?: string[],
+    ) => {
+      const mappedItems: ScenarioRow[] = items.map((item) => {
+        const scenarioRow: any = {
+          id: `row_${Math.random().toString(36).substr(2, 9)}`,
+          itemId: item.id || "",
+          Def: "R",
+          A: item.SKU || item.A || item["SKU"] || "",
+          B: item.Description || item.B || item["Description"] || "",
+          C: item.Category || item.C || item["Category"] || "",
+          is_published: 0,
+          Selected: 0,
+          CanSelect: 1,
+          PanelSelect: 1,
+        };
+
+        if (selectedHeaders) {
+          selectedHeaders.forEach((headerName) => {
+            if (
+              item[headerName] !== undefined &&
+              !["SKU", "Description", "Category"].includes(headerName)
+            ) {
+              scenarioRow[headerName] = item[headerName];
+            }
+          });
+        }
+
+        return scenarioRow as ScenarioRow;
+      });
+
+      const currentRows = prevData?.Body?.[0] || [];
       let itemsToAdd: ScenarioRow[] = [];
 
       if (groupName) {
-        // Create a single parent row representing the group with items as children
         const groupRowId = `group_${Math.random().toString(36).substr(2, 9)}`;
         const groupRow: ScenarioRow = {
           id: groupRowId,
@@ -95,29 +152,57 @@ export const useScenarioGridData = () => {
             <span style="display:flex; align-items:center; cursor:pointer;" onclick="window.handleTreeGridEdit && window.handleTreeGridEdit('${groupRowId}')">${EDIT_ICON}</span>
             <span style="display:flex; align-items:center; cursor:pointer;" onclick="window.handleTreeGridDeleteRow && window.handleTreeGridDeleteRow('${groupRowId}')">${DELETE_ICON}</span>
           </div>`,
-          Items: mappedItems, // These will be children of the groupRow
+          Items: mappedItems,
           Expanded: "1",
           is_published: 0,
           Selected: 0,
           CanSelect: 1,
+          PanelSelect: 1,
         };
         itemsToAdd = [groupRow];
       } else {
-        // Add items individually as flat rows at the top level
         itemsToAdd = mappedItems;
       }
 
       return {
-        ...prev,
+        ...prevData,
         Body: [[...currentRows, ...itemsToAdd]],
       };
-    });
-  }, []);
+    },
+    [],
+  );
+
+  const processAddItems = useCallback(
+    (
+      items: any[],
+      groupName?: string,
+      selectedHeaders?: string[],
+      onAdded?: (newData: any) => void,
+    ) => {
+      setGridData((prev) => {
+        const newState = prepareAddItems(
+          prev,
+          items,
+          groupName,
+          selectedHeaders,
+        );
+
+        if (onAdded) {
+          setTimeout(() => onAdded(newState), 0);
+        }
+
+        return newState;
+      });
+    },
+    [prepareAddItems],
+  );
 
   return {
     gridData,
     setGridData,
     handleEditRowConfirm,
+    handleDeleteRow,
     processAddItems,
+    prepareAddItems,
   };
 };

@@ -69,7 +69,7 @@ export interface PublishScenarioResponse {
 
 export interface PartialPublishScenarioRequest {
   scenario_id: string;
-  item_ids: string[];
+  item_ids?: string[];
   group_ids?: string[];
 }
 

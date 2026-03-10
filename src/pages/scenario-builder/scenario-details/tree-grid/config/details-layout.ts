@@ -50,7 +50,6 @@ export const ScenarioDetailsLayout = {
     { Name: "A", RelWidth: "1", Type: "Text", CanSort: "0" },
     { Name: "B", RelWidth: "1", Type: "Text", CanSort: "0" },
     { Name: "C", RelWidth: "1", Type: "Text", CanSort: "0" },
-    { Name: "D", Width: "100", Type: "Float", Format: "$0.00", CanSort: "0" },
     {
       Name: "is_published",
       Width: "100",
@@ -70,7 +69,7 @@ export const ScenarioDetailsLayout = {
       PanelSelect: "1",
       CanEdit: "0",
       Spanned: "1",
-      ASpan: "4",
+      ASpan: "3",
       is_publishedVisible: "1",
     },
     R: {
@@ -81,8 +80,7 @@ export const ScenarioDetailsLayout = {
   Header: {
     A: "SKU",
     B: "Description",
-    C: "UPC",
-    D: "Price",
+    C: "Category",
     is_published: "Status",
   },
 };

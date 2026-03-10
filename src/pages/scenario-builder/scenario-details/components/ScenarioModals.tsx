@@ -1,3 +1,4 @@
+import { useCreateItemGroup } from "@/services/queries/common/common.queries";
 import { useCreateScenarioComment } from "@/services/queries/scenario-builder/scenario-builder.queries";
 import { useToastStore } from "@/store/useToastStore";
 import { getErrorMessage } from "@/utils/error-helper";
@@ -26,19 +27,27 @@ import ScenarioCommentPopover from "./modals/ScenarioCommentPopover";
 
 interface ScenarioModalsProps {
   gridId: string;
-  processAddItems: (items: any[], groupName?: string) => void;
+  processAddItems: (
+    items: any[],
+    groupName?: string,
+    selectedHeaders?: string[],
+  ) => void;
   handleEditRowConfirm: (newName: string, rowId: string | null) => void;
+  handleDeleteRowConfirm: (rowId: string) => void;
 }
 
 const ScenarioModals = ({
   gridId,
   processAddItems,
   handleEditRowConfirm,
+  handleDeleteRowConfirm,
 }: ScenarioModalsProps) => {
   const { id: scenarioId } = useParams<{ id: string }>();
   const showToast = useToastStore((state) => state.showToast);
   const { mutate: addComment, isPending: isAddingComment } =
     useCreateScenarioComment();
+  const { mutate: createItemGroup, isPending: isCreatingGroup } =
+    useCreateItemGroup();
 
   const {
     isDrawerOpen,
@@ -62,6 +71,7 @@ const ScenarioModals = ({
     setIsCommentModalOpen,
     commentModalCell,
     setCommentModalCell,
+    itemsToGroup,
   } = useScenarioStore(
     useShallow((state) => ({
       isDrawerOpen: state.isDrawerOpen,
@@ -85,21 +95,53 @@ const ScenarioModals = ({
       setIsCommentModalOpen: state.setIsCommentModalOpen,
       commentModalCell: state.commentModalCell,
       setCommentModalCell: state.setCommentModalCell,
+      itemsToGroup: state.itemsToGroup,
     })),
   );
 
   const isGroupToDelete = rowToDeleteId?.startsWith("group_");
 
-  const handleAddItemsCb = (items: any[], isGroup: boolean) =>
-    handleAddItems({ processAddItems, gridId }, items, isGroup);
+  const handleAddItemsCb = (
+    items: any[],
+    isGroup: boolean,
+    selectedHeaders: string[],
+  ) =>
+    handleAddItems(
+      { processAddItems, gridId },
+      items,
+      isGroup,
+      selectedHeaders,
+    );
 
-  const handleGroupConfirmCb = (groupName: string) =>
-    handleGroupConfirm({ processAddItems, gridId }, groupName);
+  const handleGroupConfirmCb = (groupName: string) => {
+    const itemIds = itemsToGroup.map((item: any) => item.id).filter(Boolean);
+
+    createItemGroup(
+      {
+        name: groupName,
+        description: `Group created for ${groupName}`,
+        item_ids: itemIds,
+      },
+      {
+        onSuccess: (response: any) => {
+          showToast(
+            response.message || "Group created successfully",
+            "success",
+          );
+          handleGroupConfirm({ processAddItems, gridId }, groupName);
+        },
+        onError: (error: any) => {
+          showToast(getErrorMessage(error, "Failed to create group"), "error");
+        },
+      },
+    );
+  };
 
   const handleEditConfirmCb = (newName: string) =>
     handleEditConfirm({ handleEditRowConfirm, gridId }, newName);
 
-  const handleDeleteConfirmCb = () => handleDeleteConfirm({ gridId });
+  const handleDeleteConfirmCb = () =>
+    handleDeleteConfirm({ gridId, handleDeleteRowConfirm });
 
   const handleComponentAggregatorConfirmCb = (data: any) =>
     handleComponentAggregatorConfirm({ gridId }, data);
@@ -146,6 +188,7 @@ const ScenarioModals = ({
         open={isGroupModalOpen}
         onClose={() => setIsGroupModalOpen(false)}
         onConfirm={handleGroupConfirmCb}
+        isLoading={isCreatingGroup}
       />
 
       <AddAsGroupModal

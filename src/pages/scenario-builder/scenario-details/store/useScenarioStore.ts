@@ -69,59 +69,75 @@ interface ScenarioStoreState {
   // Comments Sidebar
   isCommentsSidebarOpen: boolean;
   setIsCommentsSidebarOpen: (isOpen: boolean) => void;
+
+  // Item Master Headers
+  itemMasterSelectedHeaders: string[];
+  setItemMasterSelectedHeaders: (headers: string[]) => void;
 }
 
 export const useScenarioStore = create<ScenarioStoreState>((set) => ({
   isDrawerOpen: false,
-  setIsDrawerOpen: (isOpen) => set({ isDrawerOpen: isOpen }),
+  setIsDrawerOpen: (isOpen: boolean) => set({ isDrawerOpen: isOpen }),
 
   isGroupModalOpen: false,
-  setIsGroupModalOpen: (isOpen) => set({ isGroupModalOpen: isOpen }),
+  setIsGroupModalOpen: (isOpen: boolean) => set({ isGroupModalOpen: isOpen }),
   itemsToGroup: [],
-  setItemsToGroup: (items) => set({ itemsToGroup: items }),
+  setItemsToGroup: (items: any[]) => set({ itemsToGroup: items }),
 
   isEditModalOpen: false,
-  setIsEditModalOpen: (isOpen) => set({ isEditModalOpen: isOpen }),
+  setIsEditModalOpen: (isOpen: boolean) => set({ isEditModalOpen: isOpen }),
   editingGroupId: null,
-  setEditingGroupId: (id) => set({ editingGroupId: id }),
+  setEditingGroupId: (id: string | null) => set({ editingGroupId: id }),
   editingGroupName: "",
-  setEditingGroupName: (name) => set({ editingGroupName: name }),
+  setEditingGroupName: (name: string) => set({ editingGroupName: name }),
 
   isComponentAggregatorOpen: false,
-  setIsComponentAggregatorOpen: (isOpen) =>
+  setIsComponentAggregatorOpen: (isOpen: boolean) =>
     set({ isComponentAggregatorOpen: isOpen }),
   isCostAggregatorOpen: false,
-  setIsCostAggregatorOpen: (isOpen) => set({ isCostAggregatorOpen: isOpen }),
+  setIsCostAggregatorOpen: (isOpen: boolean) =>
+    set({ isCostAggregatorOpen: isOpen }),
   activeColumn: null,
-  setActiveColumn: (col) => set({ activeColumn: col }),
+  setActiveColumn: (col: string | null) => set({ activeColumn: col }),
 
   isMarginMarkupModalOpen: false,
-  setIsMarginMarkupModalOpen: (isOpen) =>
+  setIsMarginMarkupModalOpen: (isOpen: boolean) =>
     set({ isMarginMarkupModalOpen: isOpen }),
   marginMarkupType: "Margin",
-  setMarginMarkupType: (type) => set({ marginMarkupType: type }),
+  setMarginMarkupType: (type: "Margin" | "Markup") =>
+    set({ marginMarkupType: type }),
 
   isAggregatorDrawerOpen: false,
-  setIsAggregatorDrawerOpen: (isOpen) =>
+  setIsAggregatorDrawerOpen: (isOpen: boolean) =>
     set({ isAggregatorDrawerOpen: isOpen }),
   activeCell: null,
-  setActiveCell: (cell) => set({ activeCell: cell }),
+  setActiveCell: (cell: ActiveCell | null) => set({ activeCell: cell }),
 
   isDeleteModalOpen: false,
-  setIsDeleteModalOpen: (isOpen) => set({ isDeleteModalOpen: isOpen }),
+  setIsDeleteModalOpen: (isOpen: boolean) => set({ isDeleteModalOpen: isOpen }),
   rowToDeleteId: null,
-  setRowToDeleteId: (id) => set({ rowToDeleteId: id }),
+  setRowToDeleteId: (id: string | null) => set({ rowToDeleteId: id }),
 
   isCommentPopoverOpen: false,
-  setIsCommentPopoverOpen: (isOpen) => set({ isCommentPopoverOpen: isOpen }),
+  setIsCommentPopoverOpen: (isOpen: boolean) =>
+    set({ isCommentPopoverOpen: isOpen }),
   commentCell: null,
-  setCommentCell: (cell) => set({ commentCell: cell }),
+  setCommentCell: (
+    cell: { rowId: string; col: string; rect?: DOMRect } | null,
+  ) => set({ commentCell: cell }),
 
   isCommentModalOpen: false,
-  setIsCommentModalOpen: (isOpen) => set({ isCommentModalOpen: isOpen }),
+  setIsCommentModalOpen: (isOpen: boolean) =>
+    set({ isCommentModalOpen: isOpen }),
   commentModalCell: null,
-  setCommentModalCell: (cell) => set({ commentModalCell: cell }),
+  setCommentModalCell: (cell: { rowId: string; col: string } | null) =>
+    set({ commentModalCell: cell }),
 
   isCommentsSidebarOpen: false,
-  setIsCommentsSidebarOpen: (isOpen) => set({ isCommentsSidebarOpen: isOpen }),
+  setIsCommentsSidebarOpen: (isOpen: boolean) =>
+    set({ isCommentsSidebarOpen: isOpen }),
+
+  itemMasterSelectedHeaders: [],
+  setItemMasterSelectedHeaders: (headers: string[]) =>
+    set({ itemMasterSelectedHeaders: headers }),
 }));

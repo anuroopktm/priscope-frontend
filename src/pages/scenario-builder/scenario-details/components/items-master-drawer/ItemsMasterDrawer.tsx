@@ -7,7 +7,11 @@ import ItemsMasterGrid from "./tree-grid";
 interface ItemsMasterDrawerProps {
   open: boolean;
   onClose: () => void;
-  onAddItems: (items: any[], isGroup: boolean) => void;
+  onAddItems: (
+    items: any[],
+    isGroup: boolean,
+    selectedHeaders: string[],
+  ) => void;
 }
 
 const ItemsMasterDrawer = ({
@@ -16,6 +20,7 @@ const ItemsMasterDrawer = ({
   onAddItems,
 }: ItemsMasterDrawerProps) => {
   const [searchTerm, setSearchTerm] = useState("");
+  const [selectedColumns, setSelectedColumns] = useState<string[]>([]);
   const gridRef = useRef<{
     getSelectedIds: () => string[];
     getSelectedRows: () => any[];
@@ -29,15 +34,20 @@ const ItemsMasterDrawer = ({
     onClose();
   };
 
+  const isButtonsDisabled = false;
+
   const handleAddItem = () => {
+    if (isButtonsDisabled) return;
     const items = gridRef.current?.getSelectedRows() || [];
-    onAddItems(items, false);
+    if (items.length === 0) return;
+    onAddItems(items, false, selectedColumns);
   };
 
   const handleAddAsGroup = () => {
+    if (isButtonsDisabled) return;
     const items = gridRef.current?.getSelectedRows() || [];
     if (items.length === 0) return;
-    onAddItems(items, true);
+    onAddItems(items, true, selectedColumns);
   };
 
   return (
@@ -46,11 +56,11 @@ const ItemsMasterDrawer = ({
       open={open}
       onClose={handleClose}
       sx={{
-        zIndex: 3000,
+        zIndex: 1500,
       }}
       PaperProps={{
         sx: {
-          width: "90vw",
+          width: "95vw",
           height: "100vh",
           display: "flex",
           flexDirection: "column",
@@ -75,6 +85,9 @@ const ItemsMasterDrawer = ({
           onSearch={setSearchTerm}
           onAddItem={handleAddItem}
           onAddAsGroup={handleAddAsGroup}
+          selectedColumns={selectedColumns}
+          onSelectedColumnsChange={setSelectedColumns}
+          isButtonsDisabled={isButtonsDisabled}
         />
 
         {open && <ItemsMasterGrid ref={gridRef} searchTerm={searchTerm} />}

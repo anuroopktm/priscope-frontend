@@ -16,6 +16,7 @@ interface AddAsGroupModalProps {
   title?: string;
   initialValue?: string;
   confirmLabel?: string;
+  isLoading?: boolean;
 }
 
 const AddAsGroupModal = ({
@@ -25,6 +26,7 @@ const AddAsGroupModal = ({
   title = "Scenario Builder",
   initialValue = "",
   confirmLabel = "Create Group",
+  isLoading = false,
 }: AddAsGroupModalProps) => {
   const [groupName, setGroupName] = useState<string>(initialValue);
 
@@ -78,6 +80,7 @@ const AddAsGroupModal = ({
           variant="contained"
           onClick={handleConfirm}
           disabled={!groupName.trim()}
+          loading={isLoading}
         >
           {confirmLabel}
         </Button>
