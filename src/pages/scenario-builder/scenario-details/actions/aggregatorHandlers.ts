@@ -180,7 +180,7 @@ export const handleAggregatorUpdate = (
 
       Object.keys(grid.Cols).forEach((c) => {
         if (c.startsWith(`Comp_${targetCol}_`)) {
-          grid.DelCol(c);
+          grid.SetValue(row, c, null, 1);
         }
       });
 

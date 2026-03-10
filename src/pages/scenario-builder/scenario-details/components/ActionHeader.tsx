@@ -92,7 +92,11 @@ const ActionHeader = ({
         )}
       </Box>
       <Stack direction="row" spacing={1} alignItems="center">
-        <Button variant="contained" onClick={onSaveAsDraft} disabled={isSaving}>
+        <Button
+          variant="contained"
+          onClick={() => onSaveAsDraft?.()}
+          disabled={isSaving}
+        >
           {isSaving ? "Saving..." : "Save as draft"}
         </Button>
         <Button

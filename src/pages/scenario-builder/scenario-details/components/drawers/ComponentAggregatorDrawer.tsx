@@ -3,7 +3,7 @@ import CloseIcon from "@mui/icons-material/Close";
 import { Box, Button, IconButton, Typography } from "@mui/material";
 import { useEffect, useState } from "react";
 import DeleteConfirmModal from "../../../list-scenarios/components/DeleteConfirmModal";
-import { AggregatorDrawerLayout } from "../../tree-grid/config/aggregator-drawer-layout";
+import { ComponentDrawerLayout } from "../../tree-grid/config/component-drawer-layout";
 import { useTreeGridInit } from "../../tree-grid/hooks/useTreeGridInit";
 
 interface ComponentAggregatorPanelProps {
@@ -35,12 +35,10 @@ const AggregatorGrid = ({ data }: { data: any }) => {
   useTreeGridInit(
     drawerGridId,
     drawerGridContainerId,
-    AggregatorDrawerLayout,
+    ComponentDrawerLayout,
     data,
   );
-  return (
-    <Box id={drawerGridContainerId} sx={{ height: "100%", width: "100%" }} />
-  );
+  return <Box id={drawerGridContainerId} sx={{ width: "100%" }} />;
 };
 
 const ComponentAggregatorPanel = ({
@@ -156,13 +154,12 @@ const ComponentAggregatorPanel = ({
   return (
     <Box
       sx={{
-        height: "100%",
         display: "flex",
         flexDirection: "column",
         bgcolor: "background.paper",
         borderTopLeftRadius: 8,
         borderTopRightRadius: 8,
-        overflow: "hidden",
+        overflow: "visible",
         p: 2,
       }}
     >
@@ -190,14 +187,12 @@ const ComponentAggregatorPanel = ({
       {/* Grid Content */}
       <Box
         sx={{
-          flex: 1,
           width: "100%",
-          minHeight: 0,
           bgcolor: "background.paper",
           position: "relative",
           p: 0,
           borderRadius: 1,
-          overflow: "hidden",
+          overflow: "visible",
         }}
       >
         <AggregatorGrid data={gridData} />

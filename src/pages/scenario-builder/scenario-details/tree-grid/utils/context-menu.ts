@@ -21,7 +21,9 @@ export const getHeaderContextMenu = (grid: any, col: string) => {
 
   // Determine if this is an established column (has meaningful content)
   // or a fresh builder column (no caption and no logic assigned yet)
+  const isExtraCol = grid.GetAttribute(null, col, "IsExtraCol");
   const isEstablished =
+    !!isExtraCol ||
     (caption !== "" && caption !== col) ||
     aggregatorType ||
     SYSTEM_COLS.includes(col);
@@ -77,6 +79,7 @@ export const getHeaderContextMenu = (grid: any, col: string) => {
 export const getCellContextMenu = (grid: any, row: any, col: string) => {
   const aggregatorType = grid.GetAttribute(null, col, "AggregatorType");
   const isSystem = SYSTEM_COLS.includes(col);
+  const isExtraCol = grid.GetAttribute(null, col, "IsExtraCol");
 
   // 1. If assigned to an aggregator -> Show Calculate
   if (aggregatorType) {
@@ -96,8 +99,8 @@ export const getCellContextMenu = (grid: any, row: any, col: string) => {
     ] as any[];
   }
 
-  // 2. Normal Cells (System Columns) -> Show direct calculate for all types
-  if (isSystem) {
+  // 2. Normal Cells (System Columns or Extra Columns) -> Show direct calculate for all types
+  if (isSystem || isExtraCol) {
     return [
       { Text: `<span style="${HEADER_STYLE}">Calculators</span>`, Caption: 1 },
       {

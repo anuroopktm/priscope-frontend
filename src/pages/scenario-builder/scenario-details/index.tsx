@@ -84,6 +84,38 @@ const ScenarioDetailsPage = () => {
     ) => {
       if (!id) return;
 
+      const rawData = scenario?.grid_data as { Body: ScenarioRow[][] };
+
+      // Helper to recursively set CanSelect and PanelSelect
+      const processRow = (row: ScenarioRow, level: number): ScenarioRow => {
+        const isPublished = String(row.is_published) === "1";
+        const updatedRow = {
+          ...row,
+          CanSelect: isPublished ? 0 : 1,
+          PanelSelect: isPublished ? 0 : 1,
+        };
+        if (updatedRow.Items) {
+          updatedRow.Items = updatedRow.Items.map((child) =>
+            processRow(child, level + 1),
+          );
+        }
+        return updatedRow;
+      };
+
+      const transformedBody = rawData.Body.map((page) =>
+        page.map((row) => processRow(row, 0)),
+      );
+
+      const grid = (window as any).Grids?.[SCENARIO_BUILDER_GRID_ID];
+
+      grid.EndEdit?.(1);
+      // console.log("grid", grid);
+
+      console.log("transformedBody", transformedBody);
+
+      console.log("dataToSave", dataToSave);
+      console.log("gridData", scenario);
+
       saveScenarioGrid(
         { scenario_id: id, grid_data: dataToSave || gridData },
         {
@@ -95,6 +127,7 @@ const ScenarioDetailsPage = () => {
             if (onSuccess) onSuccess();
           },
           onError: (error) => {
+            console.log(error);
             showToast(
               getErrorMessage(error, "Failed to save scenario"),
               "error",
@@ -361,7 +394,8 @@ const ScenarioDetailsPage = () => {
         RelWidth: "1",
         Type: "Text",
         CanSort: "0",
-      });
+        IsExtraCol: 1,
+      } as any);
       newHeader[colName] = colName;
     });
 

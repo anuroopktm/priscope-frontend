@@ -36,8 +36,8 @@ const ComponentAggregatorModal = ({
 
   const handleConfirm = () => {
     const finalLabel = label.trim()
-      ? `${label} ( component iterator)`
-      : "( component iterator)";
+      ? `${label} (Component Iterator)`
+      : "(Component Iterator)";
 
     onConfirm({ label: finalLabel, systemField, setEntireColumn });
     setLabel("");
