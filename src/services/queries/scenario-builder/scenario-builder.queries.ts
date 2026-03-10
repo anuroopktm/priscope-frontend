@@ -2,12 +2,154 @@ import { axiosInstance } from "@/services/api/axiosInstance";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import type { AxiosError } from "axios";
 import type {
+  CreateScenarioCommentRequest,
   CreateScenarioRequest,
   CreateScenarioResponse,
+  ForkScenarioRequest,
+  ForkScenarioResponse,
+  PartialPublishScenarioRequest,
+  PublishScenarioResponse,
+  SaveScenarioGridRequest,
+  SaveScenarioGridResponse,
+  ScenarioComment,
+  ScenarioCommentListResponse,
   ScenarioDetail,
+  SearchScenarioCommentsRequest,
   SearchScenariosRequest,
   SearchScenariosResponse,
 } from "./scenario-builder.types";
+
+export const useCreateScenarioComment = () => {
+  const queryClient = useQueryClient();
+
+  return useMutation<
+    ScenarioComment,
+    AxiosError<{ detail: string | string[] }>,
+    { scenario_id: string; payload: CreateScenarioCommentRequest }
+  >({
+    mutationKey: ["create-scenario-comment"],
+    mutationFn: async ({ scenario_id, payload }) => {
+      const { data } = await axiosInstance.post<ScenarioComment>(
+        `/v1/scenario-builder/scenarios/${scenario_id}/comments`,
+        payload,
+      );
+      return data;
+    },
+    onSuccess: (_, { scenario_id }) => {
+      // Invalidate get-scenario to potentially show indicators if they come from there
+      queryClient.invalidateQueries({
+        queryKey: ["get-scenario", scenario_id],
+      });
+      // Invalidate comments list
+      queryClient.invalidateQueries({
+        queryKey: ["list-scenario-comments", scenario_id],
+      });
+    },
+  });
+};
+
+export const useListScenarioComments = (
+  scenarioId: string | undefined,
+  payload: SearchScenarioCommentsRequest,
+) => {
+  return useQuery<
+    ScenarioCommentListResponse,
+    AxiosError<{ detail: string | string[] }>
+  >({
+    queryKey: ["list-scenario-comments", scenarioId, payload],
+    queryFn: async () => {
+      const { data } = await axiosInstance.post<ScenarioCommentListResponse>(
+        `/v1/scenario-builder/scenarios/${scenarioId}/comments/list`,
+        payload,
+      );
+      return data;
+    },
+    enabled: !!scenarioId,
+    refetchOnWindowFocus: false,
+  });
+};
+
+export const usePublishScenario = () => {
+  const queryClient = useQueryClient();
+
+  return useMutation<
+    PublishScenarioResponse,
+    AxiosError<{ detail: string | string[] }>,
+    string
+  >({
+    mutationKey: ["publish-scenario"],
+    mutationFn: async (scenarioId) => {
+      const { data } = await axiosInstance.post<PublishScenarioResponse>(
+        `/v1/scenario-builder/scenarios/${scenarioId}/publish`,
+      );
+      return data;
+    },
+    onSuccess: (_, scenarioId) => {
+      queryClient.invalidateQueries({
+        queryKey: ["get-scenario", scenarioId],
+      });
+    },
+  });
+};
+
+export const usePartialPublishScenario = () => {
+  const queryClient = useQueryClient();
+
+  return useMutation<
+    PublishScenarioResponse,
+    AxiosError<{ detail: string | string[] }>,
+    PartialPublishScenarioRequest
+  >({
+    mutationKey: ["partial-publish-scenario"],
+    mutationFn: async ({ scenario_id, item_ids, group_ids }) => {
+      const payload: any = {};
+      const cleanItemIds = (item_ids || []).filter(
+        (id) => id && id.trim() !== "",
+      );
+      const cleanGroupIds = (group_ids || []).filter(
+        (id) => id && id.trim() !== "",
+      );
+
+      if (cleanItemIds.length > 0) payload.item_ids = cleanItemIds;
+      if (cleanGroupIds.length > 0) payload.group_ids = cleanGroupIds;
+
+      const { data } = await axiosInstance.post<PublishScenarioResponse>(
+        `/v1/scenario-builder/scenarios/${scenario_id}/publish/partial`,
+        payload,
+      );
+      return data;
+    },
+    onSuccess: (_, { scenario_id }) => {
+      queryClient.invalidateQueries({
+        queryKey: ["get-scenario", scenario_id],
+      });
+    },
+  });
+};
+
+export const useSaveScenarioGrid = () => {
+  const queryClient = useQueryClient();
+
+  return useMutation<
+    SaveScenarioGridResponse,
+    AxiosError<{ detail: string | string[] }>,
+    SaveScenarioGridRequest
+  >({
+    mutationKey: ["save-scenario-grid"],
+    mutationFn: async ({ scenario_id, grid_data }) => {
+      const { data } = await axiosInstance.put<SaveScenarioGridResponse>(
+        `/v1/scenario-builder/scenarios/${scenario_id}/grid`,
+        { grid_data },
+      );
+      return data;
+    },
+    onSuccess: (_, { scenario_id }) => {
+      queryClient.invalidateQueries({
+        queryKey: ["get-scenario", scenario_id],
+      });
+    },
+  });
+};
 
 export const useCreateScenario = () => {
   const queryClient = useQueryClient();
@@ -59,7 +201,53 @@ export const useGetScenario = (scenarioId: string | undefined) => {
       );
       return data;
     },
-    enabled: !!scenarioId,
     refetchOnWindowFocus: false,
+  });
+};
+
+export const useDeleteScenario = () => {
+  const queryClient = useQueryClient();
+
+  return useMutation<string, AxiosError<{ detail: string | string[] }>, string>(
+    {
+      mutationKey: ["delete-scenario"],
+      mutationFn: async (scenarioId) => {
+        const { data } = await axiosInstance.delete<string>(
+          `/v1/scenario-builder/scenarios/${scenarioId}`,
+        );
+        return data;
+      },
+      onSuccess: () => {
+        queryClient.invalidateQueries({
+          queryKey: ["list-scenarios"],
+          exact: false,
+        });
+      },
+    },
+  );
+};
+
+export const useForkScenario = () => {
+  const queryClient = useQueryClient();
+
+  return useMutation<
+    ForkScenarioResponse,
+    AxiosError<{ detail: string | string[] }>,
+    ForkScenarioRequest
+  >({
+    mutationKey: ["fork-scenario"],
+    mutationFn: async ({ scenario_id, name }) => {
+      const { data } = await axiosInstance.post<ForkScenarioResponse>(
+        `/v1/scenario-builder/scenarios/${scenario_id}/fork`,
+        { name },
+      );
+      return data;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({
+        queryKey: ["list-scenarios"],
+        exact: false,
+      });
+    },
   });
 };

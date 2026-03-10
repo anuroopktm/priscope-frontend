@@ -29,7 +29,7 @@ const StatusUpdateModal = ({
   };
 
   const handleClose = (_e: {}, reason: "backdropClick" | "escapeKeyDown") => {
-    if (reason === "backdropClick") return;
+    if (reason === "backdropClick" || reason === "escapeKeyDown") return;
     onClose();
   };
 

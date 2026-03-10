@@ -1,3 +1,4 @@
+import { getErrorMessage } from "@/utils/error-helper";
 import { getEditCellValueAdminApproval } from "../helpers/itemMasterTreeGridHelperFunction";
 
 interface HandleEditAdminParams {
@@ -71,9 +72,12 @@ export const handleEditCellAdminRequest = ({
       setShowLoader(false);
       setRequestSuccessNotficationVisible(true);
     },
-    onError: () => {
+    onError: (error: any) => {
       setShowLoader(false);
-      showToast("Failed to save changes. Please try again.", "warning");
+      showToast(
+        getErrorMessage(error, "Failed to save changes. Please try again."),
+        "error",
+      );
     },
   });
 };

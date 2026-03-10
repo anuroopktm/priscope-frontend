@@ -49,3 +49,73 @@ export interface SearchScenariosResponse {
   total: number;
   scenarios: Scenario[];
 }
+
+export interface SaveScenarioGridRequest {
+  scenario_id: string;
+  grid_data: any;
+}
+
+export interface SaveScenarioGridResponse {
+  message: string;
+  id: string;
+}
+
+export interface PublishScenarioResponse {
+  id: string;
+  status: string;
+  published_rows: number;
+  message: string;
+}
+
+export interface PartialPublishScenarioRequest {
+  scenario_id: string;
+  item_ids?: string[];
+  group_ids?: string[];
+}
+
+export interface CreateScenarioCommentRequest {
+  cell_ref: string;
+  comment: string;
+}
+
+export interface ScenarioComment {
+  id: string;
+  scenario_id: string;
+  cell_ref: string;
+  comment: string;
+  created_by: {
+    name?: string;
+    email?: string;
+    status?: string;
+    user_id?: string;
+    is_admin?: boolean;
+    tenant_id?: string;
+    avatar?: string;
+  };
+  created_at: string;
+}
+
+export interface SearchScenarioCommentsRequest {
+  search?: string;
+  cell_ref?: string;
+  page_size?: number;
+  skip?: number;
+}
+
+export interface ScenarioCommentListResponse {
+  total: number;
+  comments: ScenarioComment[];
+}
+
+export interface ForkScenarioRequest {
+  scenario_id: string;
+  name: string;
+}
+
+export interface ForkScenarioResponse {
+  id: string;
+  name: string;
+  forked_from: string;
+  status: string;
+  message: string;
+}

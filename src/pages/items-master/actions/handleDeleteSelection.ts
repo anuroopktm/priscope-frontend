@@ -1,3 +1,4 @@
+import { getErrorMessage } from "@/utils/error-helper";
 import type { DeleteSelectedRowPayload } from "../../items-master-refactor/types/types";
 
 interface HandleDeleteSelectionProps {
@@ -33,8 +34,8 @@ export const handleDeleteSelection = ({
 
       setSelectedRows([]);
     },
-    onError: () => {
-      showToast("Failed to delete rows", "error");
+    onError: (error: any) => {
+      showToast(getErrorMessage(error, "Failed to delete rows"), "error");
       setShowLoader(false);
     },
   });

@@ -1,20 +1,19 @@
-import { useToastStore } from "@/store/useToastStore";
-import { createItemMasterCommentPayload } from "../helper";
 import { useCreateItemMasterComment } from "@/services/queries/item-master-refactor/item-master-refactor.queries";
+import { useToastStore } from "@/store/useToastStore";
+import { getErrorMessage } from "@/utils/error-helper";
+import { createItemMasterCommentPayload } from "../helper";
 
 export const useConfirmComment = () => {
   const showToast = useToastStore((state) => state.showToast);
 
-  const {
-    mutate: createComment,
-    isPending: isCreatingComment,
-  } = useCreateItemMasterComment();
+  const { mutate: createComment, isPending: isCreatingComment } =
+    useCreateItemMasterComment();
 
   const handleConfirmComment = (
     type: string,
     id: string,
     col: string,
-    comment: string
+    comment: string,
   ) => {
     const payload = createItemMasterCommentPayload(type, col, comment);
 
@@ -29,10 +28,10 @@ export const useConfirmComment = () => {
         onSuccess: () => {
           showToast("Comment added successfully", "success");
         },
-        onError: () => {
-          showToast("Failed to add comment", "error");
+        onError: (error) => {
+          showToast(getErrorMessage(error, "Failed to add comment"), "error");
         },
-      }
+      },
     );
   };
 

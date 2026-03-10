@@ -5,13 +5,14 @@ import {
   useListExport,
   useListModuleImports,
 } from "@/services/queries/common/common.queries";
+import { getErrorMessage } from "@/utils/error-helper";
 import { Dialog, DialogContent, DialogTitle } from "@mui/material";
 import { useEffect, useMemo, useState } from "react";
-import Header from "./components/Header";
-import UploadedTab from "./components/UploadedTab";
-import DownloadedTab from "./components/DownloadedTab";
 import { transformUploads } from "../../filesTransformUploads";
 import type { ExportedFile } from "../../types/types";
+import DownloadedTab from "./components/DownloadedTab";
+import Header from "./components/Header";
+import UploadedTab from "./components/UploadedTab";
 
 export interface FileDetailsModalProps {
   open?: boolean;
@@ -71,11 +72,11 @@ const FileDetailsModal: React.FC<FileDetailsModalProps> = ({
             const data = mapExports(res);
             setExportedData(data);
           },
-          onError: () => {
-            showToast({
-              message: "Failed to fetch exported files",
-              severity: "error",
-            });
+          onError: (error) => {
+            showToast(
+              getErrorMessage(error, "Failed to fetch exported files"),
+              "error",
+            );
           },
         },
       );
@@ -135,11 +136,11 @@ const FileDetailsModal: React.FC<FileDetailsModalProps> = ({
                       link.click();
                     }
                   },
-                  onError: () =>
-                    showToast({
-                      message: "Failed to download file",
-                      severity: "error",
-                    }),
+                  onError: (error) =>
+                    showToast(
+                      getErrorMessage(error, "Failed to download file"),
+                      "error",
+                    ),
                 })
               }
             />

@@ -1,15 +1,15 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
-import FileUploadModal from "./file-upload";
+import React, { useEffect, useState } from "react";
 import DataMappingModal from "./data-mapping";
+import FileUploadModal from "./file-upload";
 import UploadSnackbar from "./toast";
 
-import type {
-  UploadedFile,
-  ControlFields,
-} from "../../constants/upload.constants";
 import type { SystemFieldObject } from "@/pages/items-master-refactor/types/types";
+import type {
+  ControlFields,
+  UploadedFile,
+} from "../../constants/upload.constants";
 import type { SnackbarState } from "../columns-dropdown";
 
 type ImportData = {
@@ -72,7 +72,6 @@ const CompleteUploadFlow: React.FC<CompleteUploadFlowProps> = ({
   };
 
   const handleImport = (data: ImportData) => {
-    console.log("Import process completed successfully:", data);
     setShowDataMapping(false);
     setShowSnackbar(true);
     onImportComplete?.(data);

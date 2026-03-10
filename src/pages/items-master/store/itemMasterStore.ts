@@ -52,7 +52,6 @@ export const useItemMasterStore = create<ItemMasterStore>((set, get) => ({
     }),
 
   setUploadId: (uploadId) => {
-    console.log("Setting upload ID in store:", uploadId);
     set({ uploadId });
   },
 

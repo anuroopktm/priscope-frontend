@@ -5,6 +5,7 @@ import {
 } from "@/services/queries/auth/sign-up/sign-up.queries";
 import { useSignupStore } from "@/store/useSignupStore";
 import { useToastStore } from "@/store/useToastStore";
+import { getErrorMessage } from "@/utils/error-helper";
 import { otpSchema, type OtpSchema } from "@/validations/auth/otp.validation";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Box, Button, Stack, TextField, Typography } from "@mui/material";
@@ -110,7 +111,7 @@ const OtpForm = () => {
       clearSignupStore();
       navigate("/auth/sign-in");
     } catch (error: any) {
-      showToast(error.response?.data?.detail || "Signup failed", "error");
+      showToast(getErrorMessage(error, "Signup failed"), "error");
     }
   };
 

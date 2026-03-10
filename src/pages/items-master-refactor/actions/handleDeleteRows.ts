@@ -1,7 +1,8 @@
-import { useToastStore } from "@/store/useToastStore";
-import { useItemMasterStore } from "../store/useItemMasterStore";
-import type { MutateOptions } from "@tanstack/react-query";
 import type { DeleteSelectedRowPayload } from "@/pages/items-master-refactor/types/types";
+import { useToastStore } from "@/store/useToastStore";
+import { getErrorMessage } from "@/utils/error-helper";
+import type { MutateOptions } from "@tanstack/react-query";
+import { useItemMasterStore } from "../store/useItemMasterStore";
 import { deleteSeletectedRows } from "../tree-grid/utils/rowSelection";
 
 interface HandleDeleteSelectedParams {
@@ -28,8 +29,8 @@ export const handleDeleteSelected = ({
       deleteSeletectedRows(gridRef);
       setSelectedRows([]);
     },
-    onError: () => {
-      showToast("Failed to delete rows", "error");
+    onError: (error) => {
+      showToast(getErrorMessage(error, "Failed to delete rows"), "error");
     },
   });
 };

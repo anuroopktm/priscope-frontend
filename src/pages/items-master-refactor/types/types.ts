@@ -255,11 +255,11 @@ export interface UploadedFile {
   hasUploadData: boolean;
 }
 
-  export interface ExportedFile {
-    id: string;
-    name: string;
-    created_user_name: string;
-    created_time: string;
-    created_date: string;
-    status: string;
-  }
+export interface ExportedFile {
+  id: string;
+  name: string;
+  created_user_name: string;
+  created_time: string;
+  created_date: string;
+  status: string;
+}

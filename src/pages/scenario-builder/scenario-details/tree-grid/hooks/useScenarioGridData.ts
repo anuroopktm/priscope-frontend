@@ -1,0 +1,208 @@
+import { useCallback, useState } from "react";
+
+// Data types based on current structure
+export interface ScenarioRow {
+  id: string;
+  itemId?: string;
+  Def: string;
+  A: string;
+  B?: string;
+  C?: string;
+  D?: string;
+  E?: string;
+  is_published?: number;
+  Selected?: number;
+  CanSelect?: number;
+  PanelSelect?: number;
+  ACanEdit?: number;
+  AHtmlPostfix?: string;
+  Items?: ScenarioRow[];
+  Expanded?: string;
+  [key: string]: any;
+}
+
+const EDIT_ICON =
+  '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="cursor: pointer; color: #3B82F6;"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path></svg>';
+const DELETE_ICON =
+  '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="cursor: pointer; color: #EF4444;"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path><line x1="10" y1="11" x2="10" y2="17"></line><line x1="14" y1="11" x2="14" y2="17"></line></svg>';
+
+export const useScenarioGridData = () => {
+  const [gridData, setGridData] = useState<{ Body: ScenarioRow[][] }>({
+    Body: [[]],
+  });
+
+  const handleEditRowConfirm = useCallback(
+    (
+      newName: string,
+      editingGroupId: string | null,
+      onUpdated?: (newData: any) => void,
+    ) => {
+      if (editingGroupId) {
+        setGridData((prev) => {
+          const currentRows = prev?.Body?.[0] || [];
+
+          // Recursive function to update row text by ID
+          const updateRecursive = (rows: ScenarioRow[]): ScenarioRow[] => {
+            return rows.map((row) => {
+              if (row.id === editingGroupId) {
+                return { ...row, A: newName };
+              }
+              if (row.Items) {
+                return { ...row, Items: updateRecursive(row.Items) };
+              }
+              return row;
+            });
+          };
+
+          const newRows = updateRecursive(currentRows);
+          const newState = {
+            ...prev,
+            Body: [[...newRows]],
+          };
+
+          if (onUpdated) {
+            setTimeout(() => onUpdated(newState), 0);
+          }
+
+          return newState;
+        });
+      }
+    },
+    [],
+  );
+
+  const handleDeleteRow = useCallback(
+    (rowId: string, onDeleted?: (newData: any) => void) => {
+      setGridData((prev) => {
+        const currentRows = prev?.Body?.[0] || [];
+
+        const deleteRecursive = (rows: ScenarioRow[]): ScenarioRow[] => {
+          return rows
+            .filter((row) => row.id !== rowId)
+            .map((row) => {
+              if (row.Items) {
+                return { ...row, Items: deleteRecursive(row.Items) };
+              }
+              return row;
+            });
+        };
+
+        const newRows = deleteRecursive(currentRows);
+        const newState = {
+          ...prev,
+          Body: [[...newRows]],
+        };
+
+        if (onDeleted) {
+          setTimeout(() => onDeleted(newState), 0);
+        }
+
+        return newState;
+      });
+    },
+    [],
+  );
+
+  const prepareAddItems = useCallback(
+    (
+      prevData: { Body: ScenarioRow[][] },
+      items: any[],
+      groupName?: string,
+      selectedHeaders?: string[],
+    ) => {
+      const mappedItems: ScenarioRow[] = items.map((item) => {
+        const scenarioRow: any = {
+          id: `row_${Math.random().toString(36).substr(2, 9)}`,
+          itemId: item.id || "",
+          Def: "R",
+          A: item.SKU || item.A || item["SKU"] || "",
+          B: item.Description || item.B || item["Description"] || "",
+          C: item.Category || item.C || item["Category"] || "",
+          is_published: 0,
+          Selected: 0,
+          CanSelect: 1,
+          PanelSelect: 1,
+        };
+
+        if (selectedHeaders) {
+          selectedHeaders.forEach((headerName) => {
+            if (
+              item[headerName] !== undefined &&
+              !["SKU", "Description", "Category"].includes(headerName)
+            ) {
+              scenarioRow[headerName] = item[headerName];
+            }
+          });
+        }
+
+        return scenarioRow as ScenarioRow;
+      });
+
+      const currentRows = prevData?.Body?.[0] || [];
+      let itemsToAdd: ScenarioRow[] = [];
+
+      if (groupName) {
+        const groupRowId = `group_${Math.random().toString(36).substr(2, 9)}`;
+        const groupRow: ScenarioRow = {
+          id: groupRowId,
+          Def: "Group",
+          A: groupName,
+          ACanEdit: 0,
+          AHtmlPostfix: `<div style="display:flex; gap:12px; float:right; margin-right:8px; align-items:center; height:100%;">
+            <span style="display:flex; align-items:center; cursor:pointer;" onclick="window.handleTreeGridEdit && window.handleTreeGridEdit('${groupRowId}')">${EDIT_ICON}</span>
+            <span style="display:flex; align-items:center; cursor:pointer;" onclick="window.handleTreeGridDeleteRow && window.handleTreeGridDeleteRow('${groupRowId}')">${DELETE_ICON}</span>
+          </div>`,
+          Items: mappedItems,
+          Expanded: "1",
+          is_published: 0,
+          Selected: 0,
+          CanSelect: 1,
+          PanelSelect: 1,
+        };
+        itemsToAdd = [groupRow];
+      } else {
+        itemsToAdd = mappedItems;
+      }
+
+      return {
+        ...prevData,
+        Body: [[...currentRows, ...itemsToAdd]],
+      };
+    },
+    [],
+  );
+
+  const processAddItems = useCallback(
+    (
+      items: any[],
+      groupName?: string,
+      selectedHeaders?: string[],
+      onAdded?: (newData: any) => void,
+    ) => {
+      setGridData((prev) => {
+        const newState = prepareAddItems(
+          prev,
+          items,
+          groupName,
+          selectedHeaders,
+        );
+
+        if (onAdded) {
+          setTimeout(() => onAdded(newState), 0);
+        }
+
+        return newState;
+      });
+    },
+    [prepareAddItems],
+  );
+
+  return {
+    gridData,
+    setGridData,
+    handleEditRowConfirm,
+    handleDeleteRow,
+    processAddItems,
+    prepareAddItems,
+  };
+};

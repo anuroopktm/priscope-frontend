@@ -1,3 +1,4 @@
+import { getErrorMessage } from "@/utils/error-helper";
 import type { MutateOptions } from "@tanstack/react-query";
 import type { ExportItemMasterRowPayload } from "../helpers/types";
 
@@ -63,14 +64,14 @@ export const handleItemMasterExport = ({
             link.remove();
           }
         },
-        onError: () => {
-          showToast("Failed to download file", "error");
+        onError: (error) => {
+          showToast(getErrorMessage(error, "Failed to download file"), "error");
         },
       });
     },
-    onError: () => {
+    onError: (error) => {
       setShowLoader(false);
-      showToast("Failed to export rows", "error");
+      showToast(getErrorMessage(error, "Failed to export rows"), "error");
     },
   });
 };

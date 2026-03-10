@@ -48,7 +48,6 @@ export const ItemMasterGridLayout = (
   headers: itemMasterHeaderResponse | undefined,
 ) => {
   const filterHead = buildTreeGridFilterHead(headers?.headers);
-  console.log(filterHead, "filterheaddd");
 
   return {
     Cfg: {
@@ -92,7 +91,7 @@ export const buildItemMasterTreeGridCols = (
   if (!items || items.length === 0) {
     return { cols: [] };
   }
-  console.log(items, "===================.");
+
   const cols: TreeGridHeader[] = items
     .filter((item) => item.label !== "Color")
     .map((item) => {

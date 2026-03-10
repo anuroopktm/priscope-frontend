@@ -5,6 +5,7 @@ import {
 } from "@/services/user-management/user-management.queries";
 import type { User } from "@/services/user-management/user-management.types";
 import { useToastStore } from "@/store/useToastStore";
+import { getErrorMessage } from "@/utils/error-helper";
 import {
   Box,
   Paper,
@@ -83,10 +84,7 @@ const UserManagementListUsersPage = () => {
           setSelectedIds([]);
         },
         onError: (error) => {
-          showToast(
-            error.response?.data?.detail || "Failed to delete users",
-            "error",
-          );
+          showToast(getErrorMessage(error, "Failed to delete users"), "error");
         },
       },
     );
@@ -107,10 +105,7 @@ const UserManagementListUsersPage = () => {
           setSelectedIds([]);
         },
         onError: (error) => {
-          showToast(
-            error.response?.data?.detail || "Failed to update status",
-            "error",
-          );
+          showToast(getErrorMessage(error, "Failed to update status"), "error");
         },
       },
     );

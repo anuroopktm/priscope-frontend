@@ -1,13 +1,12 @@
-import { useState } from "react";
 import {
-  Dialog,
-  DialogTitle,
-  DialogContent,
-  DialogActions,
   Button,
+  Dialog,
+  DialogActions,
+  DialogContent,
+  DialogTitle,
   Divider,
-  CircularProgress,
 } from "@mui/material";
+import { useState } from "react";
 
 type CommentsModalProps = {
   open?: boolean;
@@ -127,7 +126,7 @@ const CommentsModal = ({
         <Button
           onClick={handleSubmit}
           variant="contained"
-          disabled={isLoading}
+          loading={isLoading}
           sx={{
             height: "40px",
             textTransform: "none",
@@ -138,7 +137,7 @@ const CommentsModal = ({
             },
           }}
         >
-          {isLoading ? <CircularProgress size={20} /> : "Submit"}
+          Submit
         </Button>
       </DialogActions>
     </Dialog>

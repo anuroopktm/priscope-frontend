@@ -1,6 +1,5 @@
 import {
   Button,
-  CircularProgress,
   Dialog,
   DialogActions,
   DialogContent,
@@ -122,15 +121,8 @@ const SaveFilterModal = ({
         >
           Cancel
         </Button>
-        <Button
-          onClick={handleSubmit}
-          variant="contained"
-          disabled={isLoading}
-          startIcon={
-            isLoading ? <CircularProgress size={20} color="inherit" /> : null
-          }
-        >
-          {isLoading ? "Saving..." : "Save Filter"}
+        <Button onClick={handleSubmit} variant="contained" loading={isLoading}>
+          Save Filter
         </Button>
       </DialogActions>
     </Dialog>

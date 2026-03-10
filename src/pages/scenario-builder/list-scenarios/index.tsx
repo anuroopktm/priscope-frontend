@@ -1,12 +1,17 @@
-import { useListScenarios } from "@/services/queries/scenario-builder/scenario-builder.queries";
+import {
+  useDeleteScenario,
+  useListScenarios,
+} from "@/services/queries/scenario-builder/scenario-builder.queries";
+import { useToastStore } from "@/store/useToastStore";
+import { getErrorMessage } from "@/utils/error-helper";
 import { Box } from "@mui/material";
 import { useEffect, useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import ActionHeader from "../components/ActionHeader";
-import DeleteConfirmModal from "../components/DeleteConfirmModal";
-import { ScenarioGridLayout } from "../tree-grid/config/layout";
-import { useTreeGridInit } from "../tree-grid/hooks/useTreeGridInit";
-import { mapScenariosToGridBody } from "../tree-grid/utils/data-mapper";
+import ActionHeader from "./components/ActionHeader";
+import DeleteConfirmModal from "./components/DeleteConfirmModal";
+import { ScenarioGridLayout } from "./tree-grid/config/layout";
+import { useTreeGridInit } from "./tree-grid/hooks/useTreeGridInit";
+import { mapScenariosToGridBody } from "./tree-grid/utils/data-mapper";
 
 declare global {
   interface Window {
@@ -23,6 +28,8 @@ const ScenarioListingPage = () => {
   const [searchTerm, setSearchTerm] = useState<string | undefined>(undefined);
   const [deleteModalOpen, setDeleteModalOpen] = useState(false);
   const [selectedRowId, setSelectedRowId] = useState<string | null>(null);
+  const [selectedForFork, setSelectedForFork] = useState<string | null>(null);
+  const showToast = useToastStore((state) => state.showToast);
 
   const { data: scenariosData } = useListScenarios({
     search: searchTerm,
@@ -30,6 +37,24 @@ const ScenarioListingPage = () => {
     page_size: 20,
     skip: 0,
   });
+
+  const { mutate: deleteScenario, isPending: isDeleting } = useDeleteScenario();
+
+  const handleGridInit = (grid: any) => {
+    if (window.TGSetEvent) {
+      window.TGSetEvent(
+        "OnSelect",
+        gridId,
+        (grid: any, row: any, deselect: boolean) => {
+          if (deselect) {
+            setSelectedForFork(null);
+          } else {
+            setSelectedForFork(row.id);
+          }
+        },
+      );
+    }
+  };
 
   useEffect(() => {
     window.handleTreeGridDelete = (id: string) => {
@@ -44,6 +69,9 @@ const ScenarioListingPage = () => {
     return () => {
       delete window.handleTreeGridDelete;
       delete window.handleTreeGridEdit;
+      if (window.TGDelEvent) {
+        window.TGDelEvent("OnSelect", gridId);
+      }
     };
   }, [navigate]);
 
@@ -52,11 +80,27 @@ const ScenarioListingPage = () => {
     return mapScenariosToGridBody(scenariosData?.scenarios);
   }, [scenariosData]);
 
-  useTreeGridInit(gridId, gridContainerId, ScenarioGridLayout, gridData);
+  useTreeGridInit(
+    gridId,
+    gridContainerId,
+    ScenarioGridLayout,
+    gridData,
+    handleGridInit,
+  );
 
   const handleDeleteConfirm = () => {
-    console.log("Confirm Delete:", selectedRowId);
-    setDeleteModalOpen(false);
+    if (!selectedRowId) return;
+
+    deleteScenario(selectedRowId, {
+      onSuccess: () => {
+        showToast("Scenario deleted successfully", "success");
+        setDeleteModalOpen(false);
+        setSelectedRowId(null);
+      },
+      onError: (error) => {
+        showToast(getErrorMessage(error, "Failed to delete scenario"), "error");
+      },
+    });
   };
 
   return (
@@ -72,7 +116,10 @@ const ScenarioListingPage = () => {
           overflow: "hidden",
         }}
       >
-        <ActionHeader onSearch={setSearchTerm} />
+        <ActionHeader
+          onSearch={setSearchTerm}
+          selectedScenarioId={selectedForFork}
+        />
 
         <Box
           sx={{
@@ -107,6 +154,7 @@ const ScenarioListingPage = () => {
         open={deleteModalOpen}
         onClose={() => setDeleteModalOpen(false)}
         onConfirm={handleDeleteConfirm}
+        isLoading={isDeleting}
       />
     </>
   );

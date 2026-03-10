@@ -1,25 +1,7 @@
-import { useInfiniteQuery, useMutation, useQuery } from "@tanstack/react-query";
-import type { AxiosError } from "axios";
-
-import { useItemMasterStore } from "../../../pages/items-master/store/itemMasterStore";
-
-import type {
-  DeleteSelectedRowPayload,
-  DeleteSelectedRowResponse,
-  Header,
-  ListCommentsPayload,
-  ListItemsResponse,
-  ListRequestBody,
-  ListTemplateHeadersRequest,
-  ListTemplateHeadersResponse,
-  ListTemplatesResponse,
-  MapFieldsRequest,
-  MapFieldsResponse,
-  SystemFieldsResponse,
-} from "./item-master.types";
-
 import type { CommentsResponse } from "@/components/common/loader/comment-sidebar/types";
 import { axiosInstance } from "@/services/api/axiosInstance";
+import { useInfiniteQuery, useMutation, useQuery } from "@tanstack/react-query";
+import type { AxiosError } from "axios";
 import type {
   AddBulkInsertAdminRequest,
   AddHeaderPayload,
@@ -36,6 +18,21 @@ import type {
   SaveFilterPayload,
   SaveFilterResponse,
 } from "../../../pages/items-master/helpers/types";
+import { useItemMasterStore } from "../../../pages/items-master/store/itemMasterStore";
+import type {
+  DeleteSelectedRowPayload,
+  DeleteSelectedRowResponse,
+  Header,
+  ListCommentsPayload,
+  ListItemsResponse,
+  ListRequestBody,
+  ListTemplateHeadersRequest,
+  ListTemplateHeadersResponse,
+  ListTemplatesResponse,
+  MapFieldsRequest,
+  MapFieldsResponse,
+  SystemFieldsResponse,
+} from "./item-master.types";
 
 export type UploadResponse = {
   upload_id: string;
@@ -354,6 +351,7 @@ export const useListHeaders = (payload: ListRequestBody) => {
 
       return response.data;
     },
+    refetchOnWindowFocus: false,
   });
 };
 
@@ -383,6 +381,7 @@ export const useItemMasterHistory = ({
       return response.data;
     },
     enabled: Boolean(item_id),
+    refetchOnWindowFocus: false,
   });
 };
 
@@ -394,6 +393,7 @@ export const useGetItemMasterById = (item_id?: string) => {
       return response.data;
     },
     enabled: Boolean(item_id),
+    refetchOnWindowFocus: false,
   });
 };
 
@@ -406,5 +406,6 @@ export const useListSavedFilter = () => {
       );
       return response.data;
     },
+    refetchOnWindowFocus: false,
   });
 };

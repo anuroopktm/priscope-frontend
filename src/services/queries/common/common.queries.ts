@@ -13,6 +13,10 @@ import type {
   ListExportRequest,
   ListExportResponse,
 } from "./types/exportServices.types";
+import type {
+  CreateItemGroupRequest,
+  CreateItemGroupResponse,
+} from "./types/item-group.types";
 
 // ---------------------- DOWNLOAD TEMPLATE ----------------------
 
@@ -168,5 +172,24 @@ export const useListCurrencies = (payload: GlobalCurrenciesRequest) => {
       return data;
     },
     refetchOnWindowFocus: false,
+  });
+};
+
+// ---------------------- CREATE ITEM GROUP ----------------------
+
+export const useCreateItemGroup = () => {
+  return useMutation<
+    CreateItemGroupResponse,
+    AxiosError<{ detail: string | string[] }>,
+    CreateItemGroupRequest
+  >({
+    mutationKey: ["create-item-group"],
+    mutationFn: async (payload) => {
+      const { data } = await axiosInstance.post<CreateItemGroupResponse>(
+        `/v1/common/item-groups`,
+        payload,
+      );
+      return data;
+    },
   });
 };

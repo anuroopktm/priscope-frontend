@@ -8,6 +8,7 @@ import {
 } from "@/services/queries/auth/sign-up/sign-up.queries";
 import { useSignupStore } from "@/store/useSignupStore";
 import { useToastStore } from "@/store/useToastStore";
+import { getErrorMessage } from "@/utils/error-helper";
 import {
   createSignUpSchema,
   type SignUpFormData,
@@ -65,7 +66,7 @@ const SignUpForm = () => {
             },
             onError: (error) => {
               showToast(
-                error.response?.data?.detail || "Invalid or expired invitation",
+                getErrorMessage(error, "Invalid or expired invitation"),
                 "error",
               );
             },
@@ -103,10 +104,7 @@ const SignUpForm = () => {
           navigate("/auth/otp");
         },
         onError: (error) => {
-          showToast(
-            error.response?.data?.detail || "Failed to send OTP",
-            "error",
-          );
+          showToast(getErrorMessage(error, "Failed to send OTP"), "error");
         },
       },
     );

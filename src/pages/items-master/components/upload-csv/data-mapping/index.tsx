@@ -1,11 +1,6 @@
 // import theme from "@/shared/styles/theme";
 import LoaderOverlay from "@/components/common/loader";
 import ConfirmationDialog from "@/components/common/upload-modal/confirmation-modal";
-import {
-  DATA_MAPPING_STEPS,
-  DEFAULT_ATTRIBUTE_CONFIGURATION,
-  DEFAULT_SYSTEM_FIELD_MAPPING,
-} from "@/pages/items-master/constants/data_mapping.constants";
 import type {
   AttributeConfigurationData,
   DataMappingModalProps,
@@ -13,6 +8,11 @@ import type {
   SystemFieldMappingData,
   SystemFieldObject,
 } from "@/pages/items-master-refactor/types/types";
+import {
+  DATA_MAPPING_STEPS,
+  DEFAULT_ATTRIBUTE_CONFIGURATION,
+  DEFAULT_SYSTEM_FIELD_MAPPING,
+} from "@/pages/items-master/constants/data_mapping.constants";
 import { useMapItemMasterFields } from "@/services/queries/item-master/item-master.queries";
 import { Close as CloseIcon } from "@mui/icons-material";
 import {
@@ -145,7 +145,6 @@ const DataMappingModal: React.FC<DataMappingModalPropsExtended> = ({
         templateNameParam || templateName || fileName.replace(/\.[^/.]+$/, "");
     }
 
-    console.log("Final API payload:", payload);
     return { payload, upload_id: uploadIdParam, update_if_exists: overwrite };
   };
 
@@ -222,8 +221,6 @@ const DataMappingModal: React.FC<DataMappingModalPropsExtended> = ({
       if (!finalUploadId) {
         throw new Error("Upload ID is required but was not provided");
       }
-
-      console.log("Using upload ID from store:", finalUploadId);
 
       const apiPayload = convertToApiFormat(
         finalUploadId,

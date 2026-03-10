@@ -55,7 +55,6 @@ const SavedFiltersDropdown = () => {
           <Button
             onClick={handleToggle}
             variant="contained"
-
             sx={{
               backgroundColor: "#144E72",
               color: "white",
