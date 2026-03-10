@@ -1,20 +1,10 @@
-// import RequestSuccessDialog from "@/components/common/request-notification";
-// import { COMMENT_TYPE } from "@/constants/comments.constants";
+
 import {
   useListHeaders,
   useListItems,
 } from "@/services/queries/item-master-refactor/item-master-refactor.queries";
 import { Box } from "@mui/material";
 import { useCallback, useEffect, useMemo, useState } from "react";
-// import { useConfirmComment } from "./actions/commentHandlers";
-// import { handleEditCellAdminRequest } from "./actions/editItemMasterAdmin";
-// import { useHandleGridEditConfirm } from "./actions/handleGridEditConfirm";
-// import ActionHeader from "./components/ActionHeader";
-// import CommentSidebar from "./components/comment-sidebar";
-// import CommentsModal from "./components/comments-modal";
-// import DetailView from "./components/detail-view";
-// import { DetailsModal } from "./components/detail-view-modal";
-// import SidePanel from "./components/sidepanel/SidePanel";
 import TableSavePopover from "./components/table-save-popover";
 import { DEfAULT_VISIBLE_COLUMNS } from "./constants/headers.constants";
 import {
@@ -24,13 +14,11 @@ import {
   ItemMasterGridLayout,
 } from "./helper";
 import { useItemMasterStore } from "./store/useItemMasterStore";
-// import { handleValueChanged } from "./tree-grid/cellvalue/handleValueChanged";
 import { useHandleEditPopover } from "./tree-grid/hooks/useHandleEditPopover";
 import { useHandleGridEditConfirm } from "./actions/handleGridEditConfirm";
 import RequestSuccessDialog from "@/components/common/request-notification";
 import { COMMENT_TYPE } from "@/constants/comments.constants";
 import CommentsModal from "./components/comments-modal";
-// import type { OpenPanel } from "./types/types";
 import CommentSidebar from "./components/comment-sidebar";
 import DetailView from "./components/detail-view";
 import { DetailsModal } from "./components/detail-view-modal";

@@ -8,7 +8,7 @@ import { useToastStore } from "@/store/useToastStore";
 import { getErrorMessage } from "@/utils/error-helper";
 import { Box } from "@mui/material";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { useParams } from "react-router-dom";
+import { useLocation, useParams } from "react-router-dom";
 import ActionHeader from "./components/ActionHeader";
 import CommentsSidebar from "./components/drawers/CommentsSidebar";
 import ScenarioDrawers from "./components/ScenarioDrawers";
@@ -24,6 +24,7 @@ import {
   registerStartScenarioColumnSelection,
   unregisterGridHighlightsGlobals,
 } from "./utils/gridHighlights";
+import { useItemMasterStore } from "@/pages/items-master-refactor/store/useItemMasterStore";
 
 declare global {
   interface Window {
@@ -36,6 +37,7 @@ export const SCENARIO_BUILDER_GRID_ID = "ScenarioGridDetails";
 const gridContainerId = "TreeGrid_" + SCENARIO_BUILDER_GRID_ID;
 
 const ScenarioDetailsPage = () => {
+  const location = useLocation();
   const { id } = useParams<{ id: string }>();
   const { data: scenario } = useGetScenario(id);
   const setIsDrawerOpen = useScenarioStore((state) => state.setIsDrawerOpen);
@@ -56,6 +58,11 @@ const ScenarioDetailsPage = () => {
   const setIsDeleteModalOpen = useScenarioStore(
     (state) => state.setIsDeleteModalOpen,
   );
+
+  const selectedItems = useItemMasterStore((state) => state.selectedItems);
+
+  const selectedRowsFromItemMaster = location.state?.selectedRows || [];
+
   const {
     gridData,
     setGridData,
@@ -76,6 +83,15 @@ const ScenarioDetailsPage = () => {
 
   const [selectedRowsCount, setSelectedRowsCount] = useState(0);
 
+  useEffect(() => {
+    if (selectedRowsFromItemMaster.length) {
+      console.log("Rows from item master:", selectedRowsFromItemMaster);
+      console.log("selectedItems", selectedItems);
+
+      // convert to scenario items if needed
+      handleProcessAddItems(selectedItems);
+    }
+  }, [selectedItems]);
   const handleSaveAsDraft = useCallback(
     (
       dataToSave?: any,

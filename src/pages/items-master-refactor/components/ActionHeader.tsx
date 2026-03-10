@@ -35,6 +35,9 @@ import FileDetailsModal from "./file-detail-modal";
 import { useNavigate } from "react-router-dom";
 import AdminRequestConfirmationModal from "./admin-request-confirmation-modal";
 import { builderItem } from "../constants/builderItem.constants";
+import { useCreateScenario } from "@/services/queries/scenario-builder/scenario-builder.queries";
+import type { ScenarioFormValues } from "@/validations/scenario-builder/scenario.validation";
+import CreateScenarioModal from "./scenario-modal";
 
 interface ActionHeaderProps {
   onSearch: (value: string) => void;
@@ -65,6 +68,7 @@ const ActionHeader = ({
     openAdminRequestConfirmationModal,
     setOpenAdminRequestConfirmationModal,
   ] = useState<boolean>(false);
+  const [open, setOpen] = useState<boolean>(false);
   const selectedRows = useItemMasterStore((state) => state.selectedRows);
   const filter = useItemMasterStore((state) => state.filter);
   const setSelectedExport = useItemMasterStore(
@@ -85,6 +89,8 @@ const ActionHeader = ({
 
   const { mutate: mutateSaveFilter, isPending: mutateSaveFilterPending } =
     useSaveFilter();
+
+  const { mutate: createScenario, isPending } = useCreateScenario();
 
   const handleOpenDeleteModal = () => {
     setOpenDeleteModal(true);
@@ -123,6 +129,30 @@ const ActionHeader = ({
         showToast("Failed to add filter", "error");
       },
     });
+  };
+
+  const handleCreate = (data: ScenarioFormValues) => {
+    createScenario(
+      {
+        name: data.label,
+        base_currency: data.currency,
+        customers: [{ customer_name: data.customer }],
+      },
+      {
+        onSuccess: (response) => {
+          setOpen(false);
+          showToast("Scenario created successfully", "success");
+          navigate(`/scenario-builder/details/${response.id}`, {
+            state: {
+             selectedRows
+            },
+          });
+        },
+        onError: () => {
+          showToast("Failed to create scenario", "error");
+        },
+      },
+    );
   };
   return (
     <Box
@@ -165,7 +195,15 @@ const ActionHeader = ({
               variant="filled"
               disableUnderline
               displayEmpty
-              onChange={(e: any) => navigate(e.target.value)}
+              onChange={(e: any) => {
+                const value = e.target.value;
+
+                if (value === "/scenario-builder") {
+                  setOpen(true);
+                } else {
+                  navigate(value);
+                }
+              }}
               renderValue={() => (
                 <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
                   <img src={builderItem.icon} width={16} />
@@ -331,6 +369,12 @@ const ActionHeader = ({
             },
           },
         ]}
+      />
+      <CreateScenarioModal
+        open={open}
+        onClose={() => setOpen(false)}
+        onSubmit={handleCreate}
+        isLoading={isPending}
       />
     </Box>
   );
