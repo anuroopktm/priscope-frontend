@@ -18,6 +18,7 @@ import BulkInsertPage from "@/pages/items-master-refactor/Pages/bulk-insert";
 import Onboarding from "@/pages/onboarding";
 import TenantSignUp from "@/pages/auth/tenent-sign-up";
 import TenantOtpPage from "@/pages/auth/tenent-otp-page";
+import TenantSignInPage from "@/pages/auth/tenant-sign-in";
 
 export const routes = [
   {
@@ -43,6 +44,10 @@ export const routes = [
       {
         path: "tenant-otp",
         element: <TenantOtpPage />,
+      },
+      {
+        path: "tenant-sign-in",
+        element: <TenantSignInPage />,
       },
     ],
   },

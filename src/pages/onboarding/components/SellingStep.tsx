@@ -36,8 +36,12 @@ const SellingStep = ({ onNext }: { onNext: () => void }) => {
     updated[index] = value;
     setSellingSteps(updated);
   };
+
   const onSubmit = (formData: SellingPriceElementFormValues) => {
-    updateData(formData);
+    updateData({
+      ...formData,
+      additional_selling_price_elements: sellingSteps,
+    });
     onNext();
   };
   return (

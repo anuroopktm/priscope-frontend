@@ -51,6 +51,7 @@ const SetupStep = ({ onNext }: Props) => {
       industry: data.industry ?? "",
       company_size: data.company_size ?? "",
       primary_location: data.primary_location ?? "",
+      base_currency: data.base_currency ?? "",
       company_logo: data.company_logo ?? undefined,
     },
   });
@@ -170,6 +171,19 @@ const SetupStep = ({ onNext }: Props) => {
           />
           <FormHelperText>{errors.primary_location?.message}</FormHelperText>
         </FormControl>
+      </Box>
+
+      <Box>
+        <Typography fontSize={12} mb={1}>
+          Base Currency *
+        </Typography>
+        <TextField
+          fullWidth
+          {...register("base_currency")}
+          error={!!errors.base_currency}
+          helperText={errors.base_currency?.message}
+          size="small"
+        />
       </Box>
 
       <Box>

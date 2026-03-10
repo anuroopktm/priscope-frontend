@@ -41,6 +41,8 @@ interface ActionHeaderProps {
   headers: HeaderList[] | null;
   onToggleCommentsPanel: () => void;
   hasAddItemMasterPrivilege: boolean;
+  isUploadModalOpen :boolean;
+  setIsUploadModalOpen: (open: boolean) => void;
 }
 
 const ActionHeader = ({
@@ -49,9 +51,10 @@ const ActionHeader = ({
   headers,
   onToggleCommentsPanel,
   hasAddItemMasterPrivilege,
+  isUploadModalOpen,
+  setIsUploadModalOpen
 }: ActionHeaderProps) => {
   const navigate = useNavigate();
-  const [isUploadModalOpen, setIsUploadModalOpen] = useState<boolean>(false);
   const [openDeleteModal, setOpenDeleteModal] = useState<boolean>(false);
   const [openRequestModal, setOpenRequestModal] = useState<boolean>(false);
   const [openSaveFilterModal, setOpenSaveFilterModal] =

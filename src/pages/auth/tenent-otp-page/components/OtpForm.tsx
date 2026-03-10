@@ -45,7 +45,7 @@ const OtpForm = () => {
     if (!signupData) {
       navigate("/auth/tenant-sign-up");
     }
-  }, [signupData, navigate]);
+  }, []);
 
   const handleOtpChange = (index: number, value: string) => {
     if (!/^\d?$/.test(value)) return;
@@ -97,8 +97,8 @@ const OtpForm = () => {
       });
 
       showToast("Successfully signed up!", "success");
+      navigate("/auth/tenant-sign-in");
       clearSignupStore();
-      navigate("/auth/sign-in");
     } catch (error: any) {
       showToast(error.response?.data?.detail || "Signup failed", "error");
     }

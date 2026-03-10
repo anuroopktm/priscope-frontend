@@ -32,6 +32,7 @@ import SidePanel from "./components/sidepanel/SidePanel";
 import { getRightClickHandlers } from "./tree-grid/utils/onHandleRightClick";
 import { selectComment } from "./utils/getCommentSelection";
 import AdminRequestConfirmationModal from "./components/admin-request-confirmation-modal";
+import EmptyDataState from "./components/action-cards";
 
 const gridId = "ItemMasterGrid";
 const gridContainerId = "TreeGrid_" + gridId;
@@ -53,6 +54,7 @@ const ItemMasterListingPage = () => {
     openAdminRequestConfirmationModal,
     setOpenAdminRequestConfirmationModal,
   ] = useState(false);
+  const [isUploadModalOpen, setIsUploadModalOpen] = useState<boolean>(false);
   const filter = useItemMasterStore((store) => store.filter);
   const setCheckBoxList = useItemMasterStore((store) => store.setCheckBoxList);
   const showSavePopover = useItemMasterStore((s) => s.showSavePopover);
@@ -70,7 +72,7 @@ const ItemMasterListingPage = () => {
     filter: filter,
   });
 
-  const { data: listHeaderData } = useListHeaders({
+  const { data: listHeaderData, refetch: refetchHeader } = useListHeaders({
     page_size: 10000,
     search: "",
     skip: 0,
@@ -112,6 +114,8 @@ const ItemMasterListingPage = () => {
     const items = itemMasterData.pages.flatMap((page) => page.items);
     return buildItemMasterTreeGridBody(items);
   }, [itemMasterData]);
+  console.log(gridData);
+  const showEmpty = gridData?.Body[0].length === 0;
 
   const headers = useMemo(() => {
     if (!listHeaderData?.headers) return null;
@@ -173,7 +177,7 @@ const ItemMasterListingPage = () => {
       itemMasterData,
       setRequestNotficationVisible,
       openAdminRequestConfirmationModal,
-      setOpenAdminRequestConfirmationModal
+      setOpenAdminRequestConfirmationModal,
     });
   };
 
@@ -220,6 +224,22 @@ const ItemMasterListingPage = () => {
     }
   };
 
+  const handleCardAction = useCallback((cardId: string) => {
+    switch (cardId) {
+      case "erp-sync":
+        console.log("ERP sync clicked");
+        break;
+      case "csv-upload":
+        setIsUploadModalOpen(true);
+        break;
+      case "manual-add":
+        // handleManualAdd();
+        break;
+      default:
+        console.warn("Unknown card action:", cardId);
+    }
+  }, []);
+
   useTreeGridInit(gridId, gridContainerId, gridLayout, gridData);
 
   return (
@@ -237,10 +257,15 @@ const ItemMasterListingPage = () => {
     >
       <ActionHeader
         onSearch={setSearchTerm}
-        onImportComplete={() => refetch()}
+        onImportComplete={() => {
+          refetch();
+          refetchHeader();
+        }}
         headers={headers}
         onToggleCommentsPanel={() => toggleCommentsPanel("comments")}
         hasAddItemMasterPrivilege={hasAddItemMasterPrivilege}
+        isUploadModalOpen={isUploadModalOpen}
+        setIsUploadModalOpen={setIsUploadModalOpen}
       />
       <Box
         sx={{
@@ -251,14 +276,18 @@ const ItemMasterListingPage = () => {
           position: "relative",
         }}
       >
-        <Box
-          id={gridContainerId}
-          sx={{
-            height: "100%",
-            width: "100%",
-            borderRadius: 1,
-          }}
-        />
+        {showEmpty ? (
+          <EmptyDataState handleCardAction={handleCardAction} />
+        ) : (
+          <Box
+            id={gridContainerId}
+            sx={{
+              height: "100%",
+              width: "100%",
+              borderRadius: 1,
+            }}
+          />
+        )}
         <SidePanel isOpen={openPanel === "comments"} width={300}>
           <CommentSidebar
             onClose={() => setOpenPanel(null)}

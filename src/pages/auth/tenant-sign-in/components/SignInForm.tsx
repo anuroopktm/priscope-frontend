@@ -13,7 +13,6 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { Button, Divider, Link, Stack, Typography } from "@mui/material";
 import { useForm } from "react-hook-form";
 import { useNavigate } from "react-router-dom";
-import { Link as RouterLink } from "react-router-dom";
 
 const SignInForm = () => {
   const navigate = useNavigate();
@@ -57,7 +56,7 @@ const SignInForm = () => {
             JSON.stringify(response.privileges),
           );
 
-          navigate("/scenario-builder");
+          navigate("/onboarding");
         },
         onError: (error) => {
           showToast(
@@ -110,19 +109,8 @@ const SignInForm = () => {
 
       <Typography variant="body2" textAlign="center" mt={4}>
         Don&apos;t have an account?{" "}
-        <Link component="button" fontWeight={700} underline="hover">
+        <Link component="button" fontWeight={700}>
           Create an account
-        </Link>
-      </Typography>
-      <Typography variant="body2" textAlign="center" mt={1}>
-        Are you a tenant?{" "}
-        <Link
-          component={RouterLink}
-          to="/auth/tenant-sign-up"
-          fontWeight={700}
-          underline="hover"
-        >
-          Tenant Sign Up
         </Link>
       </Typography>
     </AuthCard>

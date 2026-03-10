@@ -14,7 +14,8 @@ export const setupStepSchema = z.object({
 
   primary_location: z.string().min(1, "Primary location is required"),
 
-  company_logo: z.instanceof(File)
+  base_currency: z.string().min(1, "Base currency is required"),
+  company_logo: z.instanceof(File),
 });
 
 export type SetupStepFormValues = z.infer<typeof setupStepSchema>;
