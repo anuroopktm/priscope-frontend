@@ -3,17 +3,17 @@ import CloseIcon from "@mui/icons-material/Close";
 import { Box, Button, IconButton, Typography } from "@mui/material";
 import { useEffect, useState } from "react";
 import DeleteConfirmModal from "../../../list-scenarios/components/DeleteConfirmModal";
-import { AggregatorDrawerLayout } from "../../tree-grid/config/aggregator-drawer-layout";
+import { ComponentDrawerLayout } from "../../tree-grid/config/component-drawer-layout";
 import { useTreeGridInit } from "../../tree-grid/hooks/useTreeGridInit";
 
-interface ComponentAggregatorPanelProps {
+interface ComponentAggregatorDrawerProps {
   onClose: () => void;
   onUpdate: (items: any[]) => void;
   title?: string;
   initialItems?: any[];
 }
 
-const drawerGridId = "AggregatorDrawerGrid";
+const drawerGridId = "ComponentAggregatorGrid";
 const drawerGridContainerId = "TreeGrid_" + drawerGridId;
 
 const renderDeleteIcon = (id: string) => {
@@ -35,20 +35,33 @@ const AggregatorGrid = ({ data }: { data: any }) => {
   useTreeGridInit(
     drawerGridId,
     drawerGridContainerId,
-    AggregatorDrawerLayout,
+    ComponentDrawerLayout,
     data,
   );
   return (
-    <Box id={drawerGridContainerId} sx={{ height: "100%", width: "100%" }} />
+    <Box
+      id={drawerGridContainerId}
+      sx={{
+        width: "100%",
+        // borderBottom: "1px solid #e2e8f0",
+        // "& .TGMain": {
+        //   border: "1px solid #e2e8f0 !important",
+        //   borderBottom: "none !important",
+        // },
+        "& div[class*='NoDataRow']": {
+          display: "none !important",
+        },
+      }}
+    />
   );
 };
 
-const ComponentAggregatorPanel = ({
+const ComponentAggregatorDrawer = ({
   onClose,
   onUpdate,
   title = "Component aggregator",
   initialItems = [],
-}: ComponentAggregatorPanelProps) => {
+}: ComponentAggregatorDrawerProps) => {
   const [deleteModalOpen, setDeleteModalOpen] = useState(false);
   const [rowToDelete, setRowToDelete] = useState<string | null>(null);
 
@@ -57,6 +70,10 @@ const ComponentAggregatorPanel = ({
       initialItems.length > 0
         ? initialItems.map((item) => ({
             ...item,
+            A: item.name || "",
+            B: item.currency || "USD",
+            C: item.cost || 0,
+            D: item.costFor || "Base UOM",
             F: renderDeleteIcon(item.id),
           }))
         : [],
@@ -156,13 +173,12 @@ const ComponentAggregatorPanel = ({
   return (
     <Box
       sx={{
-        height: "100%",
         display: "flex",
         flexDirection: "column",
         bgcolor: "background.paper",
         borderTopLeftRadius: 8,
         borderTopRightRadius: 8,
-        overflow: "hidden",
+        overflow: "visible",
         p: 2,
       }}
     >
@@ -190,14 +206,12 @@ const ComponentAggregatorPanel = ({
       {/* Grid Content */}
       <Box
         sx={{
-          flex: 1,
           width: "100%",
-          minHeight: 0,
           bgcolor: "background.paper",
           position: "relative",
           p: 0,
           borderRadius: 1,
-          overflow: "hidden",
+          overflow: "visible",
         }}
       >
         <AggregatorGrid data={gridData} />
@@ -231,4 +245,4 @@ const ComponentAggregatorPanel = ({
   );
 };
 
-export default ComponentAggregatorPanel;
+export default ComponentAggregatorDrawer;

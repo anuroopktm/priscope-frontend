@@ -1,32 +1,36 @@
 import AddIcon from "@/assets/actions/add.svg?react";
+import {
+  default as ExportDataIcon,
+  default as ExportIcon,
+} from "@/assets/common/export-data.svg";
+import CommentIcon from "@/assets/items-master/CommentsButton.svg";
+import LogFileIcon from "@/assets/items-master/Group.svg";
+import SavedFilterIcon from "@/assets/items-master/bookmark-check-01.svg";
+import DatabaseImportIcon from "@/assets/items-master/database-import.svg";
+import RequestsIcon from "@/assets/items-master/requests.svg";
 import SearchTextField from "@/components/common/SearchTextField";
 import { Box, Button, MenuItem, Select, Stack } from "@mui/material";
 import { useState } from "react";
 import UploadFileModal from "./upload-file/UploadFileModal";
-import { useItemMasterStore } from "../store/useItemMasterStore";
-import ExportDataIcon from "@/assets/common/export-data.svg";
+// import { useItemMasterStore } from "../store/useItemMasterStore";
+// import ExportDataIcon from "@/assets/common/export-data.svg";
 import DeleteOutlineIcon from "@mui/icons-material/DeleteOutline";
 import {
   useDeleteItemMasterRow,
   useExportItemMasterRow,
   useSaveFilter,
 } from "@/services/queries/item-master-refactor/item-master-refactor.queries";
-import LoaderOverlay from "./loader";
+// import LoaderOverlay from "./loader";
 import { handleItemMasterExport } from "../actions/handleExportRows";
-import { useGetExportedFile } from "@/services/queries/common/common.queries";
-import { handleDeleteSelected } from "../actions/handleDeleteRows";
-import DeleteConfirmModal from "./delete-confirmation-modal";
-import RequestsIcon from "@/assets/items-master/requests.svg";
-import LogFileIcon from "@/assets/items-master/Group.svg";
-import { ItemMasterRequestsModal } from "./request-modal";
-import ExportIcon from "@/assets/common/export-data.svg";
-import DatabaseImportIcon from "@/assets/items-master/database-import.svg";
-import CommentIcon from "@/assets/items-master/CommentsButton.svg";
-import SavedFilterIcon from "@/assets/items-master/bookmark-check-01.svg";
+import { useItemMasterStore } from "../store/useItemMasterStore";
 import { handleClearAllFilters } from "../tree-grid/utils/clearGrid";
+// import type { HeaderList } from "../types/types";
+// import ColumnDropdown from "./columns-dropdown";
+import DeleteConfirmModal from "./delete-confirmation-modal";
+// import FileDetailsModal from "./file-detail-modal";
+import LoaderOverlay from "./loader";
+import { ItemMasterRequestsModal } from "./request-modal";
 import SaveFilterModal from "./save-filter";
-import { useToastStore } from "@/store/useToastStore";
-import { useQueryClient } from "@tanstack/react-query";
 import SavedFiltersDropdown from "./saved-filters-dropdown";
 import ColumnDropdown from "./columns-dropdown";
 import type { HeaderList } from "../types/types";
@@ -38,6 +42,11 @@ import { builderItem } from "../constants/builderItem.constants";
 import { useCreateScenario } from "@/services/queries/scenario-builder/scenario-builder.queries";
 import type { ScenarioFormValues } from "@/validations/scenario-builder/scenario.validation";
 import CreateScenarioModal from "./scenario-modal";
+import { useToastStore } from "@/store/useToastStore";
+import { useQueryClient } from "@tanstack/react-query";
+import { useGetExportedFile } from "@/services/queries/common/common.queries";
+import { handleDeleteSelected } from "../actions/handleDeleteRows";
+import { getErrorMessage } from "@/utils/error-helper";
 
 interface ActionHeaderProps {
   onSearch: (value: string) => void;
@@ -125,8 +134,8 @@ const ActionHeader = ({
         showToast("Filter added successfully!", "success");
         queryClient.invalidateQueries({ queryKey: ["saved-filter"] });
       },
-      onError: () => {
-        showToast("Failed to add filter", "error");
+      onError: (error) => {
+        showToast(getErrorMessage(error, "Failed to add filter"), "error");
       },
     });
   };

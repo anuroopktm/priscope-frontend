@@ -34,6 +34,7 @@ export const handleComponentAggregatorConfirm = (
     }
 
     grid.SetAttribute(null, colName, "AggregatorType", "Component", 1);
+    grid.SetAttribute(null, colName, "MenuType", "Aggregator", 1);
 
     setTimeout(() => {
       grid.SetAttribute(null, colName, "RelWidth", 0, 1);
@@ -83,6 +84,7 @@ export const handleCostAggregatorConfirm = (
     }
 
     grid.SetAttribute(null, colName, "AggregatorType", "Cost", 1);
+    grid.SetAttribute(null, colName, "MenuType", "Aggregator", 1);
 
     setTimeout(() => {
       grid.SetAttribute(null, colName, "RelWidth", 0, 1);
@@ -136,6 +138,7 @@ export const handleMarginMarkupConfirm = (
     }
 
     grid.SetAttribute(null, colName, "AggregatorType", marginMarkupType, 1);
+    grid.SetAttribute(null, colName, "MenuType", "Aggregator", 1);
 
     setTimeout(() => {
       grid.SetAttribute(null, colName, "RelWidth", 0, 1);
@@ -165,6 +168,8 @@ export const handleAggregatorUpdate = (
   if (grid && activeCell) {
     const row = grid.GetRowById(activeCell.rowId);
     if (row) {
+      const colsData = { ...(grid.ColsData || {}) };
+
       const totalAmount = (Array.isArray(items) ? items : []).reduce(
         (acc, item) => {
           const cost =
@@ -180,7 +185,7 @@ export const handleAggregatorUpdate = (
 
       Object.keys(grid.Cols).forEach((c) => {
         if (c.startsWith(`Comp_${targetCol}_`)) {
-          grid.DelCol(c);
+          grid.SetValue(row, c, null, 1);
         }
       });
 
@@ -203,6 +208,7 @@ export const handleAggregatorUpdate = (
 
         if (!grid.Cols[colId]) {
           grid.AddCol(colId, targetSec, insertPos, 110, 1, "Float", cleanName);
+          grid.MoveCol(colId, targetCol, 0, 1);
         } else {
           grid.ShowCol(colId);
         }
@@ -213,10 +219,15 @@ export const handleAggregatorUpdate = (
         grid.SetAttribute(null, colId, "CanMove", 1, 1);
         grid.SetAttribute(null, colId, "Type", "Float", 1);
         grid.SetAttribute(null, colId, "Format", "$0.00", 1);
-        grid.SetAttribute(null, colId, "Width", 110, 1);
+        grid.SetAttribute(null, colId, "Width", 130, 1);
+        grid.SetAttribute(null, colId, "RelWidth", 1, 1);
+        grid.SetAttribute(null, colId, "MinWidth", 100, 1);
+        grid.SetAttribute(null, colId, "CanResize", 1, 1);
         grid.SetAttribute(null, colId, "CanEdit", 1, 1);
-
-        grid.MoveCol(colId, targetCol, 0, 1);
+        grid.SetAttribute(null, colId, "CanEdit", 1, 1);
+        grid.SetAttribute(null, colId, "CanEmpty", 1, 1);
+        grid.SetAttribute(null, colId, "IsExtraCol", 1, 1);
+        grid.SetAttribute(null, colId, "MenuType", "Data", 1);
 
         const headerRow = grid.Header || grid.GetRowById("Header");
         if (headerRow) {
@@ -229,19 +240,30 @@ export const handleAggregatorUpdate = (
           typeof itemCostPerUnit === "string"
             ? itemCostPerUnit.replace(/[^0-9.]/g, "")
             : itemCostPerUnit;
-        const val = parseFloat(rawVal as any) || 0;
+        const val = parseFloat(rawVal as any);
+        const roundedVal = isNaN(val) ? null : Math.round(val * 100) / 100;
+        grid.SetValue(row, colId, roundedVal, 1);
 
-        grid.SetValue(row, colId, val, 1);
+        // Store column metadata for persistence
+        colsData[colId] = {
+          Caption: cleanName,
+          MenuType: "Data",
+          IsExtraCol: 1,
+        };
       });
 
-      const total = parseFloat(totalAmount as any) || 0;
+      const total = parseFloat(totalAmount as any);
+      const roundedTotal = isNaN(total) ? 0 : Math.round(total * 100) / 100;
 
       grid.SetAttribute(null, targetCol, "Type", "Float", 1);
       grid.SetAttribute(null, targetCol, "Format", "$0.00", 1);
 
-      grid.SetValue(row, targetCol, total, 1);
+      grid.SetValue(row, targetCol, roundedTotal, 1);
 
       grid.SetAttribute(row, targetCol, "ItemsData", JSON.stringify(items), 1);
+
+      // Save the updated column metadata to the grid
+      grid.ColsData = colsData;
 
       grid.Update();
       grid.Render();

@@ -1,6 +1,3 @@
-// Define system columns that should have the default menu
-const SYSTEM_COLS = ["A", "B", "C", "D", "E"];
-
 // Text style for menu section headers (e.g., "Builder", "Calculators")
 const HEADER_STYLE =
   "display: block; color: #888; font-size: 11px; text-align: left; margin: -6px 8px; font-weight: 600; pointer-events: none;";
@@ -10,8 +7,10 @@ const DELETE_ICON =
   '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="margin-right: 8px;"><path d="M3 6h18m-2 0v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6m3 0V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2m-6 9v4m4-4v4"></path></svg>';
 
 export const getHeaderContextMenu = (grid: any, col: string) => {
-  const caption = (grid.Header?.[col] || "").toString().trim();
-  const aggregatorType = grid.GetAttribute(null, col, "AggregatorType");
+  const menuType = grid.GetAttribute(null, col, "MenuType");
+  const isAggregator =
+    menuType === "Aggregator" ||
+    !!grid.GetAttribute(null, col, "AggregatorType");
 
   const deleteItem = {
     Name: "Delete",
@@ -19,15 +18,8 @@ export const getHeaderContextMenu = (grid: any, col: string) => {
     OnClick: () => (window as any).handleDeleteCol(grid, col),
   };
 
-  // Determine if this is an established column (has meaningful content)
-  // or a fresh builder column (no caption and no logic assigned yet)
-  const isEstablished =
-    (caption !== "" && caption !== col) ||
-    aggregatorType ||
-    SYSTEM_COLS.includes(col);
-
-  if (isEstablished) {
-    // 1. Established Header: Add Left/Right and Delete
+  // If it's a Data column or an Aggregator, show options and delete
+  if (menuType === "Data" || isAggregator) {
     return [
       {
         Text: `<span style="${HEADER_STYLE}">Column Options</span>`,
@@ -46,7 +38,7 @@ export const getHeaderContextMenu = (grid: any, col: string) => {
     ] as any[];
   }
 
-  // 2. Fresh Builder Column Header
+  // Otherwise, fallback to Builder menu for generic columns
   return [
     { Text: `<span style="${HEADER_STYLE}">Builder</span>`, Caption: 1 },
     {
@@ -75,13 +67,12 @@ export const getHeaderContextMenu = (grid: any, col: string) => {
 };
 
 export const getCellContextMenu = (grid: any, row: any, col: string) => {
+  const menuType = grid.GetAttribute(null, col, "MenuType");
   const aggregatorType = grid.GetAttribute(null, col, "AggregatorType");
-  const isSystem = SYSTEM_COLS.includes(col);
 
-  // 1. If assigned to an aggregator -> Show Calculate
-  if (aggregatorType) {
+  // 1. Aggregator -> "Calculate" and "Comment"
+  if (menuType === "Aggregator" || aggregatorType) {
     return [
-      // { Text: `<span style="${HEADER_STYLE}">Actions</span>`, Caption: 1 },
       {
         Name: "Calculate",
         OnClick: () => {
@@ -96,28 +87,9 @@ export const getCellContextMenu = (grid: any, row: any, col: string) => {
     ] as any[];
   }
 
-  // 2. Normal Cells (System Columns) -> Show direct calculate for all types
-  if (isSystem) {
+  // 2. Data column -> Just "Comment"
+  if (menuType === "Data") {
     return [
-      { Text: `<span style="${HEADER_STYLE}">Calculators</span>`, Caption: 1 },
-      {
-        Name: "Component aggregator",
-        OnClick: () =>
-          (window as any).handleCalculate(row.id, col, "Component"),
-      },
-      {
-        Name: "Cost aggregator",
-        OnClick: () => (window as any).handleCalculate(row.id, col, "Cost"),
-      },
-      {
-        Name: "Markup component",
-        OnClick: () => (window as any).handleCalculate(row.id, col),
-      },
-      {
-        Name: "Margin component",
-        OnClick: () => (window as any).handleCalculate(row.id, col),
-      },
-      { Name: "-", Separator: 1 },
       {
         Name: "Comment",
         OnClick: () => (window as any).handleCommentFromMenu(grid, row, col),
@@ -125,28 +97,24 @@ export const getCellContextMenu = (grid: any, row: any, col: string) => {
     ] as any[];
   }
 
-  // 3. Unassigned Builder Column Cells -> Show assignment options
+  // 3. Builder/Generic Column -> "Calculators" menu
   return [
-    { Text: `<span style="${HEADER_STYLE}">Builder</span>`, Caption: 1 },
+    { Text: `<span style="${HEADER_STYLE}">Calculators</span>`, Caption: 1 },
     {
       Name: "Component aggregator",
-      OnClick: () => (window as any).handleComponentAggregator(grid, col),
+      OnClick: () => (window as any).handleCalculate(row.id, col, "Component"),
     },
     {
       Name: "Cost aggregator",
-      OnClick: () => (window as any).handleCostAggregator(grid, col),
+      OnClick: () => (window as any).handleCalculate(row.id, col, "Cost"),
     },
     {
       Name: "Markup component",
-      OnClick: () => (window as any).handleMarkupComponent(grid, col),
+      OnClick: () => (window as any).handleCalculate(row.id, col),
     },
     {
       Name: "Margin component",
-      OnClick: () => (window as any).handleMarginComponent(grid, col),
-    },
-    {
-      Name: "General formula component",
-      OnClick: () => (window as any).handleGeneralFormulaComponent(grid, col),
+      OnClick: () => (window as any).handleCalculate(row.id, col),
     },
     { Name: "-", Separator: 1 },
     {

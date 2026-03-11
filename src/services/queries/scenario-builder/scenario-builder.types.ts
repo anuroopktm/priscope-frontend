@@ -1,7 +1,7 @@
 export interface CustomerPayload {
   customer_id?: string;
   customer_code?: string;
-  customer_name: string;
+  customer_name?: string;
 }
 
 export interface CreateScenarioRequest {

@@ -22,8 +22,8 @@ import { useNavigate } from "react-router-dom";
 import { useToastStore } from "@/store/useToastStore";
 import CommentsModal from "../../components/comments-modal";
 import type { TreeGridBody } from "../../helper/types";
-import { getDataFromGrid } from "../../tree-grid/cellvalue/getDataFromGrid";
-import { highlightSkippedRows } from "../../tree-grid/cellvalue/highlightCell";
+import { getDataFromGrid } from "../../tree-grid/CellValue/getDataFromGrid";
+import { highlightSkippedRows } from "../../tree-grid/CellValue/highlightCell";
 
 const BulkInsertPage = () => {
   const gridId = "ItemMasterBulkInsertGrid";

@@ -33,7 +33,7 @@ const ActionHeader = ({ onSearch, selectedScenarioId }: ActionHeaderProps) => {
       {
         name: data.label,
         base_currency: data.currency,
-        customers: [{ customer_name: data.customer }],
+        customers: data.customer ? [{ customer_name: data.customer }] : [],
       },
       {
         onSuccess: () => {

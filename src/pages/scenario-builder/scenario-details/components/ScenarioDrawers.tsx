@@ -8,9 +8,10 @@ import MarginMarkupDrawer from "./drawers/MarginMarkupDrawer";
 
 interface ScenarioDrawersProps {
   gridId: string;
+  onSaveAsDraft?: () => void;
 }
 
-const ScenarioDrawers = ({ gridId }: ScenarioDrawersProps) => {
+const ScenarioDrawers = ({ gridId, onSaveAsDraft }: ScenarioDrawersProps) => {
   const {
     isAggregatorDrawerOpen,
     setIsAggregatorDrawerOpen,
@@ -25,8 +26,12 @@ const ScenarioDrawers = ({ gridId }: ScenarioDrawersProps) => {
     })),
   );
 
-  const handleUpdate = (items: any[]) =>
+  const handleUpdate = (items: any[]) => {
     handleAggregatorUpdate({ gridId }, items);
+    setTimeout(() => {
+      onSaveAsDraft?.();
+    }, 100);
+  };
 
   const handleClose = () => {
     setIsAggregatorDrawerOpen(false);
@@ -38,11 +43,14 @@ const ScenarioDrawers = ({ gridId }: ScenarioDrawersProps) => {
       {isAggregatorDrawerOpen && activeCell && (
         <Box
           sx={{
-            flex: 0.5,
-            minHeight: 0,
+            flexShrink: 0,
+            maxHeight: 380,
+            height: "auto",
+            display: "flex",
+            flexDirection: "column",
             width: "100%",
             px: 2,
-            transition: "flex 0.3s ease-in-out",
+            transition: "all 0.3s ease-in-out",
           }}
         >
           {activeCell.type === "Cost" ? (
