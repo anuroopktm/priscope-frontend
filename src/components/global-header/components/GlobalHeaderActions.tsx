@@ -15,7 +15,7 @@ const GlobalHeaderActions = () => {
         variant="filled"
         disableUnderline
         sx={{
-          minWidth: 200,
+          // minWidth: 200,
           textAlign: "center",
           borderRadius: 20,
           border: 1,

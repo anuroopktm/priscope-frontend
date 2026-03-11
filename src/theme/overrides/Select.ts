@@ -29,6 +29,10 @@ export default function Select(theme: Theme) {
           backgroundColor: theme.palette.primary.main,
           color: theme.palette.common.white,
 
+          "& .MuiSelect-filled": {
+            padding: "6px 16px",
+          },
+
           "&:hover": {
             backgroundColor: theme.palette.brand.tertiary,
           },
