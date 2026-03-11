@@ -16,7 +16,10 @@ import ScenarioModals from "./components/ScenarioModals";
 import { useScenarioStore } from "./store/useScenarioStore";
 import { ScenarioDetailsLayout } from "./tree-grid/config/details-layout";
 import type { ScenarioRow } from "./tree-grid/hooks/useScenarioGridData";
-import { useScenarioGridData } from "./tree-grid/hooks/useScenarioGridData";
+import {
+  transformRows,
+  useScenarioGridData,
+} from "./tree-grid/hooks/useScenarioGridData";
 import { useScenarioGridEvents } from "./tree-grid/hooks/useScenarioGridEvents";
 import { useTreeGridInit } from "./tree-grid/hooks/useTreeGridInit";
 import {
@@ -34,6 +37,98 @@ declare global {
 
 export const SCENARIO_BUILDER_GRID_ID = "ScenarioGridDetails";
 const gridContainerId = "TreeGrid_" + SCENARIO_BUILDER_GRID_ID;
+
+const syncLocalGridData = (grid: any) => {
+  if (!grid) return null;
+
+  const body: any[] = [];
+  const colsData: any = {};
+
+  // Scrape column metadata
+  Object.keys(grid.Cols).forEach((colName) => {
+    const col = grid.Cols[colName];
+    const isExtra =
+      col.IsExtraCol ||
+      col.AggregatorType ||
+      colName.startsWith("Comp_") ||
+      colName.startsWith("Iterator_");
+
+    const isVisible = grid.GetAttribute(null, colName, "Visible");
+
+    if (col && isExtra && isVisible !== 0 && isVisible !== "0") {
+      colsData[colName] = {
+        Caption:
+          grid.GetAttribute(null, colName, "Caption") ||
+          grid.GetValue(grid.Header, colName) ||
+          colName,
+        MenuType: grid.GetAttribute(null, colName, "MenuType"),
+        AggregatorType:
+          grid.GetAttribute(null, colName, "AggregatorType") ||
+          col.AggregatorType,
+        IsExtraCol: 1,
+        Format: col.Format,
+        Type: col.Type,
+        Pos: col.Pos,
+        Sec: col.Sec,
+      };
+    }
+  });
+
+  // Helper to recursively scrape rows
+  const processRow = (gridRow: any): any => {
+    // Only capture keys that are relevant data
+    const rowData: any = {
+      id: gridRow.id,
+      Def: gridRow.Def?.Name || gridRow.Def,
+      is_published: gridRow.is_published,
+      itemId: gridRow.itemId,
+    };
+
+    // Capture values for ALL defined columns
+    Object.keys(grid.Cols).forEach((colName) => {
+      // ONLY capture if it's a base column or a visible extra column
+      const isBase = ["itemId", "A", "B", "C", "is_published"].includes(
+        colName,
+      );
+      const isExtra = !!colsData[colName];
+
+      if (isBase || isExtra) {
+        const val = gridRow[colName];
+        if (val !== undefined && val !== null && val !== "") {
+          rowData[colName] = val;
+        }
+      }
+    });
+
+    // Handle nested items
+    if (gridRow.firstChild) {
+      const children: any[] = [];
+      let child = gridRow.firstChild;
+      while (child) {
+        if (child.Kind === "Data") {
+          children.push(processRow(child));
+        }
+        child = child.nextSibling;
+      }
+      if (children.length > 0) {
+        rowData.Items = children;
+      }
+    }
+
+    return rowData;
+  };
+
+  let row = grid.GetFirst();
+  while (row) {
+    if (row.Kind === "Data" && !row.parentNode?.id) {
+      // Only process top-level rows (recursion handles children)
+      body.push(processRow(row));
+    }
+    row = grid.GetNext(row);
+  }
+
+  return { Body: [body], ColsData: colsData };
+};
 
 const ScenarioDetailsPage = () => {
   const { id } = useParams<{ id: string }>();
@@ -84,40 +179,16 @@ const ScenarioDetailsPage = () => {
     ) => {
       if (!id) return;
 
-      const rawData = scenario?.grid_data as { Body: ScenarioRow[][] };
-
-      // Helper to recursively set CanSelect and PanelSelect
-      const processRow = (row: ScenarioRow, level: number): ScenarioRow => {
-        const isPublished = String(row.is_published) === "1";
-        const updatedRow = {
-          ...row,
-          CanSelect: isPublished ? 0 : 1,
-          PanelSelect: isPublished ? 0 : 1,
-        };
-        if (updatedRow.Items) {
-          updatedRow.Items = updatedRow.Items.map((child) =>
-            processRow(child, level + 1),
-          );
-        }
-        return updatedRow;
-      };
-
-      const transformedBody = rawData.Body.map((page) =>
-        page.map((row) => processRow(row, 0)),
-      );
-
       const grid = (window as any).Grids?.[SCENARIO_BUILDER_GRID_ID];
+      grid?.EndEdit?.(1);
 
-      grid.EndEdit?.(1);
-      // console.log("grid", grid);
+      const syncedData = syncLocalGridData(grid);
+      const finalGridData = dataToSave || syncedData || gridData;
 
-      console.log("transformedBody", transformedBody);
-
-      console.log("dataToSave", dataToSave);
-      console.log("gridData", scenario);
+      console.log("Saving Final Grid Data:", finalGridData);
 
       saveScenarioGrid(
-        { scenario_id: id, grid_data: dataToSave || gridData },
+        { scenario_id: id, grid_data: finalGridData },
         {
           onSuccess: (response) => {
             showToast(
@@ -160,8 +231,11 @@ const ScenarioDetailsPage = () => {
 
   const handleProcessAddItems = useCallback(
     (items: any[], groupName?: string, selectedHeaders?: string[]) => {
+      const grid = (window as any).Grids?.[SCENARIO_BUILDER_GRID_ID];
+      const syncedData = syncLocalGridData(grid) || gridData;
+
       const newState = prepareAddItems(
-        gridData,
+        syncedData,
         items,
         groupName,
         selectedHeaders,
@@ -192,29 +266,10 @@ const ScenarioDetailsPage = () => {
   useEffect(() => {
     if (scenario?.grid_data?.Body) {
       console.log("Syncing scenario grid_data from API:", scenario.grid_data);
-
-      const rawData = scenario.grid_data as { Body: ScenarioRow[][] };
-
-      // Helper to recursively set CanSelect and PanelSelect
-      const processRow = (row: ScenarioRow, level: number): ScenarioRow => {
-        const isPublished = String(row.is_published) === "1";
-        const updatedRow = {
-          ...row,
-          CanSelect: isPublished ? 0 : 1,
-          PanelSelect: isPublished ? 0 : 1,
-        };
-        if (updatedRow.Items) {
-          updatedRow.Items = updatedRow.Items.map((child) =>
-            processRow(child, level + 1),
-          );
-        }
-        return updatedRow;
-      };
-
-      const transformedBody = rawData.Body.map((page) =>
-        page.map((row) => processRow(row, 0)),
+      const rawData = scenario.grid_data;
+      const transformedBody = rawData.Body.map((rows: ScenarioRow[]) =>
+        transformRows(rows),
       );
-
       setGridData({ ...rawData, Body: transformedBody });
     }
   }, [scenario, setGridData]);
@@ -388,15 +443,52 @@ const ScenarioDetailsPage = () => {
     const newCols = [...baseCols];
     const newHeader: any = { ...ScenarioDetailsLayout.Header };
 
-    extraColsSet.forEach((colName) => {
-      newCols.push({
+    const colData = gridData.ColsData || {};
+
+    const sortedExtraCols = Array.from(extraColsSet).sort((a, b) => {
+      const dataA = colData[a];
+      const dataB = colData[b];
+      if (dataA && dataB) {
+        if (dataA.Sec !== dataB.Sec) return dataA.Sec - dataB.Sec;
+        return dataA.Pos - dataB.Pos;
+      }
+      return 0;
+    });
+
+    sortedExtraCols.forEach((colName) => {
+      // Try to get a better caption if available (e.g. from ItemsData mapping)
+      let caption = colName;
+      let colConfig: any = {
         Name: colName,
+        Width: "150",
         RelWidth: "1",
+        MinWidth: "120",
+        CanResize: "1",
         Type: "Text",
         CanSort: "0",
         IsExtraCol: 1,
-      } as any);
-      newHeader[colName] = colName;
+      };
+
+      if (colData[colName]) {
+        if (colData[colName].Caption) {
+          caption = colData[colName].Caption;
+        }
+        if (colData[colName].AggregatorType) {
+          colConfig.AggregatorType = colData[colName].AggregatorType;
+        }
+        if (colData[colName].Format) {
+          colConfig.Format = colData[colName].Format;
+        }
+        if (colData[colName].Type) {
+          colConfig.Type = colData[colName].Type;
+        }
+        if (colData[colName].MenuType) {
+          colConfig.MenuType = colData[colName].MenuType;
+        }
+      }
+
+      newCols.push(colConfig);
+      newHeader[colName] = caption;
     });
 
     if (statusCol) {
@@ -494,7 +586,10 @@ const ScenarioDetailsPage = () => {
               />
             </Box>
           </Box>
-          <ScenarioDrawers gridId={SCENARIO_BUILDER_GRID_ID} />
+          <ScenarioDrawers
+            gridId={SCENARIO_BUILDER_GRID_ID}
+            onSaveAsDraft={handleSaveAsDraft}
+          />
         </Box>
 
         {isCommentsSidebarOpen && (

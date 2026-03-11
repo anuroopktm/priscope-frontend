@@ -100,6 +100,12 @@ export const useTreeGridInit = (
     if (hasData || !isCurrentlyEmpty) {
       console.log(`Syncing data update for ${gridId}:`, data);
       grid.Source.Data.Data = data;
+
+      // Restore column metadata reference for utilities
+      if (data?.ColsData) {
+        grid.ColsData = data.ColsData;
+      }
+
       // ReloadBody is faster and keeps the current scroll position/focus if possible
       grid.ReloadBody();
     }

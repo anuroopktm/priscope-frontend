@@ -13,6 +13,7 @@ import {
   DialogContent,
   Divider,
   FormControl,
+  FormHelperText,
   InputLabel,
   MenuItem,
   Select,
@@ -99,7 +100,7 @@ const CreateScenarioModal = ({
           <Controller
             name="customer"
             control={control}
-            render={({ field }) => (
+            render={({ field, fieldState }) => (
               <FormControl fullWidth size="small">
                 <InputLabel id="customer-label">Customer</InputLabel>
                 <Select
@@ -109,13 +110,20 @@ const CreateScenarioModal = ({
                   size="small"
                   variant="outlined"
                   disabled={isCustomerLoading}
+                  error={!!fieldState.error}
                 >
+                  <MenuItem value="">
+                    <em>None</em>
+                  </MenuItem>
                   {customerData?.customers.map((customer) => (
                     <MenuItem key={customer.id} value={customer.id}>
                       {customer.name}
                     </MenuItem>
                   ))}
                 </Select>
+                <FormHelperText error={!!fieldState.error}>
+                  {fieldState.error?.message}
+                </FormHelperText>
               </FormControl>
             )}
           />
@@ -123,7 +131,7 @@ const CreateScenarioModal = ({
           <Controller
             name="currency"
             control={control}
-            render={({ field }) => (
+            render={({ field, fieldState }) => (
               <FormControl fullWidth size="small">
                 <InputLabel id="currency-label">Base Currency</InputLabel>
                 <Select
@@ -133,6 +141,7 @@ const CreateScenarioModal = ({
                   size="small"
                   variant="outlined"
                   disabled={isCurrencyLoading}
+                  error={!!fieldState.error}
                 >
                   {currencyData?.currencies.map((curr) => (
                     <MenuItem key={curr.id} value={curr.id}>
@@ -140,6 +149,9 @@ const CreateScenarioModal = ({
                     </MenuItem>
                   ))}
                 </Select>
+                <FormHelperText error={!!fieldState.error}>
+                  {fieldState.error?.message}
+                </FormHelperText>
               </FormControl>
             )}
           />

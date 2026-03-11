@@ -6,14 +6,14 @@ import DeleteConfirmModal from "../../../list-scenarios/components/DeleteConfirm
 import { ComponentDrawerLayout } from "../../tree-grid/config/component-drawer-layout";
 import { useTreeGridInit } from "../../tree-grid/hooks/useTreeGridInit";
 
-interface ComponentAggregatorPanelProps {
+interface ComponentAggregatorDrawerProps {
   onClose: () => void;
   onUpdate: (items: any[]) => void;
   title?: string;
   initialItems?: any[];
 }
 
-const drawerGridId = "AggregatorDrawerGrid";
+const drawerGridId = "ComponentAggregatorGrid";
 const drawerGridContainerId = "TreeGrid_" + drawerGridId;
 
 const renderDeleteIcon = (id: string) => {
@@ -38,15 +38,30 @@ const AggregatorGrid = ({ data }: { data: any }) => {
     ComponentDrawerLayout,
     data,
   );
-  return <Box id={drawerGridContainerId} sx={{ width: "100%" }} />;
+  return (
+    <Box
+      id={drawerGridContainerId}
+      sx={{
+        width: "100%",
+        // borderBottom: "1px solid #e2e8f0",
+        // "& .TGMain": {
+        //   border: "1px solid #e2e8f0 !important",
+        //   borderBottom: "none !important",
+        // },
+        "& div[class*='NoDataRow']": {
+          display: "none !important",
+        },
+      }}
+    />
+  );
 };
 
-const ComponentAggregatorPanel = ({
+const ComponentAggregatorDrawer = ({
   onClose,
   onUpdate,
   title = "Component aggregator",
   initialItems = [],
-}: ComponentAggregatorPanelProps) => {
+}: ComponentAggregatorDrawerProps) => {
   const [deleteModalOpen, setDeleteModalOpen] = useState(false);
   const [rowToDelete, setRowToDelete] = useState<string | null>(null);
 
@@ -55,6 +70,10 @@ const ComponentAggregatorPanel = ({
       initialItems.length > 0
         ? initialItems.map((item) => ({
             ...item,
+            A: item.name || "",
+            B: item.currency || "USD",
+            C: item.cost || 0,
+            D: item.costFor || "Base UOM",
             F: renderDeleteIcon(item.id),
           }))
         : [],
@@ -226,4 +245,4 @@ const ComponentAggregatorPanel = ({
   );
 };
 
-export default ComponentAggregatorPanel;
+export default ComponentAggregatorDrawer;

@@ -1,6 +1,6 @@
 export const AggregatorDrawerLayout = {
   Cfg: {
-    CfgId: "AggregatorDrawerGrid",
+    CfgId: "CostAggregatorGrid",
     IdChars: "0123456789",
     NumberId: "1",
     Style: "White",
@@ -10,7 +10,8 @@ export const AggregatorDrawerLayout = {
     MinTagHeight: "0",
     ColMoving: "0",
     NoTreeLines: "1",
-    DynamicBorder: "1",
+    DynamicBorder: "0",
+    NoData: "0",
     RelHeight: "0",
     StretchWidth: "0",
     StretchHeight: "0",
@@ -22,6 +23,11 @@ export const AggregatorDrawerLayout = {
     Panel: "0",
     NoVScroll: "1",
     NoHScroll: "1",
+  },
+  Lang: {
+    Text: {
+      NoData: "",
+    },
   },
   LeftCols: [],
   Cols: [

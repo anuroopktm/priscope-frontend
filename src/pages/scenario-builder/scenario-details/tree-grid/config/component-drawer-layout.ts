@@ -1,6 +1,6 @@
 export const ComponentDrawerLayout = {
   Cfg: {
-    CfgId: "AggregatorDrawerGrid",
+    CfgId: "ComponentAggregatorGrid",
     IdChars: "0123456789",
     NumberId: "1",
     Style: "White",
@@ -10,7 +10,8 @@ export const ComponentDrawerLayout = {
     MinTagHeight: "0",
     ColMoving: "0",
     NoTreeLines: "1",
-    DynamicBorder: "1",
+    // DynamicBorder: "0",
+    NoData: "1",
     RelHeight: "0",
     StretchWidth: "0",
     StretchHeight: "0",
@@ -22,10 +23,15 @@ export const ComponentDrawerLayout = {
     Panel: "0",
     NoVScroll: "1",
     NoHScroll: "1",
-    // Hover: "0",
+    Hover: "0",
     // HoverRow: "0",
-    // HoverCell: "0",
+    HoverCell: "0",
   },
+  // Lang: {
+  //   Text: {
+  //     NoData: "",
+  //   },
+  // },
   LeftCols: [],
   Cols: [
     {
@@ -33,6 +39,7 @@ export const ComponentDrawerLayout = {
       RelWidth: "1",
       Type: "Text",
       Caption: "Item",
+      Align: "Left",
       CanSort: "0",
     },
     {
@@ -42,6 +49,7 @@ export const ComponentDrawerLayout = {
       Caption: "Currency",
       Enum: "|United States Dollar (USD)",
       EnumKeys: "|USD",
+      Align: "Left",
       CanSort: "0",
     },
     {
@@ -50,6 +58,7 @@ export const ComponentDrawerLayout = {
       Type: "Float",
       Format: "$0.00",
       Caption: "Cost",
+      Align: "Left",
       CanSort: "0",
     },
     {
@@ -59,6 +68,7 @@ export const ComponentDrawerLayout = {
       Caption: "Cost for",
       Enum: "|Base UOM|Qty Per Shipment",
       EnumKeys: "|Base UOM|Qty Per Shipment",
+      Align: "Left",
       CanSort: "0",
     },
     {
@@ -68,6 +78,7 @@ export const ComponentDrawerLayout = {
       Format: "$0.00",
       Formula: "C",
       Caption: "Cost per unit",
+      Align: "Left",
       CanSort: "0",
     },
     {
@@ -87,12 +98,6 @@ export const ComponentDrawerLayout = {
     D: "Cost for",
     E: "Cost per unit",
     F: "Action",
-    // AAlign: "Left",
-    // BAlign: "Left",
-    // CAlign: "Left",
-    // DAlign: "Left",
-    // EAlign: "Left",
-    // FAlign: "Center",
   },
   Def: {
     row: {
@@ -121,6 +126,7 @@ export const ComponentDrawerLayout = {
       EFormula: "sum()",
       EType: "Float",
       EFormat: "$0.00",
+      EAlign: "Left",
       ECanEdit: "0",
       FCanEdit: "0",
       FType: "Html",
