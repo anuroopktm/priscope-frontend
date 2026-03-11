@@ -63,8 +63,8 @@ export const ItemMasterGridLayout = (
     },
     Cols: Cols,
     Header: {
-      SKU: "SKU",
-      UPC: "UPC",
+      SKU: "SKU *",
+      UPC: "UPC *",
       Category: "Category",
       Description: "Description",
       SortIcons: "2",
