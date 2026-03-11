@@ -136,7 +136,7 @@ const ActionHeader = ({
       },
       onError: (error) => {
         showToast(getErrorMessage(error, "Failed to add filter"), "error");
-      },
+      }
     });
   };
 
