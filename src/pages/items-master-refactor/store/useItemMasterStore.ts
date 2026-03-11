@@ -1,5 +1,17 @@
 import { create } from "zustand";
-
+type ScenarioItem = {
+  item_id: string;
+  SKU: string;
+  UPC: string;
+  Description: string;
+  Category: string;
+  Size: string;
+  "HS Code": string | number;
+  "Customer Cost": number;
+  "Supplier Cost": number;
+  "Supplier Name": string;
+  "Customer Name": string;
+};
 interface ItemMasterStore {
   selectedRows: string[];
   setSelectedRows: (rows: string[]) => void;
@@ -29,6 +41,10 @@ interface ItemMasterStore {
     cell: { row: TRow; col: string; value: any; oldValue: any },
   ) => void;
   closeSavePopover: () => void;
+
+  selectedItems: ScenarioItem[];
+  setSelectedItems: (items: ScenarioItem[]) => void;
+  clearSelectedItems: () => void;
 }
 
 export const useItemMasterStore = create<ItemMasterStore>((set) => ({
@@ -68,4 +84,8 @@ export const useItemMasterStore = create<ItemMasterStore>((set) => ({
       popoverPosition: { top: 0, left: 0 },
       changedCell: null,
     }),
+
+  selectedItems: [],
+  setSelectedItems: (items) => set({ selectedItems: items }),
+  clearSelectedItems: () => set({ selectedItems: [] }),
 }));

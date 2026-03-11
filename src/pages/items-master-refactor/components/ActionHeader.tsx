@@ -9,38 +9,53 @@ import SavedFilterIcon from "@/assets/items-master/bookmark-check-01.svg";
 import DatabaseImportIcon from "@/assets/items-master/database-import.svg";
 import RequestsIcon from "@/assets/items-master/requests.svg";
 import SearchTextField from "@/components/common/SearchTextField";
-import { FILE_FILTER_OPTIONS } from "@/constants/file-modal.constants";
-import { useGetExportedFile } from "@/services/queries/common/common.queries";
+import { Box, Button, MenuItem, Select, Stack } from "@mui/material";
+import { useState } from "react";
+import UploadFileModal from "./upload-file/UploadFileModal";
+// import { useItemMasterStore } from "../store/useItemMasterStore";
+// import ExportDataIcon from "@/assets/common/export-data.svg";
+import DeleteOutlineIcon from "@mui/icons-material/DeleteOutline";
 import {
   useDeleteItemMasterRow,
   useExportItemMasterRow,
   useSaveFilter,
-} from "@/services/queries/item-master/item-master.queries";
-import { useToastStore } from "@/store/useToastStore";
-import { getErrorMessage } from "@/utils/error-helper";
-import DeleteOutlineIcon from "@mui/icons-material/DeleteOutline";
-import { Box, Button, Stack } from "@mui/material";
-import { useQueryClient } from "@tanstack/react-query";
-import { useState } from "react";
-import { handleDeleteSelected } from "../actions/handleDeleteRows";
+} from "@/services/queries/item-master-refactor/item-master-refactor.queries";
+// import LoaderOverlay from "./loader";
 import { handleItemMasterExport } from "../actions/handleExportRows";
 import { useItemMasterStore } from "../store/useItemMasterStore";
 import { handleClearAllFilters } from "../tree-grid/utils/clearGrid";
-import type { HeaderList } from "../types/types";
-import ColumnDropdown from "./columns-dropdown";
+// import type { HeaderList } from "../types/types";
+// import ColumnDropdown from "./columns-dropdown";
 import DeleteConfirmModal from "./delete-confirmation-modal";
-import FileDetailsModal from "./file-detail-modal";
+// import FileDetailsModal from "./file-detail-modal";
 import LoaderOverlay from "./loader";
 import { ItemMasterRequestsModal } from "./request-modal";
 import SaveFilterModal from "./save-filter";
 import SavedFiltersDropdown from "./saved-filters-dropdown";
-import UploadFileModal from "./upload-file/UploadFileModal";
+import ColumnDropdown from "./columns-dropdown";
+import type { HeaderList } from "../types/types";
+import { FILE_FILTER_OPTIONS } from "@/constants/file-modal.constants";
+import FileDetailsModal from "./file-detail-modal";
+import { useNavigate } from "react-router-dom";
+import AdminRequestConfirmationModal from "./admin-request-confirmation-modal";
+import { builderItem } from "../constants/builderItem.constants";
+import { useCreateScenario } from "@/services/queries/scenario-builder/scenario-builder.queries";
+import type { ScenarioFormValues } from "@/validations/scenario-builder/scenario.validation";
+import CreateScenarioModal from "./scenario-modal";
+import { useToastStore } from "@/store/useToastStore";
+import { useQueryClient } from "@tanstack/react-query";
+import { useGetExportedFile } from "@/services/queries/common/common.queries";
+import { handleDeleteSelected } from "../actions/handleDeleteRows";
+import { getErrorMessage } from "@/utils/error-helper";
 
 interface ActionHeaderProps {
   onSearch: (value: string) => void;
   onImportComplete?: () => void;
   headers: HeaderList[] | null;
   onToggleCommentsPanel: () => void;
+  hasAddItemMasterPrivilege: boolean;
+  isUploadModalOpen: boolean;
+  setIsUploadModalOpen: (open: boolean) => void;
 }
 
 const ActionHeader = ({
@@ -48,13 +63,21 @@ const ActionHeader = ({
   onImportComplete,
   headers,
   onToggleCommentsPanel,
+  hasAddItemMasterPrivilege,
+  isUploadModalOpen,
+  setIsUploadModalOpen,
 }: ActionHeaderProps) => {
-  const [isUploadModalOpen, setIsUploadModalOpen] = useState<boolean>(false);
+  const navigate = useNavigate();
   const [openDeleteModal, setOpenDeleteModal] = useState<boolean>(false);
   const [openRequestModal, setOpenRequestModal] = useState<boolean>(false);
   const [openSaveFilterModal, setOpenSaveFilterModal] =
     useState<boolean>(false);
   const [showFilesModal, setShowFilesModal] = useState<boolean>(false);
+  const [
+    openAdminRequestConfirmationModal,
+    setOpenAdminRequestConfirmationModal,
+  ] = useState<boolean>(false);
+  const [open, setOpen] = useState<boolean>(false);
   const selectedRows = useItemMasterStore((state) => state.selectedRows);
   const filter = useItemMasterStore((state) => state.filter);
   const setSelectedExport = useItemMasterStore(
@@ -76,6 +99,8 @@ const ActionHeader = ({
   const { mutate: mutateSaveFilter, isPending: mutateSaveFilterPending } =
     useSaveFilter();
 
+  const { mutate: createScenario, isPending } = useCreateScenario();
+
   const handleOpenDeleteModal = () => {
     setOpenDeleteModal(true);
   };
@@ -91,6 +116,14 @@ const ActionHeader = ({
     setOpenSaveFilterModal(true);
   };
 
+  const handleBulkInsert = () => {
+    if (hasAddItemMasterPrivilege) {
+      navigate("bulk-insert");
+    } else {
+      setOpenAdminRequestConfirmationModal(true);
+    }
+  };
+
   const handleSaveFilterModal = (label: string) => {
     const payload = {
       name: label,
@@ -103,8 +136,32 @@ const ActionHeader = ({
       },
       onError: (error) => {
         showToast(getErrorMessage(error, "Failed to add filter"), "error");
-      },
+      }
     });
+  };
+
+  const handleCreate = (data: ScenarioFormValues) => {
+    createScenario(
+      {
+        name: data.label,
+        base_currency: data.currency,
+        customers: [{ customer_name: data.customer }],
+      },
+      {
+        onSuccess: (response) => {
+          setOpen(false);
+          showToast("Scenario created successfully", "success");
+          navigate(`/scenario-builder/details/${response.id}`, {
+            state: {
+             selectedRows
+            },
+          });
+        },
+        onError: () => {
+          showToast("Failed to create scenario", "error");
+        },
+      },
+    );
   };
   return (
     <Box
@@ -121,7 +178,7 @@ const ActionHeader = ({
 
       {selectedRows.length > 0 ? (
         <>
-          <div>
+          <Stack direction="row" spacing={0.5} alignItems="center">
             <Button
               onClick={handleOpenDeleteModal}
               disabled={false}
@@ -142,6 +199,33 @@ const ActionHeader = ({
             >
               Delete Selected
             </Button>
+            <Select
+              value=""
+              variant="filled"
+              disableUnderline
+              displayEmpty
+              onChange={(e: any) => {
+                const value = e.target.value;
+
+                if (value === "/scenario-builder") {
+                  setOpen(true);
+                } else {
+                  navigate(value);
+                }
+              }}
+              renderValue={() => (
+                <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
+                  <img src={builderItem.icon} width={16} />
+                  {builderItem.label}
+                </Box>
+              )}
+            >
+              {builderItem.items.map((sub) => (
+                <MenuItem key={sub.path} value={sub.path}>
+                  {sub.label}
+                </MenuItem>
+              ))}
+            </Select>
 
             <Button
               onClick={() =>
@@ -167,7 +251,7 @@ const ActionHeader = ({
             >
               Export Selected
             </Button>
-          </div>
+          </Stack>
         </>
       ) : (
         <Stack
@@ -213,7 +297,11 @@ const ActionHeader = ({
             Files
           </Button>
           <ColumnDropdown headers={headers} />
-          <Button variant="contained" startIcon={<AddIcon />}>
+          <Button
+            variant="contained"
+            startIcon={<AddIcon />}
+            onClick={handleBulkInsert}
+          >
             Add Item
           </Button>
           <Button
@@ -270,6 +358,32 @@ const ActionHeader = ({
         showToast={showToast}
         module="item_master"
         filterOptions={FILE_FILTER_OPTIONS}
+      />
+      <AdminRequestConfirmationModal
+        open={openAdminRequestConfirmationModal}
+        onClose={() => setOpenAdminRequestConfirmationModal(false)}
+        title="Admin Approval Required!"
+        description="You don’t have permission to add rates, but you can suggest changes for admin approval. They will take effect once approved."
+        actions={[
+          {
+            label: "Cancel",
+            variant: "outlined",
+            onClick: () => setOpenAdminRequestConfirmationModal(false),
+          },
+          {
+            label: "Understood",
+            onClick: () => {
+              setOpenAdminRequestConfirmationModal(false);
+              navigate("bulk-insert");
+            },
+          },
+        ]}
+      />
+      <CreateScenarioModal
+        open={open}
+        onClose={() => setOpen(false)}
+        onSubmit={handleCreate}
+        isLoading={isPending}
       />
     </Box>
   );

@@ -1,13 +1,13 @@
 import { useEditItemMasterItem } from "@/services/queries/item-master-refactor/item-master-refactor.queries";
 import { useToastStore } from "@/store/useToastStore";
-import { getErrorMessage } from "@/utils/error-helper";
-import { openConfirmationModal } from "@/utils/getRequestConfirmationModal";
 import { useQueryClient } from "@tanstack/react-query";
+import { useHandleEditCellAdminRequest } from "./editItemMasterAdmin";
 
 export const useHandleGridEditConfirm = () => {
   const queryClient = useQueryClient();
   const { mutate } = useEditItemMasterItem();
   const showToast = useToastStore((state) => state.showToast);
+  const { handleEditCellAdminRequest } = useHandleEditCellAdminRequest();
 
   const handleGridEditConfirm = async ({
     row,
@@ -16,20 +16,18 @@ export const useHandleGridEditConfirm = () => {
     oldValue,
     comment,
     hasEditItemMasterPrivilege,
-    confirm,
     gridRef,
     itemMasterData,
-    itemMasterBulkInsertAdminApproval,
     setRequestNotficationVisible,
-    handleEditCellAdminRequest,
+    setOpenAdminRequestConfirmationModal,
+    openAdminRequestConfirmationModal,
   }: any) => {
     if (value === oldValue) return;
 
-    // No privilege → Admin request flow
     if (!hasEditItemMasterPrivilege) {
-      const result = await openConfirmationModal("edit", confirm);
+      setOpenAdminRequestConfirmationModal(true);
 
-      if (result && handleEditCellAdminRequest) {
+      if (handleEditCellAdminRequest && openAdminRequestConfirmationModal) {
         handleEditCellAdminRequest({
           row,
           col,
@@ -37,10 +35,7 @@ export const useHandleGridEditConfirm = () => {
           oldValue,
           comment,
           itemMasterData,
-          itemMasterBulkInsertAdminApproval,
-          // setShowLoader,
           setRequestNotficationVisible,
-          showToast,
         });
       } else {
         const Grid = gridRef.current;
@@ -52,7 +47,6 @@ export const useHandleGridEditConfirm = () => {
       return;
     }
 
-    // Normal edit flow
     const item_id = row?.id;
     if (!item_id) return;
 
@@ -83,22 +77,15 @@ export const useHandleGridEditConfirm = () => {
       comments: commentsPayload,
     };
 
-    // setShowLoader(true);
-
     mutate(
       { item_id, payload: finalPayloadWithMetadata },
       {
         onSuccess: () => {
-          // setShowLoader(false);
           showToast?.("Item updated successfully!", "success");
           queryClient.invalidateQueries({ queryKey: ["item-master-history"] });
         },
-        onError: (error) => {
-          // setShowLoader(false);
-          showToast?.(
-            getErrorMessage(error, "Failed to save changes. Please try again."),
-            "error",
-          );
+        onError: () => {
+          showToast?.("Failed to save changes. Please try again.", "warning");
         },
       },
     );

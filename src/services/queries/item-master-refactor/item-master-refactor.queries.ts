@@ -6,8 +6,6 @@ import {
 } from "@tanstack/react-query";
 import type { AxiosError } from "axios";
 
-import { useItemMasterStore } from "../../../pages/items-master/store/itemMasterStore";
-
 import type {
   DeleteSelectedRowPayload,
   DeleteSelectedRowResponse,
@@ -41,6 +39,7 @@ import type {
   SaveFilterPayload,
   SaveFilterResponse,
 } from "../../../pages/items-master/helpers/types";
+import { useItemMasterStore } from "@/store/useHeaderStore";
 
 export type UploadResponse = {
   upload_id: string;
@@ -152,6 +151,7 @@ export const useCreateItemMasterComment = () => {
 };
 
 export const useEditItemMasterItem = () => {
+  const queryClient = useQueryClient();
   return useMutation<
     EditItemMasterColResponse,
     AxiosError<{ detail: string | string[] }>,
@@ -163,6 +163,9 @@ export const useEditItemMasterItem = () => {
         payload,
       );
       return response.data;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["listComments"] });
     },
   });
 };

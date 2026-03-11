@@ -1,5 +1,4 @@
 import { useToastStore } from "@/store/useToastStore";
-import { getErrorMessage } from "@/utils/error-helper";
 import type { MutateOptions } from "@tanstack/react-query";
 import type { ExportItemMasterRowPayload } from "../helper/types";
 import { useItemMasterStore } from "../store/useItemMasterStore";
@@ -32,7 +31,6 @@ export const handleItemMasterExport = ({
 
   if (!selectedExport && (!selectedRows || selectedRows.length === 0)) return;
 
-  //   setLoading(true);
 
   const payload: ExportItemMasterRowPayload = {
     module_name: "item_master",
@@ -50,7 +48,6 @@ export const handleItemMasterExport = ({
       showToast("Rows exported successfully!", "success");
       gridRef?.ClearSelection();
       setSelectedRows([]);
-      //   setLoading(false);
       setSelectedExport(false);
       DownloadExportFile(response?.export_id, {
         onSuccess: (res) => {
@@ -63,15 +60,13 @@ export const handleItemMasterExport = ({
             link.remove();
           }
         },
-        onError: (error) => {
-          //   setLoading(false);
-          showToast(getErrorMessage(error, "Failed to download file"), "error");
+        onError: () => {
+          showToast("Failed to download file", "error");
         },
       });
     },
-    onError: (error) => {
-      //   setLoading(false);
-      showToast(getErrorMessage(error, "Failed to export rows"), "error");
+    onError: () => {
+      showToast("Failed to export rows", "error");
     },
   });
 };

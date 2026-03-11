@@ -131,6 +131,7 @@ const syncLocalGridData = (grid: any) => {
 };
 
 const ScenarioDetailsPage = () => {
+  // const location = useLocation();
   const { id } = useParams<{ id: string }>();
   const { data: scenario } = useGetScenario(id);
   const setIsDrawerOpen = useScenarioStore((state) => state.setIsDrawerOpen);

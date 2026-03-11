@@ -1,15 +1,12 @@
 import ExpandIcon from "@/assets/items-master/Button.svg";
-import ItemDetailCard from "@/components/common/item-detail";
-import TimelineDetail from "@/components/common/timeline";
-import { mapHistoryToTimeline } from "@/pages/items-master/utils/mapHistoryToTimeline";
-import { mapItemApiToDetailView } from "@/pages/items-master/utils/mapItemApiToDetailView";
-import {
-  useGetItemMasterById,
-  useItemMasterHistory,
-} from "@/services/queries/item-master/item-master.queries";
 import { Box, CircularProgress, IconButton, Typography } from "@mui/material";
 import React from "react";
 import closeIcon from "@/assets/items-master/ButtonClose.svg";
+import { useGetItemMasterById, useItemMasterHistory } from "@/services/queries/item-master-refactor/item-master-refactor.queries";
+import { mapItemApiToDetailView } from "../../utils/mapItemApiToDetailView";
+import { mapHistoryToTimeline } from "../../utils/mapHistoryToTimeline";
+import TimelineDetail from "../timeline";
+import ItemDetailCard from "../item-detail";
 
 interface DetailViewProps {
   item_id: string;

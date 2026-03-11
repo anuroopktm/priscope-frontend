@@ -1,5 +1,6 @@
 import {
   Button,
+  CircularProgress,
   Dialog,
   DialogActions,
   DialogContent,
@@ -50,7 +51,7 @@ const DeleteConfirmModal = ({
           disabled={isLoading}
           onClick={onConfirm}
         >
-          Done
+          {isLoading ? <CircularProgress size={16} color="inherit" /> : "Delete"}
         </Button>
       </DialogActions>
     </Dialog>

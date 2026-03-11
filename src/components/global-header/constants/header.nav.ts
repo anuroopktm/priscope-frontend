@@ -3,7 +3,7 @@ import BuilderIcon from "@/assets/global-header/builder.svg?react";
 import ItemsMasterIcon from "@/assets/global-header/package.svg?react";
 import SupplierCardIcon from "@/assets/global-header/user-settings.svg?react";
 
-export const HEADER_NAV = [
+export const   HEADER_NAV = [
   {
     type: "button",
     label: "Items Master",

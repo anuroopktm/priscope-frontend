@@ -3,8 +3,8 @@ import CommentSidebar from "@/components/common/loader/comment-sidebar";
 import MainContentContainer from "@/components/common/main-content-container";
 import RequestSuccessDialog from "@/components/common/request-notification";
 import RequestsModal from "@/components/common/requests-modal";
-import FileDetailsModal from "@/components/file-detail-modal";
-import { FILE_FILTER_OPTIONS } from "@/constants/file-modal.constants";
+// import FileDetailsModal from "@/components/file-detail-modal";
+// import { FILE_FILTER_OPTIONS } from "@/constants/file-modal.constants";
 import { Box } from "@mui/material";
 import DetailView from "./components/detail-view";
 import { DetailsModal } from "./components/detail-view-modal";
@@ -27,7 +27,7 @@ const ItemsMasterPage = () => {
     setOpenPanel,
     detailedViewId,
     setIsDetailViewModalOpen,
-    setShowFilesModal,
+    // setShowFilesModal,
     setShowUploadFlow,
     setRequestSuccessNotficationVisible,
     handleExport,
@@ -53,9 +53,9 @@ const ItemsMasterPage = () => {
     setOpenRequestModal,
     requestSuccessNotficationVisible,
     showUploadFlow,
-    showFilesModal,
+    // showFilesModal,
     isDetailViewModalOpen,
-    setShowLoader,
+    // setShowLoader,
   } = useItemsMasterUIStore();
 
   return (
@@ -97,7 +97,7 @@ const ItemsMasterPage = () => {
         />
       )}
 
-      {showFilesModal && (
+      {/* {showFilesModal && (
         <FileDetailsModal
           onClose={setShowFilesModal}
           showLoader={setShowLoader}
@@ -105,7 +105,7 @@ const ItemsMasterPage = () => {
           module="item_master"
           filterOptions={FILE_FILTER_OPTIONS}
         />
-      )}
+      )} */}
 
       <Box sx={{ display: "flex", position: "relative", padding: 2 }}>
         <MainContentContainer hasFilter={true}>
