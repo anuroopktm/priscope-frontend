@@ -27,6 +27,7 @@ import {
   registerStartScenarioColumnSelection,
   unregisterGridHighlightsGlobals,
 } from "./utils/gridHighlights";
+import { useItemMasterStore } from "@/pages/items-master-refactor/store/useItemMasterStore";
 
 declare global {
   interface Window {
@@ -131,9 +132,10 @@ const syncLocalGridData = (grid: any) => {
 };
 
 const ScenarioDetailsPage = () => {
-  // const location = useLocation();
   const { id } = useParams<{ id: string }>();
   const { data: scenario } = useGetScenario(id);
+  const [selectedRowsCount, setSelectedRowsCount] = useState(0);
+  const itemsInjectedRef = useRef(false);
   const setIsDrawerOpen = useScenarioStore((state) => state.setIsDrawerOpen);
   const activeCell = useScenarioStore((state) => state.activeCell);
   const isCommentsSidebarOpen = useScenarioStore(
@@ -152,6 +154,12 @@ const ScenarioDetailsPage = () => {
   const setIsDeleteModalOpen = useScenarioStore(
     (state) => state.setIsDeleteModalOpen,
   );
+
+  const selectedItems = useItemMasterStore((state) => state.selectedItems);
+  const clearSelectedItems = useItemMasterStore(
+    (state) => state.clearSelectedItems,
+  );
+
   const {
     gridData,
     setGridData,
@@ -170,7 +178,12 @@ const ScenarioDetailsPage = () => {
   const isPublishing = isFullPublishing || isPartialPublishing;
   const showToast = useToastStore((state) => state.showToast);
 
-  const [selectedRowsCount, setSelectedRowsCount] = useState(0);
+  useEffect(() => {
+    if (!itemsInjectedRef.current && selectedItems?.length && gridData?.Body) {
+      itemsInjectedRef.current = true;
+      handleProcessAddItems(selectedItems);
+    }
+  }, [selectedItems, gridData]);
 
   const handleSaveAsDraft = useCallback(
     (
@@ -241,12 +254,12 @@ const ScenarioDetailsPage = () => {
         groupName,
         selectedHeaders,
       );
-
       handleSaveAsDraft(
         newState,
         () => {
           // Success: update grid and close drawer
           setGridData(newState);
+          clearSelectedItems();
           setIsDrawerOpen(false);
         },
         () => {
@@ -261,6 +274,7 @@ const ScenarioDetailsPage = () => {
       handleSaveAsDraft,
       setGridData,
       setIsDrawerOpen,
+      clearSelectedItems,
     ],
   );
 
@@ -413,6 +427,9 @@ const ScenarioDetailsPage = () => {
               "Kind",
               "Level",
               "D",
+              // "SKU",
+              // "Description",
+              // "Category",
             ].includes(key)
           ) {
             extraColsSet.add(key);
@@ -462,9 +479,6 @@ const ScenarioDetailsPage = () => {
       let colConfig: any = {
         Name: colName,
         Width: "150",
-        RelWidth: "1",
-        MinWidth: "120",
-        CanResize: "1",
         Type: "Text",
         CanSort: "0",
         IsExtraCol: 1,

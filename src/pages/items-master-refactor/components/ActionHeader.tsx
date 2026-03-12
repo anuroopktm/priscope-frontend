@@ -12,22 +12,16 @@ import SearchTextField from "@/components/common/SearchTextField";
 import { Box, Button, MenuItem, Select, Stack } from "@mui/material";
 import { useState } from "react";
 import UploadFileModal from "./upload-file/UploadFileModal";
-// import { useItemMasterStore } from "../store/useItemMasterStore";
-// import ExportDataIcon from "@/assets/common/export-data.svg";
 import DeleteOutlineIcon from "@mui/icons-material/DeleteOutline";
 import {
   useDeleteItemMasterRow,
   useExportItemMasterRow,
   useSaveFilter,
 } from "@/services/queries/item-master-refactor/item-master-refactor.queries";
-// import LoaderOverlay from "./loader";
 import { handleItemMasterExport } from "../actions/handleExportRows";
 import { useItemMasterStore } from "../store/useItemMasterStore";
 import { handleClearAllFilters } from "../tree-grid/utils/clearGrid";
-// import type { HeaderList } from "../types/types";
-// import ColumnDropdown from "./columns-dropdown";
 import DeleteConfirmModal from "./delete-confirmation-modal";
-// import FileDetailsModal from "./file-detail-modal";
 import LoaderOverlay from "./loader";
 import { ItemMasterRequestsModal } from "./request-modal";
 import SaveFilterModal from "./save-filter";
@@ -83,6 +77,10 @@ const ActionHeader = ({
   const setSelectedExport = useItemMasterStore(
     (state) => state.setSelectedExport,
   );
+  const clearSelectedRows = useItemMasterStore(
+    (state) => state.clearSelectedRows,
+  );
+
   const showToast = useToastStore((state) => state.showToast);
   const queryClient = useQueryClient();
 
@@ -136,7 +134,7 @@ const ActionHeader = ({
       },
       onError: (error) => {
         showToast(getErrorMessage(error, "Failed to add filter"), "error");
-      }
+      },
     });
   };
 
@@ -151,11 +149,8 @@ const ActionHeader = ({
         onSuccess: (response) => {
           setOpen(false);
           showToast("Scenario created successfully", "success");
-          navigate(`/scenario-builder/details/${response.id}`, {
-            state: {
-             selectedRows
-            },
-          });
+          navigate(`/scenario-builder/details/${response.id}`);
+          clearSelectedRows();
         },
         onError: () => {
           showToast("Failed to create scenario", "error");

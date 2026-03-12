@@ -128,6 +128,33 @@ export const useScenarioGridData = () => {
     [],
   );
 
+  const cleanTreeGridRow = (row: any) => {
+    const removeKeys = [
+      "tagName",
+      "nodeName",
+      "_DefaultSort",
+      "Expanded",
+      "Kind",
+      "Visible",
+      "Calculated",
+      "Level",
+      "yF",
+      "wA",
+      "State",
+      "Selected",
+      "iTB",
+      "tenant_id",
+      "updated_at",
+      "upload_id",
+      "channel",
+      "created_at",
+    ];
+
+    return Object.fromEntries(
+      Object.entries(row).filter(([key]) => !removeKeys.includes(key)),
+    );
+  };
+
   const prepareAddItems = useCallback(
     (
       prevData: { Body: ScenarioRow[][] },
@@ -135,31 +162,94 @@ export const useScenarioGridData = () => {
       groupName?: string,
       selectedHeaders?: string[],
     ) => {
+      console.log("selectedHeaders:", selectedHeaders);
       const mappedItems: ScenarioRow[] = items.map((item) => {
+        let cleanItem: any;
+
+        if (selectedHeaders && selectedHeaders.length > 0) {
+          // Drawer flow → only keep selected headers
+          cleanItem = {
+            id: item.id,
+            SKU: item.SKU,
+            Description: item.Description,
+            Category: item.Category,
+          };
+
+          selectedHeaders.forEach((header) => {
+            cleanItem[header] = item[header];
+          });
+        } else {
+          // Item Master flow → keep all columns
+          cleanItem = cleanTreeGridRow(item);
+        }
+        console.log(cleanItem, "cleanItem");
+        // const scenarioRow: any = {
+        //   ...cleanItem,
+        //   id: `row_${Math.random().toString(36).substr(2, 9)}`,
+        //   itemId: cleanItem.id || "",
+        //   Def: "R",
+        //   A: cleanItem.SKU || cleanItem.A || cleanItem["SKU"] || "",
+        //   B: cleanItem.Description || cleanItem.B || cleanItem["Description"] || "",
+        //   C: cleanItem.Category || cleanItem.C || cleanItem["Category"] || "",
+        //   is_published: 0,
+        //   Selected: 0,
+        //   CanSelect: 1,
+        //   PanelSelect: 1,
+        // };
         const scenarioRow: any = {
           id: `row_${Math.random().toString(36).substr(2, 9)}`,
-          itemId: item.id || "",
+          itemId: cleanItem.id || "",
           Def: "R",
-          A: item.SKU || item.A || item["SKU"] || "",
-          B: item.Description || item.B || item["Description"] || "",
-          C: item.Category || item.C || item["Category"] || "",
+          A: cleanItem.SKU || cleanItem.A || "",
+          B: cleanItem.Description || cleanItem.B || "",
+          C: cleanItem.Category || cleanItem.C || "",
           is_published: 0,
           Selected: 0,
           CanSelect: 1,
           PanelSelect: 1,
         };
 
-        if (selectedHeaders) {
-          selectedHeaders.forEach((headerName) => {
+        // ⭐ Item Master flow → copy ALL columns
+        // if (!selectedHeaders || selectedHeaders.length === 0) {
+          if (selectedHeaders === undefined){
+          Object.keys(cleanItem).forEach((key) => {
             if (
-              item[headerName] !== undefined &&
-              !["SKU", "Description", "Category"].includes(headerName)
+              !["id", "SKU", "Description", "Category", "A", "B", "C"].includes(
+                key,
+              )
             ) {
-              scenarioRow[headerName] = item[headerName];
+              scenarioRow[key] = cleanItem[key];
             }
           });
         }
 
+        // ⭐ Drawer flow → copy only selected headers
+        if (selectedHeaders && selectedHeaders.length > 0) {
+          selectedHeaders.forEach((headerName) => {
+            if (
+              cleanItem[headerName] !== undefined &&
+              !["SKU", "Description", "Category"].includes(headerName)
+            ) {
+              scenarioRow[headerName] = cleanItem[headerName];
+            }
+          });
+        }
+
+        // If specific headers were selected, we ensure they are present,
+        // though spreading ...item already covers most cases.
+        // if (selectedHeaders && selectedHeaders.length > 0) {
+        //   selectedHeaders.forEach((headerName) => {
+        //     if (
+        //       cleanItem[headerName] !== undefined &&
+        //       !["SKU", "Description", "Category", "A", "B", "C"].includes(
+        //         headerName,
+        //       )
+        //     ) {
+        //       scenarioRow[headerName] = cleanItem[headerName];
+        //     }
+        //   });
+        // }
+        console.log("SCENARIO ROW", scenarioRow);
         return scenarioRow as ScenarioRow;
       });
 
