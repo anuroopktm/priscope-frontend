@@ -106,13 +106,31 @@ const CustomCalculationModal = ({
           caption.includes("amount") ||
           caption.includes("amt");
 
+        // Negative keywords to exclude text-based columns that might contain numeric words
+        const excludeKeywords = [
+          "currency",
+          "uom",
+          "unit",
+          "code",
+          "id",
+          "name",
+          "desc",
+          "type",
+          "date",
+          "status",
+          "comment",
+        ];
+        const isExcluded = excludeKeywords.some((keyword) =>
+          caption.includes(keyword),
+        );
+
         return (
           col.caption &&
           typeof col.caption === "string" &&
           col.caption.trim() !== "" &&
           col.type !== "Panel" &&
           col.name !== "Panel" &&
-          (isNumeric || likelyNumeric)
+          (isNumeric || (likelyNumeric && !isExcluded))
         );
       });
   }, [open, gridId]);
