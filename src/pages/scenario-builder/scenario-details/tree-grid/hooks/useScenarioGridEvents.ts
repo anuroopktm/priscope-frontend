@@ -10,12 +10,14 @@ interface UseScenarioGridEventsProps {
   gridId: string;
   gridData: any;
   onSelectionChange?: (count: number) => void;
+  status?: string;
 }
 
 export const useScenarioGridEvents = ({
   gridId,
   gridData,
   onSelectionChange,
+  status,
 }: UseScenarioGridEventsProps) => {
   const gridDataRef = useRef(gridData);
 
@@ -175,7 +177,12 @@ export const useScenarioGridEvents = ({
       const wasEnter = enterPressedRef.current;
       enterPressedRef.current = false; // Reset immediately
 
-      if (save !== 1 || !wasEnter) {
+      if (
+        save !== 1 ||
+        !wasEnter ||
+        status === "published" ||
+        row.is_published === 1
+      ) {
         return val;
       }
 
@@ -246,10 +253,14 @@ export const useScenarioGridEvents = ({
     const onHandleRightClick = (grid: any, row: any, col: string) => {
       if (!grid || grid.id !== gridId) return 0;
       if (row.Kind === "Header") {
+        if (status === "published") return 1;
+
         const menuItems = getHeaderContextMenu(grid, col);
         grid.ShowMenu(row, col, { Items: menuItems });
         return 1;
       } else {
+        if (status === "published" || row.is_published === 1) return 1;
+
         // Cell context menu
         const menuItems = getCellContextMenu(grid, row, col);
         if (menuItems.length > 0) {

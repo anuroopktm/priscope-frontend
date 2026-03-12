@@ -13,7 +13,13 @@ import {
   TextField,
   Typography,
 } from "@mui/material";
-import { useState } from "react";
+import { Controller, useForm } from "react-hook-form";
+
+interface CostAggregatorForm {
+  label: string;
+  systemField: string;
+  setEntireColumn: boolean;
+}
 
 interface CostAggregatorModalProps {
   open: boolean;
@@ -30,25 +36,36 @@ const CostAggregatorModal = ({
   onClose,
   onConfirm,
 }: CostAggregatorModalProps) => {
-  const [label, setLabel] = useState("");
-  const [systemField, setSystemField] = useState("System Field 1");
-  const [setEntireColumn, setSetEntireColumn] = useState(false);
+  const { control, handleSubmit, reset, register } =
+    useForm<CostAggregatorForm>({
+      defaultValues: {
+        label: "",
+        systemField: "System Field 1",
+        setEntireColumn: false,
+      },
+    });
 
-  const handleConfirm = () => {
-    const finalLabel = label.trim()
-      ? `${label} (Cost Iterator)`
+  const handleConfirm = (data: CostAggregatorForm) => {
+    const finalLabel = data.label.trim()
+      ? `${data.label} (Cost Iterator)`
       : "(Cost Iterator)";
 
-    onConfirm({ label: finalLabel, systemField, setEntireColumn });
-    setLabel("");
-    setSystemField("System Field 1");
-    setSetEntireColumn(false);
-    onClose();
+    onConfirm({
+      label: finalLabel,
+      systemField: data.systemField,
+      setEntireColumn: data.setEntireColumn,
+    });
+    handleClose();
   };
 
-  const handleClose = (_e: {}, reason: "backdropClick" | "escapeKeyDown") => {
+  const handleClose = (
+    _e?: object,
+    reason?: "backdropClick" | "escapeKeyDown",
+  ) => {
     if (reason === "backdropClick" || reason === "escapeKeyDown") return;
+
     onClose();
+    reset();
   };
 
   return (
@@ -57,7 +74,7 @@ const CostAggregatorModal = ({
         variant="h6"
         sx={{ color: "#1a365d", fontWeight: "bold", px: 3, py: 2 }}
       >
-        Cost aggregator
+        Cost Aggregator
       </Typography>
       <Divider />
 
@@ -65,10 +82,9 @@ const CostAggregatorModal = ({
         sx={{ display: "flex", flexDirection: "column", gap: 3, pt: 3 }}
       >
         <TextField
-          value={label}
-          onChange={(e) => setLabel(e.target.value)}
+          {...register("label")}
           fullWidth
-          label=""
+          label="Label"
           placeholder="Enter label"
           variant="outlined"
           size="small"
@@ -76,23 +92,27 @@ const CostAggregatorModal = ({
 
         <FormControl fullWidth size="small">
           <InputLabel shrink>Map System Field (Optional)</InputLabel>
-          <Select
-            value={systemField}
-            onChange={(e) => setSystemField(e.target.value)}
-            label="Map System Field (Optional)"
-            notched
-          >
-            <MenuItem value="System Field 1">System Field 1</MenuItem>
-            <MenuItem value="System Field 2">System Field 2</MenuItem>
-          </Select>
+          <Controller
+            name="systemField"
+            control={control}
+            render={({ field }) => (
+              <Select {...field} label="Map System Field (Optional)" notched>
+                <MenuItem value="System Field 1">System Field 1</MenuItem>
+                <MenuItem value="System Field 2">System Field 2</MenuItem>
+              </Select>
+            )}
+          />
         </FormControl>
 
         <FormControlLabel
           sx={{ width: "fit-content" }}
           control={
-            <Checkbox
-              checked={setEntireColumn}
-              onChange={(e) => setSetEntireColumn(e.target.checked)}
+            <Controller
+              name="setEntireColumn"
+              control={control}
+              render={({ field }) => (
+                <Checkbox {...field} checked={field.value} />
+              )}
             />
           }
           label="Set for entire column"
@@ -100,10 +120,14 @@ const CostAggregatorModal = ({
       </DialogContent>
 
       <DialogActions sx={{ p: 3, pt: 1, justifyContent: "start", gap: 1 }}>
-        <Button size="small" variant="outlined" onClick={onClose}>
+        <Button size="small" variant="outlined" onClick={() => handleClose()}>
           Cancel
         </Button>
-        <Button size="small" variant="contained" onClick={handleConfirm}>
+        <Button
+          size="small"
+          variant="contained"
+          onClick={handleSubmit(handleConfirm)}
+        >
           Done
         </Button>
       </DialogActions>

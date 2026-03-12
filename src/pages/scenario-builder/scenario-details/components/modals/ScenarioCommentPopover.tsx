@@ -132,7 +132,7 @@ const ScenarioCommentPopover = () => {
           onChange={(e) => setCommentText(e.target.value)}
           placeholder="Type your comment here..."
           variant="standard"
-          autoFocus
+          // autoFocus
           InputProps={{
             disableUnderline: true,
             sx: {

@@ -13,16 +13,19 @@ import {
   TextField,
   Typography,
 } from "@mui/material";
-import { useMemo, useState } from "react";
+import { useMemo } from "react";
+import { Controller, useForm } from "react-hook-form";
+
+interface MarginMarkupForm {
+  label: string;
+  mapping: string;
+  entireColumn: boolean;
+}
 
 interface MarginMarkupModalProps {
   open: boolean;
   onClose: () => void;
-  onConfirm: (data: {
-    label: string;
-    mapping: string;
-    entireColumn: boolean;
-  }) => void;
+  onConfirm: (data: MarginMarkupForm) => void;
   type: "Margin" | "Markup";
   gridId?: string;
 }
@@ -34,9 +37,13 @@ const MarginMarkupModal = ({
   type,
   gridId = "ScenarioGridDetails",
 }: MarginMarkupModalProps) => {
-  const [label, setLabel] = useState("");
-  const [mapping, setMapping] = useState("");
-  const [entireColumn, setEntireColumn] = useState(false);
+  const { control, handleSubmit, reset, register } = useForm<MarginMarkupForm>({
+    defaultValues: {
+      label: "",
+      mapping: "",
+      entireColumn: false,
+    },
+  });
 
   const title = type === "Margin" ? "Margin Component" : "Markup Component";
 
@@ -51,27 +58,29 @@ const MarginMarkupModal = ({
         caption: grid.Header?.[name] || name,
       }))
       .filter((col: any) => {
-        return (
-          col.caption &&
-          typeof col.caption === "string" &&
-          col.caption.trim() !== "" &&
-          col.name !== "Panel"
-        );
+        return col.caption && col.caption.trim() !== "" && col.name !== "Panel";
       });
   }, [open, gridId]);
 
-  const handleConfirm = () => {
-    onConfirm({ label, mapping, entireColumn });
-    setLabel("");
-    setMapping("");
-    setEntireColumn(false);
+  const handleConfirm = (data: MarginMarkupForm) => {
+    onConfirm(data);
+    handleClose();
+  };
+
+  const handleClose = (
+    _e?: object,
+    reason?: "backdropClick" | "escapeKeyDown",
+  ) => {
+    if (reason === "backdropClick" || reason === "escapeKeyDown") return;
+
     onClose();
+    reset();
   };
 
   return (
     <Dialog
       open={open}
-      onClose={onClose}
+      onClose={handleClose}
       fullWidth
       maxWidth="xs"
       PaperProps={{
@@ -92,41 +101,54 @@ const MarginMarkupModal = ({
         <TextField
           fullWidth
           size="small"
-          label="Enter label"
-          value={label}
-          onChange={(e) => setLabel(e.target.value)}
+          label="Label"
+          {...register("label")}
           placeholder="Enter label"
-          InputLabelProps={{ shrink: true }}
           sx={{ "& .MuiOutlinedInput-root": { borderRadius: "8px" } }}
         />
 
         <FormControl fullWidth size="small">
           <InputLabel shrink>Customer Cost Mapping (Optional)</InputLabel>
-          <Select
-            value={mapping}
-            onChange={(e) => setMapping(e.target.value as string)}
-            notched
-            label="Customer Cost Mapping (Optional)"
-            sx={{ borderRadius: "8px" }}
-          >
-            <MenuItem value="">
-              <em>None</em>
-            </MenuItem>
-            {columns.map((col: any) => (
-              <MenuItem key={col.name} value={col.name}>
-                {col.caption}
-              </MenuItem>
-            ))}
-            <MenuItem value="abc_cost">ABC Cost</MenuItem>
-          </Select>
+          <Controller
+            name="mapping"
+            control={control}
+            render={({ field }) => (
+              <Select
+                {...field}
+                notched
+                displayEmpty
+                label="Customer Cost Mapping (Optional)"
+                sx={{ borderRadius: "8px" }}
+              >
+                <MenuItem value="">
+                  <em>None</em>
+                </MenuItem>
+                {columns.map((col: any) => (
+                  <MenuItem key={col.name} value={col.name}>
+                    {col.caption}
+                  </MenuItem>
+                ))}
+                <MenuItem value="abc_cost">ABC Cost</MenuItem>
+              </Select>
+            )}
+          />
         </FormControl>
 
         <FormControlLabel
           control={
-            <Checkbox
-              checked={entireColumn}
-              onChange={(e) => setEntireColumn(e.target.checked)}
-              sx={{ color: "#114a70", "&.Mui-checked": { color: "#114a70" } }}
+            <Controller
+              name="entireColumn"
+              control={control}
+              render={({ field }) => (
+                <Checkbox
+                  {...field}
+                  checked={field.value}
+                  sx={{
+                    color: "#114a70",
+                    "&.Mui-checked": { color: "#114a70" },
+                  }}
+                />
+              )}
             />
           }
           label={
@@ -140,7 +162,7 @@ const MarginMarkupModal = ({
       <DialogActions sx={{ p: 3, pt: 1, justifyContent: "flex-start", gap: 1 }}>
         <Button
           variant="outlined"
-          onClick={onClose}
+          onClick={() => handleClose()}
           sx={{
             borderRadius: "8px",
             color: "#114a70",
@@ -154,7 +176,7 @@ const MarginMarkupModal = ({
         </Button>
         <Button
           variant="contained"
-          onClick={handleConfirm}
+          onClick={handleSubmit(handleConfirm)}
           sx={{
             borderRadius: "8px",
             bgcolor: "#114a70",

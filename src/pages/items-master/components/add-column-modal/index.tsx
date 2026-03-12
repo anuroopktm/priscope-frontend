@@ -9,12 +9,18 @@ import {
   MenuItem,
   TextField,
 } from "@mui/material";
-import { useEffect, useState } from "react";
+import { useEffect } from "react";
+import { useForm } from "react-hook-form";
+
+interface CreateColumnForm {
+  label: string;
+  dataType: string;
+}
 
 type CreateColumnModalProps = {
   open?: boolean;
   onClose: () => void;
-  onSubmit: (data: { label: string; dataType: string }) => void;
+  onSubmit: (data: CreateColumnForm) => void;
   defaultLabel?: string;
   dataTypeOptions: string[];
   loading?: boolean;
@@ -28,46 +34,43 @@ const CreateColumnModal = ({
   dataTypeOptions,
   loading = false,
 }: CreateColumnModalProps) => {
-  const [label, setLabel] = useState(defaultLabel ?? "");
-  const [dataType, setDataType] = useState("");
-  const [errors, setErrors] = useState<{ label?: string; dataType?: string }>(
-    {},
-  );
+  const {
+    register,
+    handleSubmit,
+    reset,
+    formState: { errors },
+  } = useForm<CreateColumnForm>({
+    defaultValues: {
+      label: defaultLabel,
+      dataType: "",
+    },
+  });
 
   useEffect(() => {
     if (open) {
-      setLabel(defaultLabel ?? "");
+      reset({ label: defaultLabel, dataType: "" });
     }
-  }, [open, defaultLabel]);
+  }, [open, defaultLabel, reset]);
 
-  const handleSubmit = () => {
-    const newErrors: typeof errors = {};
-    if (!label.trim()) newErrors.label = "Error";
-    if (!dataType) newErrors.dataType = "Error";
-
-    if (Object.keys(newErrors).length > 0) {
-      setErrors(newErrors);
-      return;
-    }
-
-    onSubmit({ label, dataType });
-    setLabel("");
-    setDataType("");
-    setErrors({});
-    // onClose();
+  const onFormSubmit = (data: CreateColumnForm) => {
+    onSubmit(data);
+    reset();
   };
 
-  const handleCancel = () => {
-    setLabel("");
-    setDataType("");
-    setErrors({});
+  const handleClose = (
+    _e?: object,
+    reason?: "backdropClick" | "escapeKeyDown",
+  ) => {
+    if (reason === "backdropClick" || reason === "escapeKeyDown") return;
+
     onClose();
+    reset();
   };
 
   return (
     <Dialog
       open={open}
-      onClose={onClose}
+      onClose={handleClose}
       maxWidth="sm"
       fullWidth
       PaperProps={{
@@ -95,16 +98,11 @@ const CreateColumnModal = ({
       >
         <TextField
           label="Column Label"
-          value={label}
-          onChange={(e) => {
-            setLabel(e.target.value);
-            if (errors.label)
-              setErrors((prev) => ({ ...prev, label: undefined }));
-          }}
+          {...register("label", { required: "Error" })}
           variant="outlined"
           size="small"
           error={!!errors.label}
-          helperText={errors.label}
+          helperText={errors.label?.message}
           sx={{
             "& .MuiOutlinedInput-root": {
               borderRadius: "8px",
@@ -115,16 +113,12 @@ const CreateColumnModal = ({
         <TextField
           select
           label="Data Type"
-          value={dataType}
-          onChange={(e) => {
-            setDataType(e.target.value);
-            if (errors.dataType)
-              setErrors((prev) => ({ ...prev, dataType: undefined }));
-          }}
+          {...register("dataType", { required: "Error" })}
+          defaultValue=""
           variant="outlined"
           size="small"
           error={!!errors.dataType}
-          helperText={errors.dataType}
+          helperText={errors.dataType?.message}
           sx={{
             "& .MuiOutlinedInput-root": {
               borderRadius: "8px",
@@ -151,13 +145,13 @@ const CreateColumnModal = ({
         <Button
           onClick={(e) => {
             e.stopPropagation();
-            handleCancel();
+            handleClose();
           }}
           variant="outlined"
         >
           Cancel
         </Button>
-        <Button onClick={handleSubmit} variant="contained">
+        <Button onClick={handleSubmit(onFormSubmit)} variant="contained">
           {loading ? (
             <CircularProgress size={20} color="inherit" />
           ) : (

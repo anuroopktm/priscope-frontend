@@ -7,7 +7,12 @@ import {
   Divider,
   TextField,
 } from "@mui/material";
-import { useState } from "react";
+import { useEffect } from "react";
+import { useForm } from "react-hook-form";
+
+type SaveFilterForm = {
+  label: string;
+};
 
 type SaveFilterModalProps = {
   open?: boolean;
@@ -25,40 +30,42 @@ const SaveFilterModal = ({
   defaultLabel = "",
   isLoading,
 }: SaveFilterModalProps) => {
-  const [label, setLabel] = useState(defaultLabel);
-  const [_dataType, setDataType] = useState("");
-  const [errors, setErrors] = useState<{ label?: string; dataType?: string }>(
-    {},
-  );
+  const {
+    register,
+    handleSubmit,
+    reset,
+    formState: { errors },
+  } = useForm<SaveFilterForm>({
+    defaultValues: {
+      label: defaultLabel,
+    },
+  });
 
-  const handleSubmit = () => {
-    const newErrors: typeof errors = {};
-    if (!label.trim())
-      newErrors.label = "Failed to add Filter. Please try again.";
-
-    if (Object.keys(newErrors).length > 0) {
-      setErrors(newErrors);
-      return;
+  useEffect(() => {
+    if (open) {
+      reset({ label: defaultLabel });
     }
+  }, [open, defaultLabel, reset]);
 
-    onSubmit(label);
-    setLabel("");
-    setDataType("");
-    setErrors({});
-    onClose();
+  const onFormSubmit = (data: SaveFilterForm) => {
+    onSubmit(data.label);
+    handleClose();
   };
 
-  const handleCancel = () => {
-    setLabel("");
-    setDataType("");
-    setErrors({});
+  const handleClose = (
+    _e?: object,
+    reason?: "backdropClick" | "escapeKeyDown",
+  ) => {
+    if (reason === "backdropClick" || reason === "escapeKeyDown") return;
+
     onClose();
+    reset();
   };
 
   return (
     <Dialog
       open={open}
-      onClose={onClose}
+      onClose={handleClose}
       maxWidth="sm"
       fullWidth
       PaperProps={{
@@ -86,16 +93,13 @@ const SaveFilterModal = ({
       >
         <TextField
           label="Add Filter"
-          value={label}
-          onChange={(e) => {
-            setLabel(e.target.value);
-            if (errors.label)
-              setErrors((prev) => ({ ...prev, label: undefined }));
-          }}
+          {...register("label", {
+            required: "Failed to add Filter. Please try again.",
+          })}
           variant="outlined"
           size="small"
           error={!!errors.label}
-          helperText={errors.label}
+          helperText={errors.label?.message}
           sx={{
             "& .MuiOutlinedInput-root": {
               borderRadius: "8px",
@@ -115,13 +119,17 @@ const SaveFilterModal = ({
         <Button
           onClick={(e) => {
             e.stopPropagation();
-            handleCancel();
+            handleClose();
           }}
           variant="contained"
         >
           Cancel
         </Button>
-        <Button onClick={handleSubmit} variant="contained" loading={isLoading}>
+        <Button
+          onClick={handleSubmit(onFormSubmit)}
+          variant="contained"
+          loading={isLoading}
+        >
           Save Filter
         </Button>
       </DialogActions>

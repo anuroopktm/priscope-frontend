@@ -1006,7 +1006,7 @@ const CostAggregatorDrawer = ({
               const row = grid.GetRowById(targetRowId);
               const mainRow = mainGrid.GetRowById(mainRowId);
               if (row && mainRow) {
-                // Update header if label is provided
+                // Update internal grid header only (keep section title/template name as is)
                 if (label) {
                   if (grid.Header) {
                     grid.SetValue(grid.Header, "A", label, 1);

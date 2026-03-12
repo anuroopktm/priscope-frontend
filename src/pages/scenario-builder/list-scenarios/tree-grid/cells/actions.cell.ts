@@ -1,4 +1,9 @@
-export const renderActionsCell = (id: string) => {
+export const renderActionsCell = (id: string, status: string = "") => {
+  const isPublished = status.toLowerCase() === "published";
+  const iconSrc = isPublished
+    ? "src/assets/tree-grid/eye.svg"
+    : "src/assets/tree-grid/edit.svg";
+
   return `<div style="display: flex; gap: 10px; align-items: center; justify-content: center;">
     <button 
       style="background-color: transparent; border: none; cursor: pointer; padding: 4px; border-radius: 4px; transition: background-color 0.2s;"
@@ -6,7 +11,7 @@ export const renderActionsCell = (id: string) => {
       onmouseout="this.style.backgroundColor='transparent'"
       onclick="window.handleTreeGridEdit && window.handleTreeGridEdit('${id}')"
     >
-      <img src="src/assets/tree-grid/edit.svg" alt="edit" style="width: 16px; height: 16px;" />
+      <img src="${iconSrc}" alt="${isPublished ? "view" : "edit"}" style="width: 16px; height: 16px;" />
     </button>
     <button 
       style="background-color: transparent; border: none; cursor: pointer; padding: 4px; border-radius: 4px; transition: background-color 0.2s;"

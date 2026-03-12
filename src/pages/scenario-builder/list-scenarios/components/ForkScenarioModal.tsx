@@ -60,7 +60,7 @@ const ForkScenarioModal = ({
             onChange={(e) => setName(e.target.value)}
             variant="outlined"
             size="small"
-            autoFocus
+            // autoFocus
           />
         </DialogContent>
 
