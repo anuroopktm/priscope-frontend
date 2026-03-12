@@ -18,8 +18,28 @@ export const getHeaderContextMenu = (grid: any, col: string) => {
     OnClick: () => (window as any).handleDeleteCol(grid, col),
   };
 
-  // If it's a Data column or an Aggregator, show options and delete
-  if (menuType === "Data" || isAggregator) {
+  // If it's a Data column, show only column options
+  if (menuType === "Data") {
+    return [
+      {
+        Text: `<span style="${HEADER_STYLE}">Column Options</span>`,
+        Caption: 1,
+      },
+      {
+        Name: "Add Column in Right",
+        OnClick: () => (window as any).handleAddColRight(grid, col),
+      },
+      {
+        Name: "Add Column in Left",
+        OnClick: () => (window as any).handleAddColLeft(grid, col),
+      },
+      { Name: "-", Separator: 1 },
+      deleteItem,
+    ] as any[];
+  }
+
+  // If it's an Aggregator, show options and delete
+  if (isAggregator) {
     return [
       {
         Text: `<span style="${HEADER_STYLE}">Column Options</span>`,
@@ -87,17 +107,7 @@ export const getCellContextMenu = (grid: any, row: any, col: string) => {
     ] as any[];
   }
 
-  // 2. Data column -> Just "Comment"
-  if (menuType === "Data") {
-    return [
-      {
-        Name: "Comment",
-        OnClick: () => (window as any).handleCommentFromMenu(grid, row, col),
-      },
-    ] as any[];
-  }
-
-  // 3. Builder/Generic Column -> "Calculators" menu
+  // 3. Builder/Generic Column / Data Column -> "Calculators" menu
   return [
     { Text: `<span style="${HEADER_STYLE}">Calculators</span>`, Caption: 1 },
     {
@@ -110,11 +120,11 @@ export const getCellContextMenu = (grid: any, row: any, col: string) => {
     },
     {
       Name: "Markup component",
-      OnClick: () => (window as any).handleCalculate(row.id, col),
+      OnClick: () => (window as any).handleCalculate(row.id, col, "Markup"),
     },
     {
       Name: "Margin component",
-      OnClick: () => (window as any).handleCalculate(row.id, col),
+      OnClick: () => (window as any).handleCalculate(row.id, col, "Margin"),
     },
     { Name: "-", Separator: 1 },
     {

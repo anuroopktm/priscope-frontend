@@ -84,6 +84,7 @@ export const ScenarioDetailsLayout = {
       Type: "Html",
       CanEdit: "0",
       CanSort: "0",
+      MenuType: "Status",
       Align: "Center",
     },
   ],
