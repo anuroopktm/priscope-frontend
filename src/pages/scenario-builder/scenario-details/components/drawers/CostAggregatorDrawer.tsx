@@ -185,10 +185,10 @@ const AggregatorGrid = ({
         height: "140px",
         width: "100%",
         borderBottom: "1px solid #e2e8f0",
-        "& .TGMain": {
-          border: "1px solid #e2e8f0 !important",
-          borderBottom: "none !important",
-        },
+        // "& .TGMain": {
+        //   border: "1px solid #e2e8f0 !important",
+        //   borderBottom: "none !important",
+        // },
         "& div[class*='NoDataRow']": {
           display: "none !important",
         },
@@ -398,24 +398,24 @@ const CostAggregatorDrawer = ({
       items: [
         type === "Tariff"
           ? {
-              id: "row1",
-              A: renderSelectButton("row1", id, "A"),
-              B: renderSelectButton("row1", id, "B"),
-              C: "Base UOM",
-              D: 0,
-            }
+            id: "row1",
+            A: renderSelectButton("row1", id, "A"),
+            B: renderSelectButton("row1", id, "B"),
+            C: "Base UOM",
+            D: 0,
+          }
           : type === "Custom"
             ? {
-                id: "row1",
-                A: 0,
-                B: renderCalculatorIcon("row1", id),
-              }
+              id: "row1",
+              A: 0,
+              B: renderCalculatorIcon("row1", id),
+            }
             : {
-                id: "row1",
-                A: renderSelectButton("row1", id, "A"),
-                B: "Base UOM",
-                C: 0,
-              },
+              id: "row1",
+              A: renderSelectButton("row1", id, "A"),
+              B: "Base UOM",
+              C: 0,
+            },
       ],
     };
     setSections([...sections, newSection]);
@@ -758,7 +758,7 @@ const CostAggregatorDrawer = ({
               <Chip
                 label="Freight"
                 onClick={() => handleAddSection("Freight")}
-                onDelete={() => {}}
+                onDelete={() => { }}
                 deleteIcon={
                   <AddIcon style={{ fontSize: 16, color: "#1a365d" }} />
                 }
@@ -766,7 +766,7 @@ const CostAggregatorDrawer = ({
               <Chip
                 label="Tariff"
                 onClick={() => handleAddSection("Tariff")}
-                onDelete={() => {}}
+                onDelete={() => { }}
                 deleteIcon={
                   <AddIcon style={{ fontSize: 16, color: "#1a365d" }} />
                 }
@@ -774,7 +774,7 @@ const CostAggregatorDrawer = ({
               <Chip
                 label="Custom"
                 onClick={() => setIsCustomModalOpen(true)}
-                onDelete={() => {}}
+                onDelete={() => { }}
                 deleteIcon={
                   <AddIcon style={{ fontSize: 16, color: "#1a365d" }} />
                 }
@@ -869,8 +869,8 @@ const CostAggregatorDrawer = ({
               </Stack>
               <Box
                 sx={{
-                  borderRadius: 1,
-                  overflow: "hidden",
+                  // borderRadius: 1,
+                  // overflow: "hidden",
                   width: "fit-content",
                 }}
               >
@@ -1006,7 +1006,7 @@ const CostAggregatorDrawer = ({
               const row = grid.GetRowById(targetRowId);
               const mainRow = mainGrid.GetRowById(mainRowId);
               if (row && mainRow) {
-                // Update header if label is provided
+                // Update internal grid header only (keep section title/template name as is)
                 if (label) {
                   if (grid.Header) {
                     grid.SetValue(grid.Header, "A", label, 1);
@@ -1023,7 +1023,14 @@ const CostAggregatorDrawer = ({
                 if (matches) {
                   matches.forEach((match, index) => {
                     const colName = match.slice(1, -1);
-                    const val = mainGrid.GetValue(mainRow, colName) || 0;
+                    const rawVal = mainGrid.GetValue(mainRow, colName);
+
+                    // Robust conversion: remove anything that isn't a digit, dot, or minus sign
+                    const val =
+                      typeof rawVal === "string"
+                        ? parseFloat(rawVal.replace(/[^0-9.-]/g, "")) || 0
+                        : Number(rawVal) || 0;
+
                     if (index === 0) firstSourceValue = val;
                     evalStr = evalStr.replace(match, String(val));
                   });

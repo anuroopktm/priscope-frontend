@@ -34,7 +34,7 @@ const GlobalHeaderActions = () => {
     handleClose();
     mutate(undefined, {
       onSuccess: () => {
-        navigate("/auth/sign-in"); 
+        navigate("/auth/sign-in");
       },
     });
   };

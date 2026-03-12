@@ -11,7 +11,7 @@ export const mapScenariosToGridRows = (scenarios: Scenario[] = []) => {
     // Email: s.created_by?.email || "N/A",
     Label: s.name || "N/A",
     Status: renderStatusBadge(s.status),
-    Actions: renderActionsCell(String(s.id)),
+    Actions: renderActionsCell(String(s.id), s.status),
   }));
 };
 

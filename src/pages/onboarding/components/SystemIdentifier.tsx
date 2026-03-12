@@ -22,17 +22,16 @@ interface Props {
 const SystemIdentifier = ({ onNext }: Props) => {
   const { data, updateData } = useOnboardingStore();
 
-  const { handleSubmit, control } =
-    useForm<SystemIdentifierFormValues>({
-      defaultValues: {
-        system_identifier: data.system_identifier ?? "",
-      },
-      resolver: zodResolver(systemIdentifierSchema),
-    });
+  const { handleSubmit, control } = useForm<SystemIdentifierFormValues>({
+    defaultValues: {
+      system_identifier: data.system_identifier ?? "",
+    },
+    resolver: zodResolver(systemIdentifierSchema),
+  });
 
   const onSubmit = (formData: SystemIdentifierFormValues) => {
-    updateData(formData); 
-    onNext(); 
+    updateData(formData);
+    onNext();
   };
 
   const options = [
@@ -44,7 +43,7 @@ const SystemIdentifier = ({ onNext }: Props) => {
     <Box
       component="form"
       onSubmit={handleSubmit(onSubmit)}
-       sx={{
+      sx={{
         display: "flex",
         flexDirection: "column",
         gap: 2,
@@ -84,9 +83,7 @@ const SystemIdentifier = ({ onNext }: Props) => {
                         alignItems: "center",
                         p: "14px 16px",
                         border: "1.5px solid",
-                        borderColor: isSelected
-                          ? "#1A2B44"
-                          : "#D0D5DD",
+                        borderColor: isSelected ? "#1A2B44" : "#D0D5DD",
                         borderRadius: "10px",
                         cursor: "pointer",
                         backgroundColor: "#ffffff",
@@ -107,10 +104,7 @@ const SystemIdentifier = ({ onNext }: Props) => {
                           />
                         }
                         label={
-                          <Typography
-                            fontSize="14px"
-                            fontWeight={600}
-                          >
+                          <Typography fontSize="14px" fontWeight={600}>
                             {option.label}
                           </Typography>
                         }

@@ -2,7 +2,10 @@ import ExpandIcon from "@/assets/items-master/Button.svg";
 import { Box, CircularProgress, IconButton, Typography } from "@mui/material";
 import React from "react";
 import closeIcon from "@/assets/items-master/ButtonClose.svg";
-import { useGetItemMasterById, useItemMasterHistory } from "@/services/queries/item-master-refactor/item-master-refactor.queries";
+import {
+  useGetItemMasterById,
+  useItemMasterHistory,
+} from "@/services/queries/item-master-refactor/item-master-refactor.queries";
 import { mapItemApiToDetailView } from "../../utils/mapItemApiToDetailView";
 import { mapHistoryToTimeline } from "../../utils/mapHistoryToTimeline";
 import TimelineDetail from "../timeline";

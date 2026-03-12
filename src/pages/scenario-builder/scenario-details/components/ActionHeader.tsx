@@ -19,6 +19,7 @@ const THE_GRID_ID = "ScenarioGridDetails";
 
 interface ActionHeaderProps {
   title?: string;
+  status?: string;
   onAddItems?: () => void;
   onSaveAsDraft?: () => void;
   onExport?: (format: string) => void;
@@ -31,6 +32,7 @@ interface ActionHeaderProps {
 
 const ActionHeader = ({
   title,
+  status,
   onAddItems,
   onSaveAsDraft,
   onExport,
@@ -40,6 +42,7 @@ const ActionHeader = ({
   isPublishing,
   selectedRowsCount = 0,
 }: ActionHeaderProps) => {
+  const isPublished = status === "published";
   const navigate = useNavigate();
   const setIsCommentsSidebarOpen = useScenarioStore(
     (state) => state.setIsCommentsSidebarOpen,
@@ -92,13 +95,15 @@ const ActionHeader = ({
         )}
       </Box>
       <Stack direction="row" spacing={1} alignItems="center">
-        <Button
-          variant="contained"
-          onClick={() => onSaveAsDraft?.()}
-          disabled={isSaving}
-        >
-          {isSaving ? "Saving..." : "Save as draft"}
-        </Button>
+        {!isPublished && (
+          <Button
+            variant="contained"
+            onClick={() => onSaveAsDraft?.()}
+            disabled={isSaving}
+          >
+            {isSaving ? "Saving..." : "Save as draft"}
+          </Button>
+        )}
         <Button
           variant="contained"
           startIcon={<DatabaseImportIcon />}
@@ -122,59 +127,65 @@ const ActionHeader = ({
           <MenuItem onClick={() => handleExportOption("csv")}>CSV</MenuItem>
           <MenuItem onClick={() => handleExportOption("excel")}>Excel</MenuItem>
         </Menu>
-        <Button
-          variant="contained"
-          startIcon={<FileImportIcon />}
-          onClick={onAddItems}
-        >
-          Add Items
-        </Button>
-        <Button
-          variant="contained"
-          onClick={() => {
-            if (selectedRowsCount > 0) {
-              const grid = (window as any).Grids?.[THE_GRID_ID];
-              if (grid) {
-                const selRows = grid.GetSelRows();
-                const itemIdSet = new Set<string>();
-                const groupIdSet = new Set<string>();
+        {!isPublished && (
+          <>
+            <Button
+              variant="contained"
+              startIcon={<FileImportIcon />}
+              onClick={onAddItems}
+            >
+              Add Items
+            </Button>
+            <Button
+              variant="contained"
+              onClick={() => {
+                if (selectedRowsCount > 0) {
+                  const grid = (window as any).Grids?.[THE_GRID_ID];
+                  if (grid) {
+                    const selRows = grid.GetSelRows();
+                    const itemIdSet = new Set<string>();
+                    const groupIdSet = new Set<string>();
 
-                const collectItemIdsRecursive = (parentRow: any) => {
-                  let child = parentRow.firstChild;
-                  while (child) {
-                    if (child.itemId) {
-                      itemIdSet.add(child.itemId);
-                    }
-                    if (child.firstChild) {
-                      collectItemIdsRecursive(child);
-                    }
-                    child = child.nextSibling;
+                    const collectItemIdsRecursive = (parentRow: any) => {
+                      let child = parentRow.firstChild;
+                      while (child) {
+                        if (child.itemId) {
+                          itemIdSet.add(child.itemId);
+                        }
+                        if (child.firstChild) {
+                          collectItemIdsRecursive(child);
+                        }
+                        child = child.nextSibling;
+                      }
+                    };
+
+                    selRows.forEach((row: any) => {
+                      if (row.Def?.Name === "Group" || row.firstChild) {
+                        groupIdSet.add(row.id);
+                        collectItemIdsRecursive(row);
+                      } else {
+                        itemIdSet.add(row.itemId || row.id);
+                      }
+                    });
+
+                    onPartialPublish?.(
+                      Array.from(itemIdSet),
+                      Array.from(groupIdSet),
+                    );
                   }
-                };
-
-                selRows.forEach((row: any) => {
-                  if (row.Def?.Name === "Group" || row.firstChild) {
-                    groupIdSet.add(row.id);
-                    collectItemIdsRecursive(row);
-                  } else {
-                    itemIdSet.add(row.itemId || row.id);
-                  }
-                });
-
-                onPartialPublish?.(
-                  Array.from(itemIdSet),
-                  Array.from(groupIdSet),
-                );
-              }
-            } else {
-              onPublish?.();
-            }
-          }}
-          loading={isPublishing}
-          sx={{ minWidth: "90px" }}
-        >
-          {selectedRowsCount > 0 ? `Publish (${selectedRowsCount})` : "Publish"}
-        </Button>
+                } else {
+                  onPublish?.();
+                }
+              }}
+              loading={isPublishing}
+              sx={{ minWidth: "90px" }}
+            >
+              {selectedRowsCount > 0
+                ? `Publish (${selectedRowsCount})`
+                : "Publish"}
+            </Button>
+          </>
+        )}
         <IconButton
           onClick={() => setIsCommentsSidebarOpen(true)}
           sx={{

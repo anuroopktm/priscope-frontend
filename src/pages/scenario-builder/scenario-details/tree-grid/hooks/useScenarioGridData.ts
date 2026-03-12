@@ -32,22 +32,33 @@ export const EDIT_ICON =
 export const DELETE_ICON =
   '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="cursor: pointer; color: #EF4444;"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path><line x1="10" y1="11" x2="10" y2="17"></line><line x1="14" y1="11" x2="14" y2="17"></line></svg>';
 
-export const transformRows = (rows: ScenarioRow[]): ScenarioRow[] => {
+export const transformRows = (
+  rows: ScenarioRow[],
+  isScenarioPublished: boolean = false,
+): ScenarioRow[] => {
   return rows.map((row) => {
+    const isPublished = isScenarioPublished || row.is_published === 1;
+    let transformedRow = { ...row };
+
+    if (isPublished) {
+      transformedRow.CanEdit = 0;
+      transformedRow.CanSelect = 0;
+      transformedRow.PanelSelect = 0;
+    }
+
     if (row.Def === "Group") {
       const groupRowId = row.id;
-      return {
-        ...row,
-        AHtmlPostfix: `<div style="display:flex; gap:12px; float:right; margin-right:8px; align-items:center; height:100%;">
+      transformedRow.AHtmlPostfix = isPublished
+        ? ""
+        : `<div style="display:flex; gap:12px; float:right; margin-right:8px; align-items:center; height:100%;">
             <span style="display:flex; align-items:center; cursor:pointer;" onclick="window.handleTreeGridEdit && window.handleTreeGridEdit('${groupRowId}')">${EDIT_ICON}</span>
             <span style="display:flex; align-items:center; cursor:pointer;" onclick="window.handleTreeGridDeleteRow && window.handleTreeGridDeleteRow('${groupRowId}')">${DELETE_ICON}</span>
-          </div>`,
-      };
+          </div>`;
     }
     if (row.Items) {
-      return { ...row, Items: transformRows(row.Items) };
+      transformedRow.Items = transformRows(row.Items, isScenarioPublished);
     }
-    return row;
+    return transformedRow;
   });
 };
 

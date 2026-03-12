@@ -50,30 +50,28 @@ const CustomCalculationModal = ({
   useEffect(() => {
     if (open) {
       if (initialValue) {
-        // Split by spaces and attempt to reconstruct tokens
-        const initialTokens: Token[] = initialValue
-          .split(" ")
-          .filter((v) => v.trim() !== "")
-          .map((v, i) => {
-            let type: Token["type"] = "operator";
-            let label = v;
+        // Use regex to find tokens: matches bracketed text [like this] OR non-space sequences
+        const matches = initialValue.match(/\[[^\]]+\]|\S+/g) || [];
+        const initialTokens: Token[] = matches.map((v, i) => {
+          let type: Token["type"] = "operator";
+          let label = v;
 
-            if (v.startsWith("[") && v.endsWith("]")) {
-              type = "column";
-              const colName = v.slice(1, -1);
-              const grid = (window as any).Grids?.[gridId];
-              label = grid?.Header?.[colName] || colName;
-            } else if (!isNaN(Number(v))) {
-              type = "numeric";
-            }
+          if (v.startsWith("[") && v.endsWith("]")) {
+            type = "column";
+            const colName = v.slice(1, -1);
+            const grid = (window as any).Grids?.[gridId];
+            label = grid?.Header?.[colName] || colName;
+          } else if (!isNaN(Number(v))) {
+            type = "numeric";
+          }
 
-            return {
-              id: `init-${i}-${Date.now()}`,
-              type,
-              value: v,
-              label,
-            };
-          });
+          return {
+            id: `init-${i}-${Date.now()}`,
+            type,
+            value: v,
+            label,
+          };
+        });
         setTokens(initialTokens);
       } else {
         setTokens([]);
@@ -95,13 +93,44 @@ const CustomCalculationModal = ({
       .filter((col: any) => {
         const type = String(col.type || "").toLowerCase();
         const isNumeric = type === "float" || type === "int";
+        const caption = String(col.caption || "").toLowerCase();
+
+        // Keywords that suggest a column is likely numeric even if typed as Text/Html
+        const likelyNumeric =
+          caption.includes("cost") ||
+          caption.includes("price") ||
+          caption.includes("margin") ||
+          caption.includes("markup") ||
+          caption.includes("aggregator") ||
+          caption.includes("iterator") ||
+          caption.includes("amount") ||
+          caption.includes("amt");
+
+        // Negative keywords to exclude text-based columns that might contain numeric words
+        const excludeKeywords = [
+          "currency",
+          "uom",
+          "unit",
+          "code",
+          "id",
+          "name",
+          "desc",
+          "type",
+          "date",
+          "status",
+          "comment",
+        ];
+        const isExcluded = excludeKeywords.some((keyword) =>
+          caption.includes(keyword),
+        );
+
         return (
           col.caption &&
           typeof col.caption === "string" &&
           col.caption.trim() !== "" &&
           col.type !== "Panel" &&
           col.name !== "Panel" &&
-          isNumeric
+          (isNumeric || (likelyNumeric && !isExcluded))
         );
       });
   }, [open, gridId]);
@@ -133,8 +162,14 @@ const CustomCalculationModal = ({
 
   const handleConfirm = () => {
     const formula = tokens.map((t) => t.value).join(" ");
-    const columnToken = tokens.find((t) => t.type === "column");
-    onConfirm(formula.trim(), columnToken?.label);
+    const columnLabels = Array.from(
+      new Set(tokens.filter((t) => t.type === "column").map((t) => t.label)),
+    );
+
+    const label =
+      columnLabels.length > 0 ? columnLabels.join(", ") : tokens[0]?.label;
+
+    onConfirm(formula.trim(), label);
     setTokens([]);
     onClose();
   };

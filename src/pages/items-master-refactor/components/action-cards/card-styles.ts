@@ -2,7 +2,7 @@ import { theme } from "@/theme/theme";
 
 export const cardBoxStyles = {
   background: theme.palette.brand.gradientBg,
-  borderRadius: '16px',
+  borderRadius: "16px",
   width: "100%",
   maxWidth: { xs: "100%", sm: "220px", lg: "220px" },
   minWidth: { xs: "220px", sm: "220px" },

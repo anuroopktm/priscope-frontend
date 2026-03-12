@@ -193,14 +193,12 @@ export const handleAggregatorUpdate = (
 
       (Array.isArray(items) ? items : []).forEach((item, index) => {
         if (!item || !item.name) return;
-        if (
-          item.type === "Custom" ||
-          item.type === "Margin" ||
-          item.type === "Markup"
-        )
-          return;
+        if (item.type === "Margin" || item.type === "Markup") return;
 
-        const itemName = String(item.name || "");
+        let itemName = String(item.name || "");
+        if (item.type === "Custom" && itemName === "Custom") {
+          itemName = "Custom Calculation";
+        }
         const cleanName = itemName.trim();
         const safeName = cleanName.replace(/[^a-zA-Z0-9]/g, "").toLowerCase();
         const colId = `Comp_${targetCol}_${safeName || "Item"}`;

@@ -1,4 +1,7 @@
-import type { Header, SelectedField } from "@/services/queries/item-master-refactor/item-master-refactor.types";
+import type {
+  Header,
+  SelectedField,
+} from "@/services/queries/item-master-refactor/item-master-refactor.types";
 import { create } from "zustand";
 
 interface ItemMasterStore {

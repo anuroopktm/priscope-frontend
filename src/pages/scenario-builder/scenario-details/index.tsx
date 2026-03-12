@@ -282,8 +282,9 @@ const ScenarioDetailsPage = () => {
     if (scenario?.grid_data?.Body) {
       console.log("Syncing scenario grid_data from API:", scenario.grid_data);
       const rawData = scenario.grid_data;
+      const isScenarioPublished = scenario.status === "published";
       const transformedBody = rawData.Body.map((rows: ScenarioRow[]) =>
-        transformRows(rows),
+        transformRows(rows, isScenarioPublished),
       );
       setGridData({ ...rawData, Body: transformedBody });
     }
@@ -352,6 +353,7 @@ const ScenarioDetailsPage = () => {
     gridId: SCENARIO_BUILDER_GRID_ID,
     gridData,
     onSelectionChange: setSelectedRowsCount,
+    status: scenario?.status,
   });
 
   useEffect(() => {
@@ -537,6 +539,7 @@ const ScenarioDetailsPage = () => {
     >
       <ActionHeader
         title={scenario?.name}
+        status={scenario?.status}
         onAddItems={() => setIsDrawerOpen(true)}
         onSaveAsDraft={handleSaveAsDraft}
         onExport={handleExport}

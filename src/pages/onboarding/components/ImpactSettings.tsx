@@ -29,7 +29,7 @@ const ImpactSettings = ({ onNext }: { onNext: () => void }) => {
     updateData(formData);
     onNext();
   };
-console.log(data)
+  console.log(data);
   const fields = [
     { name: "fx_threshold", label: "FX impact" },
     { name: "tariff_threshold", label: "Tariff impact" },
@@ -96,7 +96,6 @@ console.log(data)
         variant="text"
         onClick={onNext}
         sx={{
-
           textTransform: "none",
           fontWeight: 600,
           fontSize: "15px",

@@ -57,8 +57,8 @@ export const steps = [
     label: "General Info",
     component: GeneralInfo,
   },
-   {
+  {
     label: "Would you like to start by adding data?",
-    component:  AddItemMasterData,
+    component: AddItemMasterData,
   },
 ];

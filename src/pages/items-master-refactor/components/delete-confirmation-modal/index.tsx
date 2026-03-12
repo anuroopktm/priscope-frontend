@@ -51,7 +51,11 @@ const DeleteConfirmModal = ({
           disabled={isLoading}
           onClick={onConfirm}
         >
-          {isLoading ? <CircularProgress size={16} color="inherit" /> : "Delete"}
+          {isLoading ? (
+            <CircularProgress size={16} color="inherit" />
+          ) : (
+            "Delete"
+          )}
         </Button>
       </DialogActions>
     </Dialog>

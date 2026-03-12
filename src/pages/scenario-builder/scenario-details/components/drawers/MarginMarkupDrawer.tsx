@@ -297,7 +297,7 @@ const MarginMarkupDrawer = ({
             sx={{
               height: "70px",
               width: "100%",
-              "& .TGMain": { border: "none" },
+              // "& .TGMain": { border: "none" },
             }}
           />
         </Box>

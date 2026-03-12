@@ -9,7 +9,7 @@ export const PlainRecord = ({
   record: any;
   module?: string;
 }) => {
-  console.log(record, "record",module);
+  console.log(record, "record", module);
   if (!record || module !== "item_master") return null;
   console.log(record, "record");
   return (

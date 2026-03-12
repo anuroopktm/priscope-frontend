@@ -7,7 +7,8 @@ import {
   TextField,
   Typography,
 } from "@mui/material";
-import { useState } from "react";
+import { useEffect } from "react";
+import { useForm } from "react-hook-form";
 
 interface CustomCostModalProps {
   open: boolean;
@@ -15,23 +16,46 @@ interface CustomCostModalProps {
   onConfirm: (label: string) => void;
 }
 
+interface CustomCostForm {
+  label: string;
+}
+
 const CustomCostModal = ({
   open,
   onClose,
   onConfirm,
 }: CustomCostModalProps) => {
-  const [label, setLabel] = useState("");
+  const {
+    register,
+    handleSubmit,
+    reset,
+    watch,
+    formState: { errors },
+  } = useForm<CustomCostForm>({
+    defaultValues: {
+      label: "",
+    },
+  });
 
-  const handleConfirm = () => {
-    if (label.trim()) {
-      onConfirm(label.trim());
-      setLabel("");
-      onClose();
+  const labelValue = watch("label");
+
+  useEffect(() => {
+    if (open) {
+      reset({ label: "" });
     }
+  }, [open, reset]);
+
+  const handleConfirm = (data: CustomCostForm) => {
+    onConfirm(data.label.trim());
+    handleClose();
   };
 
-  const handleClose = (_e: {}, reason: "backdropClick" | "escapeKeyDown") => {
+  const handleClose = (
+    _e?: object,
+    reason?: "backdropClick" | "escapeKeyDown",
+  ) => {
     if (reason === "backdropClick" || reason === "escapeKeyDown") return;
+    reset();
     onClose();
   };
 
@@ -49,25 +73,25 @@ const CustomCostModal = ({
         sx={{ display: "flex", flexDirection: "column", gap: 3, pt: 3 }}
       >
         <TextField
-          value={label}
-          onChange={(e) => setLabel(e.target.value)}
-          autoFocus
+          {...register("label", { required: true })}
           fullWidth
           placeholder="Enter label"
           variant="outlined"
           size="small"
+          error={!!errors.label}
+          helperText={errors.label ? "Label is required" : ""}
         />
       </DialogContent>
 
       <DialogActions sx={{ p: 3, pt: 1, justifyContent: "start", gap: 1 }}>
-        <Button size="small" variant="outlined" onClick={onClose}>
+        <Button size="small" variant="outlined" onClick={() => handleClose()}>
           Cancel
         </Button>
         <Button
           size="small"
           variant="contained"
-          onClick={handleConfirm}
-          disabled={!label.trim()}
+          onClick={handleSubmit(handleConfirm)}
+          disabled={!labelValue?.trim()}
         >
           Done
         </Button>

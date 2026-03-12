@@ -7,7 +7,8 @@ import {
   TextField,
   Typography,
 } from "@mui/material";
-import { useEffect, useState } from "react";
+import { useEffect } from "react";
+import { useForm } from "react-hook-form";
 
 interface CommentModalProps {
   open: boolean;
@@ -16,24 +17,38 @@ interface CommentModalProps {
   isLoading?: boolean;
 }
 
+interface CommentForm {
+  commentText: string;
+}
+
 const CommentModal = ({
   open,
   onClose,
   onConfirm,
   isLoading,
 }: CommentModalProps) => {
-  const [commentText, setCommentText] = useState("");
+  const {
+    register,
+    handleSubmit,
+    reset,
+    watch,
+    formState: { errors },
+  } = useForm<CommentForm>({
+    defaultValues: {
+      commentText: "",
+    },
+  });
+
+  const commentValue = watch("commentText");
 
   useEffect(() => {
     if (open) {
-      setCommentText("");
+      reset({ commentText: "" });
     }
-  }, [open]);
+  }, [open, reset]);
 
-  const handleSubmit = () => {
-    if (commentText.trim()) {
-      onConfirm(commentText.trim());
-    }
+  const handleConfirm = (data: CommentForm) => {
+    onConfirm(data.commentText.trim());
   };
 
   return (
@@ -46,14 +61,14 @@ const CommentModal = ({
 
       <DialogContent sx={{ py: 3 }}>
         <TextField
+          {...register("commentText", { required: true })}
           fullWidth
           multiline
           rows={6}
           placeholder="Type your Comments here"
-          value={commentText}
-          onChange={(e) => setCommentText(e.target.value)}
           variant="outlined"
-          autoFocus
+          error={!!errors.commentText}
+          helperText={errors.commentText ? "Comment is required" : ""}
         />
       </DialogContent>
 
@@ -64,9 +79,9 @@ const CommentModal = ({
         <Button
           size="small"
           variant="contained"
-          disabled={!commentText.trim()}
+          disabled={!commentValue?.trim()}
           loading={isLoading}
-          onClick={handleSubmit}
+          onClick={handleSubmit(handleConfirm)}
         >
           Submit
         </Button>

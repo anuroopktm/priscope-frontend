@@ -1,4 +1,3 @@
-
 import {
   useListHeaders,
   useListItems,
@@ -191,7 +190,7 @@ const ItemMasterListingPage = () => {
   });
 
   const onClickCellComment = (grid: TGrid, row: TRow, col: string) => {
-    if(!grid) return
+    if (!grid) return;
     setOnSubmitComment(() => (comment: string) => {
       const id = row?.id || "";
       handleConfirmComment(COMMENT_TYPE.CELL, id, col, comment);
