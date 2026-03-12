@@ -1,27 +1,27 @@
 import { COMMENT_TYPE } from "@/constants/comments.constants";
 import {
-  PRIVILEGE_ACTIONS,
-  PRIVILEGE_MODULES,
-} from "@/constants/privileges.constants";
-import { itemMasterColumnToFieldMap } from "@/pages/items-master/constants/columnFieldMap";
-import { hasPrivilege } from "@/utils/hasPrivilege";
-import { v4 as uuidv4 } from "uuid";
-import { DEfAULT_VISIBLE_COLUMNS } from "../constants/headers.constants";
+  DEfAULT_VISIBLE_COLUMNS,
+  Field_Map,
+} from "../constants/headers.constants";
 import { baseGridCfg } from "../tree-grid/config/layout";
 import type {
-  AttributeConfigurationData,
-  SystemFieldObject,
-} from "../types/types";
-import type {
   itemMasterBodyResponseItems,
+  ItemMasterBulkUploadFormattedDataItem,
+  ItemMasterBulkUploadFormattedDataPayload,
   itemMasterHeaderResponse,
   itemMasterHeaderResponseArrayList,
-  SkippedItem,
   TreeGridBody,
   TreeGridHeader,
   TreeGridHeaderList,
   TreeGridRow,
 } from "./types";
+import { itemMasterColumnToFieldMap } from "@/pages/items-master/constants/columnFieldMap";
+import {
+  PRIVILEGE_ACTIONS,
+  PRIVILEGE_MODULES,
+} from "@/constants/privileges.constants";
+import { hasPrivilege } from "@/utils/hasPrivilege";
+import { v4 as uuidv4 } from "uuid";
 
 export const buildTreeGridFilterHead = (
   items: itemMasterHeaderResponseArrayList[] | undefined,
@@ -63,8 +63,8 @@ export const ItemMasterGridLayout = (
     },
     Cols: Cols,
     Header: {
-      SKU: "SKU",
-      UPC: "UPC",
+      SKU: "SKU *",
+      UPC: "UPC *",
       Category: "Category",
       Description: "Description",
       SortIcons: "2",
@@ -91,6 +91,7 @@ export const buildItemMasterTreeGridCols = (
   if (!items || items.length === 0) {
     return { cols: [] };
   }
+
 
   const cols: TreeGridHeader[] = items
     .filter((item) => item.label !== "Color")
@@ -251,55 +252,25 @@ export function getItemMasterBulkInsertPayload(
   return { items };
 }
 
-export function assignRowIds(
-  data: (string | number | null)[][],
-): (string | number | null)[][] {
-  return data.map((row) => {
-    const hasValue = row.some((cell) => cell !== null && cell !== "");
-    if (hasValue) {
-      const updatedRow = [...row];
-      updatedRow[0] = uuidv4();
-      return updatedRow;
-    }
+export const getEmptyRowData = (
+  cols: TreeGridHeader[],
+  rowCount = 25,
+): TreeGridBody => {
+  const rows: TreeGridRow[] = Array.from({ length: rowCount }, (_, i) => {
+    const row: TreeGridRow = {
+      id: `Row${i}`,
+    };
+    cols.forEach((col) => {
+      if (col.Name !== "id") {
+        row[col.Name] = "";
+      }
+    });
     return row;
   });
-}
-
-export function filterSkippedRows(
-  data: (string | number | null)[][],
-  skippedItems: SkippedItem[],
-): (string | number | null)[][] {
-  const skippedIds = new Set(skippedItems.map((item) => item.frontend_id));
-  return data.filter((row) => skippedIds.has(row[0] as string));
-}
-
-export const createSystemFieldMapping = (
-  systemFields: SystemFieldObject[],
-): Record<string, string> => {
-  return systemFields.reduce(
-    (acc, field) => {
-      acc[field.name] = "";
-      return acc;
-    },
-    {} as Record<string, string>,
-  );
+  return {
+    Body: [rows],
+  };
 };
-
-export function getAttributeConfigFromAvailableHeaders(
-  headers: string[],
-): AttributeConfigurationData {
-  const config: AttributeConfigurationData = {};
-
-  headers.forEach((header) => {
-    config[header] = {
-      dataType: "Text",
-      mandatory: false,
-    };
-  });
-
-  return config;
-}
-
 export const createItemMasterCommentPayload = (
   type: string,
   col: string,
@@ -333,13 +304,106 @@ export const createItemMasterCommentPayload = (
   return null;
 };
 
-// export const getHeaderIdByIndex = (index: number) => {
-//   const header = HEADERS.headers[index];
-//   return header ? header.id : null;
-// };
+export const getDataBulkUploadFormatAdminApproval = (
+  newData: TreeGridRow[] | undefined,
+  comment: string,
+) => {
+  const items = newData
+    ?.filter((item) =>
+      Object.entries(item).some(([key, value]) => {
+        if (key === "id" || key === "_DefaultSort") return false;
+        return value !== undefined && value !== "" && value !== null;
+      }),
+    )
+    .map((item) => {
+      const id = uuidv4();
+      return {
+        frontend_id: id,
+        sku: String(item?.SKU),
+        upc: String(item?.UPC),
+        category: item?.Category,
+        hs_code: item?.["HS Code"],
+        description: item?.Description,
+        source_type: "manual",
+        attribute: {},
+        source: "item_master",
+        action_key: "sku",
+        comments: comment
+          ? [
+              {
+                comment_type: "field",
+                field_key: "upc",
+                comment: comment,
+              },
+            ]
+          : [],
+      };
+    });
+  return {
+    source_module: "item_master",
+    target_module: "item_master",
+    request_action: "insert",
+    request_info: [
+      {
+        new_record: {
+          items,
+        },
+      },
+    ],
+    request_comments: "insert",
+  };
+};
 
-// export const getHeaderIndexById = (id: string) => {
-//   return HEADERs.headers.findIndex(
-//     (header) => header.id.toLowerCase() === id.toLowerCase(),
-//   );
-// };
+export const bulkOrderSkippedRecordFormat = (
+  items: ItemMasterBulkUploadFormattedDataItem[] | undefined,
+  finalCols: TreeGridHeader[],
+): TreeGridBody => {
+  if (!items?.length) return { Body: [] };
+  const rows: TreeGridRow[] = items?.map((item) => {
+    const row: TreeGridRow = {
+      id: item?.frontend_id!,
+      __skipped: true,
+    };
+    finalCols.forEach((col) => {
+      const key = Field_Map[col.Name];
+      if (key && item[key as keyof typeof item] !== undefined) {
+        row[col.Name] = item[key as keyof typeof item];
+      } else {
+        row[col.Name] = "";
+      }
+    });
+    return row;
+  });
+  return {
+    Body: [rows],
+  };
+};
+
+export const getDataBulkUploadFormat = (
+  items: TreeGridRow[] | undefined,
+): ItemMasterBulkUploadFormattedDataPayload => {
+  const formatteditems =
+    items
+      ?.filter((item) =>
+        Object.entries(item).some(([key, value]) => {
+          if (key === "id" || key === "_DefaultSort") return false;
+          return value !== "" && value !== null && value !== undefined;
+        }),
+      )
+      .map((item) => {
+        const id = uuidv4();
+        return {
+          frontend_id: id,
+          sku: String(item?.SKU),
+          upc: String(item?.UPC),
+          category: item?.Category,
+          hs_code: item?.["HS Code"],
+          description: item?.Description,
+          source_type: "manual",
+          attribute: {},
+          temp_sku: false,
+          source: "item_master",
+        };
+      }) ?? [];
+  return { items: formatteditems };
+};

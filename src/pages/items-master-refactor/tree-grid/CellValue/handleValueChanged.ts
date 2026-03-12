@@ -13,6 +13,8 @@ export const handleValueChanged = (
 
   if (grid?.id !== gridId || String(oldval) === String(val) || isFilterRow)
     return;
+  grid.SetValue(row, col, val, 1);
+  grid.RefreshRow(row);
 
   const cellElement = grid.GetCell(row, col);
   if (!cellElement) return;

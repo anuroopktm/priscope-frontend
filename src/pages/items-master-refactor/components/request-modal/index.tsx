@@ -79,7 +79,6 @@ export const ItemMasterRequestsModal: React.FC<Props> = ({
   const requests = useMemo(() => {
     return allRequests.map((item: any) => {
       const requestedAt = new Date(item.requested_at);
-      // const reviewedAt = item.reviewed_at ? new Date(item.reviewed_at) : null;
 
       return {
         id: item.id,
@@ -169,7 +168,15 @@ export const ItemMasterRequestsModal: React.FC<Props> = ({
                 "& .MuiToggleButton-root": {
                   color: theme.palette.brand.tertiary,
                   fontWeight: 600,
+                  "&:hover": {
+                    bgcolor: theme.palette.brand.tertiary,
+                    color: "white",
+                  },
                   "&.Mui-selected": {
+                    bgcolor: theme.palette.brand.tertiary,
+                    color: "white",
+                  },
+                  "&:not(.Mui-selected):hover": {
                     bgcolor: theme.palette.brand.tertiary,
                     color: "white",
                   },

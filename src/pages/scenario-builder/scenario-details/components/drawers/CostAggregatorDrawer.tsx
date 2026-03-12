@@ -1,16 +1,16 @@
 import AddIcon from "@mui/icons-material/Add";
-import BookmarkAddIcon from "@mui/icons-material/BookmarkAdd";
+// import BookmarkAddIcon from "@mui/icons-material/BookmarkAdd";
 import CloseIcon from "@mui/icons-material/Close";
 import DeleteIcon from "@mui/icons-material/Delete";
-import KeyboardArrowDownIcon from "@mui/icons-material/KeyboardArrowDown";
+// import KeyboardArrowDownIcon from "@mui/icons-material/KeyboardArrowDown";
 import {
   Box,
   Button,
   Chip,
   Drawer,
   IconButton,
-  Menu,
-  MenuItem,
+  // Menu,
+  // MenuItem,
   Stack,
   Typography,
 } from "@mui/material";
@@ -219,7 +219,7 @@ const CostAggregatorDrawer = ({
 
   const [sections, setSections] = useState<AggregatorSection[]>([]);
 
-  const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
+  // const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
 
   const calculateTotal = () => {
     let total = 0;
@@ -263,19 +263,19 @@ const CostAggregatorDrawer = ({
     calculateTotal();
   }, [sections]);
 
-  const openTemplate = Boolean(anchorEl);
+  // const openTemplate = Boolean(anchorEl);
 
   const sectionsRef = useRef(sections);
   useEffect(() => {
     sectionsRef.current = sections;
   }, [sections]);
 
-  const handleTemplateClick = (event: React.MouseEvent<HTMLButtonElement>) => {
-    setAnchorEl(event.currentTarget);
-  };
-  const handleTemplateClose = () => {
-    setAnchorEl(null);
-  };
+  // const handleTemplateClick = (event: React.MouseEvent<HTMLButtonElement>) => {
+  //   setAnchorEl(event.currentTarget);
+  // };
+  // const handleTemplateClose = () => {
+  //   setAnchorEl(null);
+  // };
 
   // Bridge for global handlers to access latest state
   const handlersBridgeRef = useRef({
@@ -782,7 +782,7 @@ const CostAggregatorDrawer = ({
             </Stack>
           </Box>
 
-          <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
+          {/* <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
             <Button
               size="small"
               onClick={handleTemplateClick}
@@ -806,7 +806,7 @@ const CostAggregatorDrawer = ({
             >
               Save Template
             </Button>
-          </Box>
+          </Box> */}
         </Box>
       </Box>
 

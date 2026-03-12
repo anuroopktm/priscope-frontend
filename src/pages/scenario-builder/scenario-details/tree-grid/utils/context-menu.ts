@@ -57,10 +57,10 @@ export const getHeaderContextMenu = (grid: any, col: string) => {
       Name: "Margin component",
       OnClick: () => (window as any).handleMarginComponent(grid, col),
     },
-    {
-      Name: "General formula component",
-      OnClick: () => (window as any).handleGeneralFormulaComponent(grid, col),
-    },
+    // {
+    //   Name: "General formula component",
+    //   OnClick: () => (window as any).handleGeneralFormulaComponent(grid, col),
+    // },
     { Name: "-", Separator: 1 },
     deleteItem,
   ] as any[];

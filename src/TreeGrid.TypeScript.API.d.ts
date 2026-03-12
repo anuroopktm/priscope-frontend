@@ -884,6 +884,7 @@ interface TCol {
 }
 
 interface TRow {
+  [key: string]: any;
   AcceptDef: string;
   Added: number;
   AddParent: number;

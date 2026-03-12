@@ -1,4 +1,4 @@
-import { handleRightClick } from "../cellvalue/handleRightClick";
+import { handleRightClick } from "../CellValue/handleRightClick";
 
 export const getRightClickHandlers = (
   gridId: string,

@@ -1,7 +1,13 @@
-import type { SimplifiedExport } from "@/components/file-detail-modal";
 import { MODULE_LABELS } from "../constants/file-modal.constants";
 import formatDate from "@/utils/formatDate";
-
+export interface SimplifiedExport {
+  id: string;
+  name: string;
+  created_user_name: string;
+  created_time: string;
+  created_date: string;
+  status: string;
+}
 export function mapExports(data: any[]): SimplifiedExport[] {
   return data.map((item) => {
     const createdAt = new Date(item.created_at);

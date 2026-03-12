@@ -14,7 +14,7 @@ type RequestSuccessDialogProps = {
 export default function RequestSuccessDialog({
   setNotificationOpen,
 }: RequestSuccessDialogProps) {
-  // const theme = useTheme();
+
   const handleClose = () => {
     setNotificationOpen(false);
   };
