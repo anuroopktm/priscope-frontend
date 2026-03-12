@@ -15,7 +15,7 @@ export interface CardConfig {
   image: any;
   imageAlt: string;
   imageStyle: React.CSSProperties;
-  navigate:string;
+  navigate: string;
 }
 
 interface ActionCardProps {

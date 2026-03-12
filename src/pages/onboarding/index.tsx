@@ -115,7 +115,10 @@ const Onboarding = () => {
           alignItems="center"
           gap={1}
         >
-          <Typography sx={{fontSize: "18px", fontWeight: 600}} textAlign="center">
+          <Typography
+            sx={{ fontSize: "18px", fontWeight: 600 }}
+            textAlign="center"
+          >
             {currentStep?.label}
           </Typography>
 

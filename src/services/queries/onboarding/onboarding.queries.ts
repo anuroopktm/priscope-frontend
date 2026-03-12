@@ -11,7 +11,7 @@ export const useOnboardingMutation = () => {
           headers: {
             "Content-Type": "multipart/form-data",
           },
-        }
+        },
       );
 
       return response.data;

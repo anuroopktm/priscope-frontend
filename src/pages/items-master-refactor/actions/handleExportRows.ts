@@ -31,7 +31,6 @@ export const handleItemMasterExport = ({
 
   if (!selectedExport && (!selectedRows || selectedRows.length === 0)) return;
 
-
   const payload: ExportItemMasterRowPayload = {
     module_name: "item_master",
     feature_name: "main",

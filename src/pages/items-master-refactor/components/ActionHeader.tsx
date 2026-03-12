@@ -136,7 +136,7 @@ const ActionHeader = ({
       },
       onError: (error) => {
         showToast(getErrorMessage(error, "Failed to add filter"), "error");
-      }
+      },
     });
   };
 
@@ -153,7 +153,7 @@ const ActionHeader = ({
           showToast("Scenario created successfully", "success");
           navigate(`/scenario-builder/details/${response.id}`, {
             state: {
-             selectedRows
+              selectedRows,
             },
           });
         },

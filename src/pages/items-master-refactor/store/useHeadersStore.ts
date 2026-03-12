@@ -1,8 +1,5 @@
 import { create } from "zustand";
-import type {
-  Header,
-  SelectedField,
-} from "../types/types";
+import type { Header, SelectedField } from "../types/types";
 
 interface ItemMasterStore {
   headers: string[];

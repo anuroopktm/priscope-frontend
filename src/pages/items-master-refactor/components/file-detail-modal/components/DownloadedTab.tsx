@@ -22,8 +22,12 @@ const DownloadedTab = ({
   const [selectedIndex, setSelectedIndex] = useState(0);
 
   if (loading) return <CenteredLoader />;
-  if (data.length === 0) return <Typography textAlign="center">No exported files found.</Typography>;
-  if (error) return <Typography color="error">Failed to load exported files.</Typography>;
+  if (data.length === 0)
+    return <Typography textAlign="center">No exported files found.</Typography>;
+  if (error)
+    return (
+      <Typography color="error">Failed to load exported files.</Typography>
+    );
 
   return (
     <List

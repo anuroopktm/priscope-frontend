@@ -1,4 +1,3 @@
-
 export const baseGridCfg = {
   CfgId: "MockGrid",
   MainCol: "SKU",

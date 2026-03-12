@@ -8,12 +8,14 @@ import {
 } from "@mui/material";
 import React from "react";
 import closeIcon from "@/assets/items-master/Button.svg";
-import { useGetItemMasterById, useItemMasterHistory } from "@/services/queries/item-master-refactor/item-master-refactor.queries";
+import {
+  useGetItemMasterById,
+  useItemMasterHistory,
+} from "@/services/queries/item-master-refactor/item-master-refactor.queries";
 import { mapItemApiToDetailView } from "../../utils/mapItemApiToDetailView";
 import { mapHistoryToTimeline } from "../../utils/mapHistoryToTimeline";
 import ItemDetailCard from "../item-detail";
 import TimelineDetail from "../timeline";
-
 
 interface DetailsModalProps {
   isOpen: boolean;

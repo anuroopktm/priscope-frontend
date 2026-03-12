@@ -92,7 +92,6 @@ export const buildItemMasterTreeGridCols = (
     return { cols: [] };
   }
 
-
   const cols: TreeGridHeader[] = items
     .filter((item) => item.label !== "Color")
     .map((item) => {
