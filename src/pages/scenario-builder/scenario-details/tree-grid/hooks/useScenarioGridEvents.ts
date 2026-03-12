@@ -252,6 +252,9 @@ export const useScenarioGridEvents = ({
 
     const onHandleRightClick = (grid: any, row: any, col: string) => {
       if (!grid || grid.id !== gridId) return 0;
+      const menuType = grid.GetAttribute(null, col, "MenuType");
+      if (col === "is_published" || menuType === "Status") return 1;
+
       if (row.Kind === "Header") {
         if (status === "published") return 1;
 

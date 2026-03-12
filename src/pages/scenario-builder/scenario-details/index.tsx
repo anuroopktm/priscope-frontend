@@ -409,6 +409,7 @@ const ScenarioDetailsPage = () => {
               "Selected",
               "CanSelect",
               "PanelSelect",
+              "CanEdit",
               "ACanEdit",
               "AHtmlPostfix",
               "is_published",

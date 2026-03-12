@@ -304,7 +304,7 @@ const CustomCalculationModal = ({
                 value={numericValue}
                 onChange={(e) => setNumericValue(e.target.value)}
                 placeholder="Enter Numeric Value"
-                label="Item Column"
+                label="Value"
                 InputLabelProps={{ shrink: true }}
                 sx={{
                   "& .MuiOutlinedInput-root": { borderRadius: "4px" },
