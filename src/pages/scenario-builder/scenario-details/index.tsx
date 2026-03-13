@@ -182,6 +182,7 @@ const ScenarioDetailsPage = () => {
     if (!itemsInjectedRef.current && selectedItems?.length && gridData?.Body) {
       itemsInjectedRef.current = true;
       handleProcessAddItems(selectedItems);
+      clearSelectedItems();
     }
   }, [selectedItems, gridData]);
 
