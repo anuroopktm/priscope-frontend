@@ -159,7 +159,7 @@ const ScenarioModals = ({
       {
         scenario_id: scenarioId,
         payload: {
-          cell_ref: `${commentModalCell.rowId}:${commentModalCell.col}`,
+          cell_ref: `${commentModalCell.rowId}--${commentModalCell.col}`,
           comment: comment.trim(),
         },
       },

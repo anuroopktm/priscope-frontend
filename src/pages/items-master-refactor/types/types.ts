@@ -1,4 +1,4 @@
-import type { itemMasterBodyResponseItems } from "../../items-master/helpers/types";
+import type { itemMasterBodyResponseItems } from "../helper/types";
 
 export type SystemFieldMappingData = {
   [key: string]: string;

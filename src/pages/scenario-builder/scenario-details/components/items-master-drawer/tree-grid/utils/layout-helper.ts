@@ -1,4 +1,4 @@
-import type { TreeGridLayout } from "@/pages/items-master/helpers/types";
+import type { TreeGridLayoutt } from "@/pages/items-master-refactor/helper/types";
 import {
   ITEM_MASTER_DRAWER_GRID_CFG,
   ITEM_MASTER_DRAWER_PANEL_CFG,
@@ -6,8 +6,8 @@ import {
 import { ITEM_MASTER_GRID_ID } from "../constants/grid.constants";
 
 export const enrichItemMasterLayout = (
-  layoutData: TreeGridLayout,
-): TreeGridLayout => {
+  layoutData: TreeGridLayoutt,
+): TreeGridLayoutt => {
   return {
     ...layoutData,
     Cfg: {

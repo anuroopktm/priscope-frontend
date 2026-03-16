@@ -15,6 +15,7 @@ type ScenarioItem = {
 interface ItemMasterStore {
   selectedRows: string[];
   setSelectedRows: (rows: string[]) => void;
+  clearSelectedRows: () => void;
   selectedExport: boolean;
   setSelectedExport: (value: boolean) => void;
   gridRef: TGrid | null;
@@ -50,6 +51,7 @@ interface ItemMasterStore {
 export const useItemMasterStore = create<ItemMasterStore>((set) => ({
   selectedRows: [],
   setSelectedRows: (rows) => set({ selectedRows: rows }),
+  clearSelectedRows: () => set({ selectedRows: [] }),
 
   selectedExport: false,
   setSelectedExport: (value) => set({ selectedExport: value }),
