@@ -236,6 +236,23 @@ export const useAddBulkInsertAdminRequest = () => {
   });
 };
 
+export const useEditCellAdminRequest = () => {
+  return useMutation<
+    ItemMasterBulkInsertAdminRequestResponse,
+    AxiosError,
+    AddBulkInsertAdminRequest
+  >({
+    mutationFn: async (payload) => {
+      const response =
+        await axiosInstance.post<ItemMasterBulkInsertAdminRequestResponse>(
+          `/v1/approval-requests`,
+          payload,
+        );
+      return response.data;
+    },
+  });
+};
+
 export const useAddHeader = () => {
   return useMutation<AddHeaderResponse, AxiosError, AddHeaderPayload>({
     mutationFn: async (payload) => {

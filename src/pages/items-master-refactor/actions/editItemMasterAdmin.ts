@@ -1,10 +1,9 @@
-import { useAddBulkInsertAdminRequest } from "@/services/queries/item-master-refactor/item-master-refactor.queries";
+import { useEditCellAdminRequest } from "@/services/queries/item-master-refactor/item-master-refactor.queries";
 import { getEditCellValueAdminApproval } from "../helper";
 import { useToastStore } from "@/store/useToastStore";
 
 export const useHandleEditCellAdminRequest = () => {
-  const { mutate: itemMasterBulkInsertAdminApproval } =
-    useAddBulkInsertAdminRequest();
+  const { mutate: editCellAdminRequest } = useEditCellAdminRequest();
 
   const showToast = useToastStore((state) => state.showToast);
 
@@ -50,7 +49,7 @@ export const useHandleEditCellAdminRequest = () => {
 
     if (!payload) return;
 
-    itemMasterBulkInsertAdminApproval(payload, {
+    editCellAdminRequest(payload, {
       onSuccess: () => {
         setRequestNotficationVisible(true);
       },

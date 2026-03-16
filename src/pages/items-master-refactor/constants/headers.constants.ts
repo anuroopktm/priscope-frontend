@@ -9,7 +9,7 @@ export const Field_Map: Record<string, string> = {
   UPC: "upc",
   Category: "category",
   Description: "description",
-  "HS Code": "hscode",
+  "HS Code": "hs_code",
   Size: "size",
   Supplier: "supplier",
   Customer: "customer",
