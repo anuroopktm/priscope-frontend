@@ -398,24 +398,24 @@ const CostAggregatorDrawer = ({
       items: [
         type === "Tariff"
           ? {
-            id: "row1",
-            A: renderSelectButton("row1", id, "A"),
-            B: renderSelectButton("row1", id, "B"),
-            C: "Base UOM",
-            D: 0,
-          }
-          : type === "Custom"
-            ? {
-              id: "row1",
-              A: 0,
-              B: renderCalculatorIcon("row1", id),
-            }
-            : {
               id: "row1",
               A: renderSelectButton("row1", id, "A"),
-              B: "Base UOM",
-              C: 0,
-            },
+              B: renderSelectButton("row1", id, "B"),
+              C: "Base UOM",
+              D: 0,
+            }
+          : type === "Custom"
+            ? {
+                id: "row1",
+                A: 0,
+                B: renderCalculatorIcon("row1", id),
+              }
+            : {
+                id: "row1",
+                A: renderSelectButton("row1", id, "A"),
+                B: "Base UOM",
+                C: 0,
+              },
       ],
     };
     setSections([...sections, newSection]);
@@ -758,7 +758,7 @@ const CostAggregatorDrawer = ({
               <Chip
                 label="Freight"
                 onClick={() => handleAddSection("Freight")}
-                onDelete={() => { }}
+                onDelete={() => {}}
                 deleteIcon={
                   <AddIcon style={{ fontSize: 16, color: "#1a365d" }} />
                 }
@@ -766,7 +766,7 @@ const CostAggregatorDrawer = ({
               <Chip
                 label="Tariff"
                 onClick={() => handleAddSection("Tariff")}
-                onDelete={() => { }}
+                onDelete={() => {}}
                 deleteIcon={
                   <AddIcon style={{ fontSize: 16, color: "#1a365d" }} />
                 }
@@ -774,7 +774,7 @@ const CostAggregatorDrawer = ({
               <Chip
                 label="Custom"
                 onClick={() => setIsCustomModalOpen(true)}
-                onDelete={() => { }}
+                onDelete={() => {}}
                 deleteIcon={
                   <AddIcon style={{ fontSize: 16, color: "#1a365d" }} />
                 }
