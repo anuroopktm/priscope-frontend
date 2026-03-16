@@ -33,6 +33,46 @@ const TariffDrawer = ({ onClose, onSelect }: TariffDrawerProps) => {
   const { data: tariffRatesData, isLoading } = useSearchTariffRates({
     search: searchTerm,
   });
+  const [localRows, setLocalRows] = useState<any[]>([]);
+
+  const handleAddNewRow = () => {
+    const grid = (window as any).Grids?.[tariffGridId];
+    let updatedLocalRows = [...localRows];
+
+    if (grid) {
+      // Read current state from grid rows to capture any manual edits for local rows
+      updatedLocalRows = updatedLocalRows.map((row) => {
+        const r = grid.GetRowById(row.id);
+        if (r) {
+          return {
+            ...row,
+            country_of_origin:
+              r.country_of_origin !== undefined
+                ? r.country_of_origin
+                : row.country_of_origin,
+            country_of_destination:
+              r.country_of_destination !== undefined
+                ? r.country_of_destination
+                : row.country_of_destination,
+            hs_code: r.hs_code !== undefined ? r.hs_code : row.hs_code,
+            rate: r.rate !== undefined ? r.rate : row.rate,
+          };
+        }
+        return row;
+      });
+    }
+
+    setLocalRows([
+      {
+        id: `local_${Date.now()}`,
+        country_of_origin: "",
+        country_of_destination: "",
+        hs_code: "",
+        rate: 0,
+      },
+      ...updatedLocalRows,
+    ]);
+  };
 
   const renderActionCell = (id: string) => {
     return `
@@ -49,40 +89,52 @@ const TariffDrawer = ({ onClose, onSelect }: TariffDrawerProps) => {
 
   const gridData = {
     Body: [
-      tariffRatesData?.tariff_rates?.map((rate: TariffRate) => ({
-        id: rate.id,
-        country_of_origin: rate.country_of_origin,
-        country_of_destination: rate.country_of_destination,
-        hs_code: rate.hs_code,
-        rate: rate.rate,
-        actions: renderActionCell(rate.id),
-      })) || [],
+      [
+        ...localRows.map((row) => ({
+          id: row.id,
+          country_of_origin: row.country_of_origin,
+          country_of_destination: row.country_of_destination,
+          hs_code: row.hs_code,
+          rate: row.rate,
+          actions: renderActionCell(row.id),
+        })),
+        ...(tariffRatesData?.tariff_rates?.map((rate: TariffRate) => ({
+          id: rate.id,
+          country_of_origin: rate.country_of_origin,
+          country_of_destination: rate.country_of_destination,
+          hs_code: rate.hs_code,
+          rate: rate.rate,
+          actions: renderActionCell(rate.id),
+          CanEdit: 0,
+        })) || []),
+      ],
     ],
   };
 
   // Global handler for row selection
   useEffect(() => {
     (window as any).handleSelectTariffRow = (rowId: string) => {
-      const rate = tariffRatesData?.tariff_rates?.find(
-        (r: TariffRate) => r.id === rowId,
-      );
-      if (rate) {
-        onSelect([
-          {
-            id: rate.id,
-            name: `Tariff (${rate.hs_code})`,
-            cost: rate.rate,
-            currency: "USD",
-            source: "Tariff API",
-          },
-        ]);
-        onClose();
+      const grid = (window as any).Grids?.[tariffGridId];
+      if (grid) {
+        const row = grid.GetRowById(rowId);
+        if (row) {
+          onSelect([
+            {
+              id: rowId,
+              name: `Tariff (${row.hs_code || ""})`,
+              cost: Number(row.rate) || 0,
+              currency: "USD",
+              source: rowId.startsWith("local_") ? "Manual" : "Tariff API",
+            },
+          ]);
+          onClose();
+        }
       }
     };
     return () => {
       delete (window as any).handleSelectTariffRow;
     };
-  }, [tariffRatesData, onSelect, onClose]);
+  }, [onSelect, onClose]);
 
   return (
     <Box
@@ -141,7 +193,12 @@ const TariffDrawer = ({ onClose, onSelect }: TariffDrawerProps) => {
               },
             }}
           />
-          <Button size="small" variant="contained" startIcon={<AddIcon />}>
+          <Button
+            size="small"
+            variant="contained"
+            startIcon={<AddIcon />}
+            onClick={handleAddNewRow}
+          >
             New
           </Button>
         </Box>

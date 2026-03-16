@@ -222,7 +222,7 @@ export const useScenarioGridData = () => {
 
         // ⭐ Item Master flow → copy ALL columns
         // if (!selectedHeaders || selectedHeaders.length === 0) {
-          if (selectedHeaders === undefined){
+        if (selectedHeaders === undefined) {
           Object.keys(cleanItem).forEach((key) => {
             if (
               !["id", "SKU", "Description", "Category", "A", "B", "C"].includes(

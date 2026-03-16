@@ -52,7 +52,6 @@ const CommentsSidebar = () => {
   const comments = data?.comments || [];
 
   const handleCommentClick = (comment: any) => {
-
     if (!comment.cell_ref) return;
 
     // Parse cell_ref (e.g., "row_id:col_name")

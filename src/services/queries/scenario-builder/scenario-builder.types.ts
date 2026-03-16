@@ -22,6 +22,7 @@ export interface CreateScenarioResponse {
 export interface SearchScenariosRequest {
   search?: string;
   filter: Record<string, any>;
+  advanced_search?: Record<string, any>;
   page_size: number;
   skip: number;
 }

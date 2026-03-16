@@ -9,6 +9,7 @@ import { useEffect, useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import ActionHeader from "./components/ActionHeader";
 import DeleteConfirmModal from "./components/DeleteConfirmModal";
+import ScenarioAdvancedSearch from "./components/ScenarioAdvancedSearch";
 import { ScenarioGridLayout } from "./tree-grid/config/layout";
 import { useTreeGridInit } from "./tree-grid/hooks/useTreeGridInit";
 import { mapScenariosToGridBody } from "./tree-grid/utils/data-mapper";
@@ -26,6 +27,8 @@ const gridContainerId = "TreeGrid_" + gridId;
 const ScenarioListingPage = () => {
   const navigate = useNavigate();
   const [searchTerm, setSearchTerm] = useState<string | undefined>(undefined);
+  const [isAdvancedSearchOpen, setIsAdvancedSearchOpen] = useState(false);
+  const [advancedSearch, setAdvancedSearch] = useState<Record<string, any>>({});
   const [deleteModalOpen, setDeleteModalOpen] = useState(false);
   const [selectedRowId, setSelectedRowId] = useState<string | null>(null);
   const [selectedForFork, setSelectedForFork] = useState<string | null>(null);
@@ -34,6 +37,7 @@ const ScenarioListingPage = () => {
   const { data: scenariosData } = useListScenarios({
     search: searchTerm,
     filter: {},
+    advanced_search: advancedSearch,
     page_size: 20,
     skip: 0,
   });
@@ -119,35 +123,81 @@ const ScenarioListingPage = () => {
         <ActionHeader
           onSearch={setSearchTerm}
           selectedScenarioId={selectedForFork}
+          onAdvancedSearchClick={() =>
+            setIsAdvancedSearchOpen(!isAdvancedSearchOpen)
+          }
         />
 
         <Box
           sx={{
             flex: 1,
-            minHeight: 0,
-            p: 2,
             display: "flex",
-            flexDirection: "column",
+            flexDirection: "row",
+            position: "relative",
+            minHeight: 0,
+            overflow: "hidden",
           }}
         >
           <Box
             sx={{
               flex: 1,
               minHeight: 0,
-              borderRadius: 1,
               p: 2,
-              bgcolor: "background.paper",
+              display: "flex",
+              flexDirection: "column",
             }}
           >
             <Box
-              id={gridContainerId}
               sx={{
-                height: "100%",
-                width: "100%",
+                flex: 1,
+                minHeight: 0,
                 borderRadius: 1,
+                p: 2,
+                bgcolor: "background.paper",
               }}
-            />
+            >
+              <Box
+                id={gridContainerId}
+                sx={{
+                  height: "100%",
+                  width: "100%",
+                  borderRadius: 1,
+                }}
+              />
+            </Box>
           </Box>
+
+          {isAdvancedSearchOpen && (
+            <Box
+              sx={{
+                width: 360,
+                height: "100%",
+                flexShrink: 0,
+                p: 2,
+                pl: 0,
+                transition: "width 0.3s ease-in-out",
+              }}
+            >
+              <Box
+                sx={{
+                  height: "100%",
+                  bgcolor: "background.paper",
+                  borderRadius: 1,
+                  p: 2,
+                  overflowY: "auto",
+                  display: "flex",
+                  flexDirection: "column",
+                  gap: 2,
+                }}
+              >
+                <ScenarioAdvancedSearch
+                  onClose={() => setIsAdvancedSearchOpen(false)}
+                  onApply={setAdvancedSearch}
+                  filters={advancedSearch}
+                />
+              </Box>
+            </Box>
+          )}
         </Box>
       </Box>
       <DeleteConfirmModal

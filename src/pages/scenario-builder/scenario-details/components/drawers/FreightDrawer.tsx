@@ -33,6 +33,52 @@ const FreightDrawer = ({ onClose, onSelect }: FreightDrawerProps) => {
   const { data: freightRatesData, isLoading } = useSearchFreightRates({
     search: searchTerm,
   });
+  const [localRows, setLocalRows] = useState<any[]>([]);
+
+  const handleAddNewRow = () => {
+    const grid = (window as any).Grids?.[freightGridId];
+    let updatedLocalRows = [...localRows];
+
+    if (grid) {
+      // Read current state from grid rows to capture any manual edits for local rows
+      updatedLocalRows = updatedLocalRows.map((row) => {
+        const r = grid.GetRowById(row.id);
+        if (r) {
+          return {
+            ...row,
+            port_of_origin:
+              r.port_of_origin !== undefined
+                ? r.port_of_origin
+                : row.port_of_origin,
+            port_of_destination:
+              r.port_of_destination !== undefined
+                ? r.port_of_destination
+                : row.port_of_destination,
+            container_type:
+              r.container_type !== undefined
+                ? r.container_type
+                : row.container_type,
+            currency: r.currency !== undefined ? r.currency : row.currency,
+            rate: r.rate !== undefined ? r.rate : row.rate,
+          };
+        }
+        return row;
+      });
+    }
+
+    setLocalRows([
+      {
+        id: `local_${Date.now()}`,
+        port_of_origin: "",
+        port_of_destination: "",
+        container_type: "20 ft",
+        currency: "USD",
+        rate: 0,
+      },
+      ...updatedLocalRows,
+    ]);
+  };
+
   const renderActionCell = (id: string, isSelected: boolean = false) => {
     if (isSelected) {
       return `
@@ -57,41 +103,54 @@ const FreightDrawer = ({ onClose, onSelect }: FreightDrawerProps) => {
 
   const gridData = {
     Body: [
-      freightRatesData?.freight_rates?.map((rate: FreightRate) => ({
-        id: rate.id,
-        port_of_origin: rate.port_of_origin,
-        port_of_destination: rate.port_of_destination,
-        container_type: rate.container_type || "20 ft",
-        currency: rate.currency,
-        rate: rate.rate,
-        actions: renderActionCell(rate.id, false),
-      })) || [],
+      [
+        ...localRows.map((row) => ({
+          id: row.id,
+          port_of_origin: row.port_of_origin,
+          port_of_destination: row.port_of_destination,
+          container_type: row.container_type,
+          currency: row.currency,
+          rate: row.rate,
+          actions: renderActionCell(row.id, false),
+        })),
+        ...(freightRatesData?.freight_rates?.map((rate: FreightRate) => ({
+          id: rate.id,
+          port_of_origin: rate.port_of_origin,
+          port_of_destination: rate.port_of_destination,
+          container_type: rate.container_type || "20 ft",
+          currency: rate.currency,
+          rate: rate.rate,
+          actions: renderActionCell(rate.id, false),
+          CanEdit: 0,
+        })) || []),
+      ],
     ],
   };
 
   // Global handler for row selection
   useEffect(() => {
     (window as any).handleSelectFreightRow = (rowId: string) => {
-      const rate = freightRatesData?.freight_rates?.find(
-        (r: FreightRate) => r.id === rowId,
-      );
-      if (rate) {
-        onSelect([
-          {
-            id: rate.id,
-            name: `Freight (${rate.port_of_origin} - ${rate.port_of_destination})`,
-            cost: rate.rate,
-            currency: rate.currency,
-            source: "Freight API",
-          },
-        ]);
-        onClose();
+      const grid = (window as any).Grids?.[freightGridId];
+      if (grid) {
+        const row = grid.GetRowById(rowId);
+        if (row) {
+          onSelect([
+            {
+              id: rowId,
+              name: `Freight (${row.port_of_origin || ""} - ${row.port_of_destination || ""})`,
+              cost: Number(row.rate) || 0,
+              currency: row.currency || "USD",
+              source: rowId.startsWith("local_") ? "Manual" : "Freight API",
+            },
+          ]);
+          onClose();
+        }
       }
     };
     return () => {
       delete (window as any).handleSelectFreightRow;
     };
-  }, [freightRatesData, onSelect, onClose]);
+  }, [onSelect, onClose]);
 
   return (
     <Box
@@ -142,7 +201,7 @@ const FreightDrawer = ({ onClose, onSelect }: FreightDrawerProps) => {
                 bgcolor: "#E8E8E8",
                 color: "text.primary",
                 "& .MuiInputAdornment-root svg path": {
-                  stroke: (theme) => theme.palette.brand.primary,
+                  stroke: (theme: any) => theme.palette.brand.primary,
                 },
                 "& .MuiOutlinedInput-notchedOutline": {
                   borderColor: "#E8E8E8 !important",
@@ -150,7 +209,12 @@ const FreightDrawer = ({ onClose, onSelect }: FreightDrawerProps) => {
               },
             }}
           />
-          <Button size="small" variant="contained" startIcon={<AddIcon />}>
+          <Button
+            size="small"
+            variant="contained"
+            startIcon={<AddIcon />}
+            onClick={handleAddNewRow}
+          >
             New
           </Button>
         </Box>

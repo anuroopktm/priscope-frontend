@@ -17,9 +17,14 @@ import ForkScenarioModal from "./ForkScenarioModal";
 interface ActionHeaderProps {
   onSearch: (value: string) => void;
   selectedScenarioId: string | null;
+  onAdvancedSearchClick?: () => void;
 }
 
-const ActionHeader = ({ onSearch, selectedScenarioId }: ActionHeaderProps) => {
+const ActionHeader = ({
+  onSearch,
+  selectedScenarioId,
+  onAdvancedSearchClick,
+}: ActionHeaderProps) => {
   const navigate = useNavigate();
   const [open, setOpen] = useState<boolean>(false);
   const [forkOpen, setForkOpen] = useState<boolean>(false);
@@ -33,7 +38,9 @@ const ActionHeader = ({ onSearch, selectedScenarioId }: ActionHeaderProps) => {
       {
         name: data.label,
         base_currency: data.currency,
-        customers: data.customer ? [{ customer_name: data.customer }] : [],
+        customers: data.customer
+          ? data.customer.map((id) => ({ customer_id: id }))
+          : [],
       },
       {
         onSuccess: () => {
@@ -87,7 +94,10 @@ const ActionHeader = ({ onSearch, selectedScenarioId }: ActionHeaderProps) => {
           px: 2,
         }}
       >
-        <SearchTextField onSearch={onSearch} />
+        <SearchTextField
+          onSearch={onSearch}
+          onAdvancedSearchClick={onAdvancedSearchClick}
+        />
 
         <Box sx={{ display: "flex", alignItems: "center", gap: 2 }}>
           {selectedScenarioId && (

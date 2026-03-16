@@ -39,7 +39,7 @@ const CreateScenarioModal = ({
     resolver: zodResolver(scenarioSchema),
     defaultValues: {
       label: "",
-      customer: "",
+      customer: [],
       currency: "",
     },
   });
@@ -109,12 +109,10 @@ const CreateScenarioModal = ({
                   label="Customer"
                   size="small"
                   variant="outlined"
+                  multiple
                   disabled={isCustomerLoading}
                   error={!!fieldState.error}
                 >
-                  <MenuItem value="">
-                    <em>None</em>
-                  </MenuItem>
                   {customerData?.customers.map((customer) => (
                     <MenuItem key={customer.id} value={customer.id}>
                       {customer.name}

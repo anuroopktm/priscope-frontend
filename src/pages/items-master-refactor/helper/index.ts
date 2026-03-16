@@ -23,7 +23,10 @@ import {
 } from "@/constants/privileges.constants";
 import { hasPrivilege } from "@/utils/hasPrivilege";
 import { v4 as uuidv4 } from "uuid";
-import { allowedKeys, itemMasterColumnToFieldMap } from "../constants/columnFieldMap";
+import {
+  allowedKeys,
+  itemMasterColumnToFieldMap,
+} from "../constants/columnFieldMap";
 
 export const buildTreeGridFilterHead = (
   items: itemMasterHeaderResponseArrayList[] | undefined,
@@ -479,4 +482,3 @@ export async function getItemMasterLayout(
     Solid: [],
   };
 }
-
