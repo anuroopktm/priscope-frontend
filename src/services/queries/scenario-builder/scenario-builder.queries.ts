@@ -88,6 +88,10 @@ export const usePublishScenario = () => {
       queryClient.invalidateQueries({
         queryKey: ["get-scenario", scenarioId],
       });
+      queryClient.refetchQueries({
+        queryKey: ["list-scenarios"],
+        exact: false,
+      });
     },
   });
 };
@@ -123,6 +127,10 @@ export const usePartialPublishScenario = () => {
       queryClient.invalidateQueries({
         queryKey: ["get-scenario", scenario_id],
       });
+      queryClient.refetchQueries({
+        queryKey: ["list-scenarios"],
+        exact: false,
+      });
     },
   });
 };
@@ -146,6 +154,10 @@ export const useSaveScenarioGrid = () => {
     onSuccess: (_, { scenario_id }) => {
       queryClient.invalidateQueries({
         queryKey: ["get-scenario", scenario_id],
+      });
+      queryClient.invalidateQueries({
+        queryKey: ["list-scenarios"],
+        exact: false,
       });
     },
   });

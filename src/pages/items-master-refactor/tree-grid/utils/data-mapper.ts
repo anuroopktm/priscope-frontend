@@ -1,4 +1,4 @@
-import type { itemMasterBodyResponseItems } from "@/pages/items-master/helpers/types";
+import type { itemMasterBodyResponseItems } from "../../helper/types";
 
 export const mapItemsToGridRows = (
   items: itemMasterBodyResponseItems[] = [],

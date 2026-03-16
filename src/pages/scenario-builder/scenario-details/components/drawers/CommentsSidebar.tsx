@@ -17,6 +17,7 @@ import { useState } from "react";
 import { useParams } from "react-router-dom";
 import { useShallow } from "zustand/react/shallow";
 import { useScenarioStore } from "../../store/useScenarioStore";
+import { focusCell } from "@/pages/items-master-refactor/tree-grid/focus/focusEvents";
 
 const formatTimeAgo = (dateString: string) => {
   const date = new Date(dateString);
@@ -50,11 +51,12 @@ const CommentsSidebar = () => {
 
   const comments = data?.comments || [];
 
-  const handleCommentClick = (cellRef: string) => {
-    if (!cellRef) return;
+  const handleCommentClick = (comment: any) => {
+
+    if (!comment.cell_ref) return;
 
     // Parse cell_ref (e.g., "row_id:col_name")
-    const parts = cellRef.split(":");
+    const parts = comment.cell_ref.split("--");
     if (parts.length !== 2) return;
 
     const [rowId, colName] = parts;
@@ -65,7 +67,7 @@ const CommentsSidebar = () => {
 
       if (targetRow) {
         // 1. Focus the cell (gives the visual indicator without selecting for publish)
-        grid.Focus(targetRow, colName, null, null, 2);
+        focusCell(grid, rowId, colName);
 
         // 2. Scroll the cell into view
         grid.ScrollIntoView(targetRow, colName);
@@ -158,7 +160,7 @@ const CommentsSidebar = () => {
             {comments.map((comment, index) => (
               <ListItem
                 key={comment.id}
-                onClick={() => handleCommentClick(comment.cell_ref)}
+                onClick={() => handleCommentClick(comment)}
                 sx={{
                   flexDirection: "column",
                   alignItems: "flex-start",

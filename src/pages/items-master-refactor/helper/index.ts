@@ -10,18 +10,20 @@ import type {
   ItemMasterBulkUploadFormattedDataPayload,
   itemMasterHeaderResponse,
   itemMasterHeaderResponseArrayList,
+  itemMasterRequestModalItems,
+  ItemMasterRequestModalResponse,
   TreeGridBody,
   TreeGridHeader,
   TreeGridHeaderList,
   TreeGridRow,
 } from "./types";
-import { itemMasterColumnToFieldMap } from "@/pages/items-master/constants/columnFieldMap";
 import {
   PRIVILEGE_ACTIONS,
   PRIVILEGE_MODULES,
 } from "@/constants/privileges.constants";
 import { hasPrivilege } from "@/utils/hasPrivilege";
 import { v4 as uuidv4 } from "uuid";
+import { allowedKeys, itemMasterColumnToFieldMap } from "../constants/columnFieldMap";
 
 export const buildTreeGridFilterHead = (
   items: itemMasterHeaderResponseArrayList[] | undefined,
@@ -406,3 +408,75 @@ export const getDataBulkUploadFormat = (
       }) ?? [];
   return { items: formatteditems };
 };
+
+type AllowedKey = (typeof allowedKeys)[number];
+export const recordItemMasterModal = (
+  items: itemMasterRequestModalItems[] | undefined,
+): ItemMasterRequestModalResponse[] => {
+  if (!items || items.length === 0) return [];
+  const recordList = items.map((item) => {
+    const recordObject: ItemMasterRequestModalResponse = {};
+    (Object.keys(item) as AllowedKey[]).forEach((key) => {
+      if (allowedKeys.includes(key)) {
+        recordObject[key] = item[key];
+      }
+    });
+    return recordObject;
+  });
+  return recordList;
+};
+
+export const convertSavedFilter = (filter: Record<string, string[]>) => {
+  const cols: string[] = [];
+  const values: string[] = [];
+  const operators: number[] = [];
+  Object.entries(filter).forEach(([key, val]) => {
+    cols.push(key);
+    values.push(val.join(";"));
+    operators.push(1);
+  });
+  return { cols, values, operators };
+};
+
+export async function getItemMasterLayout(
+  Cols: TreeGridHeader[],
+  headers: itemMasterHeaderResponse | undefined,
+) {
+  await new Promise((resolve) => setTimeout(resolve, 100));
+  const filterHead = buildTreeGridFilterHead(headers?.headers);
+
+  return {
+    Cfg: {
+      ...baseGridCfg,
+    },
+    Def: {
+      R: {
+        CanEdit: "1",
+      },
+      Filter: {
+        CanEdit: "1",
+      },
+    },
+    Cols: Cols,
+    Header: {
+      ...headers?.headers.reduce(
+        (acc, header) => {
+          acc[header.name] = header.label;
+          acc[`${header.name}Color`] = "#FFF";
+          // acc[`${header.name}Background`] = "#00c3ff";
+          acc[`${header.name}Align`] = "Center";
+          acc[`${header.name}Button`] = "Defaults";
+          return acc;
+        },
+        {} as Record<string, string>,
+      ),
+    },
+    Actions: {
+      OnClickSide:
+        "try { var fRow = Grid.GetRowById ? Grid.GetRowById('Filter') : Grid.GetRow('Filter'); if(fRow) { if(fRow.Visible) Grid.HideRow(fRow); else Grid.ShowRow(fRow); return -1; } } catch(e) { return -1; }",
+    },
+    Head: [filterHead],
+    Solid: [],
+  };
+}
+

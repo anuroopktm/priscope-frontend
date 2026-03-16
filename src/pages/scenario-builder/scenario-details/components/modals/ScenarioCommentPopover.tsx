@@ -50,7 +50,7 @@ const ScenarioCommentPopover = () => {
       {
         scenario_id: scenarioId,
         payload: {
-          cell_ref: `${commentCell.rowId}:${commentCell.col}`,
+          cell_ref: `${commentCell.rowId}--${commentCell.col}`,
           comment: commentText.trim(),
         },
       },

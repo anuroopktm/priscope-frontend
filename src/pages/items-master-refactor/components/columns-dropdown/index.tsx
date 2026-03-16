@@ -1,4 +1,4 @@
-import CreateColumnModal from "@/pages/items-master/components/add-column-modal";
+// import CreateColumnModal from "@/pages/items-master/components/add-column-modal";
 import { getErrorMessage } from "@/utils/error-helper";
 import KeyboardArrowDownRoundedIcon from "@mui/icons-material/KeyboardArrowDownRounded";
 import {
@@ -23,6 +23,7 @@ import { useAddHeader } from "@/services/queries/item-master-refactor/item-maste
 import type { HeaderList } from "../../types/types";
 import { useState } from "react";
 import { hideColumn, showColumn } from "../../tree-grid/Columns/Columns";
+import CreateColumnModal from "../add-column-modal";
 
 export interface ColumnDropdownProps {
   headers: HeaderList[] | null;
