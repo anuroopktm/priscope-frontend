@@ -10,6 +10,7 @@ import { Box } from "@mui/material";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useParams } from "react-router-dom";
 import ActionHeader from "./components/ActionHeader";
+import ActivitiesSidebar from "./components/drawers/ActivitiesSidebar";
 import CommentsSidebar from "./components/drawers/CommentsSidebar";
 import ScenarioDrawers from "./components/ScenarioDrawers";
 import ScenarioModals from "./components/ScenarioModals";
@@ -140,6 +141,9 @@ const ScenarioDetailsPage = () => {
   const activeCell = useScenarioStore((state) => state.activeCell);
   const isCommentsSidebarOpen = useScenarioStore(
     (state) => state.isCommentsSidebarOpen,
+  );
+  const isActivitiesSidebarOpen = useScenarioStore(
+    (state) => state.isActivitiesSidebarOpen,
   );
   const setEditingGroupId = useScenarioStore(
     (state) => state.setEditingGroupId,
@@ -624,6 +628,21 @@ const ScenarioDetailsPage = () => {
             }}
           >
             <CommentsSidebar />
+          </Box>
+        )}
+
+        {isActivitiesSidebarOpen && (
+          <Box
+            sx={{
+              width: 360,
+              height: "100%",
+              flexShrink: 0,
+              p: 2,
+              pl: 0,
+              transition: "width 0.3s ease-in-out",
+            }}
+          >
+            <ActivitiesSidebar />
           </Box>
         )}
       </Box>

@@ -120,3 +120,27 @@ export interface ForkScenarioResponse {
   status: string;
   message: string;
 }
+
+export interface SearchScenarioActivityRequest {
+  page_size: number;
+  skip: number;
+}
+
+export interface ScenarioActivity {
+  id: string;
+  scenario_id: string;
+  action: string;
+  details: Record<string, any>;
+  created_by: {
+    name?: string;
+    email?: string;
+    user_id?: string;
+    avatar?: string;
+  };
+  created_at: string;
+}
+
+export interface ScenarioActivityListResponse {
+  total: number;
+  activities: ScenarioActivity[];
+}

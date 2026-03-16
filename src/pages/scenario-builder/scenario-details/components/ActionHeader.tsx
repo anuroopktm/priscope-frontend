@@ -2,6 +2,7 @@ import ArrowBackIcon from "@/assets/actions/arrow-left.svg?react";
 import CommentIcon from "@/assets/actions/comment.svg?react";
 import DatabaseImportIcon from "@/assets/actions/database-import.svg?react";
 import FileImportIcon from "@/assets/actions/file-import.svg?react";
+import HistoryIcon from "@mui/icons-material/History";
 import {
   Box,
   Button,
@@ -46,6 +47,9 @@ const ActionHeader = ({
   const navigate = useNavigate();
   const setIsCommentsSidebarOpen = useScenarioStore(
     (state) => state.setIsCommentsSidebarOpen,
+  );
+  const setIsActivitiesSidebarOpen = useScenarioStore(
+    (state) => state.setIsActivitiesSidebarOpen,
   );
   const [exportAnchorEl, setExportAnchorEl] = useState<null | HTMLElement>(
     null,
@@ -187,7 +191,24 @@ const ActionHeader = ({
           </>
         )}
         <IconButton
-          onClick={() => setIsCommentsSidebarOpen(true)}
+          onClick={() => {
+            setIsActivitiesSidebarOpen(true);
+            setIsCommentsSidebarOpen(false);
+          }}
+          sx={{
+            borderRadius: 1,
+            width: 38,
+            height: 38,
+            "&:hover": { bgcolor: "#0C4468" },
+          }}
+        >
+          <HistoryIcon style={{ color: "white" }} />
+        </IconButton>
+        <IconButton
+          onClick={() => {
+            setIsCommentsSidebarOpen(true);
+            setIsActivitiesSidebarOpen(false);
+          }}
           sx={{
             borderRadius: 1,
             width: 38,

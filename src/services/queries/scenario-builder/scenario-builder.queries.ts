@@ -11,9 +11,11 @@ import type {
   PublishScenarioResponse,
   SaveScenarioGridRequest,
   SaveScenarioGridResponse,
+  ScenarioActivityListResponse,
   ScenarioComment,
   ScenarioCommentListResponse,
   ScenarioDetail,
+  SearchScenarioActivityRequest,
   SearchScenarioCommentsRequest,
   SearchScenariosRequest,
   SearchScenariosResponse,
@@ -261,5 +263,26 @@ export const useForkScenario = () => {
         exact: false,
       });
     },
+  });
+};
+
+export const useListScenarioActivity = (
+  scenarioId: string | undefined,
+  payload: SearchScenarioActivityRequest,
+) => {
+  return useQuery<
+    ScenarioActivityListResponse,
+    AxiosError<{ detail: string | string[] }>
+  >({
+    queryKey: ["list-scenario-activity", scenarioId, payload],
+    queryFn: async () => {
+      const { data } = await axiosInstance.post<ScenarioActivityListResponse>(
+        `/v1/scenario-builder/scenarios/${scenarioId}/activity`,
+        payload,
+      );
+      return data;
+    },
+    enabled: !!scenarioId,
+    refetchOnWindowFocus: false,
   });
 };
