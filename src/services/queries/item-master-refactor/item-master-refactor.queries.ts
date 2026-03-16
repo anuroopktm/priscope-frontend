@@ -23,12 +23,13 @@ import type {
 
 import type { CommentsResponse } from "@/components/common/loader/comment-sidebar/types";
 import { axiosInstance } from "@/services/api/axiosInstance";
+import { useItemMasterStore } from "@/store/useHeaderStore";
 import type {
+  EditItemMasterColResponse,
   AddBulkInsertAdminRequest,
   AddHeaderPayload,
   AddHeaderResponse,
   EditItemMasterColPayload,
-  EditItemMasterColResponse,
   ExportItemMasterRowPayload,
   ExportItemMasterRowResponse,
   ItemMasterBulkInsertAdminRequestResponse,
@@ -38,8 +39,7 @@ import type {
   SavedFiltersList,
   SaveFilterPayload,
   SaveFilterResponse,
-} from "../../../pages/items-master/helpers/types";
-import { useItemMasterStore } from "@/store/useHeaderStore";
+} from "@/pages/items-master-refactor/helper/types";
 
 export type UploadResponse = {
   upload_id: string;

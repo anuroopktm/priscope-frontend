@@ -1,6 +1,6 @@
 import { Box } from "@mui/material";
 import { RecordGrid } from "../record-grid";
-import { recordItemMasterModal } from "@/pages/items-master/helpers/itemMasterTreeGridHelperFunction";
+import { recordItemMasterModal } from "@/pages/items-master-refactor/helper";
 
 export const PlainRecord = ({
   record,
