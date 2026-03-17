@@ -1,9 +1,11 @@
+import { useState } from "react";
 import { useEditItemMasterItem } from "@/services/queries/item-master-refactor/item-master-refactor.queries";
 import { useToastStore } from "@/store/useToastStore";
 import { useQueryClient } from "@tanstack/react-query";
 import { useHandleEditCellAdminRequest } from "./editItemMasterAdmin";
 
 export const useHandleGridEditConfirm = () => {
+  const [pendingAdminEdit, setPendingAdminEdit] = useState<any>(null);
   const queryClient = useQueryClient();
   const { mutate } = useEditItemMasterItem();
   const showToast = useToastStore((state) => state.showToast);
@@ -16,34 +18,24 @@ export const useHandleGridEditConfirm = () => {
     oldValue,
     comment,
     hasEditItemMasterPrivilege,
-    gridRef,
     itemMasterData,
     setRequestNotficationVisible,
     setOpenAdminRequestConfirmationModal,
-    openAdminRequestConfirmationModal,
   }: any) => {
     if (value === oldValue) return;
 
     if (!hasEditItemMasterPrivilege) {
-      setOpenAdminRequestConfirmationModal(true);
+      setPendingAdminEdit({
+        row,
+        col,
+        value,
+        oldValue,
+        comment,
+        itemMasterData,
+        setRequestNotficationVisible,
+      });
 
-      if (handleEditCellAdminRequest && openAdminRequestConfirmationModal) {
-        handleEditCellAdminRequest({
-          row,
-          col,
-          value,
-          oldValue,
-          comment,
-          itemMasterData,
-          setRequestNotficationVisible,
-        });
-      } else {
-        const Grid = gridRef.current;
-        if (Grid) {
-          const gridRow = Grid.GetRowById(row.id);
-          if (gridRow) Grid.SetValue(gridRow, col, oldValue, 1);
-        }
-      }
+      setOpenAdminRequestConfirmationModal(true);
       return;
     }
 
@@ -91,5 +83,12 @@ export const useHandleGridEditConfirm = () => {
     );
   };
 
-  return { handleGridEditConfirm };
+  const handleAdminRequestConfirm = () => {
+    if (pendingAdminEdit) {
+      handleEditCellAdminRequest(pendingAdminEdit);
+      setPendingAdminEdit(null);
+    }
+  };
+
+  return { handleGridEditConfirm, handleAdminRequestConfirm };
 };

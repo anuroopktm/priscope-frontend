@@ -49,6 +49,8 @@ export const ItemMasterRequestsModal: React.FC<Props> = ({
   const { mutate, data, isPending, isError } = useListApprovalRequests();
 
   useEffect(() => {
+    if (!open) return;
+
     setPage(0);
     setAllRequests([]);
     setHasMore(true);
@@ -63,7 +65,7 @@ export const ItemMasterRequestsModal: React.FC<Props> = ({
       page_size: pageSize,
       skip: 0,
     });
-  }, [alignment, tenantId, mutate]);
+  }, [open, alignment, tenantId, mutate]);
 
   useEffect(() => {
     if (data?.requests) {
