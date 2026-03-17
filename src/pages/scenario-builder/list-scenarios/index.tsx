@@ -131,39 +131,56 @@ const ScenarioListingPage = () => {
         <Box
           sx={{
             flex: 1,
+            minHeight: 0,
+            width: "100%",
             display: "flex",
             flexDirection: "row",
             position: "relative",
-            minHeight: 0,
             overflow: "hidden",
           }}
         >
           <Box
             sx={{
               flex: 1,
-              minHeight: 0,
-              p: 2,
               display: "flex",
               flexDirection: "column",
+              minWidth: 0,
             }}
           >
             <Box
               sx={{
                 flex: 1,
                 minHeight: 0,
-                borderRadius: 1,
+                minWidth: 0,
+                width: "100%",
                 p: 2,
-                bgcolor: "background.paper",
               }}
             >
               <Box
-                id={gridContainerId}
                 sx={{
                   height: "100%",
                   width: "100%",
+                  minWidth: 0,
+                  minHeight: 0,
                   borderRadius: 1,
+                  p: 2,
+                  bgcolor: "background.paper",
+                  display: "flex",
+                  flexDirection: "column",
                 }}
-              />
+              >
+                <Box
+                  id={gridContainerId}
+                  sx={{
+                    flex: 1,
+                    minHeight: 0,
+                    minWidth: 0,
+                    height: "100%",
+                    width: "100%",
+                    borderRadius: 1,
+                  }}
+                />
+              </Box>
             </Box>
           </Box>
 
@@ -188,6 +205,7 @@ const ScenarioListingPage = () => {
                   display: "flex",
                   flexDirection: "column",
                   gap: 2,
+                  boxShadow: "-4px 0 16px rgba(0,0,0,0.08)",
                 }}
               >
                 <ScenarioAdvancedSearch

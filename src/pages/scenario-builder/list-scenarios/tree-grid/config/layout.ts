@@ -17,7 +17,6 @@ export const ScenarioGridLayout = {
     RelHeight: "1",
     StretchWidth: "1",
     StretchHeight: "1",
-    ResizeWidth: "1",
     DynamicBorder: "1",
     Filtering: "1",
     Filtered: "1",

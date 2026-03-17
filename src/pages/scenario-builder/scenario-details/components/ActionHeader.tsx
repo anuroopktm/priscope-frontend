@@ -2,6 +2,7 @@ import ArrowBackIcon from "@/assets/actions/arrow-left.svg?react";
 import CommentIcon from "@/assets/actions/comment.svg?react";
 import DatabaseImportIcon from "@/assets/actions/database-import.svg?react";
 import FileImportIcon from "@/assets/actions/file-import.svg?react";
+import DeleteIcon from "@mui/icons-material/Delete";
 import HistoryIcon from "@mui/icons-material/History";
 import {
   Box,
@@ -26,6 +27,7 @@ interface ActionHeaderProps {
   onExport?: (format: string) => void;
   onPublish?: () => void;
   onPartialPublish?: (itemIds: string[], groupIds: string[]) => void;
+  onDeleteSelected?: () => void;
   isSaving?: boolean;
   isPublishing?: boolean;
   selectedRowsCount?: number;
@@ -39,6 +41,7 @@ const ActionHeader = ({
   onExport,
   onPublish,
   onPartialPublish,
+  onDeleteSelected,
   isSaving,
   isPublishing,
   selectedRowsCount = 0,
@@ -188,6 +191,19 @@ const ActionHeader = ({
                 ? `Publish (${selectedRowsCount})`
                 : "Publish"}
             </Button>
+            {!isPublished && selectedRowsCount > 0 && (
+              <Button
+                variant="contained"
+                startIcon={<DeleteIcon />}
+                onClick={() => onDeleteSelected?.()}
+                sx={{
+                  color: "red",
+                  minWidth: "90px",
+                }}
+              >
+                Delete ({selectedRowsCount})
+              </Button>
+            )}
           </>
         )}
         <IconButton

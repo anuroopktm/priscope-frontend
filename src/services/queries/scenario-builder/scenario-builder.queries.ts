@@ -153,10 +153,7 @@ export const useSaveScenarioGrid = () => {
       );
       return data;
     },
-    onSuccess: (_, { scenario_id }) => {
-      queryClient.invalidateQueries({
-        queryKey: ["get-scenario", scenario_id],
-      });
+    onSuccess: () => {
       queryClient.invalidateQueries({
         queryKey: ["list-scenarios"],
         exact: false,

@@ -1,3 +1,4 @@
+import { useItemMasterStore } from "@/pages/items-master-refactor/store/useItemMasterStore";
 import {
   useGetScenario,
   usePartialPublishScenario,
@@ -28,7 +29,6 @@ import {
   registerStartScenarioColumnSelection,
   unregisterGridHighlightsGlobals,
 } from "./utils/gridHighlights";
-import { useItemMasterStore } from "@/pages/items-master-refactor/store/useItemMasterStore";
 
 declare global {
   interface Window {
@@ -107,7 +107,7 @@ const syncLocalGridData = (grid: any) => {
       const children: any[] = [];
       let child = gridRow.firstChild;
       while (child) {
-        if (child.Kind === "Data") {
+        if (child.Kind === "Data" && !child.Deleted) {
           children.push(processRow(child));
         }
         child = child.nextSibling;
@@ -122,7 +122,7 @@ const syncLocalGridData = (grid: any) => {
 
   let row = grid.GetFirst();
   while (row) {
-    if (row.Kind === "Data" && !row.parentNode?.id) {
+    if (row.Kind === "Data" && !row.parentNode?.id && !row.Deleted) {
       // Only process top-level rows (recursion handles children)
       body.push(processRow(row));
     }
@@ -195,6 +195,7 @@ const ScenarioDetailsPage = () => {
       dataToSave?: any,
       onSuccess?: () => void,
       onError?: (error: any) => void,
+      successMessage?: string,
     ) => {
       if (!id) return;
 
@@ -211,7 +212,9 @@ const ScenarioDetailsPage = () => {
         {
           onSuccess: (response) => {
             showToast(
-              response?.message || "Scenario saved as draft successfully",
+              successMessage ||
+                response?.message ||
+                "Scenario saved as draft successfully",
               "success",
             );
             if (onSuccess) onSuccess();
@@ -341,6 +344,48 @@ const ScenarioDetailsPage = () => {
     },
     [id, partialPublishScenario, showToast],
   );
+
+  const handleDeleteSelected = useCallback(() => {
+    const grid = (window as any).Grids?.[SCENARIO_BUILDER_GRID_ID];
+    if (!grid) return;
+
+    const selRows = grid.GetSelRows();
+    if (selRows.length === 0) return;
+
+    // Collect IDs of rows to delete before removing them
+    const deletedIds = new Set<string>(selRows.map((r: any) => String(r.id)));
+
+    // Visually remove each row from the grid DOM immediately
+    selRows.forEach((row: any) => {
+      grid.RemoveRow(row);
+    });
+    grid.RenderBody();
+
+    // Sync remaining data (deleted rows are now gone from DOM so syncLocalGridData won't include them)
+    const syncedData = syncLocalGridData(grid);
+
+    // Also remove from local React state so if the component re-renders, it won't re-add them
+    setGridData((prev: any) => {
+      if (!prev?.Body?.[0]) return prev;
+      const filterRows = (rows: any[]): any[] =>
+        rows
+          .filter((r: any) => !deletedIds.has(String(r.id)))
+          .map((r: any) => ({
+            ...r,
+            Items: r.Items ? filterRows(r.Items) : undefined,
+          }));
+      return { ...prev, Body: [filterRows(prev.Body[0])] };
+    });
+
+    handleSaveAsDraft(
+      syncedData,
+      () => {
+        setSelectedRowsCount(0);
+      },
+      undefined,
+      "Deletion successful",
+    );
+  }, [handleSaveAsDraft, setGridData]);
 
   const handleExport = (format: string) => {
     const grid = (window as any).Grids?.[SCENARIO_BUILDER_GRID_ID];
@@ -551,6 +596,7 @@ const ScenarioDetailsPage = () => {
         onExport={handleExport}
         onPublish={handlePublish}
         onPartialPublish={handlePartialPublish}
+        onDeleteSelected={handleDeleteSelected}
         isSaving={isSaving}
         isPublishing={isPublishing}
         selectedRowsCount={selectedRowsCount}
