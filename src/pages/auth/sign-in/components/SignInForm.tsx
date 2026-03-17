@@ -125,7 +125,7 @@ const SignInForm = () => {
           fontWeight={700}
           underline="hover"
         >
-          Tenant Sign Up
+          Sign Up
         </Link>
       </Typography>
     </AuthCard>

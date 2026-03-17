@@ -103,13 +103,12 @@ const SellingStep = ({ onNext }: { onNext: () => void }) => {
             alignItems: "center",
             flexDirection: "row",
             gap: 1,
-            // justifyContent: "center"
             lineHeight: 1,
           }}
         >
           <img src={addCircle} alt="" style={{ height: "100%" }} />
           <Typography sx={{ fontSize: "12px" }}>
-            Add another Supplier Cost
+            Additional Selling Price Elements
           </Typography>
         </Box>
         {sellingSteps.map((value, index) => (
