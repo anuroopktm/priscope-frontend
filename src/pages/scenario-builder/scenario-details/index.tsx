@@ -5,6 +5,7 @@ import {
   usePublishScenario,
   useSaveScenarioGrid,
 } from "@/services/queries/scenario-builder/scenario-builder.queries";
+import { useGetItemGroup } from "@/services/queries/common/common.queries";
 import { useToastStore } from "@/store/useToastStore";
 import { getErrorMessage } from "@/utils/error-helper";
 import { Box } from "@mui/material";
@@ -178,6 +179,7 @@ const ScenarioDetailsPage = () => {
     usePublishScenario();
   const { mutate: partialPublishScenario, isPending: isPartialPublishing } =
     usePartialPublishScenario();
+  const { mutateAsync: getItemGroupAsync } = useGetItemGroup();
 
   const isPublishing = isFullPublishing || isPartialPublishing;
   const showToast = useToastStore((state) => state.showToast);
@@ -283,6 +285,46 @@ const ScenarioDetailsPage = () => {
       setGridData,
       setIsDrawerOpen,
       clearSelectedItems,
+    ],
+  );
+
+  const handleAddGroupItems = useCallback(
+    async (groupIds: string[]) => {
+      try {
+        const results = await Promise.all(
+          groupIds.map((id) => getItemGroupAsync(id)),
+        );
+
+        const grid = (window as any).Grids?.[SCENARIO_BUILDER_GRID_ID];
+        const syncedData = syncLocalGridData(grid) || gridData;
+
+        let newState = { ...syncedData };
+
+        results.forEach((g: any) => {
+          if (g?.items) {
+            newState = prepareAddItems(newState, g.items, g.name);
+          }
+        });
+
+        handleSaveAsDraft(newState, () => {
+          setGridData(newState);
+        });
+
+        showToast("Groups added successfully", "success");
+      } catch (error: any) {
+        showToast(
+          getErrorMessage(error, "Failed to fetch some group items"),
+          "error",
+        );
+      }
+    },
+    [
+      getItemGroupAsync,
+      gridData,
+      prepareAddItems,
+      handleSaveAsDraft,
+      setGridData,
+      showToast,
     ],
   );
 
@@ -592,6 +634,7 @@ const ScenarioDetailsPage = () => {
         title={scenario?.name}
         status={scenario?.status}
         onAddItems={() => setIsDrawerOpen(true)}
+        onAddGroupItems={handleAddGroupItems}
         onSaveAsDraft={handleSaveAsDraft}
         onExport={handleExport}
         onPublish={handlePublish}

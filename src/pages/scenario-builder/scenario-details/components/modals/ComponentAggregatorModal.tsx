@@ -69,7 +69,13 @@ const ComponentAggregatorModal = ({
   };
 
   return (
-    <Dialog open={open} onClose={handleClose} fullWidth maxWidth="xs">
+    <Dialog
+      open={open}
+      onClose={handleClose}
+      fullWidth
+      maxWidth="xs"
+      onKeyDown={(e) => e.stopPropagation()}
+    >
       <Typography
         variant="h6"
         sx={{ color: "#1a365d", fontWeight: "bold", px: 3, py: 2 }}

@@ -174,6 +174,24 @@ export const useScenarioGridData = () => {
       selectedHeaders?: string[],
     ) => {
       console.log("selectedHeaders:", selectedHeaders);
+
+      const getUnpackedValue = (val: any) => {
+        if (val && typeof val === "object") {
+          if (!Array.isArray(val) && val.value !== undefined) return val.value;
+          if (!Array.isArray(val) && val.name !== undefined) return val.name;
+          if (Array.isArray(val)) {
+            return val
+              .map((x: any) =>
+                typeof x === "object"
+                  ? x.name || x.value || JSON.stringify(x)
+                  : String(x),
+              )
+              .join(", ");
+          }
+        }
+        return val;
+      };
+
       const mappedItems: ScenarioRow[] = items.map((item) => {
         let cleanItem: any;
 
@@ -211,25 +229,51 @@ export const useScenarioGridData = () => {
           id: `row_${Math.random().toString(36).substr(2, 9)}`,
           itemId: cleanItem.id || "",
           Def: "R",
-          A: cleanItem.SKU || cleanItem.A || "",
-          B: cleanItem.Description || cleanItem.B || "",
-          C: cleanItem.Category || cleanItem.C || "",
+          A: getUnpackedValue(cleanItem.SKU || cleanItem.A || ""),
+          B: getUnpackedValue(cleanItem.Description || cleanItem.B || ""),
+          C: getUnpackedValue(cleanItem.Category || cleanItem.C || ""),
           is_published: 0,
           Selected: 0,
           CanSelect: 1,
           PanelSelect: 1,
         };
 
-        // ⭐ Item Master flow → copy ALL columns
-        // if (!selectedHeaders || selectedHeaders.length === 0) {
+        // ⭐ Item Master flow (or direct add) → copy ALL columns
         if (selectedHeaders === undefined) {
+          const grid = (window as any).Grids?.["ScenarioGridDetails"];
+          const activeGridCols = grid ? Object.keys(grid.Cols) : [];
+
           Object.keys(cleanItem).forEach((key) => {
-            if (
-              !["id", "SKU", "Description", "Category", "A", "B", "C"].includes(
-                key,
-              )
-            ) {
-              scenarioRow[key] = cleanItem[key];
+            // Only copy if it is a base column or exists in DOM grid columns!
+            const isBase = ["A", "B", "C"].includes(key);
+            const isExtraCol = activeGridCols.includes(key);
+
+            if (isBase || isExtraCol) {
+              if (["id", "SKU", "Description", "Category"].includes(key))
+                return;
+
+              // Explicitly set MenuType as Data to DOM Grid Columns metadata directly
+              if (grid && isExtraCol && grid.Cols[key]) {
+                grid.Cols[key].MenuType = "Data";
+              }
+
+              let val = cleanItem[key];
+              if (val && typeof val === "object") {
+                if (!Array.isArray(val) && val.value !== undefined) {
+                  val = val.value;
+                } else if (!Array.isArray(val) && val.name !== undefined) {
+                  val = val.name;
+                } else if (Array.isArray(val)) {
+                  val = val
+                    .map((x: any) =>
+                      typeof x === "object"
+                        ? x.name || x.value || JSON.stringify(x)
+                        : String(x),
+                    )
+                    .join(", ");
+                }
+              }
+              scenarioRow[key] = val;
             }
           });
         }
@@ -241,7 +285,23 @@ export const useScenarioGridData = () => {
               cleanItem[headerName] !== undefined &&
               !["SKU", "Description", "Category"].includes(headerName)
             ) {
-              scenarioRow[headerName] = cleanItem[headerName];
+              let val = cleanItem[headerName];
+              if (val && typeof val === "object") {
+                if (!Array.isArray(val) && val.value !== undefined) {
+                  val = val.value;
+                } else if (!Array.isArray(val) && val.name !== undefined) {
+                  val = val.name;
+                } else if (Array.isArray(val)) {
+                  val = val
+                    .map((x: any) =>
+                      typeof x === "object"
+                        ? x.name || x.value || JSON.stringify(x)
+                        : String(x),
+                    )
+                    .join(", ");
+                }
+              }
+              scenarioRow[headerName] = val;
             }
           });
         }

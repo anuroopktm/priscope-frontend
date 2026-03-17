@@ -53,6 +53,7 @@ export const ScenarioDetailsLayout = {
       RelWidth: 1,
       CanEdit: 1,
       CanFilter: 1,
+      MenuType: "Data",
     },
     {
       Name: "B",
@@ -60,6 +61,7 @@ export const ScenarioDetailsLayout = {
       RelWidth: 1,
       CanEdit: 1,
       CanFilter: 1,
+      MenuType: "Data",
     },
     {
       Name: "C",
@@ -67,6 +69,7 @@ export const ScenarioDetailsLayout = {
       RelWidth: 1,
       CanEdit: 1,
       CanFilter: 1,
+      MenuType: "Data",
     },
     {
       Name: "is_published",

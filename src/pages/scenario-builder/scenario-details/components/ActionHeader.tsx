@@ -2,27 +2,41 @@ import ArrowBackIcon from "@/assets/actions/arrow-left.svg?react";
 import CommentIcon from "@/assets/actions/comment.svg?react";
 import DatabaseImportIcon from "@/assets/actions/database-import.svg?react";
 import FileImportIcon from "@/assets/actions/file-import.svg?react";
+import { useSearchItemGroups } from "@/services/queries/common/common.queries";
+import AddIcon from "@mui/icons-material/Add";
 import DeleteIcon from "@mui/icons-material/Delete";
 import HistoryIcon from "@mui/icons-material/History";
+import KeyboardArrowDownIcon from "@mui/icons-material/KeyboardArrowDown";
 import {
   Box,
   Button,
+  Checkbox,
+  CircularProgress,
   IconButton,
+  List,
+  ListItem,
+  ListItemButton,
+  ListItemIcon,
+  ListItemText,
   Menu,
   MenuItem,
+  Popover,
   Stack,
+  TextField,
   Typography,
 } from "@mui/material";
-import { useState } from "react";
+import debounce from "lodash.debounce";
+import { useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useScenarioStore } from "../store/useScenarioStore";
 
 const THE_GRID_ID = "ScenarioGridDetails";
 
-interface ActionHeaderProps {
+export interface ActionHeaderProps {
   title?: string;
   status?: string;
   onAddItems?: () => void;
+  onAddGroupItems?: (groupIds: string[]) => void;
   onSaveAsDraft?: () => void;
   onExport?: (format: string) => void;
   onPublish?: () => void;
@@ -37,6 +51,7 @@ const ActionHeader = ({
   title,
   status,
   onAddItems,
+  onAddGroupItems,
   onSaveAsDraft,
   onExport,
   onPublish,
@@ -58,6 +73,22 @@ const ActionHeader = ({
     null,
   );
 
+  // Group Adding State
+  const [searchGroupTerm, setSearchGroupTerm] = useState<string>("");
+  const [selectedGroupIds, setSelectedGroupIds] = useState<string[]>([]);
+  const [groupAnchorEl, setGroupAnchorEl] = useState<null | HTMLElement>(null);
+
+  const debouncedSearch = useMemo(
+    () => debounce((newValue: string) => setSearchGroupTerm(newValue), 500),
+    [],
+  );
+
+  const { data: groupsData, isLoading: isLoadingGroups } = useSearchItemGroups({
+    page_size: 50,
+    skip: 0,
+    search: searchGroupTerm,
+  });
+
   const handleBack = () => navigate("/scenario-builder");
 
   const handleExportClick = (event: React.MouseEvent<HTMLButtonElement>) => {
@@ -71,6 +102,28 @@ const ActionHeader = ({
   const handleExportOption = (format: string) => {
     onExport?.(format);
     handleExportClose();
+  };
+
+  const handleGroupMenuOpen = (event: React.MouseEvent<HTMLButtonElement>) => {
+    setGroupAnchorEl(event.currentTarget);
+  };
+
+  const handleGroupMenuClose = () => {
+    setGroupAnchorEl(null);
+    setSelectedGroupIds([]);
+  };
+
+  const handleToggleGroup = (id: string) => {
+    setSelectedGroupIds((prev) =>
+      prev.includes(id) ? prev.filter((x) => x !== id) : [...prev, id],
+    );
+  };
+
+  const handleAddGroupClick = () => {
+    if (selectedGroupIds.length > 0) {
+      onAddGroupItems?.(selectedGroupIds);
+      handleGroupMenuClose(); // reset after adding
+    }
   };
 
   return (
@@ -103,13 +156,126 @@ const ActionHeader = ({
       </Box>
       <Stack direction="row" spacing={1} alignItems="center">
         {!isPublished && (
-          <Button
-            variant="contained"
-            onClick={() => onSaveAsDraft?.()}
-            disabled={isSaving}
-          >
-            {isSaving ? "Saving..." : "Save as draft"}
-          </Button>
+          <>
+            <Button
+              variant="contained"
+              startIcon={<AddIcon />}
+              endIcon={<KeyboardArrowDownIcon />}
+              onClick={handleGroupMenuOpen}
+            >
+              Add Group
+            </Button>
+            <Popover
+              open={Boolean(groupAnchorEl)}
+              anchorEl={groupAnchorEl}
+              onClose={handleGroupMenuClose}
+              anchorOrigin={{
+                vertical: "bottom",
+                horizontal: "left",
+              }}
+              transformOrigin={{
+                vertical: "top",
+                horizontal: "left",
+              }}
+              sx={{ mt: 1 }}
+            >
+              <Box
+                sx={{
+                  p: 2,
+                  display: "flex",
+                  flexDirection: "column",
+                  gap: 1,
+                  minWidth: 320,
+                }}
+              >
+                <TextField
+                  placeholder="Search Groups"
+                  size="small"
+                  fullWidth
+                  onChange={(e) => debouncedSearch(e.target.value)}
+                  InputProps={{
+                    endAdornment: isLoadingGroups ? (
+                      <CircularProgress color="inherit" size={20} />
+                    ) : null,
+                  }}
+                />
+                <List dense sx={{ maxHeight: 200, overflowY: "auto" }}>
+                  {isLoadingGroups && !(groupsData as any)?.groups?.length ? (
+                    <ListItem dense sx={{ py: 0 }}>
+                      <ListItemText
+                        primary="Loading..."
+                        primaryTypographyProps={{
+                          variant: "body2",
+                          style: { fontSize: "13px" },
+                        }}
+                      />
+                    </ListItem>
+                  ) : null}
+                  {!isLoadingGroups && !(groupsData as any)?.groups?.length ? (
+                    <ListItem dense sx={{ py: 0 }}>
+                      <ListItemText
+                        primary="No groups found"
+                        primaryTypographyProps={{
+                          variant: "body2",
+                          style: { fontSize: "13px" },
+                        }}
+                      />
+                    </ListItem>
+                  ) : null}
+                  {(groupsData as any)?.groups?.map((group: any) => {
+                    const labelId = `checkbox-list-label-${group.id}`;
+                    const isChecked = selectedGroupIds.includes(group.id);
+                    return (
+                      <ListItem key={group.id} disableGutters>
+                        <ListItemButton
+                          role={undefined}
+                          onClick={() => handleToggleGroup(group.id)}
+                          dense
+                        >
+                          <ListItemIcon sx={{ minWidth: 28 }}>
+                            <Checkbox
+                              edge="start"
+                              size="small"
+                              checked={isChecked}
+                              tabIndex={-1}
+                              disableRipple
+                              inputProps={{ "aria-labelledby": labelId }}
+                              sx={{ p: 0.5 }}
+                            />
+                          </ListItemIcon>
+                          <ListItemText
+                            id={labelId}
+                            primary={group.name}
+                            primaryTypographyProps={{
+                              variant: "body2",
+                              style: { fontSize: "13px" },
+                            }}
+                          />
+                        </ListItemButton>
+                      </ListItem>
+                    );
+                  })}
+                </List>
+                <Button
+                  variant="contained"
+                  size="medium"
+                  fullWidth
+                  onClick={handleAddGroupClick}
+                  disabled={selectedGroupIds.length === 0}
+                >
+                  Add ({selectedGroupIds.length})
+                </Button>
+              </Box>
+            </Popover>
+
+            <Button
+              variant="contained"
+              onClick={() => onSaveAsDraft?.()}
+              disabled={isSaving}
+            >
+              {isSaving ? "Saving..." : "Save as draft"}
+            </Button>
+          </>
         )}
         <Button
           variant="contained"

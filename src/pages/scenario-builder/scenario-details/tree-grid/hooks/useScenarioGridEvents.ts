@@ -255,6 +255,9 @@ export const useScenarioGridEvents = ({
       const menuType = grid.GetAttribute(null, col, "MenuType");
       if (col === "is_published" || menuType === "Status") return 1;
 
+      // Consume right-click for Group Rows so context menu isn't triggered
+      if (row.Def === "Group" || row.Def?.Name === "Group") return 1;
+
       if (row.Kind === "Header") {
         if (status === "published") return 1;
 

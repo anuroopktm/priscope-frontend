@@ -6,6 +6,15 @@ import type {
   FreightRatesSearchResponse,
 } from "./freight.types";
 
+export const useCreateFreightRate = () => {
+  return useMutation<any, AxiosError<{ detail: string | string[] }>, any>({
+    mutationFn: async (payload) => {
+      const response = await axiosInstance.post(`/v1/freight-rates`, payload);
+      return response.data;
+    },
+  });
+};
+
 export const useListApprovalRequests = () => {
   return useMutation<
     any,
@@ -35,6 +44,32 @@ export const useSearchFreightRates = (params: FreightRatesSearchParams) => {
       const response = await axiosInstance.post(
         `/v1/freight-rates/search`,
         params,
+      );
+      return response.data;
+    },
+  });
+};
+
+export const useSearchContainerTypes = (payload: any) => {
+  return useQuery<any, AxiosError>({
+    queryKey: ["container-types", "search", payload],
+    queryFn: async () => {
+      const response = await axiosInstance.post(
+        `/v1/freight-rates/container-types/search`,
+        payload,
+      );
+      return response.data;
+    },
+    enabled: Boolean(payload?.tenant_id),
+  });
+};
+
+export const useCreateContainerType = () => {
+  return useMutation<any, AxiosError, any>({
+    mutationFn: async (payload) => {
+      const response = await axiosInstance.post(
+        `/v1/freight-rates/container-types`,
+        payload,
       );
       return response.data;
     },

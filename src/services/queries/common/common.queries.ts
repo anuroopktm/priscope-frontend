@@ -20,6 +20,9 @@ import type {
 import type {
   CreateItemGroupRequest,
   CreateItemGroupResponse,
+  ItemGroupDetail,
+  SearchItemGroupsRequest,
+  SearchItemGroupsResponse,
 } from "./types/item-group.types";
 
 // ---------------------- DOWNLOAD TEMPLATE ----------------------
@@ -191,6 +194,35 @@ export const useCreateItemGroup = () => {
       const { data } = await axiosInstance.post<CreateItemGroupResponse>(
         `/v1/common/item-groups`,
         payload,
+      );
+      return data;
+    },
+  });
+};
+
+// ---------------------- SEARCH ITEM GROUPS ----------------------
+
+export const useSearchItemGroups = (payload: SearchItemGroupsRequest) => {
+  return useQuery<SearchItemGroupsResponse, AxiosError<{ detail: string }>>({
+    queryKey: ["search-item-groups", payload],
+    queryFn: async () => {
+      const { data } = await axiosInstance.post<SearchItemGroupsResponse>(
+        `/v1/common/item-groups/search`,
+        payload,
+      );
+      return data;
+    },
+    refetchOnWindowFocus: false,
+  });
+};
+
+// ---------------------- GET ITEM GROUP BY ID ----------------------
+
+export const useGetItemGroup = () => {
+  return useMutation<ItemGroupDetail, AxiosError<{ detail: string }>, string>({
+    mutationFn: async (groupId: string) => {
+      const { data } = await axiosInstance.get<ItemGroupDetail>(
+        `/v1/common/item-groups/${groupId}`,
       );
       return data;
     },

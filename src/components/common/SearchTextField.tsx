@@ -8,12 +8,14 @@ interface SearchTextFieldProps extends Omit<TextFieldProps, "onChange"> {
   onSearch: (value: string) => void;
   onAdvancedSearchClick?: () => void;
   width?: string | number;
+  containerSx?: object;
 }
 
 const SearchTextField = ({
   onSearch,
   onAdvancedSearchClick,
   width,
+  containerSx,
   ...props
 }: SearchTextFieldProps) => {
   const [value, setValue] = useState<string>((props.value as string) || "");
@@ -48,6 +50,7 @@ const SearchTextField = ({
         backgroundColor: "brand.tertiary",
         borderRadius: 1,
         px: 1,
+        ...containerSx,
       }}
     >
       <TextField
