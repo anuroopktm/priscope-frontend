@@ -19,6 +19,10 @@ import Onboarding from "@/pages/onboarding";
 import TenantSignUp from "@/pages/auth/tenent-sign-up";
 import TenantOtpPage from "@/pages/auth/tenent-otp-page";
 import TenantSignInPage from "@/pages/auth/tenant-sign-in";
+import { GlobalSettingsLayout } from "@/pages/global-settings";
+import CompanyInfoPage from "@/pages/global-settings/components/CompanyInfoPage";
+import SystemFields from "@/pages/global-settings/components/SystemFields";
+import AttributeLabel from "@/pages/global-settings/components/AttributeLabel";
 
 export const routes = [
   {
@@ -86,6 +90,25 @@ export const routes = [
               {
                 path: "bulk-insert",
                 element: <BulkInsertPage />,
+              },
+            ],
+          },
+          {
+            path: "global-settings",
+            children: [
+              {
+                element: <GlobalSettingsLayout />,
+                children: [
+                  { index: true, element: <CompanyInfoPage /> },
+                  { path: "system-fields", element: <SystemFields /> },
+                  { path: "attributes", element: <AttributeLabel /> },
+                  // {
+                  //   path: "operations-setting",
+                  //   element: <OperationsSetting />,
+                  // },
+                  // { path: "alerts", element: <Alerts /> },
+                  // { path: "users", element: <Users /> },
+                ],
               },
             ],
           },

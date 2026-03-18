@@ -57,7 +57,12 @@ const SetupStep = ({ onNext }: Props) => {
       industry: data.industry ?? "",
       company_size: data.company_size ?? "",
       primary_location: data.primary_location ?? "",
-      base_currency: data.base_currency ?? "",
+      base_currency:
+        currencyData?.currencies?.find(
+          (c) => c.currency === data.base_currency,
+        )?.id ||
+        data.base_currency ||
+        "",
       company_logo: data.company_logo ?? undefined,
     },
   });

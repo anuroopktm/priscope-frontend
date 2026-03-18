@@ -70,6 +70,7 @@ const GlobalHeaderActions = () => {
       </Select>
 
       <IconButton
+        onClick={() => navigate("/global-settings")}
         variant="action"
         sx={{
           borderWidth: 1,

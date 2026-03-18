@@ -1,11 +1,16 @@
 import { Box, Typography, TextField, Button } from "@mui/material";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { useOnboardingStore } from "../store/useOnboardingStore";
+// import { useOnboardingStore } from "../store/useOnboardingStore";
 import {
   systemFieldMappingSchema,
   type SystemFieldMappingFormValues,
-} from "@/validations/onboarding/systemFieldMapping.validation";
+} from "@/validations/global-settings/systemfields.schema";
+import {
+  useGetSystemFields,
+  useUpdateSystemFields,
+} from "@/services/global-settings/global-setting.queries";
+import { useEffect } from "react";
 
 const fields = [
   { label: "SKU", name: "sku" },
@@ -13,10 +18,6 @@ const fields = [
   { label: "Description", name: "description" },
   { label: "Category", name: "category" },
   { label: "HS Code", name: "hsCode" },
-  { label: "Supplier Name", name: "supplierName" },
-  { label: "Supplier Code", name: "supplierCode" },
-  { label: "Customer Name", name: "customerName" },
-  { label: "Customer Code", name: "customerCode" },
 ];
 
 const fieldKeyMap: Record<string, keyof SystemFieldMappingFormValues> = {
@@ -25,45 +26,51 @@ const fieldKeyMap: Record<string, keyof SystemFieldMappingFormValues> = {
   Description: "description",
   Category: "category",
   "HS Code": "hsCode",
-  "Supplier Name": "supplierName",
-  "Supplier Code": "supplierCode",
-  "Customer Name": "customerName",
-  "Customer Code": "customerCode",
 };
-const SystemFieldMappingsDetails = ({ onNext }: { onNext: () => void }) => {
-  const { data, updateData } = useOnboardingStore();
+
+const SystemFields = () => {
+  const { data } = useGetSystemFields();
+  const { mutate: updateSystemFields } = useUpdateSystemFields();
 
   const {
     handleSubmit,
     register,
+    reset,
     formState: { errors },
   } = useForm<SystemFieldMappingFormValues>({
     resolver: zodResolver(systemFieldMappingSchema),
     mode: "onChange",
-    defaultValues: data.field_mappings ?? {
+    defaultValues: {
       sku: "",
       upc: "",
       description: "",
       category: "",
       hsCode: "",
-      supplierName: "",
-      supplierCode: "",
-      customerName: "",
-      customerCode: "",
     },
   });
 
-  const onSubmit = (formData: SystemFieldMappingFormValues) => {
-    const field_mappings = Object.entries(fieldKeyMap).reduce(
-      (acc, [system_field, key]) => {
-        acc[system_field] = formData[key];
-        return acc;
-      },
-      {} as Record<string, string>,
-    );
+  useEffect(() => {
+    if (!data?.fields) return;
 
-    updateData({ field_mappings });
-    onNext();
+    const mappedValues = data.fields.reduce((acc, field) => {
+      const key = fieldKeyMap[field.system_field];
+
+      if (key) {
+        acc[key] = field.label;
+      }
+
+      return acc;
+    }, {} as SystemFieldMappingFormValues);
+
+    reset(mappedValues);
+  }, [data, reset]);
+
+  const onSubmit = (data: SystemFieldMappingFormValues) => {
+    const payload = Object.entries(fieldKeyMap).map(([key, value]) => ({
+      system_field: key,
+      label: data[value],
+    }));
+    updateSystemFields(payload);
   };
 
   return (
@@ -79,16 +86,6 @@ const SystemFieldMappingsDetails = ({ onNext }: { onNext: () => void }) => {
         mx: "auto",
       }}
     >
-      <Typography
-        sx={{
-          fontSize: "12px",
-          fontWeight: 600,
-          color: "#1A2B44",
-        }}
-      >
-        System field labelling
-      </Typography>
-
       <Box
         sx={{
           backgroundColor: "#F9FAFB",
@@ -151,19 +148,6 @@ const SystemFieldMappingsDetails = ({ onNext }: { onNext: () => void }) => {
           </Box>
         ))}
       </Box>
-      <Typography
-        sx={{
-          display: "flex",
-          flexDirection: "column",
-          alignItems: "center",
-          fontSize: "13px",
-          color: "#4B5563",
-          mt: 1,
-        }}
-      >
-        Matching your field names ensures Priscope reads your data correctly, no
-        matter what your internal labels are.
-      </Typography>
       <Box
         sx={{
           display: "flex",
@@ -175,11 +159,11 @@ const SystemFieldMappingsDetails = ({ onNext }: { onNext: () => void }) => {
         }}
       >
         <Button type="submit" variant="contained">
-          Continue
+          Save
         </Button>
       </Box>
     </Box>
   );
 };
 
-export default SystemFieldMappingsDetails;
+export default SystemFields;

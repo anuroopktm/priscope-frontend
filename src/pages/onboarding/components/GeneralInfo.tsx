@@ -29,7 +29,6 @@ const GeneralInfo = ({ onNext }: { onNext: () => void }) => {
         return;
       }
       formData.append(key, value as string);
-      formData.append("base_currency", "usd");
     });
 
     mutate(formData, {
