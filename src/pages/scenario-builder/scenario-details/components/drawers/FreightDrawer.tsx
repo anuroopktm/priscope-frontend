@@ -250,13 +250,13 @@ const FreightDrawer = ({ onClose, onSelect }: FreightDrawerProps) => {
             prev.map((r) =>
               r.id === rowId
                 ? {
-                  ...r,
-                  port_of_origin: grid.GetValue(row, "A") || "",
-                  port_of_destination: grid.GetValue(row, "B") || "",
-                  rate: Number(grid.GetValue(row, "E")) || 0,
-                  [column === "C" ? "container_type" : "currency"]: value,
-                  ...(column === "C" && id ? { container_type_id: id } : {}),
-                }
+                    ...r,
+                    port_of_origin: grid.GetValue(row, "A") || "",
+                    port_of_destination: grid.GetValue(row, "B") || "",
+                    rate: Number(grid.GetValue(row, "E")) || 0,
+                    [column === "C" ? "container_type" : "currency"]: value,
+                    ...(column === "C" && id ? { container_type_id: id } : {}),
+                  }
                 : r,
             ),
           );
@@ -515,22 +515,23 @@ const FreightDrawer = ({ onClose, onSelect }: FreightDrawerProps) => {
               options={
                 dropdownPopover.column === "C"
                   ? (containerTypesData?.container_types || []).map(
-                    (t: any) => ({
-                      id: t.id,
-                      label: t.type,
-                    }),
-                  )
+                      (t: any) => ({
+                        id: t.id,
+                        label: t.type,
+                      }),
+                    )
                   : (currenciesData?.currencies || []).map((c: any) => ({
-                    id: c.id || c.currency || c.code,
-                    label: c.currency || c.code || "",
-                  }))
+                      id: c.id || c.currency || c.code,
+                      label: c.currency || c.code || "",
+                    }))
               }
               onSelect={handleSelectOption}
               onClose={() => setDropdownPopover(null)}
               showCreateNew={dropdownPopover.column === "C"}
               onCreateNew={handleCreateNewContainerType}
-              placeholder={`Search ${dropdownPopover.column === "C" ? "container..." : "currency..."
-                }`}
+              placeholder={`Search ${
+                dropdownPopover.column === "C" ? "container..." : "currency..."
+              }`}
             />
           )}
           {popoverPosition && (

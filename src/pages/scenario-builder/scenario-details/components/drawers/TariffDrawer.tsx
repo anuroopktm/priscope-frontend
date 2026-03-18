@@ -1,9 +1,24 @@
 import SearchTextField from "@/components/common/SearchTextField";
-import { useSearchTariffRates } from "@/services/queries/tariff/tariff.queries";
+import {
+  useCreateTariffRate,
+  useSearchTariffRates,
+} from "@/services/queries/tariff/tariff.queries";
 import type { TariffRate } from "@/services/queries/tariff/tariff.types";
+import { useToastStore } from "@/store/useToastStore";
 import AddIcon from "@mui/icons-material/Add";
-import { Box, Button, Typography } from "@mui/material";
-import { useEffect, useState } from "react";
+import CheckIcon from "@mui/icons-material/Check";
+import CloseIcon from "@mui/icons-material/Close";
+import {
+  Box,
+  Button,
+  IconButton,
+  Portal,
+  Stack,
+  TextField,
+  Typography,
+} from "@mui/material";
+import { useQueryClient } from "@tanstack/react-query";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { TariffLibraryLayout } from "../../tree-grid/config/tariff-library-layout";
 import { useTreeGridInit } from "../../tree-grid/hooks/useTreeGridInit";
 import DrawerHeader from "../items-master-drawer/components/DrawerHeader";
@@ -16,12 +31,19 @@ interface TariffDrawerProps {
 const tariffGridId = "TariffLibraryGrid";
 const tariffGridContainerId = "TreeGrid_" + tariffGridId;
 
-const TariffGrid = ({ data }: { data: any }) => {
+const TariffGrid = ({
+  data,
+  onInit,
+}: {
+  data: any;
+  onInit?: (id: string) => void;
+}) => {
   useTreeGridInit(
     tariffGridId,
     tariffGridContainerId,
     TariffLibraryLayout,
     data,
+    onInit,
   );
   return (
     <Box id={tariffGridContainerId} sx={{ height: "100%", width: "100%" }} />
@@ -29,42 +51,113 @@ const TariffGrid = ({ data }: { data: any }) => {
 };
 
 const TariffDrawer = ({ onClose, onSelect }: TariffDrawerProps) => {
+  const queryClient = useQueryClient();
+  const showToast = useToastStore((state) => state.showToast);
   const [searchTerm, setSearchTerm] = useState("");
-  const { data: tariffRatesData, isLoading } = useSearchTariffRates({
+  const {
+    data: tariffRatesData,
+    isLoading,
+    refetch,
+  } = useSearchTariffRates({
     search: searchTerm,
   });
+  const { mutate: createTariffRate, isPending: isCreating } =
+    useCreateTariffRate();
+
   const [localRows, setLocalRows] = useState<any[]>([]);
+  const [popoverPosition, setPopoverPosition] = useState<{
+    top: number;
+    left: number;
+    height: number;
+    rowId: string;
+  } | null>(null);
+  const [commentText, setCommentText] = useState("");
+
+  const handleClosePopover = () => {
+    setPopoverPosition(null);
+    setCommentText("");
+  };
+
+  const handleSaveTariffRow = (saveWithComment: boolean) => {
+    if (!popoverPosition) return;
+    const grid = (window as any).Grids?.[tariffGridId];
+    if (!grid) return;
+
+    const rowId = popoverPosition.rowId;
+    const row = grid.GetRowById(rowId);
+    if (!row) return;
+
+    const payload = {
+      tenant_id: "6b9d182e-5d44-4dbf-8a0d-efa9bb05996e",
+      country_of_origin: String(grid.GetValue(row, "country_of_origin") || ""),
+      country_of_destination: String(
+        grid.GetValue(row, "country_of_destination") || "",
+      ),
+      hs_code: String(grid.GetValue(row, "hs_code") || ""),
+      rate: Number(grid.GetValue(row, "rate")) || 0,
+      valid_from: new Date().toISOString(),
+      valid_to: "2030-12-31T23:59:59Z",
+      comments:
+        saveWithComment && commentText.trim()
+          ? [
+              {
+                comment_type: "field",
+                tariff_field_key: "hs_code",
+                comment: commentText.trim(),
+              },
+            ]
+          : [],
+      last_change_source: "tariff_rate",
+      action_key: "hs_code",
+    };
+
+    createTariffRate(payload, {
+      onSuccess: () => {
+        showToast("Tariff rate saved successfully", "success");
+        setLocalRows((prev) => prev.filter((r) => r.id !== rowId));
+        handleClosePopover();
+        refetch();
+        queryClient.invalidateQueries({ queryKey: ["tariff-rates"] });
+      },
+      onError: (error: any) => {
+        showToast(
+          error?.response?.data?.detail?.[0]?.msg ||
+            "Failed to save tariff rate",
+          "error",
+        );
+      },
+    });
+  };
+
+  const handleGridInit = useCallback((_gridId: string) => {
+    console.log("Tariff grid initialized:", _gridId);
+  }, []);
 
   const handleAddNewRow = () => {
     const grid = (window as any).Grids?.[tariffGridId];
     let updatedLocalRows = [...localRows];
 
     if (grid) {
-      // Read current state from grid rows to capture any manual edits for local rows
       updatedLocalRows = updatedLocalRows.map((row) => {
         const r = grid.GetRowById(row.id);
         if (r) {
           return {
             ...row,
-            country_of_origin:
-              r.country_of_origin !== undefined
-                ? r.country_of_origin
-                : row.country_of_origin,
+            country_of_origin: grid.GetValue(r, "country_of_origin") || "",
             country_of_destination:
-              r.country_of_destination !== undefined
-                ? r.country_of_destination
-                : row.country_of_destination,
-            hs_code: r.hs_code !== undefined ? r.hs_code : row.hs_code,
-            rate: r.rate !== undefined ? r.rate : row.rate,
+              grid.GetValue(r, "country_of_destination") || "",
+            hs_code: grid.GetValue(r, "hs_code") || "",
+            rate: Number(grid.GetValue(r, "rate")) || 0,
           };
         }
         return row;
       });
     }
 
+    const newId = `local_${Date.now()}`;
     setLocalRows([
       {
-        id: `local_${Date.now()}`,
+        id: newId,
         country_of_origin: "",
         country_of_destination: "",
         hs_code: "",
@@ -72,9 +165,30 @@ const TariffDrawer = ({ onClose, onSelect }: TariffDrawerProps) => {
       },
       ...updatedLocalRows,
     ]);
+
+    setTimeout(() => {
+      const g = (window as any).Grids?.[tariffGridId];
+      if (g) {
+        const row = g.GetRowById(newId);
+        if (row) {
+          const cell = g.GetCell(row, "actions");
+          if (cell) {
+            const rect = cell.getBoundingClientRect();
+            g.EndEdit(1);
+            setPopoverPosition({
+              top: rect.top,
+              left: rect.left,
+              height: rect.height,
+              rowId: newId,
+            });
+          }
+        }
+      }
+    }, 400);
   };
 
   const renderActionCell = (id: string) => {
+    if (id.startsWith("local_")) return `<div style="height: 100%;"></div>`;
     return `
             <div style="display: flex; justify-content: center; align-items: center; width: 100%; height: 100%;">
                 <button 
@@ -87,31 +201,33 @@ const TariffDrawer = ({ onClose, onSelect }: TariffDrawerProps) => {
         `;
   };
 
-  const gridData = {
-    Body: [
-      [
-        ...localRows.map((row) => ({
-          id: row.id,
-          country_of_origin: row.country_of_origin,
-          country_of_destination: row.country_of_destination,
-          hs_code: row.hs_code,
-          rate: row.rate,
-          actions: renderActionCell(row.id),
-        })),
-        ...(tariffRatesData?.tariff_rates?.map((rate: TariffRate) => ({
-          id: rate.id,
-          country_of_origin: rate.country_of_origin,
-          country_of_destination: rate.country_of_destination,
-          hs_code: rate.hs_code,
-          rate: rate.rate,
-          actions: renderActionCell(rate.id),
-          CanEdit: 0,
-        })) || []),
+  const gridData = useMemo(() => {
+    return {
+      Body: [
+        [
+          ...localRows.map((row) => ({
+            id: row.id,
+            country_of_origin: row.country_of_origin,
+            country_of_destination: row.country_of_destination,
+            hs_code: row.hs_code,
+            rate: row.rate,
+            actions: renderActionCell(row.id),
+            CanEdit: "1",
+          })),
+          ...(tariffRatesData?.tariff_rates?.map((rate: TariffRate) => ({
+            id: rate.id,
+            country_of_origin: rate.country_of_origin,
+            country_of_destination: rate.country_of_destination,
+            hs_code: rate.hs_code,
+            rate: rate.rate,
+            actions: renderActionCell(rate.id),
+            CanEdit: "0",
+          })) || []),
+        ],
       ],
-    ],
-  };
+    };
+  }, [localRows, tariffRatesData]);
 
-  // Global handler for row selection
   useEffect(() => {
     (window as any).handleSelectTariffRow = (rowId: string) => {
       const grid = (window as any).Grids?.[tariffGridId];
@@ -145,15 +261,12 @@ const TariffDrawer = ({ onClose, onSelect }: TariffDrawerProps) => {
         bgcolor: "background.paper",
         borderTopLeftRadius: 8,
         borderTopRightRadius: 8,
-        overflow: "hidden",
+        overflow: "visible",
         borderTop: 1,
         borderColor: "divider",
       }}
     >
-      {/* Header */}
       <DrawerHeader title="Tariff Library" onClose={onClose} />
-
-      {/* Content Container */}
       <Box
         sx={{
           flex: 1,
@@ -165,7 +278,6 @@ const TariffDrawer = ({ onClose, onSelect }: TariffDrawerProps) => {
           bgcolor: "white",
         }}
       >
-        {/* Search Bar Area */}
         <Box
           sx={{
             p: 1.5,
@@ -173,16 +285,17 @@ const TariffDrawer = ({ onClose, onSelect }: TariffDrawerProps) => {
             alignItems: "center",
             justifyContent: "space-between",
             bgcolor: "#E8E8E8",
-            borderRadius: 0.5,
+            borderRadius: 1,
             mb: 2,
           }}
         >
           <SearchTextField
             size="small"
             onSearch={setSearchTerm}
+            containerSx={{ bgcolor: "white", px: 0 }}
             sx={{
               "& .MuiOutlinedInput-root": {
-                bgcolor: "#E8E8E8",
+                bgcolor: "white",
                 color: "text.primary",
                 "& .MuiInputAdornment-root svg path": {
                   stroke: (theme: any) => theme.palette.brand.primary,
@@ -203,7 +316,6 @@ const TariffDrawer = ({ onClose, onSelect }: TariffDrawerProps) => {
           </Button>
         </Box>
 
-        {/* Grid Content */}
         <Box
           sx={{
             flex: 1,
@@ -212,7 +324,7 @@ const TariffDrawer = ({ onClose, onSelect }: TariffDrawerProps) => {
             border: "1px solid",
             borderColor: "divider",
             borderRadius: 1,
-            overflow: "hidden",
+            overflow: "visible",
           }}
         >
           {isLoading ? (
@@ -229,7 +341,103 @@ const TariffDrawer = ({ onClose, onSelect }: TariffDrawerProps) => {
               </Typography>
             </Box>
           ) : (
-            <TariffGrid data={gridData} />
+            <TariffGrid data={gridData} onInit={handleGridInit} />
+          )}
+
+          {popoverPosition && (
+            <Portal>
+              <Box
+                sx={{
+                  position: "fixed",
+                  top: popoverPosition.top + popoverPosition.height - 10,
+                  left: Math.max(10, popoverPosition.left - 310),
+                  zIndex: 1000000,
+                  width: 320,
+                  bgcolor: "background.paper",
+                  borderRadius: 2,
+                  mt: 1.5,
+                }}
+              >
+                <Box
+                  sx={{
+                    p: 2,
+                    position: "relative",
+                    pr: 0,
+                    pointerEvents: "auto",
+                  }}
+                >
+                  <Typography variant="subtitle2" sx={{ mb: 1 }}>
+                    Comments*
+                  </Typography>
+                  <TextField
+                    fullWidth
+                    multiline
+                    rows={3}
+                    value={commentText}
+                    onChange={(e) => setCommentText(e.target.value)}
+                    onKeyDownCapture={(e) => {
+                      e.stopPropagation();
+                    }}
+                    onKeyUpCapture={(e) => {
+                      e.stopPropagation();
+                    }}
+                    placeholder="Type here..."
+                    autoFocus
+                    variant="standard"
+                    InputProps={{
+                      disableUnderline: true,
+                      sx: {
+                        fontSize: "13px",
+                        py: 1,
+                        borderTop: "1px solid #E5E7EB",
+                      },
+                    }}
+                  />
+                  <Stack
+                    direction="row"
+                    spacing={1.5}
+                    sx={{
+                      position: "absolute",
+                      right: -90,
+                      top: 0,
+                      display: "flex",
+                      alignItems: "center",
+                    }}
+                  >
+                    <IconButton
+                      onClick={() => handleSaveTariffRow(true)}
+                      disabled={isCreating || !commentText.trim()}
+                      sx={{
+                        bgcolor: "white",
+                        boxShadow: "0px 4px 10px rgba(0,0,0,0.1)",
+                        color: "#3B82F6",
+                        "&:hover": { bgcolor: "#F3F4F6" },
+                        border: "1px solid #E5E7EB",
+                        width: 36,
+                        height: 36,
+                      }}
+                    >
+                      <CheckIcon />
+                    </IconButton>
+                    <IconButton
+                      onClick={() => handleSaveTariffRow(false)}
+                      disabled={isCreating}
+                      sx={{
+                        bgcolor: "white",
+                        boxShadow: "0px 4px 10px rgba(0,0,0,0.1)",
+                        color: "#EF4444",
+                        "&:hover": { bgcolor: "#F3F4F6" },
+                        border: "1px solid #E5E7EB",
+                        width: 36,
+                        height: 36,
+                      }}
+                    >
+                      <CloseIcon />
+                    </IconButton>
+                  </Stack>
+                </Box>
+              </Box>
+            </Portal>
           )}
         </Box>
       </Box>

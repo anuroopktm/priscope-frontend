@@ -1,5 +1,5 @@
 import { axiosInstance } from "@/services/api/axiosInstance";
-import { useQuery } from "@tanstack/react-query";
+import { useMutation, useQuery } from "@tanstack/react-query";
 import type { AxiosError } from "axios";
 import type {
   TariffRatesSearchParams,
@@ -17,5 +17,14 @@ export const useSearchTariffRates = (params: TariffRatesSearchParams) => {
       return response.data;
     },
     refetchOnWindowFocus: false,
+  });
+};
+
+export const useCreateTariffRate = () => {
+  return useMutation({
+    mutationFn: async (payload: any) => {
+      const response = await axiosInstance.post(`/v1/tariff-rates`, payload);
+      return response.data;
+    },
   });
 };
