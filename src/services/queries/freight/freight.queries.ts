@@ -47,6 +47,7 @@ export const useSearchFreightRates = (params: FreightRatesSearchParams) => {
       );
       return response.data;
     },
+    refetchOnWindowFocus: false,
   });
 };
 
@@ -61,6 +62,7 @@ export const useSearchContainerTypes = (payload: any) => {
       return response.data;
     },
     enabled: Boolean(payload?.tenant_id),
+    refetchOnWindowFocus: false,
   });
 };
 

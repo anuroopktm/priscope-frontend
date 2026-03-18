@@ -16,5 +16,6 @@ export const useSearchTariffRates = (params: TariffRatesSearchParams) => {
       );
       return response.data;
     },
+    refetchOnWindowFocus: false,
   });
 };

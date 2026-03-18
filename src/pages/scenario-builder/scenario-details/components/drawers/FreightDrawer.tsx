@@ -15,14 +15,19 @@ import {
   Box,
   Button,
   IconButton,
+  Portal,
   Stack,
   TextField,
   Typography,
 } from "@mui/material";
-import React, { useEffect, useMemo, useState } from "react";
+import { useQueryClient } from "@tanstack/react-query";
+import React, { useCallback, useEffect, useMemo, useState } from "react";
 import { FreightDrawerLayout } from "../../tree-grid/config/freight-drawer-layout";
 import { useTreeGridInit } from "../../tree-grid/hooks/useTreeGridInit";
 import DrawerHeader from "../items-master-drawer/components/DrawerHeader";
+import { GridSelectPopover } from "./components/GridSelectPopover";
+
+console.log("FreightDrawer.tsx module loaded");
 
 interface FreightDrawerProps {
   onClose: () => void;
@@ -32,24 +37,31 @@ interface FreightDrawerProps {
 const freightGridId = "FreightDrawerGrid";
 const freightGridContainerId = "TreeGrid_" + freightGridId;
 
-const FreightGrid = React.memo(({ data }: { data: any }) => {
-  useTreeGridInit(
-    freightGridId,
-    freightGridContainerId,
-    FreightDrawerLayout,
-    data,
-  );
-  return (
-    <Box
-      id={freightGridContainerId}
-      sx={{ height: "100%", width: "100%", overflow: "visible" }}
-    />
-  );
-});
+const FreightGrid = React.memo(
+  ({ data, onInit }: { data: any; onInit?: (id: string) => void }) => {
+    console.log("FreightGrid component mounting", { hasOninit: !!onInit });
+    useTreeGridInit(
+      freightGridId,
+      freightGridContainerId,
+      FreightDrawerLayout,
+      data,
+      (grid) => onInit?.(grid.id),
+    );
+    return (
+      <Box
+        id={freightGridContainerId}
+        sx={{ height: "100%", width: "100%", overflow: "visible" }}
+      />
+    );
+  },
+);
 
 FreightGrid.displayName = "FreightGrid";
 
 const FreightDrawer = ({ onClose, onSelect }: FreightDrawerProps) => {
+  console.log("FreightDrawer component executing/rendering");
+  const queryClient = useQueryClient();
+  const showToast = useToastStore((state) => state.showToast);
   const [searchTerm, setSearchTerm] = useState("");
   const {
     data: freightRatesData,
@@ -68,6 +80,16 @@ const FreightDrawer = ({ onClose, onSelect }: FreightDrawerProps) => {
   } | null>(null);
   const [commentText, setCommentText] = useState("");
 
+  const [dropdownPopover, setDropdownPopover] = useState<{
+    top: number;
+    left: number;
+    width: number;
+    height: number;
+    column: string;
+    rowId: string;
+    value: string;
+  } | null>(null);
+
   // APIs for dropdowns
   const { data: currenciesData } = useListCurrencies({
     search: "",
@@ -84,7 +106,6 @@ const FreightDrawer = ({ onClose, onSelect }: FreightDrawerProps) => {
 
   const { mutateAsync: createContainerType } = useCreateContainerType();
   const { mutate: createRate, isPending: isCreating } = useCreateFreightRate();
-  const showToast = useToastStore((state) => state.showToast);
 
   const handleClosePopover = () => {
     setPopoverPosition(null);
@@ -139,7 +160,7 @@ const FreightDrawer = ({ onClose, onSelect }: FreightDrawerProps) => {
         source: "freight_rate",
         tenant_id: "6b9d182e-5d44-4dbf-8a0d-efa9bb05996e",
         valid_from: new Date().toISOString().split("T")[0] + "T00:00:00",
-        valid_to: "2025-09-30T23:59:59",
+        valid_to: "2030-12-31T23:59:59",
       };
 
       createRate(payload, {
@@ -156,6 +177,111 @@ const FreightDrawer = ({ onClose, onSelect }: FreightDrawerProps) => {
     };
 
     resolveAndSave();
+  };
+
+  const handleGridInit = useCallback((gridId: string) => {
+    console.log("Setting up TreeGrid events for:", gridId);
+
+    const showDropdown = (row: any, col: string) => {
+      if (!row || !row.id.startsWith("local_")) return false;
+      console.log("Triggering dropdown event for:", col, row.id);
+      const grid = (window as any).Grids?.[gridId];
+      if (!grid) return false;
+
+      // Force any active edits (A, B, or E) to save before we process the popover
+      grid.EndEdit(1);
+
+      if (col === "C" || col === "D") {
+        grid.Focus(row, col);
+        const cell = grid.GetCell(row, col);
+        if (cell) {
+          const rect = cell.getBoundingClientRect();
+          console.log("Requesting popover at rect:", rect);
+          setDropdownPopover({
+            top: rect.top,
+            left: rect.left,
+            width: rect.width,
+            height: rect.height,
+            column: col,
+            rowId: row.id,
+            value: row[col] || "",
+          });
+          return true;
+        }
+      }
+      return false;
+    };
+
+    if ((window as any).TGSetEvent) {
+      (window as any).TGSetEvent(
+        "OnClick",
+        gridId,
+        (_: any, row: any, col: string) => showDropdown(row, col),
+      );
+      (window as any).TGSetEvent(
+        "OnFocus",
+        gridId,
+        (_: any, row: any, col: string) => {
+          showDropdown(row, col);
+        },
+      );
+      console.log("Events registered via TGSetEvent");
+    } else {
+      console.warn("TGSetEvent not found on window");
+    }
+  }, []);
+
+  const handleSelectOption = (value: string, id?: string) => {
+    if (!dropdownPopover) return;
+    const { rowId, column } = dropdownPopover;
+    const grid = (window as any).Grids?.[freightGridId];
+    if (grid) {
+      const row = grid.GetRowById(rowId);
+      if (row) {
+        // Use SetValue to ensure TreeGrid processes the change correctly
+        grid.SetValue(row, column, value, 1);
+        if (column === "C" && id) {
+          row.C_id = id;
+        }
+
+        // Sync localRows state with current grid values
+        if (rowId.startsWith("local_")) {
+          setLocalRows((prev) =>
+            prev.map((r) =>
+              r.id === rowId
+                ? {
+                  ...r,
+                  port_of_origin: grid.GetValue(row, "A") || "",
+                  port_of_destination: grid.GetValue(row, "B") || "",
+                  rate: Number(grid.GetValue(row, "E")) || 0,
+                  [column === "C" ? "container_type" : "currency"]: value,
+                  ...(column === "C" && id ? { container_type_id: id } : {}),
+                }
+                : r,
+            ),
+          );
+        }
+
+        // Focus away from the grid to prevent immediate re-trigger of focus/dropdown
+        grid.Focus(null, null);
+      }
+    }
+    setDropdownPopover(null);
+  };
+
+  const handleCreateNewContainerType = async (value: string) => {
+    try {
+      const newType = await createContainerType({
+        type: value,
+        description: `Standard ${value} container`,
+        tenant_id: "6b9d182e-5d44-4dbf-8a0d-efa9bb05996e",
+      });
+      queryClient.invalidateQueries({ queryKey: ["container-types"] });
+      handleSelectOption(newType.type, newType.id);
+      showToast(`Created New Container Type: ${value}`, "success");
+    } catch (e) {
+      showToast("Failed to create container type", "error");
+    }
   };
 
   const handleAddNewRow = () => {
@@ -201,19 +327,18 @@ const FreightDrawer = ({ onClose, onSelect }: FreightDrawerProps) => {
           const cell = g.GetCell(row, "F");
           if (cell) {
             const rect = cell.getBoundingClientRect();
+            g.EndEdit(1);
             setPopoverPosition({
               top: rect.top,
               left: rect.left,
               height: rect.height,
               rowId: newId,
             });
-            setTimeout(() => g.Focus(row, "A"), 100);
           }
         }
       }
     }, 400);
   };
-
   const renderActionCell = (id: string, isSelected: boolean = false) => {
     if (isSelected) {
       return `<div style="display: flex; justify-content: center; align-items: center; width: 100%; height: 100%; color: #059669;">
@@ -231,26 +356,8 @@ const FreightDrawer = ({ onClose, onSelect }: FreightDrawerProps) => {
             </div>`;
   };
 
-  const containerEnum = useMemo(() => {
-    const list =
-      containerTypesData?.container_types?.map((t: any) => t.type) || [];
-    const final = list.length > 0 ? list : ["20 ft", "40 ft"];
-    return "|" + Array.from(new Set(final)).join("|");
-  }, [containerTypesData]);
-
-  const currencyEnum = useMemo(() => {
-    const list = currenciesData?.currencies?.map((c: any) => c.code) || [];
-    const final = list.length > 0 ? list : ["USD", "EUR", "GBP", "JPY"];
-    return "|" + Array.from(new Set(final)).join("|");
-  }, [currenciesData]);
-
   const gridData = useMemo(() => {
     return {
-      Cfg: {
-        MenuZIndex: "1000000",
-        EnumKeysSeparator: "|",
-        EnumSeparator: "|",
-      },
       Body: [
         [
           ...localRows.map((row) => ({
@@ -258,56 +365,36 @@ const FreightDrawer = ({ onClose, onSelect }: FreightDrawerProps) => {
             A: row.port_of_origin,
             B: row.port_of_destination,
             C: row.container_type,
-            CEnum: containerEnum,
-            CEnumKeys: containerEnum,
-            CType: "Enum",
-            CButton: "Enum",
-            COnClick: "ShowEnum",
-            CCanEdit: "1",
             D: row.currency,
-            DEnum: currencyEnum,
-            DEnumKeys: currencyEnum,
-            DType: "Enum",
-            DButton: "Enum",
-            DOnClick: "ShowEnum",
-            DCanEdit: "1",
             E: row.rate,
             F: renderActionCell(row.id, false),
             CanEdit: "1",
             ACanEdit: "1",
             BCanEdit: "1",
             ECanEdit: "1",
+            CCanEdit: "1",
+            DCanEdit: "1",
           })),
           ...(freightRatesData?.freight_rates?.map((rate: FreightRate) => ({
             id: rate.id,
             A: rate.port_of_origin,
             B: rate.port_of_destination,
             C: rate.container_type || "20 ft",
-            CEnum: containerEnum,
-            CEnumKeys: containerEnum,
-            CType: "Enum",
-            CButton: "Enum",
-            COnClick: "ShowEnum",
-            CCanEdit: "1",
             C_id: rate.container_type,
             D: rate.currency,
-            DEnum: currencyEnum,
-            DEnumKeys: currencyEnum,
-            DType: "Enum",
-            DButton: "Enum",
-            DOnClick: "ShowEnum",
-            DCanEdit: "1",
             E: rate.rate,
             F: renderActionCell(rate.id, false),
-            CanEdit: "1",
-            ACanEdit: "1",
-            BCanEdit: "1",
-            ECanEdit: "1",
+            CanEdit: "0",
+            ACanEdit: "0",
+            BCanEdit: "0",
+            ECanEdit: "0",
+            CCanEdit: "0",
+            DCanEdit: "0",
           })) || []),
         ],
       ],
     };
-  }, [localRows, freightRatesData, containerEnum, currencyEnum]);
+  }, [localRows, freightRatesData]);
 
   useEffect(() => {
     (window as any).handleSelectFreightRow = (rowId: string) => {
@@ -333,9 +420,6 @@ const FreightDrawer = ({ onClose, onSelect }: FreightDrawerProps) => {
     };
   }, [onSelect, onClose]);
 
-  console.log("containerEnum", containerEnum);
-  console.log("currencyEnum", currencyEnum);
-
   return (
     <Box
       sx={{
@@ -345,12 +429,11 @@ const FreightDrawer = ({ onClose, onSelect }: FreightDrawerProps) => {
         bgcolor: "background.paper",
         borderTopLeftRadius: 8,
         borderTopRightRadius: 8,
-        overflow: "hidden",
+        overflow: "visible",
         borderTop: 1,
         borderColor: "divider",
       }}
     >
-      <style>{` .TGMenuMain, .TGMenu, .TGPivotMenu, .TGDefaultsMenu, .TGMessage, .TGMenuSearch { z-index: 1000001 !important; } `}</style>
       <DrawerHeader title="Freight Library" onClose={onClose} />
       <Box
         sx={{
@@ -408,6 +491,7 @@ const FreightDrawer = ({ onClose, onSelect }: FreightDrawerProps) => {
             border: "1px solid",
             borderColor: "divider",
             borderRadius: 1,
+            overflow: "visible",
           }}
         >
           {isLoading ? (
@@ -422,96 +506,127 @@ const FreightDrawer = ({ onClose, onSelect }: FreightDrawerProps) => {
               <Typography variant="body2">Loading...</Typography>
             </Box>
           ) : (
-            <FreightGrid data={gridData} />
+            <FreightGrid data={gridData} onInit={handleGridInit} />
+          )}
+
+          {dropdownPopover && (
+            <GridSelectPopover
+              anchor={dropdownPopover}
+              options={
+                dropdownPopover.column === "C"
+                  ? (containerTypesData?.container_types || []).map(
+                    (t: any) => ({
+                      id: t.id,
+                      label: t.type,
+                    }),
+                  )
+                  : (currenciesData?.currencies || []).map((c: any) => ({
+                    id: c.id || c.currency || c.code,
+                    label: c.currency || c.code || "",
+                  }))
+              }
+              onSelect={handleSelectOption}
+              onClose={() => setDropdownPopover(null)}
+              showCreateNew={dropdownPopover.column === "C"}
+              onCreateNew={handleCreateNewContainerType}
+              placeholder={`Search ${dropdownPopover.column === "C" ? "container..." : "currency..."
+                }`}
+            />
           )}
           {popoverPosition && (
-            <Box
-              sx={{
-                position: "fixed",
-                top: popoverPosition.top + popoverPosition.height - 10,
-                left: Math.max(10, popoverPosition.left - 310),
-                zIndex: 1400,
-                width: 320,
-                bgcolor: "background.paper",
-                borderRadius: 2,
-                boxShadow: "0px 4px 20px rgba(0,0,0,0.15)",
-                mt: 1.5,
-                pointerEvents: "none",
-              }}
-            >
+            <Portal>
               <Box
                 sx={{
-                  p: 2,
-                  position: "relative",
-                  pr: 0,
-                  pointerEvents: "auto",
+                  position: "fixed",
+                  top: popoverPosition.top + popoverPosition.height - 10,
+                  left: Math.max(10, popoverPosition.left - 310),
+                  zIndex: 1000000,
+                  width: 320,
+                  bgcolor: "background.paper",
+                  borderRadius: 2,
+                  mt: 1.5,
                 }}
               >
-                <Typography variant="subtitle2" sx={{ mb: 1 }}>
-                  Comments*
-                </Typography>
-                <TextField
-                  fullWidth
-                  multiline
-                  rows={3}
-                  value={commentText}
-                  onChange={(e) => setCommentText(e.target.value)}
-                  placeholder="Type here..."
-                  variant="standard"
-                  InputProps={{
-                    disableUnderline: true,
-                    sx: {
-                      fontSize: "13px",
-                      py: 1,
-                      borderTop: "1px solid #E5E7EB",
-                    },
-                  }}
-                />
-                <Stack
-                  direction="row"
-                  spacing={1.5}
+                <Box
                   sx={{
-                    position: "absolute",
-                    right: -88,
-                    top: 0,
-                    display: "flex",
-                    alignItems: "center",
-                    gap: 1,
+                    p: 2,
+                    position: "relative",
+                    pr: 0,
+                    pointerEvents: "auto",
                   }}
                 >
-                  <IconButton
-                    onClick={() => handleSaveFreightRow(true)}
-                    disabled={isCreating || !commentText.trim()}
+                  <Typography variant="subtitle2" sx={{ mb: 1 }}>
+                    Comments*
+                  </Typography>
+                  <TextField
+                    fullWidth
+                    multiline
+                    rows={3}
+                    value={commentText}
+                    onChange={(e) => setCommentText(e.target.value)}
+                    onKeyDownCapture={(e) => {
+                      e.stopPropagation();
+                    }}
+                    onKeyUpCapture={(e) => {
+                      e.stopPropagation();
+                    }}
+                    placeholder="Type here..."
+                    autoFocus
+                    variant="standard"
+                    InputProps={{
+                      disableUnderline: true,
+                      sx: {
+                        fontSize: "13px",
+                        py: 1,
+                        borderTop: "1px solid #E5E7EB",
+                      },
+                    }}
+                  />
+                  <Stack
+                    direction="row"
+                    spacing={1.5}
                     sx={{
-                      bgcolor: "white",
-                      boxShadow: "0px 4px 10px rgba(0,0,0,0.1)",
-                      color: "#3B82F6",
-                      "&:hover": { bgcolor: "#F3F4F6" },
-                      border: "1px solid #E5E7EB",
-                      width: 36,
-                      height: 36,
+                      position: "absolute",
+                      right: -90,
+                      top: 0,
+                      display: "flex",
+                      alignItems: "center",
                     }}
                   >
-                    <CheckIcon />
-                  </IconButton>
-                  <IconButton
-                    onClick={() => handleSaveFreightRow(false)}
-                    disabled={isCreating}
-                    sx={{
-                      bgcolor: "white",
-                      boxShadow: "0px 4px 10px rgba(0,0,0,0.1)",
-                      color: "#EF4444",
-                      "&:hover": { bgcolor: "#F3F4F6" },
-                      border: "1px solid #E5E7EB",
-                      width: 36,
-                      height: 36,
-                    }}
-                  >
-                    <CloseIcon />
-                  </IconButton>
-                </Stack>
+                    <IconButton
+                      onClick={() => handleSaveFreightRow(true)}
+                      disabled={isCreating || !commentText.trim()}
+                      sx={{
+                        bgcolor: "white",
+                        boxShadow: "0px 4px 10px rgba(0,0,0,0.1)",
+                        color: "#3B82F6",
+                        "&:hover": { bgcolor: "#F3F4F6" },
+                        border: "1px solid #E5E7EB",
+                        width: 36,
+                        height: 36,
+                      }}
+                    >
+                      <CheckIcon />
+                    </IconButton>
+                    <IconButton
+                      onClick={() => handleSaveFreightRow(false)}
+                      disabled={isCreating}
+                      sx={{
+                        bgcolor: "white",
+                        boxShadow: "0px 4px 10px rgba(0,0,0,0.1)",
+                        color: "#EF4444",
+                        "&:hover": { bgcolor: "#F3F4F6" },
+                        border: "1px solid #E5E7EB",
+                        width: 36,
+                        height: 36,
+                      }}
+                    >
+                      <CloseIcon />
+                    </IconButton>
+                  </Stack>
+                </Box>
               </Box>
-            </Box>
+            </Portal>
           )}
         </Box>
       </Box>

@@ -1,3 +1,22 @@
+import type { CommentsResponse } from "@/components/common/loader/comment-sidebar/types";
+import type {
+  AddBulkInsertAdminRequest,
+  AddHeaderPayload,
+  AddHeaderResponse,
+  EditItemMasterColPayload,
+  EditItemMasterColResponse,
+  ExportItemMasterRowPayload,
+  ExportItemMasterRowResponse,
+  ItemMasterBulkInsertAdminRequestResponse,
+  ItemMasterBulkUploadFormattedDataPayload,
+  ItemMasterBulkUploadResponseType,
+  itemMasterHeaderResponse,
+  SavedFiltersList,
+  SaveFilterPayload,
+  SaveFilterResponse,
+} from "@/pages/items-master-refactor/helper/types";
+import { axiosInstance } from "@/services/api/axiosInstance";
+import { useItemMasterStore } from "@/store/useHeaderStore";
 import {
   useInfiniteQuery,
   useMutation,
@@ -5,7 +24,6 @@ import {
   useQueryClient,
 } from "@tanstack/react-query";
 import type { AxiosError } from "axios";
-
 import type {
   DeleteSelectedRowPayload,
   DeleteSelectedRowResponse,
@@ -20,26 +38,6 @@ import type {
   MapFieldsResponse,
   SystemFieldsResponse,
 } from "./item-master-refactor.types";
-
-import type { CommentsResponse } from "@/components/common/loader/comment-sidebar/types";
-import { axiosInstance } from "@/services/api/axiosInstance";
-import { useItemMasterStore } from "@/store/useHeaderStore";
-import type {
-  EditItemMasterColResponse,
-  AddBulkInsertAdminRequest,
-  AddHeaderPayload,
-  AddHeaderResponse,
-  EditItemMasterColPayload,
-  ExportItemMasterRowPayload,
-  ExportItemMasterRowResponse,
-  ItemMasterBulkInsertAdminRequestResponse,
-  ItemMasterBulkUploadFormattedDataPayload,
-  ItemMasterBulkUploadResponseType,
-  itemMasterHeaderResponse,
-  SavedFiltersList,
-  SaveFilterPayload,
-  SaveFilterResponse,
-} from "@/pages/items-master-refactor/helper/types";
 
 export type UploadResponse = {
   upload_id: string;
@@ -367,6 +365,7 @@ export const useListHeaders = (payload: ListRequestBody) => {
 
       return response.data;
     },
+    refetchOnWindowFocus: false,
   });
 };
 export const useListComments = (payload: ListCommentsPayload) => {
@@ -417,6 +416,7 @@ export const useItemMasterHistory = ({
       return response.data;
     },
     enabled: Boolean(item_id),
+    refetchOnWindowFocus: false,
   });
 };
 
@@ -428,6 +428,7 @@ export const useGetItemMasterById = (item_id?: string) => {
       return response.data;
     },
     enabled: Boolean(item_id),
+    refetchOnWindowFocus: false,
   });
 };
 
@@ -440,5 +441,6 @@ export const useListSavedFilter = () => {
       );
       return response.data;
     },
+    refetchOnWindowFocus: false,
   });
 };

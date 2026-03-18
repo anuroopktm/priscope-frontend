@@ -10,6 +10,7 @@ const GlobalToast = () => {
       autoHideDuration={6000}
       onClose={hideToast}
       anchorOrigin={{ vertical: "top", horizontal: "center" }}
+      sx={{ zIndex: 100000 }}
     >
       <Alert
         onClose={hideToast}

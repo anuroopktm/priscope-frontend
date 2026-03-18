@@ -67,6 +67,7 @@ export const useListModuleImports = (
       return data;
     },
     enabled: Boolean(module_name),
+    refetchOnWindowFocus: false,
     ...options,
   });
 };
@@ -90,6 +91,7 @@ export const useListModuleImportSummaryCount = (
       return data;
     },
     enabled: Boolean(uploadId && module_name),
+    refetchOnWindowFocus: false,
   });
 };
 
