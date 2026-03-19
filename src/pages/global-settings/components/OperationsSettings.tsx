@@ -1,4 +1,8 @@
-import { useGetOperationsSettings, useUpdateOperationsSettings } from "@/services/global-settings/global-setting.queries";
+import {
+  useGetOperationsSettings,
+  useUpdateOperationsSettings,
+} from "@/services/global-settings/global-setting.queries";
+import { useToastStore } from "@/store/useToastStore";
 import {
   systemIdentifierSchema,
   type SystemIdentifierFormValues,
@@ -11,6 +15,7 @@ import {
   CardContent,
   Typography,
   Radio,
+  CircularProgress,
 } from "@mui/material";
 import { useEffect } from "react";
 import { Controller, useForm } from "react-hook-form";
@@ -22,7 +27,9 @@ const options = [
 
 const OperationsSettings = () => {
   const { data } = useGetOperationsSettings();
-  const {mutate}=useUpdateOperationsSettings()
+  const { mutate, isPending } = useUpdateOperationsSettings();
+  const showToast = useToastStore((store) => store.showToast);
+
   const {
     control,
     handleSubmit,
@@ -44,7 +51,14 @@ const OperationsSettings = () => {
   }, [data, reset]);
 
   const onSubmit = (data: SystemIdentifierFormValues) => {
-    mutate(data)
+    mutate(data, {
+      onSuccess: () => {
+        showToast("Operations settings updated successfully", "success");
+      },
+      onError: () => {
+        showToast("Failed to update operations settings", "error");
+      },
+    });
   };
 
   return (
@@ -128,9 +142,36 @@ const OperationsSettings = () => {
           </CardContent>
         </Card>
 
-        <Box sx={{ mt: 2 }}>
-          <Button type="submit" variant="contained" fullWidth>
-            Save
+        <Box
+          sx={{
+            display: "flex",
+            flexDirection: "column",
+            gap: 2,
+            width: "100%",
+            maxWidth: 500,
+            mx: "auto",
+          }}
+        >
+          <Button
+            type="submit"
+            fullWidth
+            variant="contained"
+            sx={{
+              mt: 2,
+              backgroundColor: "#1f4e6d",
+              textTransform: "none",
+              borderRadius: "8px",
+              height: 40,
+              "&:hover": {
+                backgroundColor: "#163c55",
+              },
+            }}
+          >
+            {isPending ? (
+              <CircularProgress color="inherit" size={20} />
+            ) : (
+              "Save"
+            )}
           </Button>
         </Box>
       </Box>

@@ -9,6 +9,7 @@ import {
   Select,
   FormControl,
   FormHelperText,
+  CircularProgress,
 } from "@mui/material";
 import CloudUploadOutlinedIcon from "@mui/icons-material/CloudUploadOutlined";
 import { useForm, Controller } from "react-hook-form";
@@ -20,11 +21,11 @@ import {
 import { useListCurrencies } from "@/services/queries/common/common.queries";
 import { styled } from "@mui/material";
 import { useEffect, useState } from "react";
-import { ACCEPTED_FILE_TYPES } from "@/pages/items-master-refactor/constants/upload.constants";
 import {
   useGetCompanyInfo,
   useUpdateCompanyInfo,
 } from "@/services/global-settings/global-setting.queries";
+import { useToastStore } from "@/store/useToastStore";
 
 const DropZone = styled(Box)<{ isDragOver: boolean }>(({ theme }) => ({
   border: `1.5px dashed #90A4AE`,
@@ -37,14 +38,21 @@ const DropZone = styled(Box)<{ isDragOver: boolean }>(({ theme }) => ({
 
 export default function CompanyInfoPage() {
   const [isDragOver, setIsDragOver] = useState(false);
+  const { data: currencyData, isLoading: isCurrencyLoading } =
+    useListCurrencies({
+      search: "",
+      page_size: 300,
+      skip: 0,
+    });
+
   const { data } = useGetCompanyInfo();
-  const { mutate: updateCompanyInfo } = useUpdateCompanyInfo();
+  const { mutate: updateCompanyInfo, isPending } = useUpdateCompanyInfo();
 
   const {
     control,
     handleSubmit,
     reset,
-    formState: { errors },
+    formState: { errors, isDirty },
   } = useForm({
     resolver: zodResolver(companyInfoSchema),
     defaultValues: {
@@ -59,7 +67,7 @@ export default function CompanyInfoPage() {
   });
 
   useEffect(() => {
-    if (data && currencyData) {
+    if (data && currencyData && !isDirty) {
       const mappedCurrency =
         currencyData.currencies?.find(
           (c) =>
@@ -76,14 +84,9 @@ export default function CompanyInfoPage() {
         company_logo_url: data.company_logo_url || undefined,
       });
     }
-  }, [data, reset]);
+  }, [data, currencyData, reset, isDirty]);
 
-  const { data: currencyData, isLoading: isCurrencyLoading } =
-    useListCurrencies({
-      search: "",
-      page_size: 300,
-      skip: 0,
-    });
+  const showToast = useToastStore((store) => store.showToast);
 
   const onSubmit = (data: CompanyInfoSchema) => {
     const formData = new FormData();
@@ -96,15 +99,16 @@ export default function CompanyInfoPage() {
     if (data.company_logo_url instanceof File) {
       formData.append("company_logo_url", data.company_logo_url);
     }
-    console.log(data);
-    console.log(data.company_logo_url instanceof File);
     console.log(data.company_logo_url);
 
-    for (let [key, value] of formData.entries()) {
-      console.log(key, value);
-    }
-
-    updateCompanyInfo(formData);
+    updateCompanyInfo(formData, {
+      onSuccess: () => {
+        showToast("Company info updated successfully", "success");
+      },
+      onError: () => {
+        showToast("Failed to update company info", "error");
+      },
+    });
   };
   return (
     <Box
@@ -153,8 +157,6 @@ export default function CompanyInfoPage() {
                 <FormControl fullWidth size="small">
                   <Select
                     {...field}
-                    labelId="currency-label"
-                    label="Base Currency"
                     size="small"
                     variant="outlined"
                     disabled={isCurrencyLoading}
@@ -206,7 +208,6 @@ export default function CompanyInfoPage() {
                         sx={{ fontSize: 32, mb: 1, color: "#607D8B" }}
                       />
 
-                      {/* ✅ HANDLE ALL CASES */}
                       {isFile ? (
                         <Typography mt={1} fontSize={12}>
                           {value.name}
@@ -243,22 +244,20 @@ export default function CompanyInfoPage() {
                       )}
                     </DropZone>
 
-                    {/* ✅ FILE INPUT */}
                     <input
                       id="file-input"
                       type="file"
                       hidden
-                      accept={ACCEPTED_FILE_TYPES}
+                      accept="image/*"
                       onChange={(e) => {
                         const selectedFile = e.target.files?.[0];
                         if (selectedFile) {
                           field.onChange(selectedFile);
-                          e.target.value = ""; // 🔥 important
+                          e.target.value = ""; 
                         }
                       }}
                     />
 
-                    {/* ✅ REMOVE BUTTON (optional but recommended) */}
                     {value && (
                       <Button
                         size="small"
@@ -268,6 +267,12 @@ export default function CompanyInfoPage() {
                       >
                         Remove
                       </Button>
+                    )}
+
+                    {errors.company_logo_url && (
+                      <FormHelperText error sx={{ mt: 1 }}>
+                        {errors.company_logo_url.message}
+                      </FormHelperText>
                     )}
                   </>
                 );
@@ -352,7 +357,7 @@ export default function CompanyInfoPage() {
             },
           }}
         >
-          Save
+          {isPending ? <CircularProgress color="inherit" size={20} /> : "Save"}
         </Button>
       </Box>
     </Box>

@@ -34,6 +34,11 @@ export const useUpdateCompanyInfo = () => {
         const response = await axiosInstance.patch(
           "/v1/global-settings/company-info",
           payload,
+          {
+            headers: {
+              "Content-Type": "multipart/form-data",
+            },
+          },
         );
         return response.data;
       },

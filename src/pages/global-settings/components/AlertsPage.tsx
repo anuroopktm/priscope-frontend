@@ -6,6 +6,7 @@ import {
   InputAdornment,
   Card,
   CardContent,
+  CircularProgress,
 } from "@mui/material";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -18,6 +19,7 @@ import {
   impactSettingsSchema,
   type ImpactSettingsFormValues,
 } from "@/validations/onboarding/impactsettings.schema";
+import { useToastStore } from "@/store/useToastStore";
 
 const fields = [
   { name: "fx_threshold", label: "FX impact" },
@@ -27,7 +29,8 @@ const fields = [
 
 const AlertsPage = () => {
   const { data } = useGetAlerts();
-  const { mutate } = useUpdateAlerts();
+  const { mutate, isPending } = useUpdateAlerts();
+  const showToast = useToastStore((store) => store.showToast);
 
   const {
     handleSubmit,
@@ -52,8 +55,15 @@ const AlertsPage = () => {
     }
   }, [data, reset]);
 
-  const onSubmit = (formData: ImpactSettingsFormValues) => {
-    mutate(formData); // now type-safe, no undefined/null issues
+  const onSubmit = (data: ImpactSettingsFormValues) => {
+    mutate(data, {
+      onSuccess: () => {
+        showToast("Alerts settings updated successfully", "success");
+      },
+      onError: () => {
+        showToast("Failed to update alerts settings", "error");
+      },
+    });
   };
 
   return (
@@ -87,7 +97,9 @@ const AlertsPage = () => {
                 <TextField
                   placeholder="Value"
                   type="number"
-                  {...register(field.name)}
+                  {...register(field.name, {
+                    valueAsNumber: true,
+                  })}
                   error={!!errors[field.name]}
                   helperText={errors[field.name]?.message}
                   sx={{
@@ -108,12 +120,40 @@ const AlertsPage = () => {
                 />
               </Box>
             ))}
-
-            <Button type="submit" variant="contained">
-              Continue
-            </Button>
           </CardContent>
         </Card>
+        <Box
+              sx={{
+                display: "flex",
+                flexDirection: "column",
+                gap: 2,
+                width: "100%",
+                maxWidth: 500,
+                mx: "auto",
+              }}
+            >
+              <Button
+                type="submit"
+                fullWidth
+                variant="contained"
+                sx={{
+                  mt: 2,
+                  backgroundColor: "#1f4e6d",
+                  textTransform: "none",
+                  borderRadius: "8px",
+                  height: 40,
+                  "&:hover": {
+                    backgroundColor: "#163c55",
+                  },
+                }}
+              >
+                {isPending ? (
+                  <CircularProgress color="inherit" size={20} />
+                ) : (
+                  "Save"
+                )}
+              </Button>
+            </Box>
       </Box>
     </Box>
   );

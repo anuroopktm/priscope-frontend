@@ -1,4 +1,10 @@
-import { Box, Typography, TextField, Button } from "@mui/material";
+import {
+  Box,
+  Typography,
+  TextField,
+  Button,
+  CircularProgress,
+} from "@mui/material";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import {
@@ -10,6 +16,7 @@ import {
   useUpdateSystemFields,
 } from "@/services/global-settings/global-setting.queries";
 import { useEffect } from "react";
+import { useToastStore } from "@/store/useToastStore";
 
 const fields = [
   { label: "SKU", name: "sku" },
@@ -29,7 +36,8 @@ const fieldKeyMap: Record<string, keyof SystemFieldMappingFormValues> = {
 
 const SystemFields = () => {
   const { data } = useGetSystemFields();
-  const { mutate: updateSystemFields } = useUpdateSystemFields();
+  const { mutate: updateSystemFields, isPending } = useUpdateSystemFields();
+  const showToast = useToastStore((store) => store.showToast);
 
   const {
     handleSubmit,
@@ -69,7 +77,14 @@ const SystemFields = () => {
       system_field: key,
       label: data[value],
     }));
-    updateSystemFields(payload);
+    updateSystemFields(payload, {
+      onSuccess: () => {
+        showToast("System fields updated successfully", "success");
+      },
+      onError: () => {
+        showToast("Failed to update system fields", "error");
+      },
+    });
   };
 
   return (
@@ -99,12 +114,8 @@ const SystemFields = () => {
             mb: 2,
           }}
         >
-          <Typography sx={{ fontSize: "14px", fontWeight: 600 }}>
-            System Fields
-          </Typography>
-          <Typography sx={{ fontSize: "14px", fontWeight: 600 }}>
-            Labeling
-          </Typography>
+          <Typography sx={{ fontWeight: 600, mb: 2 }}>System Fields</Typography>
+          <Typography sx={{ fontWeight: 600, mb: 2 }}>Labeling</Typography>
         </Box>
 
         {fields.map((field) => (
@@ -147,20 +158,25 @@ const SystemFields = () => {
           </Box>
         ))}
       </Box>
-      <Box
+      <Button
+        type="submit"
+        fullWidth
+        variant="contained"
         sx={{
-          display: "flex",
-          flexDirection: "column",
-          gap: 2,
-          width: "100%",
           maxWidth: 500,
           mx: "auto",
+          mt: 2,
+          backgroundColor: "#1f4e6d",
+          textTransform: "none",
+          borderRadius: "8px",
+          height: 40,
+          "&:hover": {
+            backgroundColor: "#163c55",
+          },
         }}
       >
-        <Button type="submit" variant="contained">
-          Save
-        </Button>
-      </Box>
+        {isPending ? <CircularProgress color="inherit" size={20} /> : "Save"}
+      </Button>
     </Box>
   );
 };

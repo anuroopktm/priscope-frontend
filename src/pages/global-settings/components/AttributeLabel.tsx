@@ -12,15 +12,18 @@ import {
   Button,
   Card,
   CardContent,
+  CircularProgress,
   TextField,
   Typography,
 } from "@mui/material";
 import { useEffect } from "react";
 import { Controller, useForm } from "react-hook-form";
+import { useToastStore } from "@/store/useToastStore";
 
 const AttributeLabel = () => {
   const { data } = useGetAttributes();
-  const { mutate: updateAttributes } = useUpdateAttributes();
+  const { mutate: updateAttributes, isPending } = useUpdateAttributes();
+  const showToast = useToastStore((store) => store.showToast);
 
   console.log(data);
   const {
@@ -57,7 +60,14 @@ const AttributeLabel = () => {
         label: value,
       })),
     };
-    updateAttributes(payload);
+    updateAttributes(payload, {
+      onSuccess: () => {
+        showToast("Attribute labels updated successfully", "success");
+      },
+      onError: () => {
+        showToast("Failed to update attribute labels", "error");
+      },
+    });
   };
   return (
     <Box
@@ -112,8 +122,26 @@ const AttributeLabel = () => {
             mx: "auto",
           }}
         >
-          <Button type="submit" variant="contained">
-            Save
+          <Button
+            type="submit"
+            fullWidth
+            variant="contained"
+            sx={{
+              mt: 2,
+              backgroundColor: "#1f4e6d",
+              textTransform: "none",
+              borderRadius: "8px",
+              height: 40,
+              "&:hover": {
+                backgroundColor: "#163c55",
+              },
+            }}
+          >
+            {isPending ? (
+              <CircularProgress color="inherit" size={20} />
+            ) : (
+              "Save"
+            )}
           </Button>
         </Box>
       </Box>
