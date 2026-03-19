@@ -63,9 +63,10 @@ const CreateScenarioModal = ({
     reset();
   };
 
-  const handleClose = (_e: {}, reason: "backdropClick" | "escapeKeyDown") => {
+  const handleClose = (_e?: object, reason?: string) => {
     if (reason === "backdropClick" || reason === "escapeKeyDown") return;
     onClose();
+    reset();
   };
 
   return (
@@ -156,7 +157,11 @@ const CreateScenarioModal = ({
         </DialogContent>
 
         <DialogActions sx={{ p: 3, pt: 1, justifyContent: "start", gap: 1 }}>
-          <Button size="medium" variant="outlined" onClick={onClose}>
+          <Button
+            size="medium"
+            variant="outlined"
+            onClick={() => handleClose()}
+          >
             Cancel
           </Button>
           <Button

@@ -143,7 +143,9 @@ const ActionHeader = ({
       {
         name: data.label,
         base_currency: data.currency,
-        customers: [{ customer_name: data.customer }],
+        customers: data.customer
+          ? data.customer.map((id) => ({ customer_id: id }))
+          : [],
       },
       {
         onSuccess: (response) => {
