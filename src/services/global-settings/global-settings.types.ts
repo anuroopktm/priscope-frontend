@@ -20,4 +20,17 @@ export interface SystemFieldResponse {
 export interface UpdateSystemFieldPayload {
   system_field: string;
   label: string;
-}[]
+}
+[];
+
+export interface AttributeResponseFields {
+  name: string;
+  label: string;
+}
+
+export interface UpdateAttributesFieldPayload {
+  attributes: {
+    name: string;
+    label: string;
+  }[];
+}

@@ -1,31 +1,73 @@
-import { useGetAttributes } from "@/services/global-settings/global-setting.queries";
-import { Box, Card, CardContent, Typography } from "@mui/material";
+import {
+  useGetAttributes,
+  useUpdateAttributes,
+} from "@/services/global-settings/global-setting.queries";
+import {
+  attributeSchema,
+  type AttributeSchemaType,
+} from "@/validations/global-settings/attributes.schema";
+import { zodResolver } from "@hookform/resolvers/zod";
+import {
+  Box,
+  Button,
+  Card,
+  CardContent,
+  TextField,
+  Typography,
+} from "@mui/material";
+import { useEffect } from "react";
+import { Controller, useForm } from "react-hook-form";
 
 const AttributeLabel = () => {
   const { data } = useGetAttributes();
-  console.log(data)
-  // const {
-  //     handleSubmit,
-  //     register,
-  //     formState: { errors },
-  //   } = useForm<SystemFieldMappingFormValues>({
-  //     resolver: zodResolver(systemFieldMappingSchema),
-  //     mode: "onChange",
-  //     defaultValues: {
-  //       sku: "",
-  //       upc: "",
-  //       description: "",
-  //       category: "",
-  //       hsCode: "",
-  //     },
-  //   });
+  const { mutate: updateAttributes } = useUpdateAttributes();
+
+  console.log(data);
+  const {
+    control,
+    reset,
+    handleSubmit,
+    formState: { errors },
+  } = useForm({
+    resolver: zodResolver(attributeSchema),
+    mode: "onChange",
+    defaultValues: {
+      attributes: {},
+    },
+  });
+
+  useEffect(() => {
+    if (data) {
+      const formatted = data.reduce(
+        (acc, item) => {
+          acc[item.name] = item.label;
+          return acc;
+        },
+        {} as Record<string, string>,
+      );
+
+      reset({ attributes: formatted });
+    }
+  }, [data, reset]);
+
+  const onSubmit = (data: AttributeSchemaType) => {
+    const payload = {
+      attributes: Object.entries(data?.attributes).map(([key, value]) => ({
+        name: key,
+        label: value,
+      })),
+    };
+    updateAttributes(payload);
+  };
   return (
     <Box
       component="form"
+      onSubmit={handleSubmit(onSubmit)}
       sx={{
         display: "flex",
         justifyContent: "center",
         mt: 4,
+        gap: 2,
       }}
     >
       <Box sx={{ width: 420 }}>
@@ -40,24 +82,40 @@ const AttributeLabel = () => {
               Attribute Label
             </Typography>
 
-            <Typography sx={{ mb: 0.5 }}>Company Name*</Typography>
-            {/* <Controller
-              name="company_name"
-            //   control={control}
-              render={({ field }) => (
-                <TextField
-                  variant="outlined"
-                  size="small"
-                  {...field}
-                  fullWidth
-                  //   error={!!errors.company_name}
-                  //   helperText={errors.company_name?.message}
-                  sx={{ mb: 2 }}
-                />
-              )}
-            /> */}
+            {data?.map((item) => (
+              <Controller
+                key={item.name}
+                name={`attributes.${item.name}`}
+                control={control}
+                render={({ field }) => (
+                  <TextField
+                    {...field}
+                    value={field.value || ""}
+                    fullWidth
+                    size="small"
+                    error={!!errors.attributes?.[item.name]}
+                    helperText={errors.attributes?.[item.name]?.message}
+                    sx={{ mb: 2 }}
+                  />
+                )}
+              />
+            ))}
           </CardContent>
         </Card>
+        <Box
+          sx={{
+            display: "flex",
+            flexDirection: "column",
+            gap: 2,
+            width: "100%",
+            maxWidth: 500,
+            mx: "auto",
+          }}
+        >
+          <Button type="submit" variant="contained">
+            Save
+          </Button>
+        </Box>
       </Box>
     </Box>
   );

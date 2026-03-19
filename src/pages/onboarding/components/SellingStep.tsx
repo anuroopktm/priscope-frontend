@@ -38,12 +38,16 @@ const SellingStep = ({ onNext }: { onNext: () => void }) => {
   };
 
   const onSubmit = (formData: SellingPriceElementFormValues) => {
+    const cleaned = sellingSteps.map((i) => i.trim()).filter((i) => i !== "");
+
     updateData({
       ...formData,
-      additional_selling_price_elements: sellingSteps,
+      additional_selling_price_elements: cleaned.length > 0 ? cleaned : null,
     });
+
     onNext();
   };
+
   return (
     <Box
       component="form"

@@ -2,8 +2,10 @@ import { useMutation, useQuery } from "@tanstack/react-query";
 import { axiosInstance } from "../api/axiosInstance";
 import type { AxiosError } from "axios";
 import type {
+  AttributeResponseFields,
   CompanyInfoResponse,
   SystemFieldResponse,
+  UpdateAttributesFieldPayload,
   UpdateSystemFieldPayload,
 } from "./global-settings.types";
 
@@ -70,11 +72,31 @@ export const useUpdateSystemFields = () => {
 };
 
 export const useGetAttributes = () => {
-  return useQuery({
+  return useQuery<
+    void,
+    AxiosError<{ detail: string | string[] }>,
+    AttributeResponseFields[]
+  >({
     queryKey: ["get-attributes"],
     queryFn: async () => {
       const response = await axiosInstance.get(
         "/v1/global-settings/attributes",
+      );
+      return response.data;
+    },
+  });
+};
+
+export const useUpdateAttributes = () => {
+  return useMutation<
+    void,
+    AxiosError<{ detail: string | string[] }>,
+    UpdateAttributesFieldPayload
+  >({
+    mutationFn: async (payload: UpdateAttributesFieldPayload) => {
+      const response = await axiosInstance.patch(
+        "/v1/global-settings/attributes",
+        payload,
       );
       return response.data;
     },
