@@ -23,6 +23,9 @@ import { GlobalSettingsLayout } from "@/pages/global-settings";
 import CompanyInfoPage from "@/pages/global-settings/components/CompanyInfoPage";
 import SystemFields from "@/pages/global-settings/components/SystemFields";
 import AttributeLabel from "@/pages/global-settings/components/AttributeLabel";
+import OperationsSettings from "@/pages/global-settings/components/OperationsSettings";
+import AlertsPage from "@/pages/global-settings/components/AlertsPage";
+import ListUsersPage from "@/pages/global-settings/components/ListUsersPage";
 
 export const routes = [
   {
@@ -102,12 +105,12 @@ export const routes = [
                   { index: true, element: <CompanyInfoPage /> },
                   { path: "system-fields", element: <SystemFields /> },
                   { path: "attributes", element: <AttributeLabel /> },
-                  // {
-                  //   path: "operations-setting",
-                  //   element: <OperationsSetting />,
-                  // },
-                  // { path: "alerts", element: <Alerts /> },
-                  // { path: "users", element: <Users /> },
+                  {
+                    path: "operations-setting",
+                    element: <OperationsSettings />,
+                  },
+                  { path: "alerts", element: <AlertsPage/> },
+                  { path: "users", element: <ListUsersPage/> },
                 ],
               },
             ],

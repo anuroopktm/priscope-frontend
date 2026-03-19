@@ -34,3 +34,13 @@ export interface UpdateAttributesFieldPayload {
     label: string;
   }[];
 }
+
+export interface OperationsSettingsResponse {
+  system_identifier: string;
+}
+
+export interface AlertsSettingsResponse {
+  fx_threshold?: number | null;
+  tariff_threshold?: number | null;
+  freight_threshold?: number | null;
+}

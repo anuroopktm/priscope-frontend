@@ -2,7 +2,7 @@ import { Box, Typography, Divider } from "@mui/material";
 import { NavLink } from "react-router-dom";
 
 const menuItems = [
-  { label: "Company Info", path: "/global-settings" },
+  { label: "Company Info", path: "/global-settings" ,exact: true},
   { label: "System Fields", path: "/global-settings/system-fields" },
   { label: "Attributes", path: "/global-settings/attributes" },
   { label: "Operations Setting", path: "/global-settings/operations-setting" },
@@ -17,14 +17,14 @@ export const SettingsSidebar = () => {
         width: 240,
         bgcolor: "#0f2a44",
         color: "#fff",
-        height: "100vh",
+        height: "100%", 
         display: "flex",
         flexDirection: "column",
         px: 2,
         py: 3,
       }}
+
     >
-      {/* Title */}
       <Typography
         variant="h6"
         sx={{
@@ -35,7 +35,6 @@ export const SettingsSidebar = () => {
         Settings
       </Typography>
 
-      {/* Divider under Settings */}
       <Divider
         sx={{
           bgcolor: "rgba(255,255,255,0.2)",
@@ -43,17 +42,18 @@ export const SettingsSidebar = () => {
         }}
       />
 
-      {/* Menu */}
       <Box sx={{ display: "flex", flexDirection: "column", gap: 0.5 }}>
         {menuItems.map((item) => (
           <NavLink
             key={item.path}
             to={item.path}
-            style={({ isActive }) => ({
+            end={item.exact}
+            style={{
               textDecoration: "none",
-            })}
+            }}
           >
             {({ isActive }) => (
+
               <Box
                 sx={{
                   px: 1.5,
@@ -66,10 +66,8 @@ export const SettingsSidebar = () => {
                   alignItems: "center",
                   transition: "all 0.2s ease",
 
-                  // Active state
                   backgroundColor: isActive ? "#144E72" : "transparent",
 
-                  // Hover effect
                   "&:hover": {
                     backgroundColor: "#144E72",
                     cursor: "pointer",

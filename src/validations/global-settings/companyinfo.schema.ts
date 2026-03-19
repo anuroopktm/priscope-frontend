@@ -1,6 +1,13 @@
 import z from "zod";
 
-const MAX_FILE_SIZE = 3 * 1024 * 1024;
+const ACCEPTED_IMAGE_TYPES = [
+  "image/png",
+  "image/jpeg",
+  "image/svg+xml",
+  "image/webp",
+];
+
+const MAX_FILE_SIZE = 3 * 1024 * 1024; // 3MB
 
 export const companyInfoSchema = z.object({
   company_name: z.string().min(1, "Company name is required"),
@@ -22,20 +29,16 @@ export const companyInfoSchema = z.object({
   base_currency: z.string().min(1, "Base currency is required"),
 
   company_logo_url: z
-    .any()
+    .union([z.instanceof(File), z.string(), z.undefined()])
     .optional()
     .refine((file) => {
-      if (!file) return true;
+      if (!file || typeof file === "string") return true;
 
-      return [
-        "image/png",
-        "image/jpeg",
-        "image/svg+xml",
-        "image/webp",
-      ].includes(file.type);
+      return ACCEPTED_IMAGE_TYPES.includes(file.type);
     }, "Only SVG, PNG, JPEG, WEBP allowed")
     .refine((file) => {
-      if (!file) return true;
+      if (!file || typeof file === "string") return true;
+
       return file.size <= MAX_FILE_SIZE;
     }, "Max file size is 3MB"),
 });

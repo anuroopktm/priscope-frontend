@@ -63,8 +63,7 @@ export default function CompanyInfoPage() {
       const mappedCurrency =
         currencyData.currencies?.find(
           (c) =>
-            c.id === data.base_currency || 
-            c.currency === data.base_currency, 
+            c.id === data.base_currency || c.currency === data.base_currency,
         )?.id || "";
 
       reset({
@@ -73,7 +72,7 @@ export default function CompanyInfoPage() {
         industry: data.industry || "",
         company_size: data.company_size || "",
         primary_location: data.primary_location || "",
-        base_currency: mappedCurrency, 
+        base_currency: mappedCurrency,
         company_logo_url: data.company_logo_url || undefined,
       });
     }
@@ -95,10 +94,15 @@ export default function CompanyInfoPage() {
     formData.append("primary_location", data.primary_location);
     formData.append("base_currency", data.base_currency);
     if (data.company_logo_url instanceof File) {
-      formData.append("file", data.company_logo_url);
+      formData.append("company_logo_url", data.company_logo_url);
     }
+    console.log(data);
+    console.log(data.company_logo_url instanceof File);
+    console.log(data.company_logo_url);
 
-    console.log(formData);
+    for (let [key, value] of formData.entries()) {
+      console.log(key, value);
+    }
 
     updateCompanyInfo(formData);
   };
@@ -247,7 +251,10 @@ export default function CompanyInfoPage() {
                       accept={ACCEPTED_FILE_TYPES}
                       onChange={(e) => {
                         const selectedFile = e.target.files?.[0];
-                        if (selectedFile) field.onChange(selectedFile);
+                        if (selectedFile) {
+                          field.onChange(selectedFile);
+                          e.target.value = ""; // 🔥 important
+                        }
                       }}
                     />
 
