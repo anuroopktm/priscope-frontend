@@ -34,6 +34,7 @@ export const ScenarioDetailsLayout = {
     ExportCols: "Visible",
     ExportAction: "download",
     SaveSession: "0",
+    Calculate: "1",
   },
   // LeftCols: [
   //   {

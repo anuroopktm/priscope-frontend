@@ -304,9 +304,6 @@ export const useCreateScenarioAggregator = () => {
     },
     onSuccess: (_, { scenario_id }) => {
       queryClient.invalidateQueries({
-        queryKey: ["get-scenario", scenario_id],
-      });
-      queryClient.invalidateQueries({
         queryKey: ["get-scenario-aggregator", scenario_id],
       });
     },

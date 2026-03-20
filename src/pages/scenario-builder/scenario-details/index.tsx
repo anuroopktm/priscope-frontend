@@ -96,6 +96,55 @@ const syncLocalGridData = (grid: any) => {
       const isExtra = !!colsData[colName];
 
       if (isBase || isExtra) {
+        if (colsData[colName]?.AggregatorType === "Component") {
+          let rowComponentCols: string[] = [];
+          const itemsDataStr = gridRow[colName + "ItemsData"];
+
+          if (itemsDataStr) {
+            try {
+              const items = JSON.parse(itemsDataStr);
+              if (Array.isArray(items)) {
+                items.forEach((item) => {
+                  if (
+                    !item.name ||
+                    item.type === "Margin" ||
+                    item.type === "Markup"
+                  )
+                    return;
+                  let itemName = String(item.name || "");
+                  if (item.type === "Custom" && itemName === "Custom") {
+                    itemName = "Custom Calculation";
+                  }
+                  const safeName = itemName
+                    .trim()
+                    .replace(/[^a-zA-Z0-9]/g, "")
+                    .toLowerCase();
+                  if (safeName) {
+                    rowComponentCols.push(`Comp_${colName}_${safeName}`);
+                  }
+                });
+              }
+            } catch (e) {
+              console.error("Failed to parse ItemsData for formula");
+            }
+          }
+
+          // Fallback if no ItemsData found
+          if (rowComponentCols.length === 0) {
+            rowComponentCols = Object.keys(grid.Cols).filter((c) => {
+              const parts = c.split("_");
+              return (
+                parts[0] === "Comp" && parts[1] === colName && !!colsData[c]
+              );
+            });
+          }
+
+          if (rowComponentCols.length > 0) {
+            rowData[colName + "Formula"] = rowComponentCols.join(" + ");
+            rowData["Calculated"] = 1;
+          }
+        }
+
         const val = gridRow[colName];
         if (val !== undefined && val !== null && val !== "") {
           rowData[colName] = val;
@@ -504,8 +553,12 @@ const ScenarioDetailsPage = () => {
     const collectKeys = (rows: ScenarioRow[]) => {
       rows.forEach((row) => {
         Object.keys(row).forEach((key) => {
+          const lowerKey = key.toLowerCase();
           if (
             !initialColNames.includes(key) &&
+            !lowerKey.endsWith("formula") &&
+            !lowerKey.endsWith("calculated") &&
+            !lowerKey.endsWith("itemsdata") &&
             ![
               "id",
               "itemId",
