@@ -47,8 +47,8 @@ const ComponentAggregatorModal = ({
 
   const handleConfirm = (data: ComponentAggregatorForm) => {
     const finalLabel = data.label.trim()
-      ? `${data.label} (Component Iterator)`
-      : "(Component Iterator)";
+      ? `${data.label} (Component Aggregator)`
+      : "(Component Aggregator)";
 
     onConfirm({
       label: finalLabel,

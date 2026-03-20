@@ -699,6 +699,7 @@ const ScenarioDetailsPage = () => {
           </Box>
           <ScenarioDrawers
             gridId={SCENARIO_BUILDER_GRID_ID}
+            scenarioId={id}
             onSaveAsDraft={handleSaveAsDraft}
           />
         </Box>

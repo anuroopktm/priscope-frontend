@@ -1,7 +1,17 @@
 import { useListCurrencies } from "@/services/queries/common/common.queries";
+import {
+  useCreateScenarioAggregator,
+  useGetScenarioAggregator,
+} from "@/services/queries/scenario-builder/scenario-builder.queries";
 import CloseIcon from "@mui/icons-material/Close";
-import { Box, Button, IconButton, Typography } from "@mui/material";
-import { useEffect, useState } from "react";
+import {
+  Box,
+  Button,
+  CircularProgress,
+  IconButton,
+  Typography,
+} from "@mui/material";
+import { useCallback, useEffect, useState } from "react";
 import DeleteConfirmModal from "../../../list-scenarios/components/DeleteConfirmModal";
 import { ComponentDrawerLayout } from "../../tree-grid/config/component-drawer-layout";
 import { useTreeGridInit } from "../../tree-grid/hooks/useTreeGridInit";
@@ -11,6 +21,8 @@ interface ComponentAggregatorDrawerProps {
   onUpdate: (items: any[]) => void;
   title?: string;
   initialItems?: any[];
+  scenarioId?: string;
+  cellId?: string;
 }
 
 const drawerGridId = "ComponentAggregatorGrid";
@@ -29,6 +41,51 @@ const renderDeleteIcon = (id: string) => {
       </svg>
     </div>
   `;
+};
+
+const scrapeAggregatorGridData = (gridId: string) => {
+  const grid = (window as any).Grids?.[gridId];
+  if (!grid) return null;
+
+  const processRow = (gridRow: any): any => {
+    const rowData: any = {
+      id: gridRow.id,
+      Def: gridRow.Def?.Name || gridRow.Def,
+    };
+
+    ["A", "B", "C", "D", "E"].forEach((colName) => {
+      const val = grid.GetValue(gridRow, colName);
+      if (val !== undefined && val !== null && val !== "") {
+        rowData[colName] = val;
+      }
+    });
+
+    if (gridRow.firstChild) {
+      const children: any[] = [];
+      let child = gridRow.firstChild;
+      while (child) {
+        if (child.Kind === "Data" && !child.Deleted) {
+          children.push(processRow(child));
+        }
+        child = child.nextSibling;
+      }
+      if (children.length > 0) {
+        rowData.Items = children;
+      }
+    }
+    return rowData;
+  };
+
+  const body: any[] = [];
+  let row = grid.GetFirst();
+  while (row) {
+    if (row.Kind === "Data" && !row.parentNode?.id && !row.Deleted) {
+      body.push(processRow(row));
+    }
+    row = grid.GetNext(row);
+  }
+
+  return { Body: [body] };
 };
 
 const AggregatorGrid = ({ data }: { data: any }) => {
@@ -61,30 +118,60 @@ const ComponentAggregatorDrawer = ({
   onUpdate,
   title = "Component aggregator",
   initialItems = [],
+  scenarioId,
+  cellId,
 }: ComponentAggregatorDrawerProps) => {
   const [deleteModalOpen, setDeleteModalOpen] = useState(false);
   const [rowToDelete, setRowToDelete] = useState<string | null>(null);
+  const [gridData, setGridData] = useState<{ Body: any[][] } | null>(null);
 
-  const [gridData] = useState<{ Body: any[][] }>({
-    Body: [
-      initialItems.length > 0
-        ? initialItems.map((item) => ({
-            ...item,
-            A: item.name || "",
-            B: item.currency || "USD",
-            C: item.cost || 0,
-            D: item.costFor || "Base UOM",
-            F: renderDeleteIcon(item.id),
-          }))
-        : [],
-    ],
-  });
+  const { data: existingAggregator, isLoading: isFetchingData } =
+    useGetScenarioAggregator(scenarioId, cellId);
+
+  const { mutate: saveAggregator, isPending: isSaving } =
+    useCreateScenarioAggregator();
 
   const { data: currencyData } = useListCurrencies({
     search: "",
     page_size: 100,
     skip: 0,
   });
+
+  useEffect(() => {
+    if (isFetchingData) return;
+
+    const addDeleteIcons = (rows: any[]): any[] => {
+      return rows.map((row) => ({
+        ...row,
+        F: renderDeleteIcon(row.id),
+        Items: row.Items ? addDeleteIcons(row.Items) : undefined,
+      }));
+    };
+
+    if (existingAggregator?.data?.Body) {
+      // Use remote tree data if it exists
+      const processedBody = existingAggregator.data.Body.map((rows: any[]) =>
+        addDeleteIcons(rows),
+      );
+      setGridData({ Body: processedBody });
+    } else {
+      // Fallback to initialItems (flat)
+      setGridData({
+        Body: [
+          initialItems.length > 0
+            ? initialItems.map((item: any) => ({
+                ...item,
+                A: item.name || "",
+                B: item.currency || "USD",
+                C: item.cost || 0,
+                D: item.costFor || "Base UOM",
+                F: renderDeleteIcon(item.id),
+              }))
+            : [],
+        ],
+      });
+    }
+  }, [existingAggregator, isFetchingData, initialItems]);
 
   // Global handler for deletion
   useEffect(() => {
@@ -113,8 +200,10 @@ const ComponentAggregatorDrawer = ({
   useEffect(() => {
     const grid = (window as any).Grids?.[drawerGridId];
     if (grid && currencyData?.currencies) {
-      const names = currencyData.currencies.map((c) => c.currency).join("|");
-      const codes = currencyData.currencies.map((c) => c.id).join("|");
+      const names = currencyData.currencies
+        .map((c: any) => c.currency)
+        .join("|");
+      const codes = currencyData.currencies.map((c: any) => c.id).join("|");
 
       // Update Enum and EnumKeys for column B
       grid.SetAttribute(null, "B", "Enum", "|" + names, 1);
@@ -123,7 +212,7 @@ const ComponentAggregatorDrawer = ({
     }
   }, [currencyData]);
 
-  const handleAddItem = () => {
+  const handleAddItem = useCallback(() => {
     const grid = (window as any).Grids?.[drawerGridId];
     if (grid) {
       const newRow = grid.AddRow(null, null, 1);
@@ -136,16 +225,17 @@ const ComponentAggregatorDrawer = ({
         grid.Calculate();
       }
     }
-  };
+  }, []);
 
   const handleUpdate = () => {
     const grid = (window as any).Grids?.[drawerGridId];
-    if (grid) {
-      const rows: any[] = [];
+    if (grid && scenarioId && cellId) {
+      // 1. Collect summary items for main grid (flat)
+      const summaryRows: any[] = [];
       let row = grid.GetFirst();
       while (row) {
         if (row.Kind === "Data" && !row.Deleted) {
-          rows.push({
+          summaryRows.push({
             id: row.id,
             name: grid.GetValue(row, "A"),
             currency: grid.GetValue(row, "B"),
@@ -156,7 +246,27 @@ const ComponentAggregatorDrawer = ({
         }
         row = grid.GetNext(row);
       }
-      onUpdate(rows);
+
+      // 2. Scrape full tree data for API
+      const fullTreeData = scrapeAggregatorGridData(drawerGridId);
+
+      // 3. Save to backend
+      saveAggregator(
+        {
+          scenario_id: scenarioId,
+          payload: {
+            aggregator_type: "Component",
+            cell_id: cellId,
+            data: fullTreeData as any,
+          },
+        },
+        {
+          onSuccess: () => {
+            // 4. Update main grid UI
+            onUpdate(summaryRows);
+          },
+        },
+      );
     }
   };
 
@@ -212,9 +322,19 @@ const ComponentAggregatorDrawer = ({
           p: 0,
           borderRadius: 1,
           overflow: "visible",
+          minHeight: 60,
+          display: "flex",
+          ...(isFetchingData && {
+            alignItems: "center",
+            justifyContent: "center",
+          }),
         }}
       >
-        <AggregatorGrid data={gridData} />
+        {isFetchingData ? (
+          <CircularProgress size={20} />
+        ) : gridData ? (
+          <AggregatorGrid data={gridData} />
+        ) : null}
       </Box>
 
       {/* Footer Actions */}
@@ -231,8 +351,13 @@ const ComponentAggregatorDrawer = ({
         <Button size="small" variant="outlined" onClick={onClose}>
           Cancel
         </Button>
-        <Button size="small" variant="contained" onClick={handleUpdate}>
-          Update
+        <Button
+          size="small"
+          variant="contained"
+          onClick={handleUpdate}
+          disabled={isSaving}
+        >
+          {isSaving ? "Updating..." : "Update"}
         </Button>
       </Box>
 

@@ -47,8 +47,8 @@ const CostAggregatorModal = ({
 
   const handleConfirm = (data: CostAggregatorForm) => {
     const finalLabel = data.label.trim()
-      ? `${data.label} (Cost Iterator)`
-      : "(Cost Iterator)";
+      ? `${data.label} (Cost Aggregator)`
+      : "(Cost Aggregator)";
 
     onConfirm({
       label: finalLabel,
