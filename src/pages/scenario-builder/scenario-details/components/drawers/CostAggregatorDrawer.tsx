@@ -185,10 +185,10 @@ const AggregatorGrid = ({
         height: "140px",
         width: "100%",
         borderBottom: "1px solid #e2e8f0",
-        // "& .TGMain": {
-        //   border: "1px solid #e2e8f0 !important",
-        //   borderBottom: "none !important",
-        // },
+        "& .TGMain": {
+          border: "1px solid #e2e8f0 !important",
+          borderBottom: "none !important",
+        },
         "& div[class*='NoDataRow']": {
           display: "none !important",
         },

@@ -43,11 +43,11 @@ const AggregatorGrid = ({ data }: { data: any }) => {
       id={drawerGridContainerId}
       sx={{
         width: "100%",
-        // borderBottom: "1px solid #e2e8f0",
-        // "& .TGMain": {
-        //   border: "1px solid #e2e8f0 !important",
-        //   borderBottom: "none !important",
-        // },
+        borderBottom: "1px solid #e2e8f0",
+        "& .TGMain": {
+          border: "1px solid #e2e8f0 !important",
+          borderBottom: "none !important",
+        },
         "& div[class*='NoDataRow']": {
           display: "none !important",
         },

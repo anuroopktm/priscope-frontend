@@ -144,3 +144,21 @@ export interface ScenarioActivityListResponse {
   total: number;
   activities: ScenarioActivity[];
 }
+
+export interface CreateScenarioAggregatorRequest {
+  aggregator_type: string;
+  cell_id: string;
+  data: Record<string, any>;
+}
+
+export interface ScenarioAggregatorResponse {
+  id: string;
+  scenario_id: string;
+  cell_id: string;
+  aggregator_type: string;
+  data: Record<string, any>;
+  created_at: string;
+  updated_at: string;
+  created_by: Record<string, any>;
+  message: string;
+}

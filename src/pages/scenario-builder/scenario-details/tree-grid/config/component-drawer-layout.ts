@@ -10,8 +10,8 @@ export const ComponentDrawerLayout = {
     MinTagHeight: "0",
     ColMoving: "0",
     NoTreeLines: "1",
-    // DynamicBorder: "0",
-    NoData: "1",
+    DynamicBorder: "0",
+    NoData: "0",
     RelHeight: "0",
     StretchWidth: "0",
     StretchHeight: "0",
@@ -23,15 +23,12 @@ export const ComponentDrawerLayout = {
     Panel: "0",
     NoVScroll: "1",
     NoHScroll: "1",
-    Hover: "0",
-    // HoverRow: "0",
-    HoverCell: "0",
   },
-  // Lang: {
-  //   Text: {
-  //     NoData: "",
-  //   },
-  // },
+  Lang: {
+    Text: {
+      NoData: "",
+    },
+  },
   LeftCols: [],
   Cols: [
     {
@@ -99,11 +96,11 @@ export const ComponentDrawerLayout = {
     E: "Cost per unit",
     F: "Action",
   },
-  Def: {
-    row: {
-      CanSelect: "0",
-    },
-  },
+  // Def: {
+  //   row: {
+  //     CanSelect: "0",
+  //   },
+  // },
   Foot: [
     {
       id: "Total",
