@@ -163,7 +163,7 @@ const ActionHeader = ({
               endIcon={<KeyboardArrowDownIcon />}
               onClick={handleGroupMenuOpen}
             >
-              Add Group
+              Group
             </Button>
             <Popover
               open={Boolean(groupAnchorEl)}

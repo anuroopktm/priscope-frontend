@@ -68,12 +68,13 @@ const DrawerActionHeader = ({
         <SearchTextField
           size="small"
           onSearch={onSearch}
+          containerSx={{ bgcolor: "white", px: 0 }}
           sx={{
             "& .MuiOutlinedInput-root": {
-              bgcolor: "#E8E8E8",
+              bgcolor: "white",
               color: "text.primary",
               "& .MuiInputAdornment-root svg path": {
-                stroke: (theme) => theme.palette.brand.primary,
+                stroke: (theme: any) => theme.palette.brand.primary,
               },
               "& .MuiOutlinedInput-notchedOutline": {
                 borderColor: "#E8E8E8 !important",
@@ -153,7 +154,7 @@ const DrawerActionHeader = ({
           onClick={onAddAsGroup}
           disabled={isButtonsDisabled}
         >
-          Add as Group
+          Group
         </Button>
         <Button
           size="small"
@@ -162,7 +163,7 @@ const DrawerActionHeader = ({
           onClick={onAddItem}
           disabled={isButtonsDisabled}
         >
-          Add Item
+          Item
         </Button>
       </Stack>
     </Box>
