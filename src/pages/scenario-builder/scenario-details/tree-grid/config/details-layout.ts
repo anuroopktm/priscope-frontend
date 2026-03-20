@@ -33,6 +33,7 @@ export const ScenarioDetailsLayout = {
     ExportRows: "Visible",
     ExportCols: "Visible",
     ExportAction: "download",
+    SaveSession: "0",
   },
   // LeftCols: [
   //   {
@@ -103,5 +104,6 @@ export const ScenarioDetailsLayout = {
     B: "Description",
     C: "Category",
     is_published: "Status",
+    Color: "",
   },
 };

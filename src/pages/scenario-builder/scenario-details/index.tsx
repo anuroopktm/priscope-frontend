@@ -1,11 +1,11 @@
 import { useItemMasterStore } from "@/pages/items-master-refactor/store/useItemMasterStore";
+import { useGetItemGroup } from "@/services/queries/common/common.queries";
 import {
   useGetScenario,
   usePartialPublishScenario,
   usePublishScenario,
   useSaveScenarioGrid,
 } from "@/services/queries/scenario-builder/scenario-builder.queries";
-import { useGetItemGroup } from "@/services/queries/common/common.queries";
 import { useToastStore } from "@/store/useToastStore";
 import { getErrorMessage } from "@/utils/error-helper";
 import { Box } from "@mui/material";
@@ -522,9 +522,7 @@ const ScenarioDetailsPage = () => {
               "Kind",
               "Level",
               "D",
-              // "SKU",
-              // "Description",
-              // "Category",
+              "Color",
             ].includes(key)
           ) {
             extraColsSet.add(key);

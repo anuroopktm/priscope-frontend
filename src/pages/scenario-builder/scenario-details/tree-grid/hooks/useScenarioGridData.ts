@@ -40,10 +40,13 @@ export const transformRows = (
     const isPublished = isScenarioPublished || row.is_published === 1;
     let transformedRow = { ...row };
 
+    console.log("transformedRow", transformedRow);
+
     if (isPublished) {
       transformedRow.CanEdit = 0;
       transformedRow.CanSelect = 0;
       transformedRow.PanelSelect = 0;
+      transformedRow.Color = "#E8F5E9";
     }
 
     if (row.Def === "Group") {
