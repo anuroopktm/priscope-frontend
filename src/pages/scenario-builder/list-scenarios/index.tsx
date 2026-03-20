@@ -31,7 +31,9 @@ const ScenarioListingPage = () => {
   const [advancedSearch, setAdvancedSearch] = useState<Record<string, any>>({});
   const [deleteModalOpen, setDeleteModalOpen] = useState(false);
   const [selectedRowId, setSelectedRowId] = useState<string | null>(null);
-  const [selectedForFork, setSelectedForFork] = useState<string | null>(null);
+  const [selectedForDuplicate, setSelectedForDuplicate] = useState<
+    string | null
+  >(null);
   const showToast = useToastStore((state) => state.showToast);
 
   const { data: scenariosData } = useListScenarios({
@@ -51,9 +53,9 @@ const ScenarioListingPage = () => {
         gridId,
         (grid: any, row: any, deselect: boolean) => {
           if (deselect) {
-            setSelectedForFork(null);
+            setSelectedForDuplicate(null);
           } else {
-            setSelectedForFork(row.id);
+            setSelectedForDuplicate(row.id);
           }
         },
       );
@@ -122,7 +124,7 @@ const ScenarioListingPage = () => {
       >
         <ActionHeader
           onSearch={setSearchTerm}
-          selectedScenarioId={selectedForFork}
+          selectedScenarioId={selectedForDuplicate}
           onAdvancedSearchClick={() =>
             setIsAdvancedSearchOpen(!isAdvancedSearchOpen)
           }

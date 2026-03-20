@@ -1,18 +1,18 @@
 import AddIcon from "@/assets/actions/add.svg?react";
+import DuplicateIcon from "@/assets/actions/duplicate.svg?react";
 import SearchTextField from "@/components/common/SearchTextField";
 import {
   useCreateScenario,
-  useForkScenario,
+  useDuplicateScenario,
 } from "@/services/queries/scenario-builder/scenario-builder.queries";
 import { useToastStore } from "@/store/useToastStore";
 import { getErrorMessage } from "@/utils/error-helper";
 import type { ScenarioFormValues } from "@/validations/scenario-builder/scenario.validation";
-import AccountTreeIcon from "@mui/icons-material/AccountTree";
 import { Box, Button } from "@mui/material";
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import CreateScenarioModal from "./CreateScenarioModal";
-import ForkScenarioModal from "./ForkScenarioModal";
+import DuplicateScenarioModal from "./DuplicateScenarioModal";
 
 interface ActionHeaderProps {
   onSearch: (value: string) => void;
@@ -27,11 +27,12 @@ const ActionHeader = ({
 }: ActionHeaderProps) => {
   const navigate = useNavigate();
   const [open, setOpen] = useState<boolean>(false);
-  const [forkOpen, setForkOpen] = useState<boolean>(false);
+  const [duplicateOpen, setDuplicateOpen] = useState<boolean>(false);
   const showToast = useToastStore((state) => state.showToast);
 
   const { mutate: createScenario, isPending } = useCreateScenario();
-  const { mutate: forkScenario, isPending: isForking } = useForkScenario();
+  const { mutate: duplicateScenario, isPending: isDuplicating } =
+    useDuplicateScenario();
 
   const handleCreate = (data: ScenarioFormValues) => {
     createScenario(
@@ -63,18 +64,18 @@ const ActionHeader = ({
     );
   };
 
-  const handleFork = (newName: string) => {
+  const handleDuplicate = (newName: string) => {
     if (!selectedScenarioId) return;
-    forkScenario(
+    duplicateScenario(
       {
         scenario_id: selectedScenarioId,
         name: newName,
       },
       {
         onSuccess: (response) => {
-          setForkOpen(false);
+          setDuplicateOpen(false);
           showToast(
-            response.message || "Scenario forked successfully",
+            response.message || "Scenario duplicated successfully",
             "success",
           );
           if (response.id) {
@@ -82,7 +83,10 @@ const ActionHeader = ({
           }
         },
         onError: (error) => {
-          showToast(getErrorMessage(error, "Failed to fork scenario"), "error");
+          showToast(
+            getErrorMessage(error, "Failed to duplicate scenario"),
+            "error",
+          );
         },
       },
     );
@@ -109,10 +113,10 @@ const ActionHeader = ({
           {selectedScenarioId && (
             <Button
               variant="contained"
-              startIcon={<AccountTreeIcon />}
-              onClick={() => setForkOpen(true)}
+              startIcon={<DuplicateIcon />}
+              onClick={() => setDuplicateOpen(true)}
             >
-              Fork
+              Duplicate
             </Button>
           )}
           <Button
@@ -130,11 +134,11 @@ const ActionHeader = ({
         onSubmit={handleCreate}
         isLoading={isPending}
       />
-      <ForkScenarioModal
-        open={forkOpen}
-        onClose={() => setForkOpen(false)}
-        onSubmit={handleFork}
-        isLoading={isForking}
+      <DuplicateScenarioModal
+        open={duplicateOpen}
+        onClose={() => setDuplicateOpen(false)}
+        onSubmit={handleDuplicate}
+        isLoading={isDuplicating}
       />
     </>
   );

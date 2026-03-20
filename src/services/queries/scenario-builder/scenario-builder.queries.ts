@@ -5,8 +5,8 @@ import type {
   CreateScenarioCommentRequest,
   CreateScenarioRequest,
   CreateScenarioResponse,
-  ForkScenarioRequest,
-  ForkScenarioResponse,
+  DuplicateScenarioRequest,
+  DuplicateScenarioResponse,
   PartialPublishScenarioRequest,
   PublishScenarioResponse,
   SaveScenarioGridRequest,
@@ -238,17 +238,17 @@ export const useDeleteScenario = () => {
   );
 };
 
-export const useForkScenario = () => {
+export const useDuplicateScenario = () => {
   const queryClient = useQueryClient();
 
   return useMutation<
-    ForkScenarioResponse,
+    DuplicateScenarioResponse,
     AxiosError<{ detail: string | string[] }>,
-    ForkScenarioRequest
+    DuplicateScenarioRequest
   >({
-    mutationKey: ["fork-scenario"],
+    mutationKey: ["duplicate-scenario"],
     mutationFn: async ({ scenario_id, name }) => {
-      const { data } = await axiosInstance.post<ForkScenarioResponse>(
+      const { data } = await axiosInstance.post<DuplicateScenarioResponse>(
         `/v1/scenario-builder/scenarios/${scenario_id}/fork`,
         { name },
       );

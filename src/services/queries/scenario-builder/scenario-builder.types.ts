@@ -108,12 +108,12 @@ export interface ScenarioCommentListResponse {
   comments: ScenarioComment[];
 }
 
-export interface ForkScenarioRequest {
+export interface DuplicateScenarioRequest {
   scenario_id: string;
   name: string;
 }
 
-export interface ForkScenarioResponse {
+export interface DuplicateScenarioResponse {
   id: string;
   name: string;
   forked_from: string;
