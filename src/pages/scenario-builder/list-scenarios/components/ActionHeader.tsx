@@ -43,9 +43,15 @@ const ActionHeader = ({
           : [],
       },
       {
-        onSuccess: () => {
+        onSuccess: (response) => {
           setOpen(false);
-          showToast("Scenario created successfully", "success");
+          showToast(
+            response.message || "Scenario created successfully",
+            "success",
+          );
+          if (response.id) {
+            navigate(`/scenario-builder/details/${response.id}`);
+          }
         },
         onError: (error) => {
           showToast(

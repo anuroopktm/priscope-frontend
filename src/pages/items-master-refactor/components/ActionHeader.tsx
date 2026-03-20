@@ -150,12 +150,20 @@ const ActionHeader = ({
       {
         onSuccess: (response) => {
           setOpen(false);
-          showToast("Scenario created successfully", "success");
-          navigate(`/scenario-builder/details/${response.id}`);
+          showToast(
+            response.message || "Scenario created successfully",
+            "success",
+          );
+          if (response.id) {
+            navigate(`/scenario-builder/details/${response.id}`);
+          }
           clearSelectedRows();
         },
-        onError: () => {
-          showToast("Failed to create scenario", "error");
+        onError: (error) => {
+          showToast(
+            getErrorMessage(error, "Failed to create scenario"),
+            "error",
+          );
         },
       },
     );
