@@ -38,7 +38,7 @@ export const AggregatorDrawerLayout = {
       Caption: "Freight Cost",
     },
     {
-      Name: "Scenario Column",
+      Name: "Cost for",
       Width: "200",
       Type: "Enum",
       Caption: "Cost for",
@@ -46,7 +46,7 @@ export const AggregatorDrawerLayout = {
       EnumKeys: "|Base UOM|Qty Per Shipment",
     },
     {
-      Name: "Total Cost Calculated",
+      Name: "Cost per unit",
       Width: "150",
       Type: "Float",
       Format: "$0.00",
@@ -55,10 +55,10 @@ export const AggregatorDrawerLayout = {
   ],
   Header: {
     "Aggregator Name": "Freight Cost",
-    "Scenario Column": "Cost for",
-    "Total Cost Calculated": "Cost per unit",
+    "Cost for": "Cost for",
+    "Cost per unit": "Cost per unit",
     "Aggregator NameAlign": "Left",
-    "Scenario ColumnAlign": "Left",
-    "Total Cost CalculatedAlign": "Left",
+    "Cost forAlign": "Left",
+    "Cost per unitAlign": "Left",
   },
 };

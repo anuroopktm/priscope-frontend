@@ -269,8 +269,8 @@ const ScenarioDetailsPage = () => {
           onSuccess: (response) => {
             showToast(
               successMessage ||
-              response?.message ||
-              "Scenario saved as draft successfully",
+                response?.message ||
+                "Scenario saved as draft successfully",
               "success",
             );
             if (onSuccess) onSuccess();

@@ -237,10 +237,7 @@ const CostAggregatorDrawer = ({
                 parseFloat(grid.GetAttribute(row, "Custom input", "Result")) ||
                 0;
             } else {
-              const costCol =
-                section.type === "Tariff"
-                  ? "Cost per unit"
-                  : "Total Cost Calculated";
+              const costCol = "Cost per unit";
               costValue = grid.GetValue(row, costCol);
             }
 
@@ -256,7 +253,7 @@ const CostAggregatorDrawer = ({
                 ? "Scenario Builder Column"
                 : section.type === "Custom"
                   ? "Action"
-                  : "Scenario Column";
+                  : "Cost for";
             const colAValue = String(grid.GetValue(row, colA) || "");
             const colBValue = String(grid.GetValue(row, colB) || "");
             const isDataSelected =
@@ -442,7 +439,6 @@ const CostAggregatorDrawer = ({
                 id,
                 "Scenario Builder Column",
               ),
-              "Cost for": "Base UOM",
               "Cost per unit": 0,
             }
           : type === "Custom"
@@ -458,8 +454,8 @@ const CostAggregatorDrawer = ({
                   id,
                   "Aggregator Name",
                 ),
-                "Scenario Column": "Base UOM",
-                "Total Cost Calculated": 0,
+                "Cost for": "Base UOM",
+                "Cost per unit": 0,
               },
       ],
     };
@@ -516,8 +512,8 @@ const CostAggregatorDrawer = ({
               rate.name,
               1,
             );
-            grid.SetValue(row, "Total Cost Calculated", rate.cost, 1);
-            grid.SetValue(row, "Scenario Column", "Base UOM", 1);
+            grid.SetValue(row, "Cost per unit", rate.cost, 1);
+            grid.SetValue(row, "Cost for", "Base UOM", 1);
             grid.RefreshRow(row);
           }
         });
@@ -542,8 +538,8 @@ const CostAggregatorDrawer = ({
               renderSelectButton(emptyRow.id, targetGridId, "Aggregator Name"),
               1,
             );
-            grid.SetValue(emptyRow, "Scenario Column", "Base UOM", 1);
-            grid.SetValue(emptyRow, "Total Cost Calculated", 0, 1);
+            grid.SetValue(emptyRow, "Cost for", "Base UOM", 1);
+            grid.SetValue(emptyRow, "Cost per unit", 0, 1);
             grid.RefreshRow(emptyRow);
           }
         }
@@ -612,8 +608,6 @@ const CostAggregatorDrawer = ({
               ) || 0;
             const costPerUnit = (rate.cost / 100) * sourceValue;
             grid.SetValue(row, "Cost per unit", costPerUnit, 1);
-
-            grid.SetValue(row, "Cost for", "Base UOM", 1);
             grid.RefreshRow(row);
           }
         });
@@ -648,7 +642,6 @@ const CostAggregatorDrawer = ({
               ),
               1,
             );
-            grid.SetValue(emptyRow, "Cost for", "Base UOM", 1);
             grid.SetValue(emptyRow, "Cost per unit", 0, 1);
             grid.RefreshRow(emptyRow);
           }
@@ -703,9 +696,7 @@ const CostAggregatorDrawer = ({
               const resAttr = grid.GetAttribute(row, "Custom input", "Result");
               costValue = Number(resAttr) || 0;
             } else {
-              const costCol = isTariff
-                ? "Cost per unit"
-                : "Total Cost Calculated";
+              const costCol = "Cost per unit";
               const costValueRaw = grid.GetValue(row, costCol);
               costValue =
                 typeof costValueRaw === "object"
@@ -758,12 +749,9 @@ const CostAggregatorDrawer = ({
               cost: costValue,
               costPerUnit: costValue,
               costFor: String(
-                isCustom
+                isCustom || isTariff
                   ? "Base UOM"
-                  : grid.GetValue(
-                      row,
-                      isTariff ? "Cost for" : "Scenario Column",
-                    ) || "Base UOM",
+                  : grid.GetValue(row, "Cost for") || "Base UOM",
               ),
             });
           }

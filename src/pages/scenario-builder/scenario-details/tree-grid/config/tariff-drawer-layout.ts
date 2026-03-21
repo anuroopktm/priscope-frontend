@@ -44,14 +44,6 @@ export const TariffDrawerLayout = {
       Caption: "Scenario Builder Column",
     },
     {
-      Name: "Cost for",
-      Width: "150",
-      Type: "Enum",
-      Caption: "Cost for",
-      Enum: "|Base UOM|Qty Per Shipment",
-      EnumKeys: "|Base UOM|Qty Per Shipment",
-    },
-    {
       Name: "Cost per unit",
       Width: "150",
       Type: "Float",
@@ -62,11 +54,9 @@ export const TariffDrawerLayout = {
   Header: {
     "Tariff Rate %": "Tariff Rate %",
     "Scenario Builder Column": "Scenario Builder Column",
-    "Cost for": "Cost for",
     "Cost per unit": "Cost per unit",
     "Tariff Rate %Align": "Left",
     "Scenario Builder ColumnAlign": "Left",
-    "Cost forAlign": "Left",
     "Cost per unitAlign": "Left",
   },
 };
