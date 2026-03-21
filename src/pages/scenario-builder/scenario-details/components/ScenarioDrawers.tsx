@@ -80,6 +80,7 @@ const ScenarioDrawers = ({
               onUpdate={handleUpdate}
               scenarioId={scenarioId}
               cellId={`${activeCell.rowId}_${activeCell.col}`}
+              mainRowId={activeCell.rowId}
             />
           )}
         </Box>

@@ -23,6 +23,7 @@ interface ComponentAggregatorDrawerProps {
   initialItems?: any[];
   scenarioId?: string;
   cellId?: string;
+  mainRowId?: string;
 }
 
 const drawerGridId = "ComponentAggregatorGrid";
@@ -122,10 +123,14 @@ const ComponentAggregatorDrawer = ({
   initialItems = [],
   scenarioId,
   cellId,
+  mainRowId,
 }: ComponentAggregatorDrawerProps) => {
-  const [deleteModalOpen, setDeleteModalOpen] = useState(false);
+
+  const [deleteModalOpen, setDeleteModalOpen] = useState<boolean>(false);
   const [rowToDelete, setRowToDelete] = useState<string | null>(null);
   const [gridData, setGridData] = useState<{ Body: any[][] } | null>(null);
+  const [hasError, setHasError] = useState<boolean>(false);
+
 
   const { data: existingAggregator, isLoading: isFetchingData } =
     useGetScenarioAggregator(scenarioId, cellId);
@@ -138,6 +143,61 @@ const ComponentAggregatorDrawer = ({
     page_size: 100,
     skip: 0,
   });
+
+  useEffect(() => {
+    if (!mainRowId) return;
+
+    const mainGrid = (window as any).Grids?.["ScenarioGridDetails"];
+    if (!mainGrid) return;
+
+    const row = mainGrid.GetRowById(mainRowId);
+    if (!row) return;
+
+    const checkQuantity = (value: any) => {
+      let numVal = 0;
+      if (typeof value === "string") {
+        numVal = parseFloat(value.replace(/[^0-9.-]/g, "")) || 0;
+      } else {
+        numVal = Number(value) || 0;
+      }
+      const isEmpty = value === null || value === undefined || value === "" || isNaN(numVal) || numVal === 0;
+      setHasError(isEmpty);
+    };
+
+    // Initial check
+    const initialVal = mainGrid.GetValue(row, "Shipment quantity");
+    checkQuantity(initialVal);
+
+    // Highlight cell
+    mainGrid.SetAttribute(row, "Shipment quantity", "Background", "#FFF9C4", 1);
+    mainGrid.RefreshRow(row);
+
+    const eventId = `ComponentAggregatorDrawer_${mainRowId}`;
+    if (window.TGAddEvent) {
+      window.TGAddEvent("OnAfterValueChanged", "ScenarioGridDetails", (grid: any, r: any, col: string, val: any) => {
+        if (r && r.id === mainRowId && col === "Shipment quantity") {
+          checkQuantity(val);
+        }
+      }, eventId);
+    }
+
+    return () => {
+      // Clear highlight safely
+      const cleanupGrid = (window as any).Grids?.["ScenarioGridDetails"];
+      if (cleanupGrid) {
+        const cleanupRow = cleanupGrid.GetRowById(mainRowId);
+        if (cleanupRow) {
+          cleanupGrid.SetAttribute(cleanupRow, "Shipment quantity", "Background", "", 1);
+          cleanupGrid.RefreshRow(cleanupRow);
+        }
+      }
+
+      if (window.TGDelEvent) {
+        window.TGDelEvent("OnAfterValueChanged", "ScenarioGridDetails", eventId);
+      }
+    };
+  }, [mainRowId]);
+
 
   useEffect(() => {
     if (isFetchingData) return;
@@ -162,13 +222,13 @@ const ComponentAggregatorDrawer = ({
         Body: [
           initialItems.length > 0
             ? initialItems.map((item: any) => ({
-                ...item,
-                "Component Name": item.name || "",
-                Currency: item.currency || "USD",
-                Cost: item.cost || 0,
-                "Cost for": item.costFor || "Base UOM",
-                Actions: renderDeleteIcon(item.id),
-              }))
+              ...item,
+              "Component Name": item.name || "",
+              Currency: item.currency || "USD",
+              Cost: item.cost || 0,
+              "Cost for": item.costFor || "Base UOM",
+              Actions: renderDeleteIcon(item.id),
+            }))
             : [],
         ],
       });
@@ -339,6 +399,14 @@ const ComponentAggregatorDrawer = ({
         ) : null}
       </Box>
 
+      {hasError && (
+        <Box sx={{ px: 2, mb: 1 }}>
+          <Typography variant="caption" sx={{ color: "error.main", fontWeight: "600" }}>
+            * Shipment Quantity is required in the top grid to calculate costs.
+          </Typography>
+        </Box>
+      )}
+
       {/* Footer Actions */}
       <Box
         sx={{
@@ -357,7 +425,7 @@ const ComponentAggregatorDrawer = ({
           size="small"
           variant="contained"
           onClick={handleUpdate}
-          disabled={isSaving}
+          disabled={hasError || isSaving}
         >
           {isSaving ? "Updating..." : "Update"}
         </Button>

@@ -205,20 +205,21 @@ const CostAggregatorDrawer = ({
   initialItems: _initialItems = [],
   mainRowId,
 }: CostAggregatorDrawerProps) => {
-  const [deleteModalOpen, setDeleteModalOpen] = useState(false);
+  const [deleteModalOpen, setDeleteModalOpen] = useState<boolean>(false);
   const [rowToDelete, setRowToDelete] = useState<{
     rowId: string;
     sectionId: string;
   } | null>(null);
-  const [isFreightDrawerOpen, setIsFreightDrawerOpen] = useState(false);
-  const [isTariffDrawerOpen, setIsTariffDrawerOpen] = useState(false);
-  const [isCustomModalOpen, setIsCustomModalOpen] = useState(false);
-  const [isCalculationModalOpen, setIsCalculationModalOpen] = useState(false);
+  const [isFreightDrawerOpen, setIsFreightDrawerOpen] = useState<boolean>(false);
+  const [isTariffDrawerOpen, setIsTariffDrawerOpen] = useState<boolean>(false);
+  const [isCustomModalOpen, setIsCustomModalOpen] = useState<boolean>(false);
+  const [isCalculationModalOpen, setIsCalculationModalOpen] = useState<boolean>(false);
   const [targetGridId, setTargetGridId] = useState<string | null>(null);
   const [targetRowId, setTargetRowId] = useState<string | null>(null);
-  const [totalCost, setTotalCost] = useState(0);
-
+  const [totalCost, setTotalCost] = useState<number>(0);
   const [sections, setSections] = useState<AggregatorSection[]>([]);
+  const [hasError, setHasError] = useState<boolean>(false);
+
 
   // const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
 
@@ -276,6 +277,60 @@ const CostAggregatorDrawer = ({
   useEffect(() => {
     calculateTotal();
   }, [sections]);
+
+  useEffect(() => {
+    if (!mainRowId) return;
+
+    const mainGrid = (window as any).Grids?.["ScenarioGridDetails"];
+    if (!mainGrid) return;
+
+    const row = mainGrid.GetRowById(mainRowId);
+    if (!row) return;
+
+    const checkQuantity = (value: any) => {
+      let numVal = 0;
+      if (typeof value === "string") {
+        numVal = parseFloat(value.replace(/[^0-9.-]/g, "")) || 0;
+      } else {
+        numVal = Number(value) || 0;
+      }
+      const isEmpty = value === null || value === undefined || value === "" || isNaN(numVal) || numVal === 0;
+      setHasError(isEmpty);
+    };
+
+    // Initial check
+    const initialVal = mainGrid.GetValue(row, "Shipment quantity");
+    checkQuantity(initialVal);
+
+    // Highlight cell
+    mainGrid.SetAttribute(row, "Shipment quantity", "Background", "#FFF9C4", 1);
+    mainGrid.RefreshRow(row);
+
+    const eventId = `CostAggregatorDrawer_${mainRowId}`;
+    if (window.TGAddEvent) {
+      window.TGAddEvent("OnAfterValueChanged", "ScenarioGridDetails", (grid: any, r: any, col: string, val: any) => {
+        if (r && r.id === mainRowId && col === "Shipment quantity") {
+          checkQuantity(val);
+        }
+      }, eventId);
+    }
+
+    return () => {
+      // Clear highlight safely
+      const cleanupGrid = (window as any).Grids?.["ScenarioGridDetails"];
+      if (cleanupGrid) {
+        const cleanupRow = cleanupGrid.GetRowById(mainRowId);
+        if (cleanupRow) {
+          cleanupGrid.SetAttribute(cleanupRow, "Shipment quantity", "Background", "", 1);
+          cleanupGrid.RefreshRow(cleanupRow);
+        }
+      }
+
+      if (window.TGDelEvent) {
+        window.TGDelEvent("OnAfterValueChanged", "ScenarioGridDetails", eventId);
+      }
+    };
+  }, [mainRowId]);
 
   // const openTemplate = Boolean(anchorEl);
 
@@ -432,33 +487,34 @@ const CostAggregatorDrawer = ({
       items: [
         type === "Tariff"
           ? {
-              id: "row1",
-              "Tariff Rate %": renderSelectButton("row1", id, "Tariff Rate %"),
-              "Scenario Builder Column": renderSelectButton(
-                "row1",
-                id,
-                "Scenario Builder Column",
-              ),
-              "Cost per unit": 0,
-            }
+            id: "row1",
+            "Tariff Rate %": renderSelectButton("row1", id, "Tariff Rate %"),
+            "Scenario Builder Column": renderSelectButton(
+              "row1",
+              id,
+              "Scenario Builder Column",
+            ),
+            "Cost per unit": 0,
+          }
           : type === "Custom"
             ? {
-                id: "row1",
-                "Custom input": 0,
-                Action: renderCalculatorIcon("row1", id),
-              }
+              id: "row1",
+              "Custom input": 0,
+              Action: renderCalculatorIcon("row1", id),
+            }
             : {
-                id: "row1",
-                "Aggregator Name": renderSelectButton(
-                  "row1",
-                  id,
-                  "Aggregator Name",
-                ),
-                "Cost for": "Base UOM",
-                "Cost per unit": 0,
-              },
+              id: "row1",
+              "Aggregator Name": renderSelectButton(
+                "row1",
+                id,
+                "Aggregator Name",
+              ),
+              "Cost for": "",
+              "Cost per unit": 0,
+            },
       ],
     };
+
     setSections([...sections, newSection]);
   };
 
@@ -513,7 +569,8 @@ const CostAggregatorDrawer = ({
               1,
             );
             grid.SetValue(row, "Cost per unit", rate.cost, 1);
-            grid.SetValue(row, "Cost for", "Base UOM", 1);
+            grid.SetValue(row, "Cost for", "", 1);
+
             grid.RefreshRow(row);
           }
         });
@@ -538,7 +595,8 @@ const CostAggregatorDrawer = ({
               renderSelectButton(emptyRow.id, targetGridId, "Aggregator Name"),
               1,
             );
-            grid.SetValue(emptyRow, "Cost for", "Base UOM", 1);
+            grid.SetValue(emptyRow, "Cost for", "", 1);
+
             grid.SetValue(emptyRow, "Cost per unit", 0, 1);
             grid.RefreshRow(emptyRow);
           }
@@ -845,7 +903,7 @@ const CostAggregatorDrawer = ({
               <Chip
                 label="Freight"
                 onClick={() => handleAddSection("Freight")}
-                onDelete={() => {}}
+                onDelete={() => { }}
                 deleteIcon={
                   <AddIcon style={{ fontSize: 16, color: "#1a365d" }} />
                 }
@@ -853,7 +911,7 @@ const CostAggregatorDrawer = ({
               <Chip
                 label="Tariff"
                 onClick={() => handleAddSection("Tariff")}
-                onDelete={() => {}}
+                onDelete={() => { }}
                 deleteIcon={
                   <AddIcon style={{ fontSize: 16, color: "#1a365d" }} />
                 }
@@ -861,7 +919,7 @@ const CostAggregatorDrawer = ({
               <Chip
                 label="Custom"
                 onClick={() => setIsCustomModalOpen(true)}
-                onDelete={() => {}}
+                onDelete={() => { }}
                 deleteIcon={
                   <AddIcon style={{ fontSize: 16, color: "#1a365d" }} />
                 }
@@ -971,6 +1029,14 @@ const CostAggregatorDrawer = ({
         )}
       </Box>
 
+      {hasError && (
+        <Box sx={{ px: 3, mb: 1, mt: -1 }}>
+          <Typography variant="caption" sx={{ color: "error.main", fontWeight: "600" }}>
+            * Shipment Quantity is required in the top grid to calculate costs.
+          </Typography>
+        </Box>
+      )}
+
       {/* Total Bar */}
       <Box sx={{ px: 3, mb: 2 }}>
         <Box
@@ -1014,7 +1080,12 @@ const CostAggregatorDrawer = ({
         >
           Cancel
         </Button>
-        <Button size="small" variant="contained" onClick={handleDone}>
+        <Button
+          size="small"
+          variant="contained"
+          onClick={handleDone}
+          disabled={hasError}
+        >
           Done
         </Button>
       </Box>
