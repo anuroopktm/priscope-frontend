@@ -95,6 +95,7 @@ const renderSelectedValue = (
   value: any,
   rowId: string,
   gridId: string,
+  colName: string,
   isPercentage: boolean = false,
 ) => {
   let formattedValue: string;
@@ -108,7 +109,7 @@ const renderSelectedValue = (
 
   return `
     <div 
-      onclick="window.handleOpenFreightSelection && window.handleOpenFreightSelection('${rowId}', '${gridId}', 'A')"
+      onclick="window.handleOpenFreightSelection && window.handleOpenFreightSelection('${rowId}', '${gridId}', '${colName}')"
       style="display: flex; align-items: center; justify-content: flex-end; gap: 12px; height: 100%; padding: 0 12px; cursor: pointer;"
       data-scenario-selected="true"
     >
@@ -233,15 +234,31 @@ const CostAggregatorDrawer = ({
             let costValue = 0;
             if (section.type === "Custom") {
               costValue =
-                parseFloat(grid.GetAttribute(row, "A", "Result")) || 0;
+                parseFloat(grid.GetAttribute(row, "Custom input", "Result")) ||
+                0;
             } else {
-              const costCol = section.type === "Tariff" ? "D" : "C";
+              const costCol =
+                section.type === "Tariff"
+                  ? "Cost per unit"
+                  : "Total Cost Calculated";
               costValue = grid.GetValue(row, costCol);
             }
 
             // Only sum rows that have a non-zero cost or have a selected value
-            const colAValue = String(grid.GetValue(row, "A") || "");
-            const colBValue = String(grid.GetValue(row, "B") || "");
+            const colA =
+              section.type === "Tariff"
+                ? "Tariff Rate %"
+                : section.type === "Custom"
+                  ? "Custom input"
+                  : "Aggregator Name";
+            const colB =
+              section.type === "Tariff"
+                ? "Scenario Builder Column"
+                : section.type === "Custom"
+                  ? "Action"
+                  : "Scenario Column";
+            const colAValue = String(grid.GetValue(row, colA) || "");
+            const colBValue = String(grid.GetValue(row, colB) || "");
             const isDataSelected =
               colAValue.includes("data-scenario-selected") ||
               colBValue.includes("data-scenario-selected") ||
@@ -308,7 +325,7 @@ const CostAggregatorDrawer = ({
         (s: any) => s.id === gridId,
       );
       if (section?.type === "Tariff") {
-        if (col === "B") {
+        if (col === "Scenario Builder Column") {
           // Logic for Scenario Builder Column selection
           (window as any).startScenarioColumnSelection &&
             (window as any).startScenarioColumnSelection(rowId, gridId);
@@ -321,11 +338,14 @@ const CostAggregatorDrawer = ({
     };
 
     const recalculateTariffRow = (grid: any, row: any) => {
-      const rate = parseFloat(grid.GetAttribute(row, "A", "RateValue")) || 0;
+      const rate =
+        parseFloat(grid.GetAttribute(row, "Tariff Rate %", "RateValue")) || 0;
       const sourceValue =
-        parseFloat(grid.GetAttribute(row, "B", "SourceValue")) || 0;
+        parseFloat(
+          grid.GetAttribute(row, "Scenario Builder Column", "SourceValue"),
+        ) || 0;
       const costPerUnit = (rate / 100) * sourceValue;
-      grid.SetValue(row, "D", costPerUnit, 1);
+      grid.SetValue(row, "Cost per unit", costPerUnit, 1);
     };
 
     (window as any).finishScenarioColumnSelection = (
@@ -343,12 +363,29 @@ const CostAggregatorDrawer = ({
             typeof value === "number" ? `$${value.toFixed(2)}` : String(value);
           grid.SetValue(
             row,
-            "B",
-            renderSelectButton(rowId, gridId, "B", formattedValue),
+            "Scenario Builder Column",
+            renderSelectButton(
+              rowId,
+              gridId,
+              "Scenario Builder Column",
+              formattedValue,
+            ),
             1,
           );
-          grid.SetAttribute(row, "B", "SourceColumn", colName, 1);
-          grid.SetAttribute(row, "B", "SourceValue", value, 1);
+          grid.SetAttribute(
+            row,
+            "Scenario Builder Column",
+            "SourceColumn",
+            colName,
+            1,
+          );
+          grid.SetAttribute(
+            row,
+            "Scenario Builder Column",
+            "SourceValue",
+            value,
+            1,
+          );
 
           recalculateTariffRow(grid, row);
           grid.RefreshRow(row);
@@ -399,22 +436,30 @@ const CostAggregatorDrawer = ({
         type === "Tariff"
           ? {
               id: "row1",
-              A: renderSelectButton("row1", id, "A"),
-              B: renderSelectButton("row1", id, "B"),
-              C: "Base UOM",
-              D: 0,
+              "Tariff Rate %": renderSelectButton("row1", id, "Tariff Rate %"),
+              "Scenario Builder Column": renderSelectButton(
+                "row1",
+                id,
+                "Scenario Builder Column",
+              ),
+              "Cost for": "Base UOM",
+              "Cost per unit": 0,
             }
           : type === "Custom"
             ? {
                 id: "row1",
-                A: 0,
-                B: renderCalculatorIcon("row1", id),
+                "Custom input": 0,
+                Action: renderCalculatorIcon("row1", id),
               }
             : {
                 id: "row1",
-                A: renderSelectButton("row1", id, "A"),
-                B: "Base UOM",
-                C: 0,
+                "Aggregator Name": renderSelectButton(
+                  "row1",
+                  id,
+                  "Aggregator Name",
+                ),
+                "Scenario Column": "Base UOM",
+                "Total Cost Calculated": 0,
               },
       ],
     };
@@ -437,7 +482,10 @@ const CostAggregatorDrawer = ({
             while (last && last.Visible === 0) last = grid.GetPrev(last);
 
             const isLastSelect =
-              last && grid.GetValue(last, "A")?.includes(">Select</button>");
+              last &&
+              grid
+                .GetValue(last, "Aggregator Name")
+                ?.includes(">Select</button>");
 
             if (isLastSelect) {
               // Insert before the Select row
@@ -452,13 +500,24 @@ const CostAggregatorDrawer = ({
           if (row) {
             grid.SetValue(
               row,
-              "A",
-              renderSelectedValue(rate.cost, row.id, targetGridId),
+              "Aggregator Name",
+              renderSelectedValue(
+                rate.cost,
+                row.id,
+                targetGridId,
+                "Aggregator Name",
+              ),
               1,
             );
-            grid.SetAttribute(row, "A", "CleanName", rate.name, 1);
-            grid.SetValue(row, "C", rate.cost, 1);
-            grid.SetValue(row, "B", "Base UOM", 1);
+            grid.SetAttribute(
+              row,
+              "Aggregator Name",
+              "CleanName",
+              rate.name,
+              1,
+            );
+            grid.SetValue(row, "Total Cost Calculated", rate.cost, 1);
+            grid.SetValue(row, "Scenario Column", "Base UOM", 1);
             grid.RefreshRow(row);
           }
         });
@@ -470,19 +529,21 @@ const CostAggregatorDrawer = ({
 
         const isFinalLastSelect =
           finalLast &&
-          grid.GetValue(finalLast, "A")?.includes(">Select</button>");
+          grid
+            .GetValue(finalLast, "Aggregator Name")
+            ?.includes(">Select</button>");
 
         if (!isFinalLastSelect) {
           const emptyRow = grid.AddRow(null, null, 1);
           if (emptyRow) {
             grid.SetValue(
               emptyRow,
-              "A",
-              renderSelectButton(emptyRow.id, targetGridId, "A"),
+              "Aggregator Name",
+              renderSelectButton(emptyRow.id, targetGridId, "Aggregator Name"),
               1,
             );
-            grid.SetValue(emptyRow, "B", "Base UOM", 1);
-            grid.SetValue(emptyRow, "C", 0, 1);
+            grid.SetValue(emptyRow, "Scenario Column", "Base UOM", 1);
+            grid.SetValue(emptyRow, "Total Cost Calculated", 0, 1);
             grid.RefreshRow(emptyRow);
           }
         }
@@ -510,7 +571,10 @@ const CostAggregatorDrawer = ({
             while (last && last.Visible === 0) last = grid.GetPrev(last);
 
             const isLastSelect =
-              last && grid.GetValue(last, "A")?.includes(">Select</button>");
+              last &&
+              grid
+                .GetValue(last, "Tariff Rate %")
+                ?.includes(">Select</button>");
 
             if (isLastSelect) {
               // Insert before the Select row
@@ -525,19 +589,31 @@ const CostAggregatorDrawer = ({
           if (row) {
             grid.SetValue(
               row,
-              "A",
-              renderSelectedValue(rate.cost, row.id, targetGridId, true),
+              "Tariff Rate %",
+              renderSelectedValue(
+                rate.cost,
+                row.id,
+                targetGridId,
+                "Tariff Rate %",
+                true,
+              ),
               1,
             );
-            grid.SetAttribute(row, "A", "CleanName", rate.name, 1);
-            grid.SetAttribute(row, "A", "RateValue", rate.cost, 1);
+            grid.SetAttribute(row, "Tariff Rate %", "CleanName", rate.name, 1);
+            grid.SetAttribute(row, "Tariff Rate %", "RateValue", rate.cost, 1);
 
             const sourceValue =
-              parseFloat(grid.GetAttribute(row, "B", "SourceValue")) || 0;
+              parseFloat(
+                grid.GetAttribute(
+                  row,
+                  "Scenario Builder Column",
+                  "SourceValue",
+                ),
+              ) || 0;
             const costPerUnit = (rate.cost / 100) * sourceValue;
-            grid.SetValue(row, "D", costPerUnit, 1);
+            grid.SetValue(row, "Cost per unit", costPerUnit, 1);
 
-            grid.SetValue(row, "C", "Base UOM", 1);
+            grid.SetValue(row, "Cost for", "Base UOM", 1);
             grid.RefreshRow(row);
           }
         });
@@ -549,25 +625,31 @@ const CostAggregatorDrawer = ({
 
         const isFinalLastSelect =
           finalLast &&
-          grid.GetValue(finalLast, "A")?.includes(">Select</button>");
+          grid
+            .GetValue(finalLast, "Tariff Rate %")
+            ?.includes(">Select</button>");
 
         if (!isFinalLastSelect) {
           const emptyRow = grid.AddRow(null, null, 1);
           if (emptyRow) {
             grid.SetValue(
               emptyRow,
-              "A",
-              renderSelectButton(emptyRow.id, targetGridId, "A"),
+              "Tariff Rate %",
+              renderSelectButton(emptyRow.id, targetGridId, "Tariff Rate %"),
               1,
             );
             grid.SetValue(
               emptyRow,
-              "B",
-              renderSelectButton(emptyRow.id, targetGridId, "B"),
+              "Scenario Builder Column",
+              renderSelectButton(
+                emptyRow.id,
+                targetGridId,
+                "Scenario Builder Column",
+              ),
               1,
             );
-            grid.SetValue(emptyRow, "C", "Base UOM", 1);
-            grid.SetValue(emptyRow, "D", 0, 1);
+            grid.SetValue(emptyRow, "Cost for", "Base UOM", 1);
+            grid.SetValue(emptyRow, "Cost per unit", 0, 1);
             grid.RefreshRow(emptyRow);
           }
         }
@@ -589,7 +671,14 @@ const CostAggregatorDrawer = ({
         let row = grid.GetFirst();
         while (row) {
           if (row.Kind === "Data" && !row.Deleted) {
-            const colAValue = String(grid.GetValue(row, "A") || "");
+            const isTariff = section.type === "Tariff";
+            const isCustom = section.type === "Custom";
+            const colA = isTariff
+              ? "Tariff Rate %"
+              : isCustom
+                ? "Custom input"
+                : "Aggregator Name";
+            const colAValue = String(grid.GetValue(row, colA) || "");
             const isSelectRow =
               colAValue.includes("Select") &&
               !colAValue.includes("data-scenario-selected");
@@ -611,10 +700,12 @@ const CostAggregatorDrawer = ({
 
             let costValue = 0;
             if (isCustom) {
-              const resAttr = grid.GetAttribute(row, "A", "Result");
+              const resAttr = grid.GetAttribute(row, "Custom input", "Result");
               costValue = Number(resAttr) || 0;
             } else {
-              const costCol = isTariff ? "D" : "C";
+              const costCol = isTariff
+                ? "Cost per unit"
+                : "Total Cost Calculated";
               const costValueRaw = grid.GetValue(row, costCol);
               costValue =
                 typeof costValueRaw === "object"
@@ -622,7 +713,12 @@ const CostAggregatorDrawer = ({
                   : Number(costValueRaw) || 0;
             }
 
-            const colAValue = String(grid.GetValue(row, "A") || "");
+            const colA = isTariff
+              ? "Tariff Rate %"
+              : isCustom
+                ? "Custom input"
+                : "Aggregator Name";
+            const colAValue = String(grid.GetValue(row, colA) || "");
             const isSelectRow =
               colAValue.includes("Select") &&
               !colAValue.includes("data-scenario-selected");
@@ -633,7 +729,7 @@ const CostAggregatorDrawer = ({
             }
 
             // Get clean name from attribute
-            const cleanNameRaw = grid.GetAttribute(row, "A", "CleanName");
+            const cleanNameRaw = grid.GetAttribute(row, colA, "CleanName");
             const cleanName =
               typeof cleanNameRaw === "string" ? cleanNameRaw : null;
 
@@ -664,7 +760,10 @@ const CostAggregatorDrawer = ({
               costFor: String(
                 isCustom
                   ? "Base UOM"
-                  : grid.GetValue(row, isTariff ? "C" : "B") || "Base UOM",
+                  : grid.GetValue(
+                      row,
+                      isTariff ? "Cost for" : "Scenario Column",
+                    ) || "Base UOM",
               ),
             });
           }
@@ -993,7 +1092,7 @@ const CostAggregatorDrawer = ({
             const row = grid?.GetRowById(targetRowId);
             // Prefer the stored formula attribute
             return row
-              ? String(grid.GetAttribute(row, "A", "Formula") || "")
+              ? String(grid.GetAttribute(row, "Custom input", "Formula") || "")
               : "";
           }
           return "";
@@ -1009,9 +1108,15 @@ const CostAggregatorDrawer = ({
                 // Update internal grid header only (keep section title/template name as is)
                 if (label) {
                   if (grid.Header) {
-                    grid.SetValue(grid.Header, "A", label, 1);
+                    grid.SetValue(grid.Header, "Custom input", label, 1);
                   } else {
-                    grid.SetAttribute(null, "A", "Caption", label, 1);
+                    grid.SetAttribute(
+                      null,
+                      "Custom input",
+                      "Caption",
+                      label,
+                      1,
+                    );
                   }
                   grid.Render();
                 }
@@ -1041,21 +1146,21 @@ const CostAggregatorDrawer = ({
                   // eslint-disable-next-line no-eval
                   const result = Number(eval(evalStr)) || 0;
                   // Store the source value in A and the result in B (via icon renderer)
-                  grid.SetValue(row, "A", firstSourceValue, 1);
+                  grid.SetValue(row, "Custom input", firstSourceValue, 1);
                   grid.SetValue(
                     row,
-                    "B",
+                    "Action",
                     renderCalculatorIcon(row.id, grid.id, result),
                     1,
                   );
                   // Preserve original result for calculations
-                  grid.SetAttribute(row, "A", "Result", result, 1);
+                  grid.SetAttribute(row, "Custom input", "Result", result, 1);
                   // Preserve the formula in an attribute for re-editing
-                  grid.SetAttribute(row, "A", "Formula", formula, 1);
+                  grid.SetAttribute(row, "Custom input", "Formula", formula, 1);
                   calculateTotal();
                 } catch (e) {
                   console.error("Formula eval failed:", e);
-                  grid.SetValue(row, "A", 0, 1);
+                  grid.SetValue(row, "Custom input", 0, 1);
                 }
               }
             }

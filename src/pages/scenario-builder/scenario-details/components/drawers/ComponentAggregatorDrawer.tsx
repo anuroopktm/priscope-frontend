@@ -53,12 +53,14 @@ const scrapeAggregatorGridData = (gridId: string) => {
       Def: gridRow.Def?.Name || gridRow.Def,
     };
 
-    ["A", "B", "C", "D", "E"].forEach((colName) => {
-      const val = grid.GetValue(gridRow, colName);
-      if (val !== undefined && val !== null && val !== "") {
-        rowData[colName] = val;
-      }
-    });
+    ["Component Name", "Currency", "Cost", "Cost for", "Cost per unit"].forEach(
+      (colName) => {
+        const val = grid.GetValue(gridRow, colName);
+        if (val !== undefined && val !== null && val !== "") {
+          rowData[colName] = val;
+        }
+      },
+    );
 
     if (gridRow.firstChild) {
       const children: any[] = [];
@@ -143,7 +145,7 @@ const ComponentAggregatorDrawer = ({
     const addDeleteIcons = (rows: any[]): any[] => {
       return rows.map((row) => ({
         ...row,
-        F: renderDeleteIcon(row.id),
+        Actions: renderDeleteIcon(row.id),
         Items: row.Items ? addDeleteIcons(row.Items) : undefined,
       }));
     };
@@ -161,11 +163,11 @@ const ComponentAggregatorDrawer = ({
           initialItems.length > 0
             ? initialItems.map((item: any) => ({
                 ...item,
-                A: item.name || "",
-                B: item.currency || "USD",
-                C: item.cost || 0,
-                D: item.costFor || "Base UOM",
-                F: renderDeleteIcon(item.id),
+                "Component Name": item.name || "",
+                Currency: item.currency || "USD",
+                Cost: item.cost || 0,
+                "Cost for": item.costFor || "Base UOM",
+                Actions: renderDeleteIcon(item.id),
               }))
             : [],
         ],
@@ -206,8 +208,8 @@ const ComponentAggregatorDrawer = ({
       const codes = currencyData.currencies.map((c: any) => c.id).join("|");
 
       // Update Enum and EnumKeys for column B
-      grid.SetAttribute(null, "B", "Enum", "|" + names, 1);
-      grid.SetAttribute(null, "B", "EnumKeys", "|" + codes, 1);
+      grid.SetAttribute(null, "Currency", "Enum", "|" + names, 1);
+      grid.SetAttribute(null, "Currency", "EnumKeys", "|" + codes, 1);
       grid.Render();
     }
   }, [currencyData]);
@@ -217,11 +219,11 @@ const ComponentAggregatorDrawer = ({
     if (grid) {
       const newRow = grid.AddRow(null, null, 1);
       if (newRow) {
-        grid.SetValue(newRow, "A", "", 1);
-        grid.SetValue(newRow, "B", "USD", 1);
-        grid.SetValue(newRow, "C", 0, 1);
-        grid.SetValue(newRow, "D", "Base UOM", 1);
-        grid.SetValue(newRow, "F", renderDeleteIcon(newRow.id), 1);
+        grid.SetValue(newRow, "Component Name", "", 1);
+        grid.SetValue(newRow, "Currency", "USD", 1);
+        grid.SetValue(newRow, "Cost", 0, 1);
+        grid.SetValue(newRow, "Cost for", "Base UOM", 1);
+        grid.SetValue(newRow, "Actions", renderDeleteIcon(newRow.id), 1);
         grid.Calculate();
       }
     }
@@ -237,11 +239,11 @@ const ComponentAggregatorDrawer = ({
         if (row.Kind === "Data" && !row.Deleted) {
           summaryRows.push({
             id: row.id,
-            name: grid.GetValue(row, "A"),
-            currency: grid.GetValue(row, "B"),
-            cost: grid.GetValue(row, "C"),
-            costFor: grid.GetValue(row, "D"),
-            costPerUnit: grid.GetValue(row, "E"),
+            name: grid.GetValue(row, "Component Name"),
+            currency: grid.GetValue(row, "Currency"),
+            cost: grid.GetValue(row, "Cost"),
+            costFor: grid.GetValue(row, "Cost for"),
+            costPerUnit: grid.GetValue(row, "Cost per unit"),
           });
         }
         row = grid.GetNext(row);

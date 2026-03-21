@@ -90,9 +90,14 @@ const syncLocalGridData = (grid: any) => {
     // Capture values for ALL defined columns
     Object.keys(grid.Cols).forEach((colName) => {
       // ONLY capture if it's a base column or a visible extra column
-      const isBase = ["itemId", "A", "B", "C", "is_published"].includes(
-        colName,
-      );
+      const isBase = [
+        "itemId",
+        "SKU",
+        "Description",
+        "Category",
+        "Shipment quantity",
+        "is_published",
+      ].includes(colName);
       const isExtra = !!colsData[colName];
 
       if (isBase || isExtra) {
@@ -264,8 +269,8 @@ const ScenarioDetailsPage = () => {
           onSuccess: (response) => {
             showToast(
               successMessage ||
-                response?.message ||
-                "Scenario saved as draft successfully",
+              response?.message ||
+              "Scenario saved as draft successfully",
               "success",
             );
             if (onSuccess) onSuccess();
@@ -516,7 +521,7 @@ const ScenarioDetailsPage = () => {
       if (grid) {
         const row = grid.GetRowById(id);
         if (row) {
-          setEditingGroupName(row.A || "");
+          setEditingGroupName(row.SKU || "");
         }
       }
       setIsEditModalOpen(true);

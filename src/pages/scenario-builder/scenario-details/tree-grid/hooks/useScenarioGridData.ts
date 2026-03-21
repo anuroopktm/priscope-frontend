@@ -5,11 +5,9 @@ export interface ScenarioRow {
   id: string;
   itemId?: string;
   Def: string;
-  A: string;
-  B?: string;
-  C?: string;
-  D?: string;
-  E?: string;
+  SKU: string;
+  Description?: string;
+  Category?: string;
   is_published?: number;
   Selected?: number;
   CanSelect?: number;
@@ -38,9 +36,7 @@ export const transformRows = (
 ): ScenarioRow[] => {
   return rows.map((row) => {
     const isPublished = isScenarioPublished || row.is_published === 1;
-    let transformedRow = { ...row };
-
-    console.log("transformedRow", transformedRow);
+    let transformedRow: any = { ...row };
 
     if (isPublished) {
       transformedRow.CanEdit = 0;
@@ -84,7 +80,7 @@ export const useScenarioGridData = () => {
           const updateRecursive = (rows: ScenarioRow[]): ScenarioRow[] => {
             return rows.map((row) => {
               if (row.id === editingGroupId) {
-                return { ...row, A: newName };
+                return { ...row, SKU: newName };
               }
               if (row.Items) {
                 return { ...row, Items: updateRecursive(row.Items) };
@@ -205,6 +201,7 @@ export const useScenarioGridData = () => {
             SKU: item.SKU,
             Description: item.Description,
             Category: item.Category,
+            "Shipment quantity": item["Shipment quantity"],
           };
 
           selectedHeaders.forEach((header) => {
@@ -232,9 +229,12 @@ export const useScenarioGridData = () => {
           id: `row_${Math.random().toString(36).substr(2, 9)}`,
           itemId: cleanItem.id || "",
           Def: "R",
-          A: getUnpackedValue(cleanItem.SKU || cleanItem.A || ""),
-          B: getUnpackedValue(cleanItem.Description || cleanItem.B || ""),
-          C: getUnpackedValue(cleanItem.Category || cleanItem.C || ""),
+          SKU: getUnpackedValue(cleanItem.SKU || ""),
+          Description: getUnpackedValue(cleanItem.Description || ""),
+          Category: getUnpackedValue(cleanItem.Category || ""),
+          "Shipment quantity": getUnpackedValue(
+            cleanItem["Shipment quantity"] || "",
+          ),
           is_published: 0,
           Selected: 0,
           CanSelect: 1,
@@ -248,11 +248,24 @@ export const useScenarioGridData = () => {
 
           Object.keys(cleanItem).forEach((key) => {
             // Only copy if it is a base column or exists in DOM grid columns!
-            const isBase = ["A", "B", "C"].includes(key);
+            const isBase = [
+              "SKU",
+              "Description",
+              "Category",
+              "Shipment quantity",
+            ].includes(key);
             const isExtraCol = activeGridCols.includes(key);
 
             if (isBase || isExtraCol) {
-              if (["id", "SKU", "Description", "Category"].includes(key))
+              if (
+                [
+                  "id",
+                  "SKU",
+                  "Description",
+                  "Category",
+                  "Shipment quantity",
+                ].includes(key)
+              )
                 return;
 
               // Explicitly set MenuType as Data to DOM Grid Columns metadata directly
@@ -286,7 +299,9 @@ export const useScenarioGridData = () => {
           selectedHeaders.forEach((headerName) => {
             if (
               cleanItem[headerName] !== undefined &&
-              !["SKU", "Description", "Category"].includes(headerName)
+              !["SKU", "Description", "Category", "Shipment quantity"].includes(
+                headerName,
+              )
             ) {
               let val = cleanItem[headerName];
               if (val && typeof val === "object") {
@@ -332,7 +347,11 @@ export const useScenarioGridData = () => {
 
       if (selectedHeaders) {
         selectedHeaders.forEach((headerName) => {
-          if (!["SKU", "Description", "Category"].includes(headerName)) {
+          if (
+            !["SKU", "Description", "Category", "Shipment quantity"].includes(
+              headerName,
+            )
+          ) {
             if (!colsData[headerName]) {
               colsData[headerName] = {
                 Caption: headerName,
@@ -353,7 +372,7 @@ export const useScenarioGridData = () => {
         const groupRow: ScenarioRow = {
           id: groupRowId,
           Def: "Group",
-          A: groupName,
+          SKU: groupName,
           ACanEdit: 0,
           AHtmlPostfix: `<div style="display:flex; gap:12px; float:right; margin-right:8px; align-items:center; height:100%;">
             <span style="display:flex; align-items:center; cursor:pointer;" onclick="window.handleTreeGridEdit && window.handleTreeGridEdit('${groupRowId}')">${EDIT_ICON}</span>

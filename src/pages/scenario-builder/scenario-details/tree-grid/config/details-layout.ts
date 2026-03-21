@@ -3,7 +3,7 @@ export const ScenarioDetailsLayout = {
     CfgId: "ScenarioDetailsGrid",
     IdChars: "0123456789",
     NumberId: "1",
-    MainCol: "A",
+    MainCol: "SKU",
     Group: "",
     Style: "White",
     ReloadChanged: "1",
@@ -50,7 +50,7 @@ export const ScenarioDetailsLayout = {
   Cols: [
     { Name: "itemId", Visible: "0" },
     {
-      Name: "A",
+      Name: "SKU",
       Type: "Text",
       RelWidth: 1,
       CanEdit: 1,
@@ -58,7 +58,7 @@ export const ScenarioDetailsLayout = {
       MenuType: "Data",
     },
     {
-      Name: "B",
+      Name: "Description",
       Type: "Text",
       RelWidth: 1,
       CanEdit: 1,
@@ -66,7 +66,15 @@ export const ScenarioDetailsLayout = {
       MenuType: "Data",
     },
     {
-      Name: "C",
+      Name: "Category",
+      Type: "Text",
+      RelWidth: 1,
+      CanEdit: 1,
+      CanFilter: 1,
+      MenuType: "Data",
+    },
+    {
+      Name: "Shipment quantity",
       Type: "Text",
       RelWidth: 1,
       CanEdit: 1,
@@ -92,7 +100,7 @@ export const ScenarioDetailsLayout = {
       PanelSelect: "1",
       CanEdit: "0",
       Spanned: "1",
-      ASpan: "3",
+      SKUSpan: "3",
       is_publishedVisible: "1",
     },
     R: {
@@ -101,9 +109,10 @@ export const ScenarioDetailsLayout = {
     },
   },
   Header: {
-    A: "SKU",
-    B: "Description",
-    C: "Category",
+    SKU: "SKU",
+    Description: "Description",
+    Category: "Category",
+    "Shipment quantity": "Shipment quantity",
     is_published: "Status",
     Color: "",
   },

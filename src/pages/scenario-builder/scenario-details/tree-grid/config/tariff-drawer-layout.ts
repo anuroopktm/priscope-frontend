@@ -32,19 +32,19 @@ export const TariffDrawerLayout = {
   LeftCols: [],
   Cols: [
     {
-      Name: "A",
+      Name: "Tariff Rate %",
       Width: "150",
       Type: "Html",
       Caption: "Tariff Rate %",
     },
     {
-      Name: "B",
+      Name: "Scenario Builder Column",
       Width: "200",
       Type: "Html",
       Caption: "Scenario Builder Column",
     },
     {
-      Name: "C",
+      Name: "Cost for",
       Width: "150",
       Type: "Enum",
       Caption: "Cost for",
@@ -52,7 +52,7 @@ export const TariffDrawerLayout = {
       EnumKeys: "|Base UOM|Qty Per Shipment",
     },
     {
-      Name: "D",
+      Name: "Cost per unit",
       Width: "150",
       Type: "Float",
       Format: "$0.00",
@@ -60,13 +60,13 @@ export const TariffDrawerLayout = {
     },
   ],
   Header: {
-    A: "Tariff Rate %",
-    B: "Scenario Builder Column",
-    C: "Cost for",
-    D: "Cost per unit",
-    AAlign: "Left",
-    BAlign: "Left",
-    CAlign: "Left",
-    DAlign: "Left",
+    "Tariff Rate %": "Tariff Rate %",
+    "Scenario Builder Column": "Scenario Builder Column",
+    "Cost for": "Cost for",
+    "Cost per unit": "Cost per unit",
+    "Tariff Rate %Align": "Left",
+    "Scenario Builder ColumnAlign": "Left",
+    "Cost forAlign": "Left",
+    "Cost per unitAlign": "Left",
   },
 };

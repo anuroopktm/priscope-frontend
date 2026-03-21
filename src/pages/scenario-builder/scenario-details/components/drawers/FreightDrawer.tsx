@@ -122,19 +122,19 @@ const FreightDrawer = ({ onClose, onSelect }: FreightDrawerProps) => {
     if (!row) return;
 
     const resolveAndSave = async () => {
-      let containerTypeId = row.C_id;
+      let containerTypeId = row["Container Type_id"];
 
-      if (!containerTypeId && row.C) {
+      if (!containerTypeId && row["Container Type"]) {
         const existing = containerTypesData?.container_types?.find(
-          (t: any) => t.type === row.C,
+          (t: any) => t.type === row["Container Type"],
         );
         if (existing) {
           containerTypeId = existing.id;
         } else {
           try {
             const newType = await createContainerType({
-              type: row.C,
-              description: `Standard ${row.C} container`,
+              type: row["Container Type"],
+              description: `Standard ${row["Container Type"]} container`,
               tenant_id: "6b9d182e-5d44-4dbf-8a0d-efa9bb05996e",
             });
             containerTypeId = newType.id;
@@ -153,10 +153,10 @@ const FreightDrawer = ({ onClose, onSelect }: FreightDrawerProps) => {
             : [],
         container_type_id:
           containerTypeId || "c3d4e5f6-7890-1234-cdef-123406789012",
-        currency: row.D || "USD",
-        port_of_destination: row.B || "",
-        port_of_origin: row.A || "",
-        rate: Number(row.E) || 0,
+        currency: row["Currency"] || "USD",
+        port_of_destination: row["Port of Destination"] || "",
+        port_of_origin: row["Port of Origin"] || "",
+        rate: Number(row["Rate"]) || 0,
         source: "freight_rate",
         tenant_id: "6b9d182e-5d44-4dbf-8a0d-efa9bb05996e",
         valid_from: new Date().toISOString().split("T")[0] + "T00:00:00",
@@ -188,10 +188,10 @@ const FreightDrawer = ({ onClose, onSelect }: FreightDrawerProps) => {
       const grid = (window as any).Grids?.[gridId];
       if (!grid) return false;
 
-      // Force any active edits (A, B, or E) to save before we process the popover
+      // Force any active edits to save before we process the popover
       grid.EndEdit(1);
 
-      if (col === "C" || col === "D") {
+      if (col === "Container Type" || col === "Currency") {
         grid.Focus(row, col);
         const cell = grid.GetCell(row, col);
         if (cell) {
@@ -240,8 +240,8 @@ const FreightDrawer = ({ onClose, onSelect }: FreightDrawerProps) => {
       if (row) {
         // Use SetValue to ensure TreeGrid processes the change correctly
         grid.SetValue(row, column, value, 1);
-        if (column === "C" && id) {
-          row.C_id = id;
+        if (column === "Container Type" && id) {
+          row["Container Type_id"] = id;
         }
 
         // Sync localRows state with current grid values
@@ -251,11 +251,16 @@ const FreightDrawer = ({ onClose, onSelect }: FreightDrawerProps) => {
               r.id === rowId
                 ? {
                     ...r,
-                    port_of_origin: grid.GetValue(row, "A") || "",
-                    port_of_destination: grid.GetValue(row, "B") || "",
-                    rate: Number(grid.GetValue(row, "E")) || 0,
-                    [column === "C" ? "container_type" : "currency"]: value,
-                    ...(column === "C" && id ? { container_type_id: id } : {}),
+                    port_of_origin: grid.GetValue(row, "Port of Origin") || "",
+                    port_of_destination:
+                      grid.GetValue(row, "Port of Destination") || "",
+                    rate: Number(grid.GetValue(row, "Rate")) || 0,
+                    [column === "Container Type"
+                      ? "container_type"
+                      : "currency"]: value,
+                    ...(column === "Container Type" && id
+                      ? { container_type_id: id }
+                      : {}),
                   }
                 : r,
             ),
@@ -294,12 +299,21 @@ const FreightDrawer = ({ onClose, onSelect }: FreightDrawerProps) => {
         if (r) {
           return {
             ...row,
-            port_of_origin: r.A !== undefined ? r.A : row.port_of_origin,
+            port_of_origin:
+              r["Port of Origin"] !== undefined
+                ? r["Port of Origin"]
+                : row.port_of_origin,
             port_of_destination:
-              r.B !== undefined ? r.B : row.port_of_destination,
-            container_type: r.C !== undefined ? r.C : row.container_type,
-            currency: r.D !== undefined ? r.D : row.currency,
-            rate: r.E !== undefined ? r.E : row.rate,
+              r["Port of Destination"] !== undefined
+                ? r["Port of Destination"]
+                : row.port_of_destination,
+            container_type:
+              r["Container Type"] !== undefined
+                ? r["Container Type"]
+                : row.container_type,
+            currency:
+              r["Currency"] !== undefined ? r["Currency"] : row.currency,
+            rate: r["Rate"] !== undefined ? r["Rate"] : row.rate,
           };
         }
         return row;
@@ -324,7 +338,7 @@ const FreightDrawer = ({ onClose, onSelect }: FreightDrawerProps) => {
       if (g) {
         const row = g.GetRowById(newId);
         if (row) {
-          const cell = g.GetCell(row, "F");
+          const cell = g.GetCell(row, "Actions");
           if (cell) {
             const rect = cell.getBoundingClientRect();
             g.EndEdit(1);
@@ -362,34 +376,34 @@ const FreightDrawer = ({ onClose, onSelect }: FreightDrawerProps) => {
         [
           ...localRows.map((row) => ({
             id: row.id,
-            A: row.port_of_origin,
-            B: row.port_of_destination,
-            C: row.container_type,
-            D: row.currency,
-            E: row.rate,
-            F: renderActionCell(row.id, false),
+            "Port of Origin": row.port_of_origin,
+            "Port of Destination": row.port_of_destination,
+            "Container Type": row.container_type,
+            Currency: row.currency,
+            Rate: row.rate,
+            Actions: renderActionCell(row.id, false),
             CanEdit: "1",
-            ACanEdit: "1",
-            BCanEdit: "1",
-            ECanEdit: "1",
-            CCanEdit: "1",
-            DCanEdit: "1",
+            "Port of OriginCanEdit": "1",
+            "Port of DestinationCanEdit": "1",
+            RateCanEdit: "1",
+            "Container TypeCanEdit": "1",
+            CurrencyCanEdit: "1",
           })),
           ...(freightRatesData?.freight_rates?.map((rate: FreightRate) => ({
             id: rate.id,
-            A: rate.port_of_origin,
-            B: rate.port_of_destination,
-            C: rate.container_type || "20 ft",
-            C_id: rate.container_type,
-            D: rate.currency,
-            E: rate.rate,
-            F: renderActionCell(rate.id, false),
+            "Port of Origin": rate.port_of_origin,
+            "Port of Destination": rate.port_of_destination,
+            "Container Type": rate.container_type || "20 ft",
+            "Container Type_id": rate.container_type,
+            Currency: rate.currency,
+            Rate: rate.rate,
+            Actions: renderActionCell(rate.id, false),
             CanEdit: "0",
-            ACanEdit: "0",
-            BCanEdit: "0",
-            ECanEdit: "0",
-            CCanEdit: "0",
-            DCanEdit: "0",
+            "Port of OriginCanEdit": "0",
+            "Port of DestinationCanEdit": "0",
+            RateCanEdit: "0",
+            "Container TypeCanEdit": "0",
+            CurrencyCanEdit: "0",
           })) || []),
         ],
       ],
@@ -405,9 +419,9 @@ const FreightDrawer = ({ onClose, onSelect }: FreightDrawerProps) => {
           onSelect([
             {
               id: rowId,
-              name: `Freight (${row.A || ""} - ${row.B || ""})`,
-              cost: Number(row.E) || 0,
-              currency: row.D || "USD",
+              name: `Freight (${row["Port of Origin"] || ""} - ${row["Port of Destination"] || ""})`,
+              cost: Number(row["Rate"]) || 0,
+              currency: row["Currency"] || "USD",
               source: rowId.startsWith("local_") ? "Manual" : "Freight API",
             },
           ]);
@@ -513,7 +527,7 @@ const FreightDrawer = ({ onClose, onSelect }: FreightDrawerProps) => {
             <GridSelectPopover
               anchor={dropdownPopover}
               options={
-                dropdownPopover.column === "C"
+                dropdownPopover.column === "Container Type"
                   ? (containerTypesData?.container_types || []).map(
                       (t: any) => ({
                         id: t.id,
@@ -527,10 +541,12 @@ const FreightDrawer = ({ onClose, onSelect }: FreightDrawerProps) => {
               }
               onSelect={handleSelectOption}
               onClose={() => setDropdownPopover(null)}
-              showCreateNew={dropdownPopover.column === "C"}
+              showCreateNew={dropdownPopover.column === "Container Type"}
               onCreateNew={handleCreateNewContainerType}
               placeholder={`Search ${
-                dropdownPopover.column === "C" ? "container..." : "currency..."
+                dropdownPopover.column === "Container Type"
+                  ? "container..."
+                  : "currency..."
               }`}
             />
           )}
