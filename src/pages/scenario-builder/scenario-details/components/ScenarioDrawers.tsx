@@ -64,6 +64,8 @@ const ScenarioDrawers = ({
               mainRowId={activeCell.rowId}
               onClose={handleClose}
               onUpdate={handleUpdate}
+              scenarioId={scenarioId}
+              cellId={`${activeCell.rowId}_${activeCell.col}`}
             />
           ) : activeCell.type === "Margin" || activeCell.type === "Markup" ? (
             <MarginMarkupDrawer

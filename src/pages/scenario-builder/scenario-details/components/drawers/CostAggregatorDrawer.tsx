@@ -1,16 +1,17 @@
+import {
+  useCreateScenarioAggregator,
+  useGetScenarioAggregator,
+} from "@/services/queries/scenario-builder/scenario-builder.queries";
 import AddIcon from "@mui/icons-material/Add";
-// import BookmarkAddIcon from "@mui/icons-material/BookmarkAdd";
 import CloseIcon from "@mui/icons-material/Close";
 import DeleteIcon from "@mui/icons-material/Delete";
-// import KeyboardArrowDownIcon from "@mui/icons-material/KeyboardArrowDown";
 import {
   Box,
   Button,
   Chip,
+  CircularProgress,
   Drawer,
   IconButton,
-  // Menu,
-  // MenuItem,
   Stack,
   Typography,
 } from "@mui/material";
@@ -31,6 +32,8 @@ interface CostAggregatorDrawerProps {
   title?: string;
   initialItems?: any[];
   mainRowId?: string;
+  scenarioId?: string;
+  cellId?: string;
 }
 
 interface AggregatorSection {
@@ -178,6 +181,9 @@ const AggregatorGrid = ({
     (window as any).TGAddEvent("OnAfterValueChanged", id, (_grid: any) => {
       onDataChange?.();
     });
+    (window as any).TGAddEvent("OnRenderFinish", id, (_grid: any) => {
+      onDataChange?.();
+    });
   });
   return (
     <Box
@@ -204,6 +210,8 @@ const CostAggregatorDrawer = ({
   title = "Cost aggregator",
   initialItems: _initialItems = [],
   mainRowId,
+  scenarioId,
+  cellId,
 }: CostAggregatorDrawerProps) => {
   const [deleteModalOpen, setDeleteModalOpen] = useState<boolean>(false);
   const [rowToDelete, setRowToDelete] = useState<{
@@ -221,6 +229,39 @@ const CostAggregatorDrawer = ({
   const [totalCost, setTotalCost] = useState<number>(0);
   const [sections, setSections] = useState<AggregatorSection[]>([]);
   const [hasError, setHasError] = useState<boolean>(false);
+
+  const { data: existingAggregator, isLoading: isFetchingData } =
+    useGetScenarioAggregator(scenarioId, cellId);
+
+  const { mutate: saveAggregator, isPending: isSaving } =
+    useCreateScenarioAggregator();
+
+  useEffect(() => {
+    if (isFetchingData) return;
+    if (existingAggregator?.data) {
+      const loadedSections: AggregatorSection[] = [];
+      const data = existingAggregator.data;
+
+      // Group back loaded grid segments into proper setup arrays
+      ["freight", "tariff", "custom"].forEach((type) => {
+        const arr = data[type];
+        if (Array.isArray(arr)) {
+          arr.forEach((sec: any, index: number) => {
+            loadedSections.push({
+              id: `grid_${Date.now()}_${type}_${index}`,
+              type: (type.charAt(0).toUpperCase() + type.slice(1)) as any,
+              title: sec.title || type,
+              items: sec.grid_data?.Body?.[0] || [],
+            });
+          });
+        }
+      });
+
+      if (loadedSections.length > 0) {
+        setSections(loadedSections);
+      }
+    }
+  }, [existingAggregator, isFetchingData]);
 
   // const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
 
@@ -240,7 +281,17 @@ const CostAggregatorDrawer = ({
                 0;
             } else {
               const costCol = "Cost per unit";
-              costValue = grid.GetValue(row, costCol);
+              const costValueRaw = grid.GetValue(row, costCol);
+              if (costValueRaw !== null && costValueRaw !== undefined) {
+                if (typeof costValueRaw === "number") {
+                  costValue = costValueRaw;
+                } else {
+                  const numVal = parseFloat(
+                    String(costValueRaw).replace(/[^0-9.-]/g, ""),
+                  );
+                  if (!isNaN(numVal)) costValue = numVal;
+                }
+              }
             }
 
             // Only sum rows that have a non-zero cost or have a selected value
@@ -738,32 +789,8 @@ const CostAggregatorDrawer = ({
     sections.forEach((section) => {
       const grid = (window as any).Grids?.[section.id];
       if (grid) {
-        // First pass: count valid data rows (excluding the trailing Select row)
-        let dataRowCount = 0;
-        let row = grid.GetFirst();
-        while (row) {
-          if (row.Kind === "Data" && !row.Deleted) {
-            const isTariff = section.type === "Tariff";
-            const isCustom = section.type === "Custom";
-            const colA = isTariff
-              ? "Tariff Rate %"
-              : isCustom
-                ? "Custom input"
-                : "Aggregator Name";
-            const colAValue = String(grid.GetValue(row, colA) || "");
-            const isSelectRow =
-              colAValue.includes("Select") &&
-              !colAValue.includes("data-scenario-selected");
-            if (!isSelectRow) {
-              dataRowCount++;
-            }
-          }
-          row = grid.GetNext(row);
-        }
-
-        // Second pass: process rows
         let currentItemIndex = 1;
-        row = grid.GetFirst();
+        let row = grid.GetFirst();
         while (row) {
           if (row.Kind === "Data" && !row.Deleted) {
             const isTariff = section.type === "Tariff";
@@ -772,15 +799,10 @@ const CostAggregatorDrawer = ({
 
             let costValue = 0;
             if (isCustom) {
-              const resAttr = grid.GetAttribute(row, "Custom input", "Result");
-              costValue = Number(resAttr) || 0;
-            } else {
-              const costCol = "Cost per unit";
-              const costValueRaw = grid.GetValue(row, costCol);
               costValue =
-                typeof costValueRaw === "object"
-                  ? 0
-                  : Number(costValueRaw) || 0;
+                Number(grid.GetAttribute(row, "Custom input", "Result")) || 0;
+            } else {
+              costValue = Number(grid.GetValue(row, "Cost per unit")) || 0;
             }
 
             const colA = isTariff
@@ -798,23 +820,16 @@ const CostAggregatorDrawer = ({
               continue;
             }
 
-            // Get clean name from attribute
-            const cleanNameRaw = grid.GetAttribute(row, colA, "CleanName");
-            const cleanName =
-              typeof cleanNameRaw === "string" ? cleanNameRaw : null;
-
-            // For Custom, we use the section title
-            // For Tariff/Freight, we use the specified naming logic
+            const cleanName = grid.GetAttribute(row, colA, "CleanName");
             let finalName = "";
             if (isCustom) {
               finalName = section.title;
             } else if (isTariff || isFreight) {
               const typeName = isTariff ? "Tariff" : "Freight";
-              if (currentItemIndex === 1) {
-                finalName = typeName;
-              } else {
-                finalName = `${typeName} ${currentItemIndex}`;
-              }
+              finalName =
+                currentItemIndex === 1
+                  ? typeName
+                  : `${typeName} ${currentItemIndex}`;
               currentItemIndex++;
             } else {
               finalName = cleanName || "Cost Item";
@@ -823,7 +838,7 @@ const CostAggregatorDrawer = ({
             allRows.push({
               id: String(row.id),
               name: finalName,
-              type: section.type, // Added to distinguish Custom vs others
+              type: section.type,
               currency: "USD",
               cost: costValue,
               costPerUnit: costValue,
@@ -838,8 +853,104 @@ const CostAggregatorDrawer = ({
         }
       }
     });
-    onUpdate(allRows);
-    onClose();
+
+    const scrapeCostAggregatorData = () => {
+      const payloadData: any = { freight: [], tariff: [], custom: [] };
+
+      sections.forEach((section) => {
+        const typeKey = section.type.toLowerCase() as
+          | "freight"
+          | "tariff"
+          | "custom";
+        const grid = (window as any).Grids?.[section.id];
+        if (grid) {
+          const processRow = (gridRow: any): any => {
+            const rowData: any = {
+              id: gridRow.id,
+              Def: gridRow.Def?.Name || gridRow.Def,
+            };
+            Object.keys(grid.Cols).forEach((colName) => {
+              const val = grid.GetValue(gridRow, colName);
+              if (val !== undefined && val !== null && val !== "") {
+                rowData[colName] = val;
+              }
+              const attrs = [
+                "CleanName",
+                "RateValue",
+                "SourceColumn",
+                "SourceValue",
+                "Formula",
+                "Result",
+              ];
+              attrs.forEach((attr) => {
+                const attrVal = grid.GetAttribute(gridRow, colName, attr);
+                if (
+                  attrVal !== undefined &&
+                  attrVal !== null &&
+                  attrVal !== ""
+                ) {
+                  rowData[colName + attr] = attrVal;
+                }
+              });
+            });
+
+            if (gridRow.firstChild) {
+              const children: any[] = [];
+              let child = gridRow.firstChild;
+              while (child) {
+                if (child.Kind === "Data" && !child.Deleted) {
+                  children.push(processRow(child));
+                }
+                child = child.nextSibling;
+              }
+              if (children.length > 0) {
+                rowData.Items = children;
+              }
+            }
+            return rowData;
+          };
+
+          const body: any[] = [];
+          let row = grid.GetFirst();
+          while (row) {
+            if (row.Kind === "Data" && !row.parentNode?.id && !row.Deleted) {
+              body.push(processRow(row));
+            }
+            row = grid.GetNext(row);
+          }
+
+          payloadData[typeKey].push({
+            title: section.title,
+            grid_data: { Body: [body] },
+          });
+        }
+      });
+      return payloadData;
+    };
+
+    const fullScrape = scrapeCostAggregatorData();
+
+    if (scenarioId && cellId) {
+      saveAggregator(
+        {
+          scenario_id: scenarioId,
+          payload: {
+            aggregator_type: "Cost",
+            cell_id: cellId,
+            data: fullScrape as any,
+          },
+        },
+        {
+          onSuccess: () => {
+            onUpdate(allRows);
+            onClose();
+          },
+        },
+      );
+    } else {
+      onUpdate(allRows);
+      onClose();
+    }
   };
 
   return (
@@ -984,9 +1095,17 @@ const CostAggregatorDrawer = ({
           display: "flex",
           flexDirection: "column",
           gap: 3,
+          flex: 1,
+          ...(isFetchingData && {
+            minHeight: 120,
+            alignItems: "center",
+            justifyContent: "center",
+          }),
         }}
       >
-        {sections.length === 0 ? (
+        {isFetchingData ? (
+          <CircularProgress size={20} />
+        ) : sections.length === 0 ? (
           <Box
             sx={{
               height: "100px",
@@ -1108,9 +1227,10 @@ const CostAggregatorDrawer = ({
           size="small"
           variant="contained"
           onClick={handleDone}
-          disabled={hasError}
+          disabled={hasError || isSaving}
+          loading={isSaving}
         >
-          Done
+          Update
         </Button>
       </Box>
 

@@ -101,7 +101,10 @@ const syncLocalGridData = (grid: any) => {
       const isExtra = !!colsData[colName];
 
       if (isBase || isExtra) {
-        if (colsData[colName]?.AggregatorType === "Component") {
+        if (
+          colsData[colName]?.AggregatorType === "Component" ||
+          colsData[colName]?.AggregatorType === "Cost"
+        ) {
           let rowComponentCols: string[] = [];
           const itemsDataStr = gridRow[colName + "ItemsData"];
 
