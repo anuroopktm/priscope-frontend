@@ -125,12 +125,10 @@ const ComponentAggregatorDrawer = ({
   cellId,
   mainRowId,
 }: ComponentAggregatorDrawerProps) => {
-
   const [deleteModalOpen, setDeleteModalOpen] = useState<boolean>(false);
   const [rowToDelete, setRowToDelete] = useState<string | null>(null);
   const [gridData, setGridData] = useState<{ Body: any[][] } | null>(null);
   const [hasError, setHasError] = useState<boolean>(false);
-
 
   const { data: existingAggregator, isLoading: isFetchingData } =
     useGetScenarioAggregator(scenarioId, cellId);
@@ -160,7 +158,12 @@ const ComponentAggregatorDrawer = ({
       } else {
         numVal = Number(value) || 0;
       }
-      const isEmpty = value === null || value === undefined || value === "" || isNaN(numVal) || numVal === 0;
+      const isEmpty =
+        value === null ||
+        value === undefined ||
+        value === "" ||
+        isNaN(numVal) ||
+        numVal === 0;
       setHasError(isEmpty);
     };
 
@@ -174,11 +177,16 @@ const ComponentAggregatorDrawer = ({
 
     const eventId = `ComponentAggregatorDrawer_${mainRowId}`;
     if (window.TGAddEvent) {
-      window.TGAddEvent("OnAfterValueChanged", "ScenarioGridDetails", (grid: any, r: any, col: string, val: any) => {
-        if (r && r.id === mainRowId && col === "Shipment quantity") {
-          checkQuantity(val);
-        }
-      }, eventId);
+      window.TGAddEvent(
+        "OnAfterValueChanged",
+        "ScenarioGridDetails",
+        (grid: any, r: any, col: string, val: any) => {
+          if (r && r.id === mainRowId && col === "Shipment quantity") {
+            checkQuantity(val);
+          }
+        },
+        eventId,
+      );
     }
 
     return () => {
@@ -187,17 +195,26 @@ const ComponentAggregatorDrawer = ({
       if (cleanupGrid) {
         const cleanupRow = cleanupGrid.GetRowById(mainRowId);
         if (cleanupRow) {
-          cleanupGrid.SetAttribute(cleanupRow, "Shipment quantity", "Background", "", 1);
+          cleanupGrid.SetAttribute(
+            cleanupRow,
+            "Shipment quantity",
+            "Background",
+            "",
+            1,
+          );
           cleanupGrid.RefreshRow(cleanupRow);
         }
       }
 
       if (window.TGDelEvent) {
-        window.TGDelEvent("OnAfterValueChanged", "ScenarioGridDetails", eventId);
+        window.TGDelEvent(
+          "OnAfterValueChanged",
+          "ScenarioGridDetails",
+          eventId,
+        );
       }
     };
   }, [mainRowId]);
-
 
   useEffect(() => {
     if (isFetchingData) return;
@@ -222,13 +239,13 @@ const ComponentAggregatorDrawer = ({
         Body: [
           initialItems.length > 0
             ? initialItems.map((item: any) => ({
-              ...item,
-              "Component Name": item.name || "",
-              Currency: item.currency || "USD",
-              Cost: item.cost || 0,
-              "Cost for": item.costFor || "Base UOM",
-              Actions: renderDeleteIcon(item.id),
-            }))
+                ...item,
+                "Component Name": item.name || "",
+                Currency: item.currency || "USD",
+                Cost: item.cost || 0,
+                "Cost for": item.costFor || "Base UOM",
+                Actions: renderDeleteIcon(item.id),
+              }))
             : [],
         ],
       });
@@ -401,7 +418,10 @@ const ComponentAggregatorDrawer = ({
 
       {hasError && (
         <Box sx={{ px: 2, mb: 1 }}>
-          <Typography variant="caption" sx={{ color: "error.main", fontWeight: "600" }}>
+          <Typography
+            variant="caption"
+            sx={{ color: "error.main", fontWeight: "600" }}
+          >
             * Shipment Quantity is required in the top grid to calculate costs.
           </Typography>
         </Box>

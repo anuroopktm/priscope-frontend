@@ -37,6 +37,12 @@
     border-bottom: none !important;
 }
 
+.CustomPanelHeader {
+    padding-left: 6px !important;
+    padding-right: 5px !important;
+    /* Adjust padding for panel header cell */
+}
+
 .TSNoLeft {
     border-right: 1px solid #E7E7E9 !important;
 }

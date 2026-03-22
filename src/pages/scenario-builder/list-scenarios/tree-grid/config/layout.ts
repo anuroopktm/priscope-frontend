@@ -2,7 +2,6 @@ export const ScenarioGridLayout = {
   Cfg: {
     Style: "White",
     CfgId: "ScenarioBuilderGrid",
-    MainCol: "SKU",
     Tree: "0",
     Delete: "0",
     NumberId: "1",
