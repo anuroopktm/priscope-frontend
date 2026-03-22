@@ -15,7 +15,6 @@ export const GlobalSettingsLayout = () => {
       <Box
         sx={{
           flex: 1,
-          p: 3,
           bgcolor: "#f5f6f8",
           overflowY: "auto",
           height: "100%",

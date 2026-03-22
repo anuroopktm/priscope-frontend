@@ -25,7 +25,10 @@ import SystemFields from "@/pages/global-settings/components/SystemFields";
 import AttributeLabel from "@/pages/global-settings/components/AttributeLabel";
 import OperationsSettings from "@/pages/global-settings/components/OperationsSettings";
 import AlertsPage from "@/pages/global-settings/components/AlertsPage";
-import ListUsersPage from "@/pages/global-settings/components/ListUsersPage";
+import GlobalSettingsUserDetailsPage from "@/pages/global-settings/components/user-mangement/user-details";
+import GlobalSettingsListUsersPage from "@/pages/global-settings/components/user-mangement/list-users";
+import GlobalSettingsCreateUserPage from "@/pages/global-settings/components/user-mangement/user-actions/create-user";
+import GlobalSettingsEditUserPage from "@/pages/global-settings/components/user-mangement/user-actions/edit-user";
 
 export const routes = [
   {
@@ -109,8 +112,19 @@ export const routes = [
                     path: "operations-setting",
                     element: <OperationsSettings />,
                   },
-                  { path: "alerts", element: <AlertsPage/> },
-                  { path: "users", element: <ListUsersPage/> },
+                  { path: "alerts", element: <AlertsPage /> },
+                  {
+                    path: "users",
+                    children: [
+                      { index: true, element: <GlobalSettingsListUsersPage /> },
+                      { path: "create-user", element: <GlobalSettingsCreateUserPage /> },
+                      { path: "edit-user/:userId", element: <GlobalSettingsEditUserPage /> },
+                      {
+                        path: "user-details/:userId",
+                        element: <GlobalSettingsUserDetailsPage />,
+                      },
+                    ],
+                  },
                 ],
               },
             ],
