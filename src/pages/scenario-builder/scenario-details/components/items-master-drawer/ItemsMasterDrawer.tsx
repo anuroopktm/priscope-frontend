@@ -90,7 +90,13 @@ const ItemsMasterDrawer = ({
           isButtonsDisabled={isButtonsDisabled}
         />
 
-        {open && <ItemsMasterGrid ref={gridRef} searchTerm={searchTerm} />}
+        {open && (
+          <ItemsMasterGrid
+            ref={gridRef}
+            searchTerm={searchTerm}
+            selectedColumns={selectedColumns}
+          />
+        )}
       </Box>
     </Drawer>
   );

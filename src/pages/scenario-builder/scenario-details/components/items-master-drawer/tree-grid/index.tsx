@@ -9,13 +9,15 @@ import { useItemMasterGrid } from "./hooks/useItemMasterGrid";
 
 interface ItemsMasterGridProps {
   searchTerm: string;
+  selectedColumns: string[];
 }
 
 const ItemsMasterGrid = forwardRef(
-  ({ searchTerm }: ItemsMasterGridProps, ref) => {
+  ({ searchTerm, selectedColumns }: ItemsMasterGridProps, ref) => {
     const { layout, data, handleGridReady, gridInstanceRef } =
       useItemMasterGrid({
         searchTerm,
+        selectedColumns,
       });
 
     const gridInstance = useTreeGridInit(

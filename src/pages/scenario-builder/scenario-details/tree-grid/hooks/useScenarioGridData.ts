@@ -61,6 +61,23 @@ export const transformRows = (
   });
 };
 
+export const getUnpackedValue = (val: any) => {
+  if (val && typeof val === "object") {
+    if (!Array.isArray(val) && val.value !== undefined) return val.value;
+    if (!Array.isArray(val) && val.name !== undefined) return val.name;
+    if (Array.isArray(val)) {
+      return val
+        .map((x: any) =>
+          typeof x === "object"
+            ? x.name || x.value || JSON.stringify(x)
+            : String(x),
+        )
+        .join(", ");
+    }
+  }
+  return val;
+};
+
 export const useScenarioGridData = () => {
   const [gridData, setGridData] = useState<ScenarioGridType>({
     Body: [[]],
@@ -174,57 +191,13 @@ export const useScenarioGridData = () => {
     ) => {
       console.log("selectedHeaders:", selectedHeaders);
 
-      const getUnpackedValue = (val: any) => {
-        if (val && typeof val === "object") {
-          if (!Array.isArray(val) && val.value !== undefined) return val.value;
-          if (!Array.isArray(val) && val.name !== undefined) return val.name;
-          if (Array.isArray(val)) {
-            return val
-              .map((x: any) =>
-                typeof x === "object"
-                  ? x.name || x.value || JSON.stringify(x)
-                  : String(x),
-              )
-              .join(", ");
-          }
-        }
-        return val;
-      };
+      // getUnpackedValue is now helper on top of file
 
       const mappedItems: ScenarioRow[] = items.map((item) => {
         let cleanItem: any;
 
-        if (selectedHeaders && selectedHeaders.length > 0) {
-          // Drawer flow → only keep selected headers
-          cleanItem = {
-            id: item.id,
-            SKU: item.SKU,
-            Description: item.Description,
-            Category: item.Category,
-            "Shipment quantity": item["Shipment quantity"],
-          };
+        cleanItem = cleanTreeGridRow(item);
 
-          selectedHeaders.forEach((header) => {
-            cleanItem[header] = item[header];
-          });
-        } else {
-          // Item Master flow → keep all columns
-          cleanItem = cleanTreeGridRow(item);
-        }
-        console.log(cleanItem, "cleanItem");
-        // const scenarioRow: any = {
-        //   ...cleanItem,
-        //   id: `row_${Math.random().toString(36).substr(2, 9)}`,
-        //   itemId: cleanItem.id || "",
-        //   Def: "R",
-        //   A: cleanItem.SKU || cleanItem.A || cleanItem["SKU"] || "",
-        //   B: cleanItem.Description || cleanItem.B || cleanItem["Description"] || "",
-        //   C: cleanItem.Category || cleanItem.C || cleanItem["Category"] || "",
-        //   is_published: 0,
-        //   Selected: 0,
-        //   CanSelect: 1,
-        //   PanelSelect: 1,
-        // };
         const scenarioRow: any = {
           id: `row_${Math.random().toString(36).substr(2, 9)}`,
           itemId: cleanItem.id || "",
@@ -241,88 +214,37 @@ export const useScenarioGridData = () => {
           PanelSelect: 1,
         };
 
-        // ⭐ Item Master flow (or direct add) → copy ALL columns
-        if (selectedHeaders === undefined) {
-          const grid = (window as any).Grids?.["ScenarioGridDetails"];
-          const activeGridCols = grid ? Object.keys(grid.Cols) : [];
-
-          Object.keys(cleanItem).forEach((key) => {
-            // Only copy if it is a base column or exists in DOM grid columns!
-            const isBase = [
+        // Copy ALL columns from cleanItem
+        Object.keys(cleanItem).forEach((key) => {
+          if (
+            [
+              "id",
               "SKU",
               "Description",
               "Category",
               "Shipment quantity",
-            ].includes(key);
-            const isExtraCol = activeGridCols.includes(key);
+            ].includes(key)
+          )
+            return;
 
-            if (isBase || isExtraCol) {
-              if (
-                [
-                  "id",
-                  "SKU",
-                  "Description",
-                  "Category",
-                  "Shipment quantity",
-                ].includes(key)
-              )
-                return;
-
-              // Explicitly set MenuType as Data to DOM Grid Columns metadata directly
-              if (grid && isExtraCol && grid.Cols[key]) {
-                grid.Cols[key].MenuType = "Data";
-              }
-
-              let val = cleanItem[key];
-              if (val && typeof val === "object") {
-                if (!Array.isArray(val) && val.value !== undefined) {
-                  val = val.value;
-                } else if (!Array.isArray(val) && val.name !== undefined) {
-                  val = val.name;
-                } else if (Array.isArray(val)) {
-                  val = val
-                    .map((x: any) =>
-                      typeof x === "object"
-                        ? x.name || x.value || JSON.stringify(x)
-                        : String(x),
-                    )
-                    .join(", ");
-                }
-              }
-              scenarioRow[key] = val;
+          let val = cleanItem[key];
+          if (val && typeof val === "object") {
+            if (!Array.isArray(val) && val.value !== undefined) {
+              val = val.value;
+            } else if (!Array.isArray(val) && val.name !== undefined) {
+              val = val.name;
+            } else if (Array.isArray(val)) {
+              val = val
+                .map((x: any) =>
+                  typeof x === "object"
+                    ? x.name || x.value || JSON.stringify(x)
+                    : String(x),
+                )
+                .join(", ");
             }
-          });
-        }
-
-        // ⭐ Drawer flow → copy only selected headers
-        if (selectedHeaders && selectedHeaders.length > 0) {
-          selectedHeaders.forEach((headerName) => {
-            if (
-              cleanItem[headerName] !== undefined &&
-              !["SKU", "Description", "Category", "Shipment quantity"].includes(
-                headerName,
-              )
-            ) {
-              let val = cleanItem[headerName];
-              if (val && typeof val === "object") {
-                if (!Array.isArray(val) && val.value !== undefined) {
-                  val = val.value;
-                } else if (!Array.isArray(val) && val.name !== undefined) {
-                  val = val.name;
-                } else if (Array.isArray(val)) {
-                  val = val
-                    .map((x: any) =>
-                      typeof x === "object"
-                        ? x.name || x.value || JSON.stringify(x)
-                        : String(x),
-                    )
-                    .join(", ");
-                }
-              }
-              scenarioRow[headerName] = val;
-            }
-          });
-        }
+          }
+          scenarioRow[key] = val;
+        });
 
         // If specific headers were selected, we ensure they are present,
         // though spreading ...item already covers most cases.
@@ -345,7 +267,7 @@ export const useScenarioGridData = () => {
       const currentRows = prevData?.Body?.[0] || [];
       const colsData = { ...((prevData as any).ColsData || {}) };
 
-      if (selectedHeaders) {
+      if (selectedHeaders && selectedHeaders.length > 0) {
         selectedHeaders.forEach((headerName) => {
           if (
             !["SKU", "Description", "Category", "Shipment quantity"].includes(

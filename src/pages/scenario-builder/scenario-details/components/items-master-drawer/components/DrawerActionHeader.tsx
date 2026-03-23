@@ -46,10 +46,7 @@ const DrawerActionHeader = ({
     } = event;
     const newSelected = typeof value === "string" ? value.split(",") : value;
 
-    // Ensure at least one option is selected
-    if (newSelected.length > 0) {
-      onSelectedColumnsChange(newSelected);
-    }
+    onSelectedColumnsChange(newSelected);
   };
 
   return (

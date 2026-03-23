@@ -18,10 +18,13 @@ import ScenarioDrawers from "./components/ScenarioDrawers";
 import ScenarioModals from "./components/ScenarioModals";
 import { useScenarioStore } from "./store/useScenarioStore";
 import { ScenarioDetailsLayout } from "./tree-grid/config/details-layout";
+import { axiosInstance } from "@/services/api/axiosInstance";
+import { buildItemMasterTreeGridBody } from "@/pages/items-master-refactor/helper";
 import type { ScenarioRow } from "./tree-grid/hooks/useScenarioGridData";
 import {
   transformRows,
   useScenarioGridData,
+  getUnpackedValue,
 } from "./tree-grid/hooks/useScenarioGridData";
 import { useScenarioGridEvents } from "./tree-grid/hooks/useScenarioGridEvents";
 import { useTreeGridInit } from "./tree-grid/hooks/useTreeGridInit";
@@ -311,9 +314,68 @@ const ScenarioDetailsPage = () => {
   );
 
   const handleProcessAddItems = useCallback(
-    (items: any[], groupName?: string, selectedHeaders?: string[]) => {
+    async (items: any[], groupName?: string, selectedHeaders?: string[]) => {
       const grid = (window as any).Grids?.[SCENARIO_BUILDER_GRID_ID];
       const syncedData = syncLocalGridData(grid) || gridData;
+
+      if (!syncedData) return;
+
+      // 1. Identify rows missing selected headers
+      const idsToFetch: string[] = [];
+      const processRowForBackfill = (row: ScenarioRow) => {
+        if (row.itemId) {
+          const missing =
+            selectedHeaders?.some(
+              (h) => row[h] === undefined || row[h] === "",
+            ) ?? false;
+          if (missing && !idsToFetch.includes(row.itemId)) {
+            idsToFetch.push(row.itemId);
+          }
+        }
+        if (row.Items) row.Items.forEach(processRowForBackfill);
+      };
+      syncedData.Body?.[0]?.forEach(processRowForBackfill);
+
+      // 2. Fetch missing items from Item Master API
+      const fetchedItemsMap: { [key: string]: any } = {};
+      if (idsToFetch.length > 0) {
+        try {
+          const responses = await Promise.all(
+            idsToFetch.map((id) =>
+              axiosInstance.get(`/v1/item-master/${id}`).catch((e) => {
+                console.error(`Failed to fetch item ${id}`, e);
+                return null;
+              }),
+            ),
+          );
+
+          responses.forEach((resp) => {
+            if (resp && resp.data) {
+              const rawItem = resp.data;
+              const body = buildItemMasterTreeGridBody([rawItem]);
+              if (body.Body?.[0]?.length > 0) {
+                fetchedItemsMap[rawItem.id] = body.Body[0][0];
+              }
+            }
+          });
+        } catch (e) {
+          console.error("Failed to back-fill items", e);
+        }
+      }
+
+      // 3. Merge fetched data into syncedData to populate missing cells
+      const mergeBackfill = (row: ScenarioRow) => {
+        if (row.itemId && fetchedItemsMap[row.itemId]) {
+          const cleanItem = fetchedItemsMap[row.itemId];
+          Object.keys(cleanItem).forEach((key) => {
+            if (!["id", "Def", "is_published", "itemId"].includes(key)) {
+              row[key] = getUnpackedValue(cleanItem[key]);
+            }
+          });
+        }
+        if (row.Items) row.Items.forEach(mergeBackfill);
+      };
+      syncedData.Body?.[0]?.forEach(mergeBackfill);
 
       const newState = prepareAddItems(
         syncedData,
@@ -321,6 +383,7 @@ const ScenarioDetailsPage = () => {
         groupName,
         selectedHeaders,
       );
+
       handleSaveAsDraft(
         newState,
         () => {
@@ -562,6 +625,7 @@ const ScenarioDetailsPage = () => {
       rows.forEach((row) => {
         Object.keys(row).forEach((key) => {
           const lowerKey = key.toLowerCase();
+          const colData = gridData.ColsData || {};
           if (
             !initialColNames.includes(key) &&
             !lowerKey.endsWith("formula") &&
@@ -586,7 +650,13 @@ const ScenarioDetailsPage = () => {
               "Color",
             ].includes(key)
           ) {
-            extraColsSet.add(key);
+            if (
+              colData[key] ||
+              key.startsWith("Comp_") ||
+              key.startsWith("Iterator_")
+            ) {
+              extraColsSet.add(key);
+            }
           }
         });
         if (row.Items) collectKeys(row.Items);

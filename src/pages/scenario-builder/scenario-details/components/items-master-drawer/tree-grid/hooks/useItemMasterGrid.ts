@@ -18,9 +18,13 @@ import {
 
 interface UseItemMasterGridProps {
   searchTerm: string;
+  selectedColumns?: string[];
 }
 
-export const useItemMasterGrid = ({ searchTerm }: UseItemMasterGridProps) => {
+export const useItemMasterGrid = ({
+  searchTerm,
+  selectedColumns,
+}: UseItemMasterGridProps) => {
   const [layout, setLayout] = useState<TreeGridLayout | null>(null);
   const [data, setData] = useState<TreeGridBody | null>(null);
   const isInitialLoadRef = useRef(true);
@@ -69,6 +73,31 @@ export const useItemMasterGrid = ({ searchTerm }: UseItemMasterGridProps) => {
 
     syncGridData(gridInstanceRef.current, pages, body);
   }, [itemMasterDataList, listHeaderData]);
+
+  useEffect(() => {
+    const grid = gridInstanceRef.current;
+    if (!grid) return;
+
+    // Default visible columns in drawer baseline
+    const defaultCols = ["SKU", "Description", "Category", "Shipment quantity"];
+
+    if (grid.Cols) {
+      Object.keys(grid.Cols).forEach((col) => {
+        // Skip index or action columns
+        if (["id", "Panel", "Selected", "Def"].includes(col)) return;
+        if (defaultCols.includes(col)) return;
+
+        const shouldBeVisible = selectedColumns?.includes(col);
+        const isVisible = grid.GetAttribute(null, col, "Visible") !== 0;
+
+        if (shouldBeVisible && !isVisible) {
+          grid.ShowCol(col);
+        } else if (!shouldBeVisible && isVisible) {
+          grid.HideCol(col);
+        }
+      });
+    }
+  }, [selectedColumns]);
 
   return {
     layout,
