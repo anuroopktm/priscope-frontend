@@ -23,7 +23,10 @@ import {
 } from "@/constants/privileges.constants";
 import { hasPrivilege } from "@/utils/hasPrivilege";
 import { v4 as uuidv4 } from "uuid";
-import { allowedKeys, itemMasterColumnToFieldMap } from "../constants/columnFieldMap";
+import {
+  allowedKeys,
+  itemMasterColumnToFieldMap,
+} from "../constants/columnFieldMap";
 
 export const buildTreeGridFilterHead = (
   items: itemMasterHeaderResponseArrayList[] | undefined,
@@ -103,7 +106,7 @@ export const buildItemMasterTreeGridCols = (
         RelWidth: 1,
         CanEdit: 1,
         CanFilter: 1,
-        Visible: DEfAULT_VISIBLE_COLUMNS.includes(item.label) ? 1 : 0,
+        Visible: DEfAULT_VISIBLE_COLUMNS.includes(item.label) ? 1: 1,
       };
       return col;
     });
@@ -479,4 +482,3 @@ export async function getItemMasterLayout(
     Solid: [],
   };
 }
-

@@ -38,19 +38,19 @@ export const CARD_CONFIGS: readonly CardConfig[] = [
     image: upload,
     imageAlt: "Upload csv",
     imageStyle: { width: "130px", height: "auto" },
-  },
-  {
-    id: "manual-add",
-    title: (
-      <>
-        Add your item <br />
-        <strong>Manually</strong>
-      </>
-    ),
-    buttonText: "Add Item",
-    icon: <img src={add} alt="plus sign" width={20} height={20} />,
-    image: plus,
-    imageAlt: "Add item icon",
-    imageStyle: { width: "100px", height: "auto" },
-  },
+  }
+  // {
+  //   id: "manual-add",
+  //   title: (
+  //     <>
+  //       Add your item <br />
+  //       <strong>Manually</strong>
+  //     </>
+  //   ),
+  //   buttonText: "Add Item",
+  //   icon: <img src={add} alt="plus sign" width={20} height={20} />,
+  //   image: plus,
+  //   imageAlt: "Add item icon",
+  //   imageStyle: { width: "100px", height: "auto" },
+  // },
 ] as const;
