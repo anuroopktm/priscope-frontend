@@ -1,4 +1,4 @@
-import InsertDriveFileIcon from "@/public/images/upload_modal/fileUploaded.svg";
+import InsertDriveFileIcon from "@/assets/rate-libraries/fileUploaded.svg";
 import CheckCircleIcon from "@mui/icons-material/CheckCircle";
 import DeleteIcon from "@mui/icons-material/Delete";
 import { Box, CircularProgress, IconButton, Typography } from "@mui/material";

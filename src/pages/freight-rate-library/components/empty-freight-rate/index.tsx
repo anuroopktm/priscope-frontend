@@ -1,9 +1,9 @@
 import React, { useMemo, useCallback } from "react";
 import { Box, Grid, Typography, Button } from "@mui/material";
-import add from "@/app/[lang]/(protected)/item-master/assets/add-item.svg";
-import upload from "@/app/[lang]/(protected)/item-master/assets/upload-circle.svg";
-import uploadcsv from "@/app/[lang]/(protected)/item-master/assets/csv-upload.svg";
-import plus from "@/app/[lang]/(protected)/item-master/assets/plus-sign.svg";
+import add from "@/assets/rate-libraries/add-item.svg";
+import upload from "@/assets/rate-libraries/upload-circle.svg";
+import uploadcsv from "@/assets/rate-libraries/csv-upload.svg";
+import plus from "@/assets/rate-libraries/plus-sign.svg";
 import { MainContentContainer } from "@/components/common/main-content-container";
 
 interface CardConfig {

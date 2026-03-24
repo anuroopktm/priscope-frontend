@@ -1,5 +1,5 @@
 
-import SearchIcon from "@/public/images/search.svg";
+import SearchIcon from "@/assets/rate-libraries/search.svg";
 import {
   Box,
   Button,
@@ -15,8 +15,8 @@ import {
   default as ImportDataIcon,
   default as LogFileIcon,
 } from "@/assets/actions/database-import.svg";
-import ExportDataIcon from "@/assets/actions/export-data.svg";
-import RequestsIcon from "@/assets/actions/requests.svg";
+import ExportDataIcon from "@/assets/rate-libraries/export-data.svg";
+import RequestsIcon from "@/assets/rate-libraries/requests.svg";
 import AddIcon from "@mui/icons-material/Add";
 import CheckCircleOutlineOutlinedIcon from "@mui/icons-material/CheckCircleOutlineOutlined";
 import HighlightOffOutlinedIcon from "@mui/icons-material/HighlightOffOutlined";

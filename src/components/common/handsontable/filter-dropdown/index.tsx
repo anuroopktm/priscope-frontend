@@ -9,7 +9,7 @@ import {
   InputBase,
   useTheme,
 } from "@mui/material";
-import SearchIcon from "@/public/images/search-01.svg";
+import SearchIcon from "@/assets/rate-libraries/search-01.svg";
 
 interface FilterDropdownProps {
   isOpen: boolean;

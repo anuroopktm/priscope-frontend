@@ -8,7 +8,7 @@ import {
   CircularProgress,
 } from "@mui/material";
 import CloseIcon from "@mui/icons-material/Close";
-import SearchIcon from "@/public/images/search-01.svg";
+import SearchIcon from "@/assets/rate-libraries/search-01.svg";
 import { useListFreightRateComments } from "../../services/freightRateService";
 import { useMemo, useState, useCallback, useRef, useEffect } from "react";
 import { debounce } from "lodash";
