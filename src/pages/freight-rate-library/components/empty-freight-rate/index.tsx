@@ -4,7 +4,7 @@ import add from "@/assets/rate-libraries/add-item.svg";
 import upload from "@/assets/rate-libraries/upload-circle.svg";
 import uploadcsv from "@/assets/rate-libraries/csv-upload.svg";
 import plus from "@/assets/rate-libraries/plus-sign.svg";
-import { MainContentContainer } from "@/components/common/main-content-container";
+import MainContentContainer from "@/components/common/main-content-container";
 
 interface CardConfig {
   id: string;
@@ -254,7 +254,7 @@ const FreightRateInitialPage: React.FC<FreightRateInitialPageProps> = ({
   );
 
   return (
-    <MainContentContainer>
+    <MainContentContainer hasFilter={true}>
       <Box p={1} sx={containerBoxStyles}>
         {/* Header Section */}
         <Typography

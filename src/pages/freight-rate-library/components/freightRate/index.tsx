@@ -37,7 +37,7 @@ import {
   handleCommentSelect,
   addComment,
 } from "../../helpers/freightRateHandlers";
-import { MainContentContainer } from "@/components/common/main-content-container";
+import MainContentContainer from "@/components/common/main-content-container";
 import {
   PAGE_SIZE,
   RATE_FILTER_OPTIONS,
@@ -525,7 +525,7 @@ function FreightRate() {
           backgroundColor: "divider",
         }}
       >
-        <MainContentContainer>
+        <MainContentContainer hasFilter={true}>
           {showRequestsModal && (
             <RequestsModal
               onClose={setShowRequestsModal}
