@@ -1,7 +1,7 @@
-import add from "@/assets/actions/plus-sign.svg";
+// import add from "@/assets/actions/plus-sign.svg";
 import uploadcsv from "@/assets/actions/upload-03.svg";
 import databaseImport from "@/assets/actions/crown-03.svg";
-import plus from "@/assets/actions/plus-sign-circle.svg";
+// import plus from "@/assets/actions/plus-sign-circle.svg";
 import refresh from "@/assets/actions/refresh.svg";
 import upload from "@/assets/actions/upload-circle-01.svg";
 import type { CardConfig } from "./actionCard";

@@ -1,0 +1,20 @@
+export const FREIGHT_RATE_ENDPOINTS = {
+  upload: () => `/common/upload`,
+  getFreightRates: `/freight-rates/search`,
+  getFreightRateById: (freight_rate_id: string) => `/freight-rates/${freight_rate_id}`,
+  createFreightRate: `/freight-rates`,
+  getContainerTypes: `/freight-rates/container-types/search`,
+  getGlobalCurrencies: `/global-currencies`,
+  getFreightRateUploads: `/common/uploads`,
+  getFreightRateUploadSummaryCounts: (upload_id: number | string) => `/common/upload-summary/${upload_id}/counts`,
+  getFreightRateErrorFile: (upload_id: number | string) => `/common/uploads/${upload_id}/error-file`,
+  createContainerType: `/freight-rates/container-types`,
+  getFreightRateHistory: (freight_rate_id: string) => `/freight-rates/${freight_rate_id}/history/search`,
+  getFreightRateChanges: (freight_rate_id: string) => `/freight-rates/${freight_rate_id}/rate-changes/search`,
+  updateFreightRate: (freight_rate_id: number | string) => `/freight-rates/${freight_rate_id}`,
+  bulkStatusUpdate: `/freight-rates/bulk-status-update`,
+  getFreightRateComments: `/freight-rates/comments/search`,
+  createAdminRequest: `/approval-requests`,
+  approvalRequests: `/approval-requests/search`,
+  saveFreightRateComment: (freight_rate_id: string | number) => `/freight-rates/${freight_rate_id}/comments`
+};
