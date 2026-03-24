@@ -78,7 +78,7 @@ export function transformResponse(data: FreightRateResponse) {
         item.currency,
         item.rate,
         formatDate(item.valid_to),
-        item.last_updated_by?.name || "-",
+        item.last_updated_by?.name ? String(item.last_updated_by.name) : "-",
         formatDate(item.last_updated_at),
         item.id,
         item.status,

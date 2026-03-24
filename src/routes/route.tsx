@@ -29,6 +29,7 @@ import GlobalSettingsUserDetailsPage from "@/pages/global-settings/components/us
 import GlobalSettingsListUsersPage from "@/pages/global-settings/components/user-mangement/list-users";
 import GlobalSettingsCreateUserPage from "@/pages/global-settings/components/user-mangement/user-actions/create-user";
 import GlobalSettingsEditUserPage from "@/pages/global-settings/components/user-mangement/user-actions/edit-user";
+import FreightRatePage from "@/pages/freight-rate-library/page";
 
 export const routes = [
   {
@@ -87,6 +88,12 @@ export const routes = [
               { path: "create-user", element: <CreateUserPage /> },
               { path: "edit-user/:userId", element: <EditUserPage /> },
               { path: "user-details/:userId", element: <UserDetailsPage /> },
+            ],
+          },
+          {
+            path: "freight-rate-library",
+            children: [
+              { index: true, element: <FreightRatePage /> },
             ],
           },
           {

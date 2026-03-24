@@ -189,7 +189,7 @@ const CustomHandsontable: React.FC<HandsontableProps> = ({
 
       if (rowIndex === -1) {
         // Call parent callback if ID not found
-        onFreightRateIdNotFound?.(highlightTarget.freightRateId).then(
+        onFreightRateIdNotFound?.(highlightTarget.freightRateId!).then(
           (res: boolean) => {
             if (res) {
               setRetryKey((prev) => prev + 1);
@@ -365,6 +365,7 @@ const CustomHandsontable: React.FC<HandsontableProps> = ({
     const hot = hotRef.current?.hotInstance;
     if (activeOverlay?.type === ActiveOverlayType.EDIT) {
       const { row, col } = activeOverlay;
+      if (col == null) return;
       const colHeader = headers[col];
       const field = commentMantatoryFields.find((value) => value === colHeader);
       const required = !hasEditPermission ? true : !!field;

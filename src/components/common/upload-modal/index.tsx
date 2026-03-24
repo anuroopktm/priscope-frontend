@@ -1,4 +1,4 @@
-"use client";
+
 import { getErrorMessage } from "@/utils/error-helper";
 import {
   Alert,

@@ -1,18 +1,18 @@
+import { WARNING_DAYS_LIMIT } from "@/pages/freight-rate-library/constants/data-validation.constants";
 import {
   addDays,
   differenceInCalendarDays,
   isToday,
   isWithinInterval,
 } from "date-fns";
-import { WARNING_DAYS_LIMIT } from "../constants/data-validation.constants";
 import Handsontable from "handsontable";
 
 type HTRenderer = ( 
   instance: any,
   td: HTMLTableCellElement,
   row: number,
-  col: number,
-  prop: string | number,
+  // col: number,
+  // prop: string | number,
   value: any,
   cellProperties?: any
 ) => void;
@@ -23,8 +23,8 @@ export const dateValidationRenderer =
       instance: Handsontable,
       td: HTMLTableCellElement,
       row: number,
-      col: number,
-      prop: string | number,
+      // col: number,
+      // prop: string | number,
       value: string | null,
       cellProperties: Handsontable.CellProperties
     ): void => {

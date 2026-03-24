@@ -1,4 +1,3 @@
-"use client";
 
 import React from "react";
 import { Box, Typography, Chip, Stack, CardContent } from "@mui/material";

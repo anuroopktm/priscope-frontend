@@ -42,7 +42,7 @@ export const FilterDropdown: React.FC<FilterDropdownProps> = ({
   };
 
   const handleClearAll = () => {
-    const newSelected = new Set();
+    const newSelected = new Set<string | number>();
     onFilterChange(newSelected);
   };
 

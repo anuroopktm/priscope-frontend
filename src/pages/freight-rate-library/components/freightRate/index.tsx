@@ -1,10 +1,4 @@
-import  {
-  useCallback,
-  useEffect,
-  useMemo,
-  useRef,
-  useState,
-} from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { Alert, Box, Snackbar } from "@mui/material";
 import { debounce } from "lodash";
 import {
@@ -19,7 +13,7 @@ import {
   useUpdateFrieghtRate,
   useUploadFreightRateFile,
 } from "../../services/freightRateService";
-import type {  SnackbarState } from "../../types";
+import type { SnackbarState } from "../../types";
 import { FREIGHT_RATE_HEADERS } from "../../constants/tableHeaders.constants";
 import {
   FILTER_OPTIONS,
@@ -60,6 +54,7 @@ import { useConfirm } from "@/pages/items-master-refactor/utils/ModalProvider";
 import { resetHandsontableScroll } from "@/helpers/handsontableHelpers";
 import { openConfirmationModal } from "@/utils/getRequestConfirmationModal";
 import applyAlignmentFilter from "@/utils/applyAlignmentFilter";
+import RequestsModal from "@/components/common/requests-modal";
 
 function FreightRate() {
   const hotRef = useRef<any>(null);
@@ -133,7 +128,7 @@ function FreightRate() {
   );
 
   const handleChange = (
-    // event: React.MouseEvent<HTMLElement>,
+    event: React.MouseEvent<HTMLElement>,
     newAlignment: string,
   ) => {
     setAllData([]);
@@ -220,8 +215,8 @@ function FreightRate() {
   }, [payload, refetch]);
 
   const handleFreightRateIdNotFound = useCallback(
-    async (freightRateId: string) => {
-      if (!freightRateId) return;
+    async (freightRateId: string): Promise<boolean> => {
+      if (!freightRateId) return false;
 
       try {
         setShowLoader(true);
@@ -247,8 +242,10 @@ function FreightRate() {
             return false;
           }
         }
+        return false;
       } catch (error) {
         console.error("Error fetching Freight Rate details", error);
+        return false;
       } finally {
         setShowLoader(false);
       }
@@ -286,12 +283,11 @@ function FreightRate() {
 
     const transformed = transformResponse({
       freight_rates: filteredData,
+      total: filteredData.length,
     });
     setSelectAll(false);
     return {
-      headers: transformed.headers.map((header: string) =>
-       header
-      ),
+      headers: transformed.headers.map((header: string) => header),
       values: [...localData, ...transformed.values],
     };
   }, [allData, alignment, localData]);
@@ -492,8 +488,6 @@ function FreightRate() {
         alignment={alignment}
         onAlignmentChange={handleChange}
         onSearchChange={handleSearchChange}
-        isAddingRow={isAddingRow}
-        onAddNewRow={handleAddNewRow}
         setShowRequestsModal={setShowRequestsModal}
         setShowFilesModal={setShowFilesModal}
         isAddingItem={isAddingRow}
@@ -533,7 +527,7 @@ function FreightRate() {
       >
         <MainContentContainer>
           {showRequestsModal && (
-            <RequestsModaL
+            <RequestsModal
               onClose={setShowRequestsModal}
               targetModule={"freight_rate"}
             />

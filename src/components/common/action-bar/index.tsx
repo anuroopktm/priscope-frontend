@@ -1,4 +1,3 @@
-"use client";
 
 import SearchIcon from "@/public/images/search.svg";
 import {
@@ -11,7 +10,6 @@ import {
   useTheme,
 } from "@mui/material";
 import React, { useCallback } from "react";
-// import Image from "next/image";
 import CommentIcon from "@/assets/actions/comment.svg";
 import {
   default as ImportDataIcon,
@@ -43,7 +41,7 @@ interface ExtendedActionBarProps {
   isUpdating?: boolean;
   showUploadModal?: boolean;
   setShowUploadModal?: (value: boolean) => void;
-  onBulkStatusUpdate?: (status: string) => void;
+  onBulkStatusUpdate?: (status: "active" | "inactive") => void;
   onToggleDrawer?: () => void;
   filterOptions?:
     | { value: string; label: string }[]

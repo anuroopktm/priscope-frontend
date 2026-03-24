@@ -29,7 +29,7 @@ export interface HandsontableProps {
   setShowLoader: React.Dispatch<React.SetStateAction<boolean>>;
   commentMantatoryFields?: string[];
   highlightTarget: {
-    freightRateId: string;
+    freightRateId: string | null;
     fieldKey?: string | null;
   };
   columnFieldMap: Record<number, string>;

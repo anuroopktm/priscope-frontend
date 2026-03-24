@@ -19,6 +19,10 @@ export const HEADER_NAV = [
         label: "Rate Libraries",
         path: "/rate-libraries",
       },
+      {
+        label: "Freight Rate Library",
+        path: "/freight-rate-library",
+      },
     ],
   },
   {
