@@ -191,10 +191,11 @@ const AggregatorGrid = ({
       sx={{
         height: "140px",
         width: "100%",
-        borderBottom: "1px solid #e2e8f0",
+        border: "1px solid #e2e8f0",
+        borderRadius: 1,
+        overflow: "hidden",
         "& .TGMain": {
-          border: "1px solid #e2e8f0 !important",
-          borderBottom: "none !important",
+          border: "none !important",
         },
         "& div[class*='NoDataRow']": {
           display: "none !important",
@@ -247,10 +248,18 @@ const CostAggregatorDrawer = ({
         const arr = data[type];
         if (Array.isArray(arr)) {
           arr.forEach((sec: any, index: number) => {
+            let sectionTitle = sec.title || type;
+            if (type === "freight" && sectionTitle === "Freight")
+              sectionTitle = "Freight Cost";
+            if (type === "tariff" && sectionTitle === "Tariff")
+              sectionTitle = "Tariff Rate";
+            if (type === "custom" && sectionTitle === "Custom")
+              sectionTitle = "Custom Calculation";
+
             loadedSections.push({
               id: `grid_${Date.now()}_${type}_${index}`,
               type: (type.charAt(0).toUpperCase() + type.slice(1)) as any,
-              title: sec.title || type,
+              title: sectionTitle,
               items: sec.grid_data?.Body?.[0] || [],
             });
           });
@@ -552,10 +561,16 @@ const CostAggregatorDrawer = ({
     customTitle?: string,
   ) => {
     const id = `grid_${Date.now()}`;
+    const defaultTitle =
+      type === "Freight"
+        ? "Freight Cost"
+        : type === "Tariff"
+          ? "Tariff Rate"
+          : "Custom Calculation";
     const newSection: AggregatorSection = {
       id,
       type,
-      title: customTitle || type,
+      title: customTitle || defaultTitle,
       items: [
         type === "Tariff"
           ? {
@@ -647,33 +662,6 @@ const CostAggregatorDrawer = ({
           }
         });
 
-        // Ensure exactly one Select button remains at the bottom
-        let finalLast = grid.GetLast();
-        while (finalLast && finalLast.Visible === 0)
-          finalLast = grid.GetPrev(finalLast);
-
-        const isFinalLastSelect =
-          finalLast &&
-          grid
-            .GetValue(finalLast, "Aggregator Name")
-            ?.includes(">Select</button>");
-
-        if (!isFinalLastSelect) {
-          const emptyRow = grid.AddRow(null, null, 1);
-          if (emptyRow) {
-            grid.SetValue(
-              emptyRow,
-              "Aggregator Name",
-              renderSelectButton(emptyRow.id, targetGridId, "Aggregator Name"),
-              1,
-            );
-            grid.SetValue(emptyRow, "Cost for", "", 1);
-
-            grid.SetValue(emptyRow, "Cost per unit", 0, 1);
-            grid.RefreshRow(emptyRow);
-          }
-        }
-
         grid.Calculate();
         calculateTotal();
       }
@@ -742,41 +730,6 @@ const CostAggregatorDrawer = ({
           }
         });
 
-        // Ensure exactly one Select button remains at the bottom
-        let finalLast = grid.GetLast();
-        while (finalLast && finalLast.Visible === 0)
-          finalLast = grid.GetPrev(finalLast);
-
-        const isFinalLastSelect =
-          finalLast &&
-          grid
-            .GetValue(finalLast, "Tariff Rate %")
-            ?.includes(">Select</button>");
-
-        if (!isFinalLastSelect) {
-          const emptyRow = grid.AddRow(null, null, 1);
-          if (emptyRow) {
-            grid.SetValue(
-              emptyRow,
-              "Tariff Rate %",
-              renderSelectButton(emptyRow.id, targetGridId, "Tariff Rate %"),
-              1,
-            );
-            grid.SetValue(
-              emptyRow,
-              "Scenario Builder Column",
-              renderSelectButton(
-                emptyRow.id,
-                targetGridId,
-                "Scenario Builder Column",
-              ),
-              1,
-            );
-            grid.SetValue(emptyRow, "Cost per unit", 0, 1);
-            grid.RefreshRow(emptyRow);
-          }
-        }
-
         grid.Calculate();
         calculateTotal();
       }
@@ -823,9 +776,12 @@ const CostAggregatorDrawer = ({
             const cleanName = grid.GetAttribute(row, colA, "CleanName");
             let finalName = "";
             if (isCustom) {
-              finalName = section.title;
+              finalName =
+                section.title === "Custom"
+                  ? "Custom Calculation"
+                  : section.title;
             } else if (isTariff || isFreight) {
-              const typeName = isTariff ? "Tariff" : "Freight";
+              const typeName = isTariff ? "Tariff Rate" : "Freight Cost";
               finalName =
                 currentItemIndex === 1
                   ? typeName
@@ -962,7 +918,7 @@ const CostAggregatorDrawer = ({
         bgcolor: "background.paper",
         borderTopLeftRadius: 8,
         borderTopRightRadius: 8,
-        overflowY: "auto",
+        overflow: "hidden",
         borderTop: 1,
         borderColor: "divider",
       }}
@@ -997,69 +953,108 @@ const CostAggregatorDrawer = ({
         </IconButton>
       </Box>
 
-      {/* Calculate Buttons Section */}
+      {/* Scrollable Container */}
       <Box
         sx={{
-          px: 2,
-          py: 1.5,
-          borderTop: 1,
-          borderColor: "grey.200",
+          flex: 1,
+          overflowY: "auto",
           display: "flex",
           flexDirection: "column",
-          gap: 2,
-          flexShrink: 0,
         }}
       >
+        {/* Calculate Buttons Section */}
         <Box
           sx={{
+            px: 2,
+            py: 1.5,
+            borderTop: 1,
+            borderColor: "grey.200",
             display: "flex",
-            alignItems: "center",
-            justifyContent: "space-between",
+            flexDirection: "column",
+            gap: 2,
+            flexShrink: 0,
           }}
         >
           <Box
             sx={{
               display: "flex",
               alignItems: "center",
-              gap: 2,
+              justifyContent: "space-between",
             }}
           >
-            <Typography
-              variant="subtitle2"
-              sx={{ fontWeight: "bold", color: "#1a365d" }}
+            <Box
+              sx={{
+                display: "flex",
+                alignItems: "center",
+                gap: 2,
+              }}
             >
-              Calculate - Cost aggregator
-            </Typography>
+              <Typography
+                variant="subtitle2"
+                sx={{ fontWeight: "bold", color: "#1a365d" }}
+              >
+                Calculate - Cost aggregator
+              </Typography>
 
-            <Stack direction="row" spacing={1}>
-              <Chip
-                label="Freight"
-                onClick={() => handleAddSection("Freight")}
-                onDelete={() => {}}
-                deleteIcon={
-                  <AddIcon style={{ fontSize: 16, color: "#1a365d" }} />
-                }
-              />
-              <Chip
-                label="Tariff"
-                onClick={() => handleAddSection("Tariff")}
-                onDelete={() => {}}
-                deleteIcon={
-                  <AddIcon style={{ fontSize: 16, color: "#1a365d" }} />
-                }
-              />
-              <Chip
-                label="Custom"
-                onClick={() => setIsCustomModalOpen(true)}
-                onDelete={() => {}}
-                deleteIcon={
-                  <AddIcon style={{ fontSize: 16, color: "#1a365d" }} />
-                }
-              />
-            </Stack>
-          </Box>
+              <Stack direction="row" spacing={1}>
+                <Chip
+                  label="Freight"
+                  onClick={() => {
+                    if (!sections.some((s) => s.type === "Freight")) {
+                      handleAddSection("Freight");
+                    }
+                  }}
+                  disabled={
+                    isFetchingData || sections.some((s) => s.type === "Freight")
+                  }
+                  onDelete={() => {}}
+                  deleteIcon={
+                    <AddIcon style={{ fontSize: 16, color: "#1a365d" }} />
+                  }
+                  sx={{
+                    borderRadius: "16px",
+                    height: "28px",
+                    fontSize: "0.8rem",
+                  }}
+                />
+                <Chip
+                  label="Tariff"
+                  onClick={() => {
+                    if (!sections.some((s) => s.type === "Tariff")) {
+                      handleAddSection("Tariff");
+                    }
+                  }}
+                  disabled={
+                    isFetchingData || sections.some((s) => s.type === "Tariff")
+                  }
+                  onDelete={() => {}}
+                  deleteIcon={
+                    <AddIcon style={{ fontSize: 16, color: "#1a365d" }} />
+                  }
+                  sx={{
+                    borderRadius: "16px",
+                    height: "28px",
+                    fontSize: "0.8rem",
+                  }}
+                />
+                <Chip
+                  label="Custom"
+                  onClick={() => setIsCustomModalOpen(true)}
+                  disabled={isFetchingData}
+                  onDelete={() => {}}
+                  deleteIcon={
+                    <AddIcon style={{ fontSize: 16, color: "#1a365d" }} />
+                  }
+                  sx={{
+                    borderRadius: "16px",
+                    height: "28px",
+                    fontSize: "0.8rem",
+                  }}
+                />
+              </Stack>
+            </Box>
 
-          {/* <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
+            {/* <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
             <Button
               size="small"
               onClick={handleTemplateClick}
@@ -1084,89 +1079,90 @@ const CostAggregatorDrawer = ({
               Save Template
             </Button>
           </Box> */}
+          </Box>
         </Box>
-      </Box>
 
-      {/* Content Area */}
-      <Box
-        sx={{
-          px: 3,
-          pb: 1,
-          display: "flex",
-          flexDirection: "column",
-          gap: 3,
-          flex: 1,
-          ...(isFetchingData && {
-            minHeight: 120,
-            alignItems: "center",
-            justifyContent: "center",
-          }),
-        }}
-      >
-        {isFetchingData ? (
-          <CircularProgress size={20} />
-        ) : sections.length === 0 ? (
-          <Box
-            sx={{
-              height: "100px",
-              display: "flex",
+        {/* Content Area */}
+        <Box
+          sx={{
+            px: 3,
+            pb: 1,
+            display: "flex",
+            flexDirection: "column",
+            gap: 3,
+            flex: 1,
+            ...(isFetchingData && {
+              minHeight: 120,
               alignItems: "center",
               justifyContent: "center",
-              bgcolor: "grey.50",
-              borderRadius: 1,
-              border: "1px dashed #cbd5e1",
-              mb: 2,
-            }}
-          >
-            <Typography variant="body2" sx={{ color: "grey.500" }}>
-              Add Freight, Tariff or custom the define cost aggregator
-            </Typography>
-          </Box>
-        ) : (
-          sections.map((section) => (
+            }),
+          }}
+        >
+          {isFetchingData ? (
+            <CircularProgress size={20} />
+          ) : sections.length === 0 ? (
             <Box
-              key={section.id}
-              sx={{ display: "flex", flexDirection: "column", gap: 1 }}
+              sx={{
+                height: "100px",
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+                bgcolor: "grey.50",
+                borderRadius: 1,
+                border: "1px dashed #cbd5e1",
+                mb: 2,
+              }}
             >
-              <Stack direction="row" alignItems="center" spacing={1}>
-                <Typography
-                  variant="subtitle2"
-                  sx={{ fontWeight: "bold", color: "#1a365d" }}
-                >
-                  {section.title}
-                </Typography>
-                <IconButton
-                  size="small"
-                  sx={{ color: "grey.500" }}
-                  onClick={() => {
-                    const sectionToRemove = sections.find(
-                      (s) => s.id === section.id,
-                    );
-                    if (sectionToRemove?.type === "Tariff") {
-                      (window as any).clearScenarioColumnHighlights &&
-                        (window as any).clearScenarioColumnHighlights();
-                    }
-                    setSections(sections.filter((s) => s.id !== section.id));
+              <Typography variant="body2" sx={{ color: "grey.500" }}>
+                Add Freight, Tariff, or Custom to define cost aggregator
+              </Typography>
+            </Box>
+          ) : (
+            sections.map((section) => (
+              <Box
+                key={section.id}
+                sx={{ display: "flex", flexDirection: "column", gap: 1 }}
+              >
+                <Stack direction="row" alignItems="center" spacing={1}>
+                  <Typography
+                    variant="subtitle2"
+                    sx={{ fontWeight: "bold", color: "#1a365d" }}
+                  >
+                    {section.title}
+                  </Typography>
+                  <IconButton
+                    size="small"
+                    sx={{ color: "grey.500" }}
+                    onClick={() => {
+                      const sectionToRemove = sections.find(
+                        (s) => s.id === section.id,
+                      );
+                      if (sectionToRemove?.type === "Tariff") {
+                        (window as any).clearScenarioColumnHighlights &&
+                          (window as any).clearScenarioColumnHighlights();
+                      }
+                      setSections(sections.filter((s) => s.id !== section.id));
+                    }}
+                  >
+                    <DeleteIcon fontSize="small" />
+                  </IconButton>
+                </Stack>
+                <Box
+                  sx={{
+                    // borderRadius: 1,
+                    // overflow: "hidden",
+                    width: "fit-content",
                   }}
                 >
-                  <DeleteIcon fontSize="small" />
-                </IconButton>
-              </Stack>
-              <Box
-                sx={{
-                  // borderRadius: 1,
-                  // overflow: "hidden",
-                  width: "fit-content",
-                }}
-              >
-                <GridWrapper
-                  section={section}
-                  calculateTotal={calculateTotal}
-                />
+                  <GridWrapper
+                    section={section}
+                    calculateTotal={calculateTotal}
+                  />
+                </Box>
               </Box>
-            </Box>
-          ))
-        )}
+            ))
+          )}
+        </Box>
       </Box>
 
       {hasError && (
@@ -1181,7 +1177,7 @@ const CostAggregatorDrawer = ({
       )}
 
       {/* Total Bar */}
-      <Box sx={{ px: 3, mb: 2 }}>
+      <Box sx={{ px: 2 }}>
         <Box
           sx={{
             bgcolor: "#f1f5f9",
@@ -1208,7 +1204,6 @@ const CostAggregatorDrawer = ({
           gap: 1.5,
           bgcolor: "background.paper",
           flexShrink: 0,
-          borderTop: 1,
           borderColor: "grey.100",
         }}
       >
@@ -1227,7 +1222,7 @@ const CostAggregatorDrawer = ({
           size="small"
           variant="contained"
           onClick={handleDone}
-          disabled={hasError || isSaving}
+          disabled={isFetchingData || hasError || isSaving}
           loading={isSaving}
         >
           Update

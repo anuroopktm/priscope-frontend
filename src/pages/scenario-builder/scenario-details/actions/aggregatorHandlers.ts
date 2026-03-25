@@ -201,6 +201,12 @@ export const handleAggregatorUpdate = (
         if (item.type === "Custom" && itemName === "Custom") {
           itemName = "Custom Calculation";
         }
+        if (item.type === "Freight" && itemName === "Freight") {
+          itemName = "Freight Cost";
+        }
+        if (item.type === "Tariff" && itemName === "Tariff") {
+          itemName = "Tariff Rate";
+        }
         const cleanName = itemName.trim();
         const safeName = cleanName.replace(/[^a-zA-Z0-9]/g, "").toLowerCase();
         const colId = `Comp_${targetCol}_${safeName || "Item"}`;

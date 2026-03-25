@@ -326,9 +326,9 @@ const FreightDrawer = ({ onClose, onSelect }: FreightDrawerProps) => {
         id: newId,
         port_of_origin: "",
         port_of_destination: "",
-        container_type: "20 ft",
-        currency: "USD",
-        rate: 0,
+        container_type: "",
+        currency: "",
+        rate: "",
       },
       ...updatedLocalRows,
     ]);
@@ -361,7 +361,19 @@ const FreightDrawer = ({ onClose, onSelect }: FreightDrawerProps) => {
                 </svg>
             </div>`;
     }
-    if (id.startsWith("local_")) return `<div style="height: 100%;"></div>`;
+    if (id.startsWith("local_")) {
+      return `<div style="display: flex; justify-content: center; align-items: center; width: 100%; height: 100%; gap: 8px;">
+                <button onclick="window.handleDeleteFreightRow && window.handleDeleteFreightRow('${id}')" 
+                    style="background: transparent; border: none; color: #EF4444; cursor: pointer; display: flex; align-items: center; justify-content: center; padding: 4px;"
+                    title="Delete">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M3 6h18"></path>
+                        <path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"></path>
+                        <path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"></path>
+                    </svg>
+                </button>
+            </div>`;
+    }
     return `<div style="display: flex; justify-content: center; align-items: center; width: 100%; height: 100%;">
                 <button onclick="window.handleSelectFreightRow && window.handleSelectFreightRow('${id}')"
                     style="background: #E0F2FE; border: 1px solid #BAE6FD; border-radius: 4px; color: #0369A1; font-size: 11px; font-weight: 500; cursor: pointer; padding: 2px 8px; width: 60px; height: 24px;">
@@ -429,8 +441,14 @@ const FreightDrawer = ({ onClose, onSelect }: FreightDrawerProps) => {
         }
       }
     };
+    (window as any).handleDeleteFreightRow = (rowId: string) => {
+      setLocalRows((prev) => prev.filter((r) => r.id !== rowId));
+      setPopoverPosition(null);
+    };
+
     return () => {
       delete (window as any).handleSelectFreightRow;
+      delete (window as any).handleDeleteFreightRow;
     };
   }, [onSelect, onClose]);
 

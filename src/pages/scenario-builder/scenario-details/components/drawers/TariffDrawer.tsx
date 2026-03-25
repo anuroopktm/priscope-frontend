@@ -161,7 +161,7 @@ const TariffDrawer = ({ onClose, onSelect }: TariffDrawerProps) => {
         country_of_origin: "",
         country_of_destination: "",
         hs_code: "",
-        rate: 0,
+        rate: "",
       },
       ...updatedLocalRows,
     ]);
@@ -188,7 +188,19 @@ const TariffDrawer = ({ onClose, onSelect }: TariffDrawerProps) => {
   };
 
   const renderActionCell = (id: string) => {
-    if (id.startsWith("local_")) return `<div style="height: 100%;"></div>`;
+    if (id.startsWith("local_")) {
+      return `<div style="display: flex; justify-content: center; align-items: center; width: 100%; height: 100%; gap: 8px;">
+                <button onclick="window.handleDeleteTariffRow && window.handleDeleteTariffRow('${id}')" 
+                    style="background: transparent; border: none; color: #EF4444; cursor: pointer; display: flex; align-items: center; justify-content: center; padding: 4px;"
+                    title="Delete">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M3 6h18"></path>
+                        <path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"></path>
+                        <path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"></path>
+                    </svg>
+                </button>
+            </div>`;
+    }
     return `
             <div style="display: flex; justify-content: center; align-items: center; width: 100%; height: 100%;">
                 <button 
@@ -247,8 +259,14 @@ const TariffDrawer = ({ onClose, onSelect }: TariffDrawerProps) => {
         }
       }
     };
+    (window as any).handleDeleteTariffRow = (rowId: string) => {
+      setLocalRows((prev) => prev.filter((r) => r.id !== rowId));
+      setPopoverPosition(null);
+    };
+
     return () => {
       delete (window as any).handleSelectTariffRow;
+      delete (window as any).handleDeleteTariffRow;
     };
   }, [onSelect, onClose]);
 
