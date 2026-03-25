@@ -86,6 +86,7 @@ export const ComponentDrawerLayout = {
       CanEdit: "0",
       Align: "Center",
       CanSort: "0",
+      CanFocus: "0",
     },
   ],
   Header: {

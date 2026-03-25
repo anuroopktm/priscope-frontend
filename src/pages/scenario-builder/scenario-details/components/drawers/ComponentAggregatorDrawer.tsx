@@ -180,7 +180,7 @@ const ComponentAggregatorDrawer = ({
       window.TGAddEvent(
         "OnAfterValueChanged",
         "ScenarioGridDetails",
-        (grid: any, r: any, col: string, val: any) => {
+        (_grid: any, r: any, col: string, val: any) => {
           if (r && r.id === mainRowId && col === "Shipment Quantity") {
             checkQuantity(val);
           }
@@ -268,7 +268,12 @@ const ComponentAggregatorDrawer = ({
     if (grid && rowToDelete) {
       const row = grid.GetRowById(rowToDelete);
       if (row) {
-        grid.DeleteRow(row, 2); // 2 = delete row physically from view
+        console.log("Deleting row:", rowToDelete);
+        grid.RemoveRow(row); // Physically remove row from grid
+        grid.Calculate(); // Recalculate sums if any
+        grid.Render(); // Refresh view to ensure row is gone from DOM
+      } else {
+        console.warn("Row not found for deletion:", rowToDelete);
       }
     }
     setDeleteModalOpen(false);

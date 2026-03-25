@@ -140,15 +140,8 @@ const syncLocalGridData = (grid: any) => {
             }
           }
 
-          // Fallback if no ItemsData found
-          if (rowComponentCols.length === 0) {
-            rowComponentCols = Object.keys(grid.Cols).filter((c) => {
-              const parts = c.split("_");
-              return (
-                parts[0] === "Comp" && parts[1] === colName && !!colsData[c]
-              );
-            });
-          }
+          // Removed fallback that collected all Comp_ columns if itemsData was missing,
+          // as it caused formulas to be applied to all rows incorrectly.
 
           if (rowComponentCols.length > 0) {
             rowData[colName + "Formula"] = rowComponentCols.join(" + ");
