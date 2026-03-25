@@ -58,12 +58,12 @@ const ModalHeader: React.FC<ModalHeaderProps> = ({
             component="span"
             onClick={handleTemplateDownload}
             sx={{
-              color: theme.palette.divider,
+              color: "#3a3838ff",
               fontSize: 14,
               textDecoration: "none",
               cursor: "pointer",
               display: "flex",
-              alignItems: "center",
+              alignItems: "center"
             }}
           >
             <img

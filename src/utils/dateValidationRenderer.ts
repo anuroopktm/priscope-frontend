@@ -11,8 +11,8 @@ type HTRenderer = (
   instance: any,
   td: HTMLTableCellElement,
   row: number,
-  // col: number,
-  // prop: string | number,
+  _col: number,
+  _prop: string | number,
   value: any,
   cellProperties?: any,
 ) => void;
@@ -23,8 +23,8 @@ export const dateValidationRenderer =
     instance: Handsontable,
     td: HTMLTableCellElement,
     row: number,
-    // col: number,
-    // prop: string | number,
+    _col: number,
+    _prop: string | number,
     value: string | null,
     cellProperties: Handsontable.CellProperties,
   ): void => {
@@ -70,17 +70,28 @@ export const dateValidationRenderer =
     wrapper.style.gap = "4px";
 
     let cellDate: Date | null = null;
-    // const parts = (value ?? "").split("-").map(Number);
     const stringValue = typeof value === "string" ? value : String(value ?? "");
-    const parts = stringValue.split("-").map(Number);
-    if (parts.length === 3 && !parts.some(isNaN)) {
-      const [year, month, day] = parts;
-      cellDate = new Date(year, month - 1, day);
+    
+    // Try YYYY-MM-DD first
+    if (stringValue.includes("-")) {
+      const parts = stringValue.split("-").map(Number);
+      if (parts.length === 3 && !parts.some(isNaN)) {
+        const [year, month, day] = parts;
+        cellDate = new Date(year, month - 1, day);
+      }
+    } 
+    // Then try DD/MM/YYYY
+    else if (stringValue.includes("/")) {
+      const parts = stringValue.split("/").map(Number);
+      if (parts.length === 3 && !parts.some(isNaN)) {
+        const [day, month, year] = parts;
+        cellDate = new Date(year, month - 1, day);
+      }
     }
 
     let textColor = "";
     let svgIcon: string | null = null;
-    if (cellDate instanceof Date && !isNaN(cellDate.getTime())) {
+    if (cellDate && !isNaN(cellDate.getTime())) {
       const today = new Date();
       const isWithinWarningPeriod = isWithinInterval(cellDate, {
         start: today,
@@ -121,7 +132,16 @@ export const dateValidationRenderer =
       td.style.backgroundColor = "#13111110 ";
       spanText.style.color = "#777777";
     }
-    spanText.textContent = value ?? "";
+
+    let displayText = value ?? "";
+    if (cellDate && !isNaN(cellDate.getTime())) {
+      const day = String(cellDate.getDate()).padStart(2, "0");
+      const month = String(cellDate.getMonth() + 1).padStart(2, "0");
+      const year = cellDate.getFullYear();
+      displayText = `${day}/${month}/${year}`;
+    }
+
+    spanText.textContent = displayText;
     if (textColor) spanText.style.color = textColor;
     wrapper.appendChild(spanText);
 

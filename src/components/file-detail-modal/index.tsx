@@ -31,7 +31,7 @@ import {
   Typography,
   useTheme,
 } from "@mui/material";
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import StatsSummaryBar from "../status-summary-bar";
 
 const TOGGLE_BUTTON = ["uploaded", "downloaded"];
@@ -77,7 +77,6 @@ const FileDetailsModal: React.FC<FileDetailsModalProps> = ({
   const theme = useTheme();
   const [selectedDownloadIndex, setSelectedDownloadIndex] = useState(0);
   const [exportedData, setExportedData] = useState<SimplifiedExport[]>([]);
-  const [uploadData, setUploadData] = useState([]);
 
   const listExportPayload = getListExportPayload([module]);
 
@@ -87,10 +86,12 @@ const FileDetailsModal: React.FC<FileDetailsModalProps> = ({
   } = useGetModuleImportErrorFile() ?? {};
 
   const {
-    mutate: listUploads = () => {},
-    isPending = false,
-    isError = false,
-  } = useListModuleImports(module) ?? {};
+    data: uploadsResponse,
+    isLoading: isUploadsPending,
+    isError: isUploadsError,
+  } = useListModuleImports(module, {
+    enabled: !!module && open && alignment === TOGGLE_BUTTON[0],
+  });
 
   const {
     mutate: listExports = () => {},
@@ -111,54 +112,48 @@ const FileDetailsModal: React.FC<FileDetailsModalProps> = ({
     }
   }, [errorFileDownloadPending, isDownloadExportPending]);
 
-  useEffect(() => {
-    if (filterOptions.find((opt) => opt.value === TOGGLE_BUTTON[0])?.value) {
-      listUploads(undefined as any, {
-        onSuccess: (res: any) => {
-          let uploads;
-          if (res?.uploads) {
-            uploads = res.uploads
-              .filter(
-                (item: any) =>
-                  item.status !== FILE_UPLOAD_STATUS.PROCESSING &&
-                  item.status !== FILE_UPLOAD_STATUS.UPLOADED,
-              )
-              .map((item: any) => {
-                const createdAt = new Date(item.created_at);
-                return {
-                  id: item.id,
-                  title: item.file_name,
-                  status:
-                    item.status === FILE_UPLOAD_STATUS.SUCCESS ||
-                    item.status === FILE_UPLOAD_STATUS.PROCESSED
-                      ? "Success"
-                      : item.status,
-                  uploadDate: formatDate(item.created_at),
-                  uploadTime: createdAt.toLocaleTimeString([], {
-                    hour: "2-digit",
-                    minute: "2-digit",
-                  }),
-                  uploadedBy: item?.created_by?.name ?? "",
-                  updatedDate: formatDate(item.updated_at),
-                  errorFile:
-                    item.status === FILE_UPLOAD_STATUS.PROCESSED ||
-                    item.status === FILE_UPLOAD_STATUS.FAILED,
-                  hasUploadData:
-                    item.status === FILE_UPLOAD_STATUS.SUCCESS ||
-                    item.status === FILE_UPLOAD_STATUS.PROCESSED ||
-                    item.status === FILE_UPLOAD_STATUS.FAILED,
-                };
-              });
-          }
-          setUploadData(uploads || []);
-        },
-        onError: (err: any) => {
-          console.error("Error fetching uploads:", err);
-        },
-      });
-    }
+  const uploadData = useMemo(() => {
+    if (!uploadsResponse?.uploads) return [];
 
-    if (filterOptions.find((opt) => opt.value === TOGGLE_BUTTON[1])?.value) {
+    return uploadsResponse.uploads.map((item: any) => {
+      const createdAt = new Date(item.created_at);
+      let statusLabel = item.status;
+      if (
+        item.status === FILE_UPLOAD_STATUS.SUCCESS ||
+        item.status === FILE_UPLOAD_STATUS.PROCESSED
+      ) {
+        statusLabel = "Success";
+      } else if (
+        item.status === FILE_UPLOAD_STATUS.PROCESSING ||
+        item.status === FILE_UPLOAD_STATUS.UPLOADED
+      ) {
+        statusLabel = "Processing";
+      }
+
+      return {
+        id: item.id,
+        title: item.file_name,
+        status: statusLabel,
+        uploadDate: formatDate(item.created_at),
+        uploadTime: createdAt.toLocaleTimeString([], {
+          hour: "2-digit",
+          minute: "2-digit",
+        }),
+        uploadedBy: item?.created_by?.name ?? "",
+        updatedDate: formatDate(item.updated_at),
+        errorFile:
+          item.status === FILE_UPLOAD_STATUS.PROCESSED ||
+          item.status === FILE_UPLOAD_STATUS.FAILED,
+        hasUploadData:
+          item.status === FILE_UPLOAD_STATUS.SUCCESS ||
+          item.status === FILE_UPLOAD_STATUS.PROCESSED ||
+          item.status === FILE_UPLOAD_STATUS.FAILED,
+      };
+    });
+  }, [uploadsResponse?.uploads]);
+
+  useEffect(() => {
+    if (open && alignment === TOGGLE_BUTTON[1]) {
       listExports(listExportPayload, {
         onSuccess: (res) => {
           const data = mapExports(res);
@@ -169,7 +164,7 @@ const FileDetailsModal: React.FC<FileDetailsModalProps> = ({
         },
       });
     }
-  }, []);
+  }, [open, alignment, module, listExports]);
 
   const handleChange = (
     _event: React.MouseEvent<HTMLElement>,
@@ -320,7 +315,7 @@ const FileDetailsModal: React.FC<FileDetailsModalProps> = ({
       >
         {alignment === TOGGLE_BUTTON[0] && (
           <>
-            {isPending && (
+            {isUploadsPending && (
               <Box
                 sx={{
                   display: "flex",
@@ -332,7 +327,7 @@ const FileDetailsModal: React.FC<FileDetailsModalProps> = ({
                 <CircularProgress />
               </Box>
             )}
-            {isError && (
+            {isUploadsError && (
               <Typography color="error">Failed to load files.</Typography>
             )}
 
@@ -395,12 +390,21 @@ const FileDetailsModal: React.FC<FileDetailsModalProps> = ({
                   }}
                 >
                   <Chip
-                    label={file.status === "Success" ? "Success" : "Failed"}
+                    label={file.status}
                     size="small"
                     sx={{
                       backgroundColor:
-                        file.status === "Success" ? "#1FC16B1A" : "#FB37481A",
-                      color: file.status === "Success" ? "#1FC16B" : "#D00416",
+                        file.status === "Success"
+                          ? "#1FC16B1A"
+                          : file.status === "Processing"
+                            ? "#3B9EDC1A"
+                            : "#FB37481A",
+                      color:
+                        file.status === "Success"
+                          ? "#1FC16B"
+                          : file.status === "Processing"
+                            ? "#3B9EDC"
+                            : "#D00416",
                       fontWeight: 500,
                       fontSize: "0.75rem",
                       height: 24,
