@@ -92,9 +92,7 @@ export const routes = [
           },
           {
             path: "freight-rate-library",
-            children: [
-              { index: true, element: <FreightRatePage /> },
-            ],
+            children: [{ index: true, element: <FreightRatePage /> }],
           },
           {
             path: "items-master",
@@ -124,8 +122,14 @@ export const routes = [
                     path: "users",
                     children: [
                       { index: true, element: <GlobalSettingsListUsersPage /> },
-                      { path: "create-user", element: <GlobalSettingsCreateUserPage /> },
-                      { path: "edit-user/:userId", element: <GlobalSettingsEditUserPage /> },
+                      {
+                        path: "create-user",
+                        element: <GlobalSettingsCreateUserPage />,
+                      },
+                      {
+                        path: "edit-user/:userId",
+                        element: <GlobalSettingsEditUserPage />,
+                      },
                       {
                         path: "user-details/:userId",
                         element: <GlobalSettingsUserDetailsPage />,

@@ -232,7 +232,7 @@ export interface ExportItemMasterRowPayload {
   parameters: ExportItemMasterRowResponseParameters;
 }
 
-// bulk add new 
+// bulk add new
 export interface ItemMasterBulkAddRequest {
   source_module: string;
   target_module: string;

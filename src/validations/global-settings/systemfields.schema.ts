@@ -1,17 +1,9 @@
 import { z } from "zod";
 
 export const systemFieldMappingSchema = z.object({
-  sku: z
-    .string()
-    .min(1, "SKU is required")
-    .max(50, "Max 50 characters")
-    .trim(),
+  sku: z.string().min(1, "SKU is required").max(50, "Max 50 characters").trim(),
 
-  upc: z
-    .string()
-    .min(1, "UPC is required")
-    .max(50, "Max 50 characters")
-    .trim(),
+  upc: z.string().min(1, "UPC is required").max(50, "Max 50 characters").trim(),
 
   description: z
     .string()
@@ -32,4 +24,6 @@ export const systemFieldMappingSchema = z.object({
     .trim(),
 });
 
-export type SystemFieldMappingFormValues = z.infer<typeof systemFieldMappingSchema>;
+export type SystemFieldMappingFormValues = z.infer<
+  typeof systemFieldMappingSchema
+>;

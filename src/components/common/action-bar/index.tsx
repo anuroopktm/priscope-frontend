@@ -1,4 +1,3 @@
-
 import SearchIcon from "@/assets/rate-libraries/search.svg";
 import {
   Box,

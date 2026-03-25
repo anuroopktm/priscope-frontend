@@ -71,7 +71,7 @@ export const dateValidationRenderer =
 
     let cellDate: Date | null = null;
     const stringValue = typeof value === "string" ? value : String(value ?? "");
-    
+
     // Try YYYY-MM-DD first
     if (stringValue.includes("-")) {
       const parts = stringValue.split("-").map(Number);
@@ -79,7 +79,7 @@ export const dateValidationRenderer =
         const [year, month, day] = parts;
         cellDate = new Date(year, month - 1, day);
       }
-    } 
+    }
     // Then try DD/MM/YYYY
     else if (stringValue.includes("/")) {
       const parts = stringValue.split("/").map(Number);

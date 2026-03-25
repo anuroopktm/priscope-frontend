@@ -2,7 +2,7 @@ import { Box, Typography, Divider } from "@mui/material";
 import { NavLink } from "react-router-dom";
 
 const menuItems = [
-  { label: "Company Info", path: "/global-settings" ,exact: true},
+  { label: "Company Info", path: "/global-settings", exact: true },
   { label: "System Fields", path: "/global-settings/system-fields" },
   { label: "Attributes", path: "/global-settings/attributes" },
   { label: "Operations Setting", path: "/global-settings/operations-setting" },
@@ -17,13 +17,12 @@ export const SettingsSidebar = () => {
         width: 240,
         bgcolor: "#0f2a44",
         color: "#fff",
-        height: "100%", 
+        height: "100%",
         display: "flex",
         flexDirection: "column",
         px: 2,
         py: 3,
       }}
-
     >
       <Typography
         variant="h6"
@@ -53,7 +52,6 @@ export const SettingsSidebar = () => {
             }}
           >
             {({ isActive }) => (
-
               <Box
                 sx={{
                   px: 1.5,

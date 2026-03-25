@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import {  Box } from "@mui/material";
+import { Box } from "@mui/material";
 import { debounce } from "lodash";
 import {
   useBulkStatusUpdate,
@@ -74,7 +74,7 @@ function FreightRate() {
   const [showUploadModal, setShowUploadModal] = useState<boolean>(false);
   const [isDrawerOpen, setIsDrawerOpen] = useState(false);
 
-   const { showToast } = useToastStore();
+  const { showToast } = useToastStore();
   const [initialLoadCompleted, setInitialLoadCompleted] = useState(false);
   const [highlightTarget, setHighlightTarget] = useState<{
     freightRateId: string | null;
