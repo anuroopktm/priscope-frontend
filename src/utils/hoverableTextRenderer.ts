@@ -6,7 +6,7 @@ export interface CellTextClickDetail {
   value: any;
 }
 
-export const HoverableTextRenderer: Handsontable.renderers.Base = (
+export const HoverableTextRenderer: typeof Handsontable.renderers.TextRenderer = (
   instance: Handsontable.Core,
   td: HTMLTableCellElement,
   row: number,
