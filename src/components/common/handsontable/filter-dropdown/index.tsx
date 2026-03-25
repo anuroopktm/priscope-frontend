@@ -88,7 +88,7 @@ export const FilterDropdown: React.FC<FilterDropdownProps> = ({
           bgcolor: theme.palette.background.paper,
           border: 1,
           borderColor: "#BBBBBB",
-          borderRadius: 8,
+          borderRadius: 1,
           boxShadow: 3,
           width: 248,
           maxHeight: 330,
@@ -105,7 +105,7 @@ export const FilterDropdown: React.FC<FilterDropdownProps> = ({
               gap: 1,
               border: 1,
               borderColor: "#BBBBBB",
-              borderRadius: 4,
+              borderRadius: 8,
               padding: "8px 12px",
               "&:focus-within": {
                 borderColor: theme.palette.primary.main,

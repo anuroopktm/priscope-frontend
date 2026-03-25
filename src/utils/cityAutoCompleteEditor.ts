@@ -228,7 +228,6 @@ class CityAutocompleteEditor extends Handsontable.editors.TextEditor {
   }
 
   destroy() {
-    super.destroy();
     if (this.dropdown) {
       try {
         document.body.removeChild(this.dropdown);

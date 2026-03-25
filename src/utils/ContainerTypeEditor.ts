@@ -1,6 +1,5 @@
 import Handsontable from "handsontable";
 
-
 class ContainerTypeEditor extends Handsontable.editors.BaseEditor {
   dropdown: HTMLDivElement | null = null;
   searchInput: HTMLInputElement | null = null;
@@ -20,15 +19,16 @@ class ContainerTypeEditor extends Handsontable.editors.BaseEditor {
     row: number,
     col: number,
     prop: string | number,
-    td: HTMLElement,
+    // td: HTMLElement,
+    td: HTMLTableCellElement,
     value: any,
-    cellProperties: Handsontable.CellProperties
+    cellProperties: Handsontable.CellProperties,
   ) {
     super.prepare(row, col, prop, td, value, cellProperties);
 
     if (Array.isArray(cellProperties.source)) {
       this.source = cellProperties.source.filter(
-        (item): item is string => typeof item === "string"
+        (item): item is string => typeof item === "string",
       );
     } else {
       this.source = [];
@@ -108,7 +108,7 @@ class ContainerTypeEditor extends Handsontable.editors.BaseEditor {
     const query = this.searchInput?.value.toLowerCase() || "";
     if (query) {
       this.suggestions = this.source.filter((s) =>
-        s.toLowerCase().includes(query)
+        s.toLowerCase().includes(query),
       );
     } else {
       this.suggestions = this.source;
@@ -117,38 +117,38 @@ class ContainerTypeEditor extends Handsontable.editors.BaseEditor {
   }
 
   renderDropdown(predictions: string[], query: string = "") {
-  if (!this.dropdown) return;
+    if (!this.dropdown) return;
 
-  while (this.dropdown.children.length > 1) {
-    this.dropdown.removeChild(this.dropdown.lastChild!);
-  }
-
-  this.activeIndex = -1;
-
-  if (predictions.length === 0 && query) {
-    // Ensure search input is visible and reflects the query
-    if (this.searchInput) {
-      this.searchInput.value = query; // Sync input with query
+    while (this.dropdown.children.length > 1) {
+      this.dropdown.removeChild(this.dropdown.lastChild!);
     }
 
-    // Create container for value and "Create new" button
-    const createContainer = document.createElement("div");
-    Object.assign(createContainer.style, {
-      display: "flex",
-      alignItems: "center",
-      padding: "8px 16px", // Consistent padding
-      boxSizing: "border-box",
-      justifyContent: "space-between",
-    });
+    this.activeIndex = -1;
 
-    // Display the entered value
-    const valueSpan = document.createElement("span");
-    valueSpan.textContent = query;
-    Object.assign(valueSpan.style, {
-      marginRight: "10px", // Space between value and button
-      color: "#333", // Darker text for contrast
-      fontSize: "13px",
-    });
+    if (predictions.length === 0 && query) {
+      // Ensure search input is visible and reflects the query
+      if (this.searchInput) {
+        this.searchInput.value = query; // Sync input with query
+      }
+
+      // Create container for value and "Create new" button
+      const createContainer = document.createElement("div");
+      Object.assign(createContainer.style, {
+        display: "flex",
+        alignItems: "center",
+        padding: "8px 16px", // Consistent padding
+        boxSizing: "border-box",
+        justifyContent: "space-between",
+      });
+
+      // Display the entered value
+      const valueSpan = document.createElement("span");
+      valueSpan.textContent = query;
+      Object.assign(valueSpan.style, {
+        marginRight: "10px", // Space between value and button
+        color: "#333", // Darker text for contrast
+        fontSize: "13px",
+      });
 
       // Create "Create new" button
       const createBtn = document.createElement("div");
@@ -163,7 +163,7 @@ class ContainerTypeEditor extends Handsontable.editors.BaseEditor {
       });
 
       // Append value and button to container
-      
+
       createBtn.addEventListener("mousedown", async (ev) => {
         ev.preventDefault();
 
@@ -233,34 +233,34 @@ class ContainerTypeEditor extends Handsontable.editors.BaseEditor {
       return;
     }
 
-  predictions.forEach((p, idx) => {
-    const item = document.createElement("div");
-    item.textContent = p;
-    Object.assign(item.style, {
-      padding: "8px 10px",
-      cursor: "pointer",
-      userSelect: "none",
+    predictions.forEach((p, idx) => {
+      const item = document.createElement("div");
+      item.textContent = p;
+      Object.assign(item.style, {
+        padding: "8px 10px",
+        cursor: "pointer",
+        userSelect: "none",
+      });
+
+      item.addEventListener("mousedown", (ev) => {
+        ev.preventDefault();
+        this.selectSuggestion(idx);
+      });
+
+      item.addEventListener("mouseover", () => {
+        this.setActive(idx);
+      });
+
+      this.dropdown!.appendChild(item);
     });
 
-    item.addEventListener("mousedown", (ev) => {
-      ev.preventDefault();
-      this.selectSuggestion(idx);
-    });
-
-    item.addEventListener("mouseover", () => {
-      this.setActive(idx);
-    });
-
-    this.dropdown!.appendChild(item);
-  });
-
-  this.positionDropdown();
-}
+    this.positionDropdown();
+  }
 
   setActive(idx: number) {
     if (!this.dropdown) return;
     const children = Array.from(this.dropdown.children).slice(
-      1
+      1,
     ) as HTMLDivElement[];
     children.forEach((c, i) => {
       c.style.background = i === idx ? "#e6f2ff" : "#fff";
@@ -294,7 +294,7 @@ class ContainerTypeEditor extends Handsontable.editors.BaseEditor {
     if (!this.dropdown || !this.dropdown.childElementCount) return;
 
     const children = Array.from(this.dropdown.children).slice(
-      1
+      1,
     ) as HTMLDivElement[];
 
     if (e.key === "ArrowDown") {
@@ -356,8 +356,17 @@ class ContainerTypeEditor extends Handsontable.editors.BaseEditor {
     });
   }
 
+  // destroy() {
+  //   super.destroy();
+  //   if (this.dropdown) {
+  //     try {
+  //       document.body.removeChild(this.dropdown);
+  //     } catch (e) {}
+  //     this.dropdown = null;
+  //     this.searchInput = null;
+  //   }
+  // }
   destroy() {
-    super.destroy();
     if (this.dropdown) {
       try {
         document.body.removeChild(this.dropdown);
