@@ -39,6 +39,7 @@ import type {
   SavedFiltersList,
   SaveFilterPayload,
   SaveFilterResponse,
+  ItemMasterBulkAddRequest,
 } from "@/pages/items-master-refactor/helper/types";
 
 export type UploadResponse = {
@@ -223,7 +224,8 @@ export const useAddBulkInsertAdminRequest = () => {
   return useMutation<
     ItemMasterBulkInsertAdminRequestResponse,
     AxiosError,
-    AddBulkInsertAdminRequest
+    // AddBulkInsertAdminRequest
+    ItemMasterBulkAddRequest
   >({
     mutationFn: async (payload) => {
       const response =
