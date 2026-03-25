@@ -1,4 +1,6 @@
+import { buildItemMasterTreeGridBody } from "@/pages/items-master-refactor/helper";
 import { useItemMasterStore } from "@/pages/items-master-refactor/store/useItemMasterStore";
+import { axiosInstance } from "@/services/api/axiosInstance";
 import { useGetItemGroup } from "@/services/queries/common/common.queries";
 import {
   useGetScenario,
@@ -18,13 +20,11 @@ import ScenarioDrawers from "./components/ScenarioDrawers";
 import ScenarioModals from "./components/ScenarioModals";
 import { useScenarioStore } from "./store/useScenarioStore";
 import { ScenarioDetailsLayout } from "./tree-grid/config/details-layout";
-import { axiosInstance } from "@/services/api/axiosInstance";
-import { buildItemMasterTreeGridBody } from "@/pages/items-master-refactor/helper";
 import type { ScenarioRow } from "./tree-grid/hooks/useScenarioGridData";
 import {
+  getUnpackedValue,
   transformRows,
   useScenarioGridData,
-  getUnpackedValue,
 } from "./tree-grid/hooks/useScenarioGridData";
 import { useScenarioGridEvents } from "./tree-grid/hooks/useScenarioGridEvents";
 import { useTreeGridInit } from "./tree-grid/hooks/useTreeGridInit";
@@ -98,7 +98,7 @@ const syncLocalGridData = (grid: any) => {
         "SKU",
         "Description",
         "Category",
-        "Shipment quantity",
+        "Shipment Quantity",
         "is_published",
       ].includes(colName);
       const isExtra = !!colsData[colName];

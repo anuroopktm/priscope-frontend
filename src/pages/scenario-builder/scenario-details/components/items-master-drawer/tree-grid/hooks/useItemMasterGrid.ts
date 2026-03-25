@@ -1,4 +1,13 @@
 import {
+  buildItemMasterTreeGridBody,
+  buildItemMasterTreeGridCols,
+  getItemMasterLayout,
+} from "@/pages/items-master-refactor/helper";
+import type {
+  TreeGridBody,
+  TreeGridLayout,
+} from "@/pages/items-master-refactor/helper/types";
+import {
   useListHeaders,
   useListItems,
 } from "@/services/queries/item-master-refactor/item-master-refactor.queries";
@@ -6,15 +15,6 @@ import { useEffect, useRef, useState } from "react";
 import { syncGridData } from "../utils/grid-data";
 import { enrichItemMasterLayout } from "../utils/layout-helper";
 import { useItemMasterEvents } from "./useItemMasterEvents";
-import type {
-  TreeGridBody,
-  TreeGridLayout,
-} from "@/pages/items-master-refactor/helper/types";
-import {
-  buildItemMasterTreeGridBody,
-  buildItemMasterTreeGridCols,
-  getItemMasterLayout,
-} from "@/pages/items-master-refactor/helper";
 
 interface UseItemMasterGridProps {
   searchTerm: string;
@@ -79,7 +79,7 @@ export const useItemMasterGrid = ({
     if (!grid) return;
 
     // Default visible columns in drawer baseline
-    const defaultCols = ["SKU", "Description", "Category", "Shipment quantity"];
+    const defaultCols = ["SKU", "Description", "Category", "Shipment Quantity"];
 
     if (grid.Cols) {
       Object.keys(grid.Cols).forEach((col) => {

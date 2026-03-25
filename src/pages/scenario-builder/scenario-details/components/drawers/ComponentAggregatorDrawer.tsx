@@ -168,11 +168,11 @@ const ComponentAggregatorDrawer = ({
     };
 
     // Initial check
-    const initialVal = mainGrid.GetValue(row, "Shipment quantity");
+    const initialVal = mainGrid.GetValue(row, "Shipment Quantity");
     checkQuantity(initialVal);
 
     // Highlight cell
-    mainGrid.SetAttribute(row, "Shipment quantity", "Background", "#FFF9C4", 1);
+    mainGrid.SetAttribute(row, "Shipment Quantity", "Background", "#FFF9C4", 1);
     mainGrid.RefreshRow(row);
 
     const eventId = `ComponentAggregatorDrawer_${mainRowId}`;
@@ -181,7 +181,7 @@ const ComponentAggregatorDrawer = ({
         "OnAfterValueChanged",
         "ScenarioGridDetails",
         (grid: any, r: any, col: string, val: any) => {
-          if (r && r.id === mainRowId && col === "Shipment quantity") {
+          if (r && r.id === mainRowId && col === "Shipment Quantity") {
             checkQuantity(val);
           }
         },
@@ -197,7 +197,7 @@ const ComponentAggregatorDrawer = ({
         if (cleanupRow) {
           cleanupGrid.SetAttribute(
             cleanupRow,
-            "Shipment quantity",
+            "Shipment Quantity",
             "Background",
             "",
             1,

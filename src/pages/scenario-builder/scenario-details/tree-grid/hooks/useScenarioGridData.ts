@@ -205,8 +205,8 @@ export const useScenarioGridData = () => {
           SKU: getUnpackedValue(cleanItem.SKU || ""),
           Description: getUnpackedValue(cleanItem.Description || ""),
           Category: getUnpackedValue(cleanItem.Category || ""),
-          "Shipment quantity": getUnpackedValue(
-            cleanItem["Shipment quantity"] || "",
+          "Shipment Quantity": getUnpackedValue(
+            cleanItem["Shipment Quantity"] || "",
           ),
           is_published: 0,
           Selected: 0,
@@ -222,7 +222,7 @@ export const useScenarioGridData = () => {
               "SKU",
               "Description",
               "Category",
-              "Shipment quantity",
+              "Shipment Quantity",
             ].includes(key)
           )
             return;
@@ -270,7 +270,7 @@ export const useScenarioGridData = () => {
       if (selectedHeaders && selectedHeaders.length > 0) {
         selectedHeaders.forEach((headerName) => {
           if (
-            !["SKU", "Description", "Category", "Shipment quantity"].includes(
+            !["SKU", "Description", "Category", "Shipment Quantity"].includes(
               headerName,
             )
           ) {
