@@ -47,8 +47,8 @@ const ComponentAggregatorModal = ({
 
   const handleConfirm = (data: ComponentAggregatorForm) => {
     const finalLabel = data.label.trim()
-      ? `${data.label} (Component Iterator)`
-      : "(Component Iterator)";
+      ? `${data.label} (Component Aggregator)`
+      : "(Component Aggregator)";
 
     onConfirm({
       label: finalLabel,
@@ -69,7 +69,13 @@ const ComponentAggregatorModal = ({
   };
 
   return (
-    <Dialog open={open} onClose={handleClose} fullWidth maxWidth="xs">
+    <Dialog
+      open={open}
+      onClose={handleClose}
+      fullWidth
+      maxWidth="xs"
+      onKeyDown={(e) => e.stopPropagation()}
+    >
       <Typography
         variant="h6"
         sx={{ color: "#1a365d", fontWeight: "bold", px: 3, py: 2 }}

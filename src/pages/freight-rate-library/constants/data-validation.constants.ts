@@ -1,1 +1,1 @@
-export const WARNING_DAYS_LIMIT = 7
+export const WARNING_DAYS_LIMIT = 7;

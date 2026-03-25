@@ -13,8 +13,8 @@ export const getHeaderContextMenu = (grid: any, col: string) => {
     !!grid.GetAttribute(null, col, "AggregatorType");
 
   const deleteItem = {
-    Name: "Delete",
-    Text: `<span style="color: #d32f2f; display: flex; align-items: center;">${DELETE_ICON} Delete</span>`,
+    Name: "Remove",
+    Text: `<span style="color: #d32f2f; display: flex; align-items: center;">${DELETE_ICON} Remove</span>`,
     OnClick: () => (window as any).handleDeleteCol(grid, col),
   };
 

@@ -1,16 +1,17 @@
+import {
+  useCreateScenarioAggregator,
+  useGetScenarioAggregator,
+} from "@/services/queries/scenario-builder/scenario-builder.queries";
 import AddIcon from "@mui/icons-material/Add";
-// import BookmarkAddIcon from "@mui/icons-material/BookmarkAdd";
 import CloseIcon from "@mui/icons-material/Close";
 import DeleteIcon from "@mui/icons-material/Delete";
-// import KeyboardArrowDownIcon from "@mui/icons-material/KeyboardArrowDown";
 import {
   Box,
   Button,
   Chip,
+  CircularProgress,
   Drawer,
   IconButton,
-  // Menu,
-  // MenuItem,
   Stack,
   Typography,
 } from "@mui/material";
@@ -31,6 +32,8 @@ interface CostAggregatorDrawerProps {
   title?: string;
   initialItems?: any[];
   mainRowId?: string;
+  scenarioId?: string;
+  cellId?: string;
 }
 
 interface AggregatorSection {
@@ -95,6 +98,7 @@ const renderSelectedValue = (
   value: any,
   rowId: string,
   gridId: string,
+  colName: string,
   isPercentage: boolean = false,
 ) => {
   let formattedValue: string;
@@ -108,7 +112,7 @@ const renderSelectedValue = (
 
   return `
     <div 
-      onclick="window.handleOpenFreightSelection && window.handleOpenFreightSelection('${rowId}', '${gridId}', 'A')"
+      onclick="window.handleOpenFreightSelection && window.handleOpenFreightSelection('${rowId}', '${gridId}', '${colName}')"
       style="display: flex; align-items: center; justify-content: flex-end; gap: 12px; height: 100%; padding: 0 12px; cursor: pointer;"
       data-scenario-selected="true"
     >
@@ -177,6 +181,9 @@ const AggregatorGrid = ({
     (window as any).TGAddEvent("OnAfterValueChanged", id, (_grid: any) => {
       onDataChange?.();
     });
+    (window as any).TGAddEvent("OnRenderFinish", id, (_grid: any) => {
+      onDataChange?.();
+    });
   });
   return (
     <Box
@@ -184,11 +191,12 @@ const AggregatorGrid = ({
       sx={{
         height: "140px",
         width: "100%",
-        borderBottom: "1px solid #e2e8f0",
-        // "& .TGMain": {
-        //   border: "1px solid #e2e8f0 !important",
-        //   borderBottom: "none !important",
-        // },
+        border: "1px solid #e2e8f0",
+        borderRadius: 1,
+        overflow: "hidden",
+        "& .TGMain": {
+          border: "none !important",
+        },
         "& div[class*='NoDataRow']": {
           display: "none !important",
         },
@@ -203,21 +211,66 @@ const CostAggregatorDrawer = ({
   title = "Cost aggregator",
   initialItems: _initialItems = [],
   mainRowId,
+  scenarioId,
+  cellId,
 }: CostAggregatorDrawerProps) => {
-  const [deleteModalOpen, setDeleteModalOpen] = useState(false);
+  const [deleteModalOpen, setDeleteModalOpen] = useState<boolean>(false);
   const [rowToDelete, setRowToDelete] = useState<{
     rowId: string;
     sectionId: string;
   } | null>(null);
-  const [isFreightDrawerOpen, setIsFreightDrawerOpen] = useState(false);
-  const [isTariffDrawerOpen, setIsTariffDrawerOpen] = useState(false);
-  const [isCustomModalOpen, setIsCustomModalOpen] = useState(false);
-  const [isCalculationModalOpen, setIsCalculationModalOpen] = useState(false);
+  const [isFreightDrawerOpen, setIsFreightDrawerOpen] =
+    useState<boolean>(false);
+  const [isTariffDrawerOpen, setIsTariffDrawerOpen] = useState<boolean>(false);
+  const [isCustomModalOpen, setIsCustomModalOpen] = useState<boolean>(false);
+  const [isCalculationModalOpen, setIsCalculationModalOpen] =
+    useState<boolean>(false);
   const [targetGridId, setTargetGridId] = useState<string | null>(null);
   const [targetRowId, setTargetRowId] = useState<string | null>(null);
-  const [totalCost, setTotalCost] = useState(0);
-
+  const [totalCost, setTotalCost] = useState<number>(0);
   const [sections, setSections] = useState<AggregatorSection[]>([]);
+  const [hasError, setHasError] = useState<boolean>(false);
+
+  const { data: existingAggregator, isLoading: isFetchingData } =
+    useGetScenarioAggregator(scenarioId, cellId);
+
+  const { mutate: saveAggregator, isPending: isSaving } =
+    useCreateScenarioAggregator();
+
+  useEffect(() => {
+    if (isFetchingData) return;
+    if (existingAggregator?.data) {
+      const loadedSections: AggregatorSection[] = [];
+      const data = existingAggregator.data;
+
+      // Group back loaded grid segments into proper setup arrays
+      ["freight", "tariff", "custom"].forEach((type) => {
+        const arr = data[type];
+        if (Array.isArray(arr)) {
+          arr.forEach((sec: any, index: number) => {
+            let sectionTitle = sec.title || type;
+            if (type === "freight" && sectionTitle === "Freight")
+              sectionTitle = "Freight Cost";
+            if (type === "tariff" && sectionTitle === "Tariff")
+              sectionTitle = "Tariff Rate";
+            if (type === "custom" && sectionTitle === "Custom")
+              sectionTitle = "Custom Calculation";
+
+            loadedSections.push({
+              id: `grid_${Date.now()}_${type}_${index}`,
+              type: (type.charAt(0).toUpperCase() + type.slice(1)) as any,
+              title: sectionTitle,
+              items: sec.grid_data?.Body?.[0] || [],
+            });
+          });
+        }
+      });
+
+      if (loadedSections.length > 0) {
+        setSections(loadedSections);
+      }
+    }
+  }, [existingAggregator, isFetchingData]);
 
   // const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
 
@@ -233,15 +286,38 @@ const CostAggregatorDrawer = ({
             let costValue = 0;
             if (section.type === "Custom") {
               costValue =
-                parseFloat(grid.GetAttribute(row, "A", "Result")) || 0;
+                parseFloat(grid.GetAttribute(row, "Custom input", "Result")) ||
+                0;
             } else {
-              const costCol = section.type === "Tariff" ? "D" : "C";
-              costValue = grid.GetValue(row, costCol);
+              const costCol = "Cost per unit";
+              const costValueRaw = grid.GetValue(row, costCol);
+              if (costValueRaw !== null && costValueRaw !== undefined) {
+                if (typeof costValueRaw === "number") {
+                  costValue = costValueRaw;
+                } else {
+                  const numVal = parseFloat(
+                    String(costValueRaw).replace(/[^0-9.-]/g, ""),
+                  );
+                  if (!isNaN(numVal)) costValue = numVal;
+                }
+              }
             }
 
             // Only sum rows that have a non-zero cost or have a selected value
-            const colAValue = String(grid.GetValue(row, "A") || "");
-            const colBValue = String(grid.GetValue(row, "B") || "");
+            const colA =
+              section.type === "Tariff"
+                ? "Tariff Rate %"
+                : section.type === "Custom"
+                  ? "Custom input"
+                  : "Aggregator Name";
+            const colB =
+              section.type === "Tariff"
+                ? "Scenario Builder Column"
+                : section.type === "Custom"
+                  ? "Action"
+                  : "Cost for";
+            const colAValue = String(grid.GetValue(row, colA) || "");
+            const colBValue = String(grid.GetValue(row, colB) || "");
             const isDataSelected =
               colAValue.includes("data-scenario-selected") ||
               colBValue.includes("data-scenario-selected") ||
@@ -262,6 +338,80 @@ const CostAggregatorDrawer = ({
   useEffect(() => {
     calculateTotal();
   }, [sections]);
+
+  useEffect(() => {
+    if (!mainRowId) return;
+
+    const mainGrid = (window as any).Grids?.["ScenarioGridDetails"];
+    if (!mainGrid) return;
+
+    const row = mainGrid.GetRowById(mainRowId);
+    if (!row) return;
+
+    const checkQuantity = (value: any) => {
+      let numVal = 0;
+      if (typeof value === "string") {
+        numVal = parseFloat(value.replace(/[^0-9.-]/g, "")) || 0;
+      } else {
+        numVal = Number(value) || 0;
+      }
+      const isEmpty =
+        value === null ||
+        value === undefined ||
+        value === "" ||
+        isNaN(numVal) ||
+        numVal === 0;
+      setHasError(isEmpty);
+    };
+
+    // Initial check
+    const initialVal = mainGrid.GetValue(row, "Shipment Quantity");
+    checkQuantity(initialVal);
+
+    // Highlight cell
+    mainGrid.SetAttribute(row, "Shipment Quantity", "Background", "#FFF9C4", 1);
+    mainGrid.RefreshRow(row);
+
+    const eventId = `CostAggregatorDrawer_${mainRowId}`;
+    if (window.TGAddEvent) {
+      window.TGAddEvent(
+        "OnAfterValueChanged",
+        "ScenarioGridDetails",
+        (_grid: any, r: any, col: string, val: any) => {
+          if (r && r.id === mainRowId && col === "Shipment Quantity") {
+            checkQuantity(val);
+          }
+        },
+        eventId,
+      );
+    }
+
+    return () => {
+      // Clear highlight safely
+      const cleanupGrid = (window as any).Grids?.["ScenarioGridDetails"];
+      if (cleanupGrid) {
+        const cleanupRow = cleanupGrid.GetRowById(mainRowId);
+        if (cleanupRow) {
+          cleanupGrid.SetAttribute(
+            cleanupRow,
+            "Shipment Quantity",
+            "Background",
+            "",
+            1,
+          );
+          cleanupGrid.RefreshRow(cleanupRow);
+        }
+      }
+
+      if (window.TGDelEvent) {
+        window.TGDelEvent(
+          "OnAfterValueChanged",
+          "ScenarioGridDetails",
+          eventId,
+        );
+      }
+    };
+  }, [mainRowId]);
 
   // const openTemplate = Boolean(anchorEl);
 
@@ -308,7 +458,7 @@ const CostAggregatorDrawer = ({
         (s: any) => s.id === gridId,
       );
       if (section?.type === "Tariff") {
-        if (col === "B") {
+        if (col === "Scenario Builder Column") {
           // Logic for Scenario Builder Column selection
           (window as any).startScenarioColumnSelection &&
             (window as any).startScenarioColumnSelection(rowId, gridId);
@@ -321,11 +471,14 @@ const CostAggregatorDrawer = ({
     };
 
     const recalculateTariffRow = (grid: any, row: any) => {
-      const rate = parseFloat(grid.GetAttribute(row, "A", "RateValue")) || 0;
+      const rate =
+        parseFloat(grid.GetAttribute(row, "Tariff Rate %", "RateValue")) || 0;
       const sourceValue =
-        parseFloat(grid.GetAttribute(row, "B", "SourceValue")) || 0;
+        parseFloat(
+          grid.GetAttribute(row, "Scenario Builder Column", "SourceValue"),
+        ) || 0;
       const costPerUnit = (rate / 100) * sourceValue;
-      grid.SetValue(row, "D", costPerUnit, 1);
+      grid.SetValue(row, "Cost per unit", costPerUnit, 1);
     };
 
     (window as any).finishScenarioColumnSelection = (
@@ -343,12 +496,29 @@ const CostAggregatorDrawer = ({
             typeof value === "number" ? `$${value.toFixed(2)}` : String(value);
           grid.SetValue(
             row,
-            "B",
-            renderSelectButton(rowId, gridId, "B", formattedValue),
+            "Scenario Builder Column",
+            renderSelectButton(
+              rowId,
+              gridId,
+              "Scenario Builder Column",
+              formattedValue,
+            ),
             1,
           );
-          grid.SetAttribute(row, "B", "SourceColumn", colName, 1);
-          grid.SetAttribute(row, "B", "SourceValue", value, 1);
+          grid.SetAttribute(
+            row,
+            "Scenario Builder Column",
+            "SourceColumn",
+            colName,
+            1,
+          );
+          grid.SetAttribute(
+            row,
+            "Scenario Builder Column",
+            "SourceValue",
+            value,
+            1,
+          );
 
           recalculateTariffRow(grid, row);
           grid.RefreshRow(row);
@@ -391,33 +561,47 @@ const CostAggregatorDrawer = ({
     customTitle?: string,
   ) => {
     const id = `grid_${Date.now()}`;
+    const defaultTitle =
+      type === "Freight"
+        ? "Freight Cost"
+        : type === "Tariff"
+          ? "Tariff Rate"
+          : "Custom Calculation";
     const newSection: AggregatorSection = {
       id,
       type,
-      title: customTitle || type,
+      title: customTitle || defaultTitle,
       items: [
         type === "Tariff"
           ? {
-            id: "row1",
-            A: renderSelectButton("row1", id, "A"),
-            B: renderSelectButton("row1", id, "B"),
-            C: "Base UOM",
-            D: 0,
-          }
+              id: "row1",
+              "Tariff Rate %": renderSelectButton("row1", id, "Tariff Rate %"),
+              "Scenario Builder Column": renderSelectButton(
+                "row1",
+                id,
+                "Scenario Builder Column",
+              ),
+              "Cost per unit": 0,
+            }
           : type === "Custom"
             ? {
-              id: "row1",
-              A: 0,
-              B: renderCalculatorIcon("row1", id),
-            }
+                id: "row1",
+                "Custom input": 0,
+                Action: renderCalculatorIcon("row1", id),
+              }
             : {
-              id: "row1",
-              A: renderSelectButton("row1", id, "A"),
-              B: "Base UOM",
-              C: 0,
-            },
+                id: "row1",
+                "Aggregator Name": renderSelectButton(
+                  "row1",
+                  id,
+                  "Aggregator Name",
+                ),
+                "Cost for": "",
+                "Cost per unit": 0,
+              },
       ],
     };
+
     setSections([...sections, newSection]);
   };
 
@@ -437,7 +621,10 @@ const CostAggregatorDrawer = ({
             while (last && last.Visible === 0) last = grid.GetPrev(last);
 
             const isLastSelect =
-              last && grid.GetValue(last, "A")?.includes(">Select</button>");
+              last &&
+              grid
+                .GetValue(last, "Aggregator Name")
+                ?.includes(">Select</button>");
 
             if (isLastSelect) {
               // Insert before the Select row
@@ -452,40 +639,28 @@ const CostAggregatorDrawer = ({
           if (row) {
             grid.SetValue(
               row,
-              "A",
-              renderSelectedValue(rate.cost, row.id, targetGridId),
+              "Aggregator Name",
+              renderSelectedValue(
+                rate.cost,
+                row.id,
+                targetGridId,
+                "Aggregator Name",
+              ),
               1,
             );
-            grid.SetAttribute(row, "A", "CleanName", rate.name, 1);
-            grid.SetValue(row, "C", rate.cost, 1);
-            grid.SetValue(row, "B", "Base UOM", 1);
+            grid.SetAttribute(
+              row,
+              "Aggregator Name",
+              "CleanName",
+              rate.name,
+              1,
+            );
+            grid.SetValue(row, "Cost per unit", rate.cost, 1);
+            grid.SetValue(row, "Cost for", "", 1);
+
             grid.RefreshRow(row);
           }
         });
-
-        // Ensure exactly one Select button remains at the bottom
-        let finalLast = grid.GetLast();
-        while (finalLast && finalLast.Visible === 0)
-          finalLast = grid.GetPrev(finalLast);
-
-        const isFinalLastSelect =
-          finalLast &&
-          grid.GetValue(finalLast, "A")?.includes(">Select</button>");
-
-        if (!isFinalLastSelect) {
-          const emptyRow = grid.AddRow(null, null, 1);
-          if (emptyRow) {
-            grid.SetValue(
-              emptyRow,
-              "A",
-              renderSelectButton(emptyRow.id, targetGridId, "A"),
-              1,
-            );
-            grid.SetValue(emptyRow, "B", "Base UOM", 1);
-            grid.SetValue(emptyRow, "C", 0, 1);
-            grid.RefreshRow(emptyRow);
-          }
-        }
 
         grid.Calculate();
         calculateTotal();
@@ -510,7 +685,10 @@ const CostAggregatorDrawer = ({
             while (last && last.Visible === 0) last = grid.GetPrev(last);
 
             const isLastSelect =
-              last && grid.GetValue(last, "A")?.includes(">Select</button>");
+              last &&
+              grid
+                .GetValue(last, "Tariff Rate %")
+                ?.includes(">Select</button>");
 
             if (isLastSelect) {
               // Insert before the Select row
@@ -525,52 +703,32 @@ const CostAggregatorDrawer = ({
           if (row) {
             grid.SetValue(
               row,
-              "A",
-              renderSelectedValue(rate.cost, row.id, targetGridId, true),
+              "Tariff Rate %",
+              renderSelectedValue(
+                rate.cost,
+                row.id,
+                targetGridId,
+                "Tariff Rate %",
+                true,
+              ),
               1,
             );
-            grid.SetAttribute(row, "A", "CleanName", rate.name, 1);
-            grid.SetAttribute(row, "A", "RateValue", rate.cost, 1);
+            grid.SetAttribute(row, "Tariff Rate %", "CleanName", rate.name, 1);
+            grid.SetAttribute(row, "Tariff Rate %", "RateValue", rate.cost, 1);
 
             const sourceValue =
-              parseFloat(grid.GetAttribute(row, "B", "SourceValue")) || 0;
+              parseFloat(
+                grid.GetAttribute(
+                  row,
+                  "Scenario Builder Column",
+                  "SourceValue",
+                ),
+              ) || 0;
             const costPerUnit = (rate.cost / 100) * sourceValue;
-            grid.SetValue(row, "D", costPerUnit, 1);
-
-            grid.SetValue(row, "C", "Base UOM", 1);
+            grid.SetValue(row, "Cost per unit", costPerUnit, 1);
             grid.RefreshRow(row);
           }
         });
-
-        // Ensure exactly one Select button remains at the bottom
-        let finalLast = grid.GetLast();
-        while (finalLast && finalLast.Visible === 0)
-          finalLast = grid.GetPrev(finalLast);
-
-        const isFinalLastSelect =
-          finalLast &&
-          grid.GetValue(finalLast, "A")?.includes(">Select</button>");
-
-        if (!isFinalLastSelect) {
-          const emptyRow = grid.AddRow(null, null, 1);
-          if (emptyRow) {
-            grid.SetValue(
-              emptyRow,
-              "A",
-              renderSelectButton(emptyRow.id, targetGridId, "A"),
-              1,
-            );
-            grid.SetValue(
-              emptyRow,
-              "B",
-              renderSelectButton(emptyRow.id, targetGridId, "B"),
-              1,
-            );
-            grid.SetValue(emptyRow, "C", "Base UOM", 1);
-            grid.SetValue(emptyRow, "D", 0, 1);
-            grid.RefreshRow(emptyRow);
-          }
-        }
 
         grid.Calculate();
         calculateTotal();
@@ -584,25 +742,8 @@ const CostAggregatorDrawer = ({
     sections.forEach((section) => {
       const grid = (window as any).Grids?.[section.id];
       if (grid) {
-        // First pass: count valid data rows (excluding the trailing Select row)
-        let dataRowCount = 0;
-        let row = grid.GetFirst();
-        while (row) {
-          if (row.Kind === "Data" && !row.Deleted) {
-            const colAValue = String(grid.GetValue(row, "A") || "");
-            const isSelectRow =
-              colAValue.includes("Select") &&
-              !colAValue.includes("data-scenario-selected");
-            if (!isSelectRow) {
-              dataRowCount++;
-            }
-          }
-          row = grid.GetNext(row);
-        }
-
-        // Second pass: process rows
         let currentItemIndex = 1;
-        row = grid.GetFirst();
+        let row = grid.GetFirst();
         while (row) {
           if (row.Kind === "Data" && !row.Deleted) {
             const isTariff = section.type === "Tariff";
@@ -611,18 +752,18 @@ const CostAggregatorDrawer = ({
 
             let costValue = 0;
             if (isCustom) {
-              const resAttr = grid.GetAttribute(row, "A", "Result");
-              costValue = Number(resAttr) || 0;
-            } else {
-              const costCol = isTariff ? "D" : "C";
-              const costValueRaw = grid.GetValue(row, costCol);
               costValue =
-                typeof costValueRaw === "object"
-                  ? 0
-                  : Number(costValueRaw) || 0;
+                Number(grid.GetAttribute(row, "Custom input", "Result")) || 0;
+            } else {
+              costValue = Number(grid.GetValue(row, "Cost per unit")) || 0;
             }
 
-            const colAValue = String(grid.GetValue(row, "A") || "");
+            const colA = isTariff
+              ? "Tariff Rate %"
+              : isCustom
+                ? "Custom input"
+                : "Aggregator Name";
+            const colAValue = String(grid.GetValue(row, colA) || "");
             const isSelectRow =
               colAValue.includes("Select") &&
               !colAValue.includes("data-scenario-selected");
@@ -632,23 +773,19 @@ const CostAggregatorDrawer = ({
               continue;
             }
 
-            // Get clean name from attribute
-            const cleanNameRaw = grid.GetAttribute(row, "A", "CleanName");
-            const cleanName =
-              typeof cleanNameRaw === "string" ? cleanNameRaw : null;
-
-            // For Custom, we use the section title
-            // For Tariff/Freight, we use the specified naming logic
+            const cleanName = grid.GetAttribute(row, colA, "CleanName");
             let finalName = "";
             if (isCustom) {
-              finalName = section.title;
+              finalName =
+                section.title === "Custom"
+                  ? "Custom Calculation"
+                  : section.title;
             } else if (isTariff || isFreight) {
-              const typeName = isTariff ? "Tariff" : "Freight";
-              if (currentItemIndex === 1) {
-                finalName = typeName;
-              } else {
-                finalName = `${typeName} ${currentItemIndex}`;
-              }
+              const typeName = isTariff ? "Tariff Rate" : "Freight Cost";
+              finalName =
+                currentItemIndex === 1
+                  ? typeName
+                  : `${typeName} ${currentItemIndex}`;
               currentItemIndex++;
             } else {
               finalName = cleanName || "Cost Item";
@@ -657,14 +794,14 @@ const CostAggregatorDrawer = ({
             allRows.push({
               id: String(row.id),
               name: finalName,
-              type: section.type, // Added to distinguish Custom vs others
+              type: section.type,
               currency: "USD",
               cost: costValue,
               costPerUnit: costValue,
               costFor: String(
-                isCustom
+                isCustom || isTariff
                   ? "Base UOM"
-                  : grid.GetValue(row, isTariff ? "C" : "B") || "Base UOM",
+                  : grid.GetValue(row, "Cost for") || "Base UOM",
               ),
             });
           }
@@ -672,8 +809,104 @@ const CostAggregatorDrawer = ({
         }
       }
     });
-    onUpdate(allRows);
-    onClose();
+
+    const scrapeCostAggregatorData = () => {
+      const payloadData: any = { freight: [], tariff: [], custom: [] };
+
+      sections.forEach((section) => {
+        const typeKey = section.type.toLowerCase() as
+          | "freight"
+          | "tariff"
+          | "custom";
+        const grid = (window as any).Grids?.[section.id];
+        if (grid) {
+          const processRow = (gridRow: any): any => {
+            const rowData: any = {
+              id: gridRow.id,
+              Def: gridRow.Def?.Name || gridRow.Def,
+            };
+            Object.keys(grid.Cols).forEach((colName) => {
+              const val = grid.GetValue(gridRow, colName);
+              if (val !== undefined && val !== null && val !== "") {
+                rowData[colName] = val;
+              }
+              const attrs = [
+                "CleanName",
+                "RateValue",
+                "SourceColumn",
+                "SourceValue",
+                "Formula",
+                "Result",
+              ];
+              attrs.forEach((attr) => {
+                const attrVal = grid.GetAttribute(gridRow, colName, attr);
+                if (
+                  attrVal !== undefined &&
+                  attrVal !== null &&
+                  attrVal !== ""
+                ) {
+                  rowData[colName + attr] = attrVal;
+                }
+              });
+            });
+
+            if (gridRow.firstChild) {
+              const children: any[] = [];
+              let child = gridRow.firstChild;
+              while (child) {
+                if (child.Kind === "Data" && !child.Deleted) {
+                  children.push(processRow(child));
+                }
+                child = child.nextSibling;
+              }
+              if (children.length > 0) {
+                rowData.Items = children;
+              }
+            }
+            return rowData;
+          };
+
+          const body: any[] = [];
+          let row = grid.GetFirst();
+          while (row) {
+            if (row.Kind === "Data" && !row.parentNode?.id && !row.Deleted) {
+              body.push(processRow(row));
+            }
+            row = grid.GetNext(row);
+          }
+
+          payloadData[typeKey].push({
+            title: section.title,
+            grid_data: { Body: [body] },
+          });
+        }
+      });
+      return payloadData;
+    };
+
+    const fullScrape = scrapeCostAggregatorData();
+
+    if (scenarioId && cellId) {
+      saveAggregator(
+        {
+          scenario_id: scenarioId,
+          payload: {
+            aggregator_type: "Cost",
+            cell_id: cellId,
+            data: fullScrape as any,
+          },
+        },
+        {
+          onSuccess: () => {
+            onUpdate(allRows);
+            onClose();
+          },
+        },
+      );
+    } else {
+      onUpdate(allRows);
+      onClose();
+    }
   };
 
   return (
@@ -685,7 +918,7 @@ const CostAggregatorDrawer = ({
         bgcolor: "background.paper",
         borderTopLeftRadius: 8,
         borderTopRightRadius: 8,
-        overflowY: "auto",
+        overflow: "hidden",
         borderTop: 1,
         borderColor: "divider",
       }}
@@ -720,69 +953,108 @@ const CostAggregatorDrawer = ({
         </IconButton>
       </Box>
 
-      {/* Calculate Buttons Section */}
+      {/* Scrollable Container */}
       <Box
         sx={{
-          px: 2,
-          py: 1.5,
-          borderTop: 1,
-          borderColor: "grey.200",
+          flex: 1,
+          overflowY: "auto",
           display: "flex",
           flexDirection: "column",
-          gap: 2,
-          flexShrink: 0,
         }}
       >
+        {/* Calculate Buttons Section */}
         <Box
           sx={{
+            px: 2,
+            py: 1.5,
+            borderTop: 1,
+            borderColor: "grey.200",
             display: "flex",
-            alignItems: "center",
-            justifyContent: "space-between",
+            flexDirection: "column",
+            gap: 2,
+            flexShrink: 0,
           }}
         >
           <Box
             sx={{
               display: "flex",
               alignItems: "center",
-              gap: 2,
+              justifyContent: "space-between",
             }}
           >
-            <Typography
-              variant="subtitle2"
-              sx={{ fontWeight: "bold", color: "#1a365d" }}
+            <Box
+              sx={{
+                display: "flex",
+                alignItems: "center",
+                gap: 2,
+              }}
             >
-              Calculate - Cost aggregator
-            </Typography>
+              <Typography
+                variant="subtitle2"
+                sx={{ fontWeight: "bold", color: "#1a365d" }}
+              >
+                Calculate - Cost aggregator
+              </Typography>
 
-            <Stack direction="row" spacing={1}>
-              <Chip
-                label="Freight"
-                onClick={() => handleAddSection("Freight")}
-                onDelete={() => { }}
-                deleteIcon={
-                  <AddIcon style={{ fontSize: 16, color: "#1a365d" }} />
-                }
-              />
-              <Chip
-                label="Tariff"
-                onClick={() => handleAddSection("Tariff")}
-                onDelete={() => { }}
-                deleteIcon={
-                  <AddIcon style={{ fontSize: 16, color: "#1a365d" }} />
-                }
-              />
-              <Chip
-                label="Custom"
-                onClick={() => setIsCustomModalOpen(true)}
-                onDelete={() => { }}
-                deleteIcon={
-                  <AddIcon style={{ fontSize: 16, color: "#1a365d" }} />
-                }
-              />
-            </Stack>
-          </Box>
+              <Stack direction="row" spacing={1}>
+                <Chip
+                  label="Freight"
+                  onClick={() => {
+                    if (!sections.some((s) => s.type === "Freight")) {
+                      handleAddSection("Freight");
+                    }
+                  }}
+                  disabled={
+                    isFetchingData || sections.some((s) => s.type === "Freight")
+                  }
+                  onDelete={() => {}}
+                  deleteIcon={
+                    <AddIcon style={{ fontSize: 16, color: "#1a365d" }} />
+                  }
+                  sx={{
+                    borderRadius: "16px",
+                    height: "28px",
+                    fontSize: "0.8rem",
+                  }}
+                />
+                <Chip
+                  label="Tariff"
+                  onClick={() => {
+                    if (!sections.some((s) => s.type === "Tariff")) {
+                      handleAddSection("Tariff");
+                    }
+                  }}
+                  disabled={
+                    isFetchingData || sections.some((s) => s.type === "Tariff")
+                  }
+                  onDelete={() => {}}
+                  deleteIcon={
+                    <AddIcon style={{ fontSize: 16, color: "#1a365d" }} />
+                  }
+                  sx={{
+                    borderRadius: "16px",
+                    height: "28px",
+                    fontSize: "0.8rem",
+                  }}
+                />
+                <Chip
+                  label="Custom"
+                  onClick={() => setIsCustomModalOpen(true)}
+                  disabled={isFetchingData}
+                  onDelete={() => {}}
+                  deleteIcon={
+                    <AddIcon style={{ fontSize: 16, color: "#1a365d" }} />
+                  }
+                  sx={{
+                    borderRadius: "16px",
+                    height: "28px",
+                    fontSize: "0.8rem",
+                  }}
+                />
+              </Stack>
+            </Box>
 
-          {/* <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
+            {/* <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
             <Button
               size="small"
               onClick={handleTemplateClick}
@@ -807,85 +1079,105 @@ const CostAggregatorDrawer = ({
               Save Template
             </Button>
           </Box> */}
+          </Box>
+        </Box>
+
+        {/* Content Area */}
+        <Box
+          sx={{
+            px: 3,
+            pb: 1,
+            display: "flex",
+            flexDirection: "column",
+            gap: 3,
+            flex: 1,
+            ...(isFetchingData && {
+              minHeight: 120,
+              alignItems: "center",
+              justifyContent: "center",
+            }),
+          }}
+        >
+          {isFetchingData ? (
+            <CircularProgress size={20} />
+          ) : sections.length === 0 ? (
+            <Box
+              sx={{
+                height: "100px",
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+                bgcolor: "grey.50",
+                borderRadius: 1,
+                border: "1px dashed #cbd5e1",
+                mb: 2,
+              }}
+            >
+              <Typography variant="body2" sx={{ color: "grey.500" }}>
+                Add Freight, Tariff, or Custom to define cost aggregator
+              </Typography>
+            </Box>
+          ) : (
+            sections.map((section) => (
+              <Box
+                key={section.id}
+                sx={{ display: "flex", flexDirection: "column", gap: 1 }}
+              >
+                <Stack direction="row" alignItems="center" spacing={1}>
+                  <Typography
+                    variant="subtitle2"
+                    sx={{ fontWeight: "bold", color: "#1a365d" }}
+                  >
+                    {section.title}
+                  </Typography>
+                  <IconButton
+                    size="small"
+                    sx={{ color: "grey.500" }}
+                    onClick={() => {
+                      const sectionToRemove = sections.find(
+                        (s) => s.id === section.id,
+                      );
+                      if (sectionToRemove?.type === "Tariff") {
+                        (window as any).clearScenarioColumnHighlights &&
+                          (window as any).clearScenarioColumnHighlights();
+                      }
+                      setSections(sections.filter((s) => s.id !== section.id));
+                    }}
+                  >
+                    <DeleteIcon fontSize="small" />
+                  </IconButton>
+                </Stack>
+                <Box
+                  sx={{
+                    // borderRadius: 1,
+                    // overflow: "hidden",
+                    width: "fit-content",
+                  }}
+                >
+                  <GridWrapper
+                    section={section}
+                    calculateTotal={calculateTotal}
+                  />
+                </Box>
+              </Box>
+            ))
+          )}
         </Box>
       </Box>
 
-      {/* Content Area */}
-      <Box
-        sx={{
-          px: 3,
-          pb: 1,
-          display: "flex",
-          flexDirection: "column",
-          gap: 3,
-        }}
-      >
-        {sections.length === 0 ? (
-          <Box
-            sx={{
-              height: "100px",
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "center",
-              bgcolor: "grey.50",
-              borderRadius: 1,
-              border: "1px dashed #cbd5e1",
-              mb: 2,
-            }}
+      {hasError && (
+        <Box sx={{ px: 3, mb: 1, mt: -1 }}>
+          <Typography
+            variant="caption"
+            sx={{ color: "error.main", fontWeight: "600" }}
           >
-            <Typography variant="body2" sx={{ color: "grey.500" }}>
-              Add Freight, Tariff or custom the define cost aggregator
-            </Typography>
-          </Box>
-        ) : (
-          sections.map((section) => (
-            <Box
-              key={section.id}
-              sx={{ display: "flex", flexDirection: "column", gap: 1 }}
-            >
-              <Stack direction="row" alignItems="center" spacing={1}>
-                <Typography
-                  variant="subtitle2"
-                  sx={{ fontWeight: "bold", color: "#1a365d" }}
-                >
-                  {section.title}
-                </Typography>
-                <IconButton
-                  size="small"
-                  sx={{ color: "grey.500" }}
-                  onClick={() => {
-                    const sectionToRemove = sections.find(
-                      (s) => s.id === section.id,
-                    );
-                    if (sectionToRemove?.type === "Tariff") {
-                      (window as any).clearScenarioColumnHighlights &&
-                        (window as any).clearScenarioColumnHighlights();
-                    }
-                    setSections(sections.filter((s) => s.id !== section.id));
-                  }}
-                >
-                  <DeleteIcon fontSize="small" />
-                </IconButton>
-              </Stack>
-              <Box
-                sx={{
-                  // borderRadius: 1,
-                  // overflow: "hidden",
-                  width: "fit-content",
-                }}
-              >
-                <GridWrapper
-                  section={section}
-                  calculateTotal={calculateTotal}
-                />
-              </Box>
-            </Box>
-          ))
-        )}
-      </Box>
+            * Shipment Quantity is required in the top grid to calculate costs.
+          </Typography>
+        </Box>
+      )}
 
       {/* Total Bar */}
-      <Box sx={{ px: 3, mb: 2 }}>
+      <Box sx={{ px: 2 }}>
         <Box
           sx={{
             bgcolor: "#f1f5f9",
@@ -912,7 +1204,6 @@ const CostAggregatorDrawer = ({
           gap: 1.5,
           bgcolor: "background.paper",
           flexShrink: 0,
-          borderTop: 1,
           borderColor: "grey.100",
         }}
       >
@@ -927,8 +1218,14 @@ const CostAggregatorDrawer = ({
         >
           Cancel
         </Button>
-        <Button size="small" variant="contained" onClick={handleDone}>
-          Done
+        <Button
+          size="small"
+          variant="contained"
+          onClick={handleDone}
+          disabled={isFetchingData || hasError || isSaving}
+          loading={isSaving}
+        >
+          Update
         </Button>
       </Box>
 
@@ -993,7 +1290,7 @@ const CostAggregatorDrawer = ({
             const row = grid?.GetRowById(targetRowId);
             // Prefer the stored formula attribute
             return row
-              ? String(grid.GetAttribute(row, "A", "Formula") || "")
+              ? String(grid.GetAttribute(row, "Custom input", "Formula") || "")
               : "";
           }
           return "";
@@ -1009,9 +1306,15 @@ const CostAggregatorDrawer = ({
                 // Update internal grid header only (keep section title/template name as is)
                 if (label) {
                   if (grid.Header) {
-                    grid.SetValue(grid.Header, "A", label, 1);
+                    grid.SetValue(grid.Header, "Custom input", label, 1);
                   } else {
-                    grid.SetAttribute(null, "A", "Caption", label, 1);
+                    grid.SetAttribute(
+                      null,
+                      "Custom input",
+                      "Caption",
+                      label,
+                      1,
+                    );
                   }
                   grid.Render();
                 }
@@ -1041,21 +1344,21 @@ const CostAggregatorDrawer = ({
                   // eslint-disable-next-line no-eval
                   const result = Number(eval(evalStr)) || 0;
                   // Store the source value in A and the result in B (via icon renderer)
-                  grid.SetValue(row, "A", firstSourceValue, 1);
+                  grid.SetValue(row, "Custom input", firstSourceValue, 1);
                   grid.SetValue(
                     row,
-                    "B",
+                    "Action",
                     renderCalculatorIcon(row.id, grid.id, result),
                     1,
                   );
                   // Preserve original result for calculations
-                  grid.SetAttribute(row, "A", "Result", result, 1);
+                  grid.SetAttribute(row, "Custom input", "Result", result, 1);
                   // Preserve the formula in an attribute for re-editing
-                  grid.SetAttribute(row, "A", "Formula", formula, 1);
+                  grid.SetAttribute(row, "Custom input", "Formula", formula, 1);
                   calculateTotal();
                 } catch (e) {
                   console.error("Formula eval failed:", e);
-                  grid.SetValue(row, "A", 0, 1);
+                  grid.SetValue(row, "Custom input", 0, 1);
                 }
               }
             }

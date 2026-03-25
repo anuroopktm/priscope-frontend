@@ -22,6 +22,7 @@ export interface CreateScenarioResponse {
 export interface SearchScenariosRequest {
   search?: string;
   filter: Record<string, any>;
+  advanced_search?: Record<string, any>;
   page_size: number;
   skip: number;
 }
@@ -107,15 +108,57 @@ export interface ScenarioCommentListResponse {
   comments: ScenarioComment[];
 }
 
-export interface ForkScenarioRequest {
+export interface DuplicateScenarioRequest {
   scenario_id: string;
   name: string;
 }
 
-export interface ForkScenarioResponse {
+export interface DuplicateScenarioResponse {
   id: string;
   name: string;
   forked_from: string;
   status: string;
+  message: string;
+}
+
+export interface SearchScenarioActivityRequest {
+  page_size: number;
+  skip: number;
+}
+
+export interface ScenarioActivity {
+  id: string;
+  scenario_id: string;
+  action: string;
+  details: Record<string, any>;
+  created_by: {
+    name?: string;
+    email?: string;
+    user_id?: string;
+    avatar?: string;
+  };
+  created_at: string;
+}
+
+export interface ScenarioActivityListResponse {
+  total: number;
+  activities: ScenarioActivity[];
+}
+
+export interface CreateScenarioAggregatorRequest {
+  aggregator_type: string;
+  cell_id: string;
+  data: Record<string, any>;
+}
+
+export interface ScenarioAggregatorResponse {
+  id: string;
+  scenario_id: string;
+  cell_id: string;
+  aggregator_type: string;
+  data: Record<string, any>;
+  created_at: string;
+  updated_at: string;
+  created_by: Record<string, any>;
   message: string;
 }

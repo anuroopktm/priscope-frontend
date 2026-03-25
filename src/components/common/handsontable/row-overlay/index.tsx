@@ -1,9 +1,5 @@
 import React, { useState, useCallback } from "react";
-import {
-  IconButton,
-  Box,
-  TextareaAutosize,
-} from "@mui/material";
+import { IconButton, Box, TextareaAutosize } from "@mui/material";
 import CheckIcon from "@mui/icons-material/Check";
 import CloseIcon from "@mui/icons-material/Close";
 
@@ -38,7 +34,7 @@ const RowOverlay: React.FC<RowOverlayProps> = ({
       commentRef.current = value;
       if (error) setError(false);
     },
-    [error, commentRef]
+    [error, commentRef],
   );
 
   const handleConfirm = useCallback(() => {

@@ -25,7 +25,7 @@ export const MarginMarkupDrawerLayout = {
   },
   Cols: [
     {
-      Name: "A",
+      Name: "Margin %",
       Width: "150",
       Type: "Text",
       CanEdit: "1",
@@ -33,13 +33,13 @@ export const MarginMarkupDrawerLayout = {
       Caption: "Margin %",
     },
     {
-      Name: "B",
+      Name: "Scenario builder column",
       Width: "250",
       Type: "Html",
       Caption: "Scenario builder column",
     },
     {
-      Name: "C",
+      Name: "Total Cost",
       Width: "150",
       Type: "Float",
       Format: "$0.00",
@@ -48,11 +48,11 @@ export const MarginMarkupDrawerLayout = {
     },
   ],
   Header: {
-    A: "Margin %",
-    B: "Scenario builder column",
-    C: "Total Cost",
-    AAlign: "Left",
-    BAlign: "Left",
-    CAlign: "Left",
+    "Margin %": "Margin %",
+    "Scenario builder column": "Scenario builder column",
+    "Total Cost": "Total Cost",
+    "Margin %Align": "Left",
+    "Scenario builder columnAlign": "Left",
+    "Total CostAlign": "Left",
   },
 };

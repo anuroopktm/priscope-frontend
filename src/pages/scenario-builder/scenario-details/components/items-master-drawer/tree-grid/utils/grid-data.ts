@@ -1,4 +1,3 @@
-
 import { buildItemMasterTreeGridBody } from "@/pages/items-master-refactor/helper";
 
 export const syncGridData = (grid: any, pages: any[], body: any) => {

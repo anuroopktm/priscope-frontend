@@ -39,7 +39,7 @@ const CreateScenarioModal = ({
     resolver: zodResolver(scenarioSchema),
     defaultValues: {
       label: "",
-      customer: "",
+      customer: [],
       currency: "",
     },
   });
@@ -63,9 +63,10 @@ const CreateScenarioModal = ({
     reset();
   };
 
-  const handleClose = (_e: {}, reason: "backdropClick" | "escapeKeyDown") => {
+  const handleClose = (_e?: object, reason?: string) => {
     if (reason === "backdropClick" || reason === "escapeKeyDown") return;
     onClose();
+    reset();
   };
 
   return (
@@ -109,12 +110,10 @@ const CreateScenarioModal = ({
                   label="Customer"
                   size="small"
                   variant="outlined"
+                  multiple
                   disabled={isCustomerLoading}
                   error={!!fieldState.error}
                 >
-                  <MenuItem value="">
-                    <em>None</em>
-                  </MenuItem>
                   {customerData?.customers.map((customer) => (
                     <MenuItem key={customer.id} value={customer.id}>
                       {customer.name}
@@ -158,7 +157,11 @@ const CreateScenarioModal = ({
         </DialogContent>
 
         <DialogActions sx={{ p: 3, pt: 1, justifyContent: "start", gap: 1 }}>
-          <Button size="medium" variant="outlined" onClick={onClose}>
+          <Button
+            size="medium"
+            variant="outlined"
+            onClick={() => handleClose()}
+          >
             Cancel
           </Button>
           <Button

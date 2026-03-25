@@ -9,6 +9,7 @@ import { useEffect, useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import ActionHeader from "./components/ActionHeader";
 import DeleteConfirmModal from "./components/DeleteConfirmModal";
+import ScenarioAdvancedSearch from "./components/ScenarioAdvancedSearch";
 import { ScenarioGridLayout } from "./tree-grid/config/layout";
 import { useTreeGridInit } from "./tree-grid/hooks/useTreeGridInit";
 import { mapScenariosToGridBody } from "./tree-grid/utils/data-mapper";
@@ -26,30 +27,35 @@ const gridContainerId = "TreeGrid_" + gridId;
 const ScenarioListingPage = () => {
   const navigate = useNavigate();
   const [searchTerm, setSearchTerm] = useState<string | undefined>(undefined);
+  const [isAdvancedSearchOpen, setIsAdvancedSearchOpen] = useState(false);
+  const [advancedSearch, setAdvancedSearch] = useState<Record<string, any>>({});
   const [deleteModalOpen, setDeleteModalOpen] = useState(false);
   const [selectedRowId, setSelectedRowId] = useState<string | null>(null);
-  const [selectedForFork, setSelectedForFork] = useState<string | null>(null);
+  const [selectedForDuplicate, setSelectedForDuplicate] = useState<
+    string | null
+  >(null);
   const showToast = useToastStore((state) => state.showToast);
 
   const { data: scenariosData } = useListScenarios({
     search: searchTerm,
     filter: {},
+    advanced_search: advancedSearch,
     page_size: 20,
     skip: 0,
   });
 
   const { mutate: deleteScenario, isPending: isDeleting } = useDeleteScenario();
 
-  const handleGridInit = (grid: any) => {
+  const handleGridInit = (_grid: any) => {
     if (window.TGSetEvent) {
       window.TGSetEvent(
         "OnSelect",
         gridId,
-        (grid: any, row: any, deselect: boolean) => {
+        (_grid: any, row: any, deselect: boolean) => {
           if (deselect) {
-            setSelectedForFork(null);
+            setSelectedForDuplicate(null);
           } else {
-            setSelectedForFork(row.id);
+            setSelectedForDuplicate(row.id);
           }
         },
       );
@@ -118,36 +124,100 @@ const ScenarioListingPage = () => {
       >
         <ActionHeader
           onSearch={setSearchTerm}
-          selectedScenarioId={selectedForFork}
+          selectedScenarioId={selectedForDuplicate}
+          onAdvancedSearchClick={() =>
+            setIsAdvancedSearchOpen(!isAdvancedSearchOpen)
+          }
         />
 
         <Box
           sx={{
             flex: 1,
             minHeight: 0,
-            p: 2,
+            width: "100%",
             display: "flex",
-            flexDirection: "column",
+            flexDirection: "row",
+            position: "relative",
+            overflow: "hidden",
           }}
         >
           <Box
             sx={{
               flex: 1,
-              minHeight: 0,
-              borderRadius: 1,
-              p: 2,
-              bgcolor: "background.paper",
+              display: "flex",
+              flexDirection: "column",
+              minWidth: 0,
             }}
           >
             <Box
-              id={gridContainerId}
               sx={{
-                height: "100%",
+                flex: 1,
+                minHeight: 0,
+                minWidth: 0,
                 width: "100%",
-                borderRadius: 1,
+                p: 2,
               }}
-            />
+            >
+              <Box
+                sx={{
+                  height: "100%",
+                  width: "100%",
+                  minWidth: 0,
+                  minHeight: 0,
+                  borderRadius: 1,
+                  p: 2,
+                  bgcolor: "background.paper",
+                  display: "flex",
+                  flexDirection: "column",
+                }}
+              >
+                <Box
+                  id={gridContainerId}
+                  sx={{
+                    flex: 1,
+                    minHeight: 0,
+                    minWidth: 0,
+                    height: "100%",
+                    width: "100%",
+                    borderRadius: 1,
+                  }}
+                />
+              </Box>
+            </Box>
           </Box>
+
+          {isAdvancedSearchOpen && (
+            <Box
+              sx={{
+                width: 360,
+                height: "100%",
+                flexShrink: 0,
+                p: 2,
+                pl: 0,
+                transition: "width 0.3s ease-in-out",
+              }}
+            >
+              <Box
+                sx={{
+                  height: "100%",
+                  bgcolor: "background.paper",
+                  borderRadius: 1,
+                  p: 2,
+                  overflowY: "auto",
+                  display: "flex",
+                  flexDirection: "column",
+                  gap: 2,
+                  boxShadow: "-4px 0 16px rgba(0,0,0,0.08)",
+                }}
+              >
+                <ScenarioAdvancedSearch
+                  onClose={() => setIsAdvancedSearchOpen(false)}
+                  onApply={setAdvancedSearch}
+                  filters={advancedSearch}
+                />
+              </Box>
+            </Box>
+          )}
         </Box>
       </Box>
       <DeleteConfirmModal

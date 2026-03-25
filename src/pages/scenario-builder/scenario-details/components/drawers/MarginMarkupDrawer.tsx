@@ -80,7 +80,7 @@ const MarginMarkupDrawer = ({
 
   const updatedLayout = useMemo(() => {
     const layout = JSON.parse(JSON.stringify(MarginMarkupDrawerLayout));
-    layout.Header.A = `${type} %`;
+    layout.Header["Margin %"] = `${type} %`;
     layout.Cols[0].Caption = `${type} %`;
     return layout;
   }, [type]);
@@ -90,16 +90,16 @@ const MarginMarkupDrawer = ({
       Body: [
         data.map((item) => ({
           id: item.id,
-          A: item.percent,
-          B: renderSelectButton(
+          "Margin %": item.percent,
+          "Scenario builder column": renderSelectButton(
             item.id,
             gridId,
-            "B",
+            "Scenario builder column",
             typeof item.columnValue === "number" && item.column !== "Select"
               ? `$${item.columnValue.toFixed(2)}`
               : item.column,
           ),
-          C: item.value || 0,
+          "Total Cost": item.value || 0,
         })),
       ],
     };
@@ -122,13 +122,13 @@ const MarginMarkupDrawer = ({
       _col: string,
       val: any,
     ) => {
-      if (grid.id === gridId && _col === "A") {
+      if (grid.id === gridId && _col === "Margin %") {
         const percent = String(val || "");
         setData((prev) => {
           const item = prev.find((i) => i.id === row.id);
           if (item) {
             const total = calculateTotal(percent, item.columnValue || 0);
-            grid.SetValue(row, "C", total, 1);
+            grid.SetValue(row, "Total Cost", total, 1);
           }
           return prev;
         });
@@ -151,7 +151,9 @@ const MarginMarkupDrawer = ({
           if (item.id === rowId) {
             const grid = (window as any).Grids?.[gridId];
             const row = grid?.GetRowById(rowId);
-            const currentPercent = row ? String(row.A || "") : item.percent;
+            const currentPercent = row
+              ? String(row["Margin %"] || "")
+              : item.percent;
 
             const val = calculateTotal(currentPercent, value);
             return {
@@ -185,8 +187,8 @@ const MarginMarkupDrawer = ({
 
     const finalItems = data.map((item) => {
       const row = grid?.GetRowById(item.id);
-      const finalPercent = row ? String(row.A || "") : item.percent;
-      const finalCost = row ? Number(row.C || 0) : item.value;
+      const finalPercent = row ? String(row["Margin %"] || "") : item.percent;
+      const finalCost = row ? Number(row["Total Cost"] || 0) : item.value;
 
       return {
         id: item.id,

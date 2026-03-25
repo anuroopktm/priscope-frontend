@@ -5,6 +5,7 @@ interface GridReference {
 }
 
 export const handleComponentAggregatorConfirm = (
+  // ... (omitted for brevity in instruction, but I'll write the full replacement below)
   { gridId }: GridReference,
   data: {
     label: string;
@@ -191,6 +192,7 @@ export const handleAggregatorUpdate = (
 
       grid.Update();
 
+      const formulaParts: string[] = [];
       (Array.isArray(items) ? items : []).forEach((item, index) => {
         if (!item || !item.name) return;
         if (item.type === "Margin" || item.type === "Markup") return;
@@ -199,13 +201,20 @@ export const handleAggregatorUpdate = (
         if (item.type === "Custom" && itemName === "Custom") {
           itemName = "Custom Calculation";
         }
+        if (item.type === "Freight" && itemName === "Freight") {
+          itemName = "Freight Cost";
+        }
+        if (item.type === "Tariff" && itemName === "Tariff") {
+          itemName = "Tariff Rate";
+        }
         const cleanName = itemName.trim();
         const safeName = cleanName.replace(/[^a-zA-Z0-9]/g, "").toLowerCase();
         const colId = `Comp_${targetCol}_${safeName || "Item"}`;
+        formulaParts.push(colId);
         const insertPos = targetPos + index;
 
         if (!grid.Cols[colId]) {
-          grid.AddCol(colId, targetSec, insertPos, 110, 1, "Float", cleanName);
+          grid.AddCol(colId, targetSec, insertPos, 130, 1, "Float", cleanName);
           grid.MoveCol(colId, targetCol, 0, 1);
         } else {
           grid.ShowCol(colId);
@@ -218,10 +227,9 @@ export const handleAggregatorUpdate = (
         grid.SetAttribute(null, colId, "Type", "Float", 1);
         grid.SetAttribute(null, colId, "Format", "$0.00", 1);
         grid.SetAttribute(null, colId, "Width", 130, 1);
-        grid.SetAttribute(null, colId, "RelWidth", 1, 1);
+        grid.SetAttribute(null, colId, "RelWidth", 0, 1); // Set to 0 to prevent shrinking and enable overflow
         grid.SetAttribute(null, colId, "MinWidth", 100, 1);
         grid.SetAttribute(null, colId, "CanResize", 1, 1);
-        grid.SetAttribute(null, colId, "CanEdit", 1, 1);
         grid.SetAttribute(null, colId, "CanEdit", 1, 1);
         grid.SetAttribute(null, colId, "CanEmpty", 1, 1);
         grid.SetAttribute(null, colId, "IsExtraCol", 1, 1);
@@ -258,11 +266,23 @@ export const handleAggregatorUpdate = (
 
       grid.SetValue(row, targetCol, roundedTotal, 1);
 
+      if (formulaParts.length > 0) {
+        grid.SetAttribute(
+          row,
+          targetCol,
+          "Formula",
+          formulaParts.join(" + "),
+          1,
+        );
+        grid.SetAttribute(row, null, "Calculated", 1, 1);
+      }
+
       grid.SetAttribute(row, targetCol, "ItemsData", JSON.stringify(items), 1);
 
       // Save the updated column metadata to the grid
       grid.ColsData = colsData;
 
+      grid.Calculate(1);
       grid.Update();
       grid.Render();
     }

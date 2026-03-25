@@ -1,5 +1,5 @@
 import { Box, Drawer } from "@mui/material";
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import DrawerActionHeader from "./components/DrawerActionHeader";
 import DrawerHeader from "./components/DrawerHeader";
 import ItemsMasterGrid from "./tree-grid";
@@ -25,6 +25,12 @@ const ItemsMasterDrawer = ({
     getSelectedIds: () => string[];
     getSelectedRows: () => any[];
   } | null>(null);
+
+  useEffect(() => {
+    if (open) {
+      setSearchTerm("");
+    }
+  }, [open]);
 
   const handleClose = (
     _event: {},
@@ -82,6 +88,7 @@ const ItemsMasterDrawer = ({
         }}
       >
         <DrawerActionHeader
+          searchTerm={searchTerm}
           onSearch={setSearchTerm}
           onAddItem={handleAddItem}
           onAddAsGroup={handleAddAsGroup}
@@ -90,7 +97,13 @@ const ItemsMasterDrawer = ({
           isButtonsDisabled={isButtonsDisabled}
         />
 
-        {open && <ItemsMasterGrid ref={gridRef} searchTerm={searchTerm} />}
+        {open && (
+          <ItemsMasterGrid
+            ref={gridRef}
+            searchTerm={searchTerm}
+            selectedColumns={selectedColumns}
+          />
+        )}
       </Box>
     </Drawer>
   );

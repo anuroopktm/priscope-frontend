@@ -5,11 +5,9 @@ export interface ScenarioRow {
   id: string;
   itemId?: string;
   Def: string;
-  A: string;
-  B?: string;
-  C?: string;
-  D?: string;
-  E?: string;
+  SKU: string;
+  Description?: string;
+  Category?: string;
   is_published?: number;
   Selected?: number;
   CanSelect?: number;
@@ -38,17 +36,20 @@ export const transformRows = (
 ): ScenarioRow[] => {
   return rows.map((row) => {
     const isPublished = isScenarioPublished || row.is_published === 1;
-    let transformedRow = { ...row };
+    let transformedRow: any = { ...row };
 
     if (isPublished) {
       transformedRow.CanEdit = 0;
       transformedRow.CanSelect = 0;
       transformedRow.PanelSelect = 0;
+      transformedRow.Color = "#E8F5E9";
     }
 
     if (row.Def === "Group") {
       const groupRowId = row.id;
-      transformedRow.AHtmlPostfix = isPublished
+      transformedRow.SKUSpan = 3;
+      transformedRow.Spanned = 1;
+      transformedRow.SKUHtmlPostfix = isPublished
         ? ""
         : `<div style="display:flex; gap:12px; float:right; margin-right:8px; align-items:center; height:100%;">
             <span style="display:flex; align-items:center; cursor:pointer;" onclick="window.handleTreeGridEdit && window.handleTreeGridEdit('${groupRowId}')">${EDIT_ICON}</span>
@@ -60,6 +61,23 @@ export const transformRows = (
     }
     return transformedRow;
   });
+};
+
+export const getUnpackedValue = (val: any) => {
+  if (val && typeof val === "object") {
+    if (!Array.isArray(val) && val.value !== undefined) return val.value;
+    if (!Array.isArray(val) && val.name !== undefined) return val.name;
+    if (Array.isArray(val)) {
+      return val
+        .map((x: any) =>
+          typeof x === "object"
+            ? x.name || x.value || JSON.stringify(x)
+            : String(x),
+        )
+        .join(", ");
+    }
+  }
+  return val;
 };
 
 export const useScenarioGridData = () => {
@@ -81,7 +99,7 @@ export const useScenarioGridData = () => {
           const updateRecursive = (rows: ScenarioRow[]): ScenarioRow[] => {
             return rows.map((row) => {
               if (row.id === editingGroupId) {
-                return { ...row, A: newName };
+                return { ...row, SKU: newName };
               }
               if (row.Items) {
                 return { ...row, Items: updateRecursive(row.Items) };
@@ -174,77 +192,61 @@ export const useScenarioGridData = () => {
       selectedHeaders?: string[],
     ) => {
       console.log("selectedHeaders:", selectedHeaders);
+
+      // getUnpackedValue is now helper on top of file
+
       const mappedItems: ScenarioRow[] = items.map((item) => {
         let cleanItem: any;
 
-        if (selectedHeaders && selectedHeaders.length > 0) {
-          // Drawer flow → only keep selected headers
-          cleanItem = {
-            id: item.id,
-            SKU: item.SKU,
-            Description: item.Description,
-            Category: item.Category,
-          };
+        cleanItem = cleanTreeGridRow(item);
 
-          selectedHeaders.forEach((header) => {
-            cleanItem[header] = item[header];
-          });
-        } else {
-          // Item Master flow → keep all columns
-          cleanItem = cleanTreeGridRow(item);
-        }
-        console.log(cleanItem, "cleanItem");
-        // const scenarioRow: any = {
-        //   ...cleanItem,
-        //   id: `row_${Math.random().toString(36).substr(2, 9)}`,
-        //   itemId: cleanItem.id || "",
-        //   Def: "R",
-        //   A: cleanItem.SKU || cleanItem.A || cleanItem["SKU"] || "",
-        //   B: cleanItem.Description || cleanItem.B || cleanItem["Description"] || "",
-        //   C: cleanItem.Category || cleanItem.C || cleanItem["Category"] || "",
-        //   is_published: 0,
-        //   Selected: 0,
-        //   CanSelect: 1,
-        //   PanelSelect: 1,
-        // };
         const scenarioRow: any = {
           id: `row_${Math.random().toString(36).substr(2, 9)}`,
           itemId: cleanItem.id || "",
           Def: "R",
-          A: cleanItem.SKU || cleanItem.A || "",
-          B: cleanItem.Description || cleanItem.B || "",
-          C: cleanItem.Category || cleanItem.C || "",
+          SKU: getUnpackedValue(cleanItem.SKU || ""),
+          Description: getUnpackedValue(cleanItem.Description || ""),
+          Category: getUnpackedValue(cleanItem.Category || ""),
+          "Shipment Quantity": getUnpackedValue(
+            cleanItem["Shipment Quantity"] || "",
+          ),
           is_published: 0,
           Selected: 0,
           CanSelect: 1,
           PanelSelect: 1,
         };
 
-        // ⭐ Item Master flow → copy ALL columns
-        // if (!selectedHeaders || selectedHeaders.length === 0) {
-          if (selectedHeaders === undefined){
-          Object.keys(cleanItem).forEach((key) => {
-            if (
-              !["id", "SKU", "Description", "Category", "A", "B", "C"].includes(
-                key,
-              )
-            ) {
-              scenarioRow[key] = cleanItem[key];
-            }
-          });
-        }
+        // Copy ALL columns from cleanItem
+        Object.keys(cleanItem).forEach((key) => {
+          if (
+            [
+              "id",
+              "SKU",
+              "Description",
+              "Category",
+              "Shipment Quantity",
+            ].includes(key)
+          )
+            return;
 
-        // ⭐ Drawer flow → copy only selected headers
-        if (selectedHeaders && selectedHeaders.length > 0) {
-          selectedHeaders.forEach((headerName) => {
-            if (
-              cleanItem[headerName] !== undefined &&
-              !["SKU", "Description", "Category"].includes(headerName)
-            ) {
-              scenarioRow[headerName] = cleanItem[headerName];
+          let val = cleanItem[key];
+          if (val && typeof val === "object") {
+            if (!Array.isArray(val) && val.value !== undefined) {
+              val = val.value;
+            } else if (!Array.isArray(val) && val.name !== undefined) {
+              val = val.name;
+            } else if (Array.isArray(val)) {
+              val = val
+                .map((x: any) =>
+                  typeof x === "object"
+                    ? x.name || x.value || JSON.stringify(x)
+                    : String(x),
+                )
+                .join(", ");
             }
-          });
-        }
+          }
+          scenarioRow[key] = val;
+        });
 
         // If specific headers were selected, we ensure they are present,
         // though spreading ...item already covers most cases.
@@ -267,9 +269,13 @@ export const useScenarioGridData = () => {
       const currentRows = prevData?.Body?.[0] || [];
       const colsData = { ...((prevData as any).ColsData || {}) };
 
-      if (selectedHeaders) {
+      if (selectedHeaders && selectedHeaders.length > 0) {
         selectedHeaders.forEach((headerName) => {
-          if (!["SKU", "Description", "Category"].includes(headerName)) {
+          if (
+            !["SKU", "Description", "Category", "Shipment Quantity"].includes(
+              headerName,
+            )
+          ) {
             if (!colsData[headerName]) {
               colsData[headerName] = {
                 Caption: headerName,
@@ -290,9 +296,11 @@ export const useScenarioGridData = () => {
         const groupRow: ScenarioRow = {
           id: groupRowId,
           Def: "Group",
-          A: groupName,
-          ACanEdit: 0,
-          AHtmlPostfix: `<div style="display:flex; gap:12px; float:right; margin-right:8px; align-items:center; height:100%;">
+          SKU: groupName,
+          SKUCanEdit: 0,
+          SKUSpan: 3,
+          Spanned: 1,
+          SKUHtmlPostfix: `<div style="display:flex; gap:12px; float:right; margin-right:8px; align-items:center; height:100%;">
             <span style="display:flex; align-items:center; cursor:pointer;" onclick="window.handleTreeGridEdit && window.handleTreeGridEdit('${groupRowId}')">${EDIT_ICON}</span>
             <span style="display:flex; align-items:center; cursor:pointer;" onclick="window.handleTreeGridDeleteRow && window.handleTreeGridDeleteRow('${groupRowId}')">${DELETE_ICON}</span>
           </div>`,

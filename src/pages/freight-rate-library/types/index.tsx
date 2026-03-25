@@ -2,7 +2,10 @@ import type { AlertColor } from "@mui/material";
 
 export interface ActionBarProps {
   alignment: string;
-  onAlignmentChange: (event: React.MouseEvent<HTMLElement>, newAlignment: string) => void;
+  onAlignmentChange: (
+    event: React.MouseEvent<HTMLElement>,
+    newAlignment: string,
+  ) => void;
   onSearchChange: (value: string) => void;
   setShowFilesModal: any;
 }
@@ -129,7 +132,6 @@ export interface ContainerTypeCreateResponse {
   type: string;
 }
 
-
 export interface CommentInput {
   comment: string;
   fieldKey: string;
@@ -205,10 +207,10 @@ export interface FreightRateCommentResponse {
   tenant_id: string;
   freight_rate_id: string;
   comment_type: "field" | "row";
-  freight_field_key?: string; 
+  freight_field_key?: string;
   comment: string;
-  source: string; 
-  action: string; 
+  source: string;
+  action: string;
   action_key?: string;
   created_at: string;
   created_by: UserInfo;
@@ -220,5 +222,3 @@ export interface FreightRateCommentResponse {
 }
 
 export type CreateFreightRateCommentResponse = FreightRateCommentResponse[];
-
-

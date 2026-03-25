@@ -108,7 +108,7 @@ const ItemMasterListingPage = () => {
 
   useEffect(() => {
     if (showSavePopover && gridRef) {
-      gridRef.Focus(null, null);
+      gridRef.Focus(undefined, undefined);
     }
   }, [showSavePopover]);
 

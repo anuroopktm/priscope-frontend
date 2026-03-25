@@ -63,7 +63,7 @@ const ModalHeader: React.FC<ModalHeaderProps> = ({
               textDecoration: "none",
               cursor: "pointer",
               display: "flex",
-              alignItems: "center"
+              alignItems: "center",
             }}
           >
             <img

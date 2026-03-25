@@ -4,7 +4,6 @@ export const itemMasterColumnToFieldMap: Record<string, string> = {
   Description: "description",
 };
 
-
 export const allowedKeys = [
   "sku",
   "upc",

@@ -70,6 +70,10 @@ interface ScenarioStoreState {
   isCommentsSidebarOpen: boolean;
   setIsCommentsSidebarOpen: (isOpen: boolean) => void;
 
+  // Activities Sidebar
+  isActivitiesSidebarOpen: boolean;
+  setIsActivitiesSidebarOpen: (isOpen: boolean) => void;
+
   // Item Master Headers
   itemMasterSelectedHeaders: string[];
   setItemMasterSelectedHeaders: (headers: string[]) => void;
@@ -136,6 +140,10 @@ export const useScenarioStore = create<ScenarioStoreState>((set) => ({
   isCommentsSidebarOpen: false,
   setIsCommentsSidebarOpen: (isOpen: boolean) =>
     set({ isCommentsSidebarOpen: isOpen }),
+
+  isActivitiesSidebarOpen: false,
+  setIsActivitiesSidebarOpen: (isOpen: boolean) =>
+    set({ isActivitiesSidebarOpen: isOpen }),
 
   itemMasterSelectedHeaders: [],
   setItemMasterSelectedHeaders: (headers: string[]) =>

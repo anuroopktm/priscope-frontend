@@ -32,7 +32,6 @@ type Comment = {
   time: string;
 };
 
-
 const getAvatarColor = (user: string) => {
   const colors = ["#CB5E5E", "#144E72", "#4caf50", "#ff9800", "#9c27b0"];
   let hash = 0;

@@ -81,4 +81,3 @@ const MainContentContainerWithProps = ({
 };
 
 export default MainContentContainerWithProps;
-

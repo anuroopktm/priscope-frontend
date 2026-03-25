@@ -16,6 +16,7 @@ import {
 } from "@mui/material";
 
 interface DrawerActionHeaderProps {
+  searchTerm: string;
   onSearch: (value: string) => void;
   onAddItem?: () => void;
   onAddAsGroup?: () => void;
@@ -25,6 +26,7 @@ interface DrawerActionHeaderProps {
 }
 
 const DrawerActionHeader = ({
+  searchTerm,
   onSearch,
   onAddItem,
   onAddAsGroup,
@@ -46,10 +48,7 @@ const DrawerActionHeader = ({
     } = event;
     const newSelected = typeof value === "string" ? value.split(",") : value;
 
-    // Ensure at least one option is selected
-    if (newSelected.length > 0) {
-      onSelectedColumnsChange(newSelected);
-    }
+    onSelectedColumnsChange(newSelected);
   };
 
   return (
@@ -67,13 +66,15 @@ const DrawerActionHeader = ({
       <Stack direction="row" spacing={3} sx={{ flex: 1, alignItems: "center" }}>
         <SearchTextField
           size="small"
+          value={searchTerm}
           onSearch={onSearch}
+          containerSx={{ bgcolor: "white", px: 0 }}
           sx={{
             "& .MuiOutlinedInput-root": {
-              bgcolor: "#E8E8E8",
+              bgcolor: "white",
               color: "text.primary",
               "& .MuiInputAdornment-root svg path": {
-                stroke: (theme) => theme.palette.brand.primary,
+                stroke: (theme: any) => theme.palette.brand.primary,
               },
               "& .MuiOutlinedInput-notchedOutline": {
                 borderColor: "#E8E8E8 !important",
@@ -153,7 +154,7 @@ const DrawerActionHeader = ({
           onClick={onAddAsGroup}
           disabled={isButtonsDisabled}
         >
-          Add as Group
+          Group
         </Button>
         <Button
           size="small"
@@ -162,7 +163,7 @@ const DrawerActionHeader = ({
           onClick={onAddItem}
           disabled={isButtonsDisabled}
         >
-          Add Item
+          Item
         </Button>
       </Stack>
     </Box>

@@ -1,7 +1,7 @@
 import FreightRate from "./components/freightRate";
 
 const FreightRatePage = () => {
-    return (<FreightRate />)
-}
+  return <FreightRate />;
+};
 
 export default FreightRatePage;

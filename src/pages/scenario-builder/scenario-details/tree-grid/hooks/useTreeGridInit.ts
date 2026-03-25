@@ -10,18 +10,28 @@ export const useTreeGridInit = (
   containerId: string,
   layout: any,
   data: any,
-  onInit?: (grid: TGrid) => void,
+  onInit?: (grid: any) => void,
 ) => {
-  const gridRef = useRef<TGrid | null>(null);
+  const gridRef = useRef<any>(null);
   const created = useRef(false);
   const dataRef = useRef(data);
   const layoutRef = useRef(layout);
+  const onInitRef = useRef(onInit);
 
   // Sync refs so initGrid always sees the latest values even if captured in closure
   useEffect(() => {
     dataRef.current = data;
     layoutRef.current = layout;
-  }, [data, layout]);
+    onInitRef.current = onInit;
+  }, [data, layout, onInit]);
+
+  // Ensure onInit is called if it's provided late
+  useEffect(() => {
+    const grid = gridRef.current || (window as any).Grids?.[gridId];
+    if (grid && onInit) {
+      onInit(grid);
+    }
+  }, [gridId, onInit]);
 
   // Create grid once
   useEffect(() => {
@@ -37,7 +47,6 @@ export const useTreeGridInit = (
       }
 
       // 🚨 CRITICAL: Dispose any existing grid with the same ID before creating a new one.
-      // This solves issues with "stale" or "zombie" grids during hot-reloads/navigation.
       const existingGrid = (window as any).Grids?.[gridId];
       if (existingGrid) {
         try {
@@ -60,13 +69,13 @@ export const useTreeGridInit = (
         const grid = window.TreeGrid(source, containerId);
         gridRef.current = grid;
         created.current = true;
-        onInit?.(grid);
+        onInitRef.current?.(grid);
       } catch (error) {
         console.error("useTreeGridInit: Error creating TreeGrid:", error);
       }
     };
 
-    const timer = setTimeout(initGrid, 150); // Slightly longer delay to ensure DOM is settled
+    const timer = setTimeout(initGrid, 150);
 
     return () => {
       clearTimeout(timer);
@@ -80,7 +89,6 @@ export const useTreeGridInit = (
         }
         gridRef.current = null;
         created.current = false;
-        // Ensure the ID is removed from the global registry
         if ((window as any).Grids) {
           delete (window as any).Grids[gridId];
         }
@@ -93,7 +101,6 @@ export const useTreeGridInit = (
     const grid = gridRef.current || (window as any).Grids?.[gridId];
     if (!grid) return;
 
-    // Check if we have real data to sync (not just an initial/empty state)
     const hasData = data?.Body && data.Body[0]?.length > 0;
     const isCurrentlyEmpty = !grid.GetFirst();
 
@@ -101,12 +108,10 @@ export const useTreeGridInit = (
       console.log(`Syncing data update for ${gridId}:`, data);
       grid.Source.Data.Data = data;
 
-      // Restore column metadata reference for utilities
       if (data?.ColsData) {
         grid.ColsData = data.ColsData;
       }
 
-      // ReloadBody is faster and keeps the current scroll position/focus if possible
       grid.ReloadBody();
     }
   }, [data, gridId]);

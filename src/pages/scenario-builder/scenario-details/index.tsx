@@ -1,3 +1,7 @@
+import { buildItemMasterTreeGridBody } from "@/pages/items-master-refactor/helper";
+import { useItemMasterStore } from "@/pages/items-master-refactor/store/useItemMasterStore";
+import { axiosInstance } from "@/services/api/axiosInstance";
+import { useGetItemGroup } from "@/services/queries/common/common.queries";
 import {
   useGetScenario,
   usePartialPublishScenario,
@@ -10,6 +14,7 @@ import { Box } from "@mui/material";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useParams } from "react-router-dom";
 import ActionHeader from "./components/ActionHeader";
+import ActivitiesSidebar from "./components/drawers/ActivitiesSidebar";
 import CommentsSidebar from "./components/drawers/CommentsSidebar";
 import ScenarioDrawers from "./components/ScenarioDrawers";
 import ScenarioModals from "./components/ScenarioModals";
@@ -17,6 +22,7 @@ import { useScenarioStore } from "./store/useScenarioStore";
 import { ScenarioDetailsLayout } from "./tree-grid/config/details-layout";
 import type { ScenarioRow } from "./tree-grid/hooks/useScenarioGridData";
 import {
+  getUnpackedValue,
   transformRows,
   useScenarioGridData,
 } from "./tree-grid/hooks/useScenarioGridData";
@@ -27,7 +33,6 @@ import {
   registerStartScenarioColumnSelection,
   unregisterGridHighlightsGlobals,
 } from "./utils/gridHighlights";
-import { useItemMasterStore } from "@/pages/items-master-refactor/store/useItemMasterStore";
 
 declare global {
   interface Window {
@@ -88,12 +93,62 @@ const syncLocalGridData = (grid: any) => {
     // Capture values for ALL defined columns
     Object.keys(grid.Cols).forEach((colName) => {
       // ONLY capture if it's a base column or a visible extra column
-      const isBase = ["itemId", "A", "B", "C", "is_published"].includes(
-        colName,
-      );
+      const isBase = [
+        "itemId",
+        "SKU",
+        "Description",
+        "Category",
+        "Shipment Quantity",
+        "is_published",
+      ].includes(colName);
       const isExtra = !!colsData[colName];
 
       if (isBase || isExtra) {
+        if (
+          colsData[colName]?.AggregatorType === "Component" ||
+          colsData[colName]?.AggregatorType === "Cost"
+        ) {
+          let rowComponentCols: string[] = [];
+          const itemsDataStr = gridRow[colName + "ItemsData"];
+
+          if (itemsDataStr) {
+            try {
+              const items = JSON.parse(itemsDataStr);
+              if (Array.isArray(items)) {
+                items.forEach((item) => {
+                  if (
+                    !item.name ||
+                    item.type === "Margin" ||
+                    item.type === "Markup"
+                  )
+                    return;
+                  let itemName = String(item.name || "");
+                  if (item.type === "Custom" && itemName === "Custom") {
+                    itemName = "Custom Calculation";
+                  }
+                  const safeName = itemName
+                    .trim()
+                    .replace(/[^a-zA-Z0-9]/g, "")
+                    .toLowerCase();
+                  if (safeName) {
+                    rowComponentCols.push(`Comp_${colName}_${safeName}`);
+                  }
+                });
+              }
+            } catch (e) {
+              console.error("Failed to parse ItemsData for formula");
+            }
+          }
+
+          // Removed fallback that collected all Comp_ columns if itemsData was missing,
+          // as it caused formulas to be applied to all rows incorrectly.
+
+          if (rowComponentCols.length > 0) {
+            rowData[colName + "Formula"] = rowComponentCols.join(" + ");
+            rowData["Calculated"] = 1;
+          }
+        }
+
         const val = gridRow[colName];
         if (val !== undefined && val !== null && val !== "") {
           rowData[colName] = val;
@@ -106,7 +161,7 @@ const syncLocalGridData = (grid: any) => {
       const children: any[] = [];
       let child = gridRow.firstChild;
       while (child) {
-        if (child.Kind === "Data") {
+        if (child.Kind === "Data" && !child.Deleted) {
           children.push(processRow(child));
         }
         child = child.nextSibling;
@@ -121,7 +176,7 @@ const syncLocalGridData = (grid: any) => {
 
   let row = grid.GetFirst();
   while (row) {
-    if (row.Kind === "Data" && !row.parentNode?.id) {
+    if (row.Kind === "Data" && !row.parentNode?.id && !row.Deleted) {
       // Only process top-level rows (recursion handles children)
       body.push(processRow(row));
     }
@@ -140,6 +195,9 @@ const ScenarioDetailsPage = () => {
   const activeCell = useScenarioStore((state) => state.activeCell);
   const isCommentsSidebarOpen = useScenarioStore(
     (state) => state.isCommentsSidebarOpen,
+  );
+  const isActivitiesSidebarOpen = useScenarioStore(
+    (state) => state.isActivitiesSidebarOpen,
   );
   const setEditingGroupId = useScenarioStore(
     (state) => state.setEditingGroupId,
@@ -174,6 +232,7 @@ const ScenarioDetailsPage = () => {
     usePublishScenario();
   const { mutate: partialPublishScenario, isPending: isPartialPublishing } =
     usePartialPublishScenario();
+  const { mutateAsync: getItemGroupAsync } = useGetItemGroup();
 
   const isPublishing = isFullPublishing || isPartialPublishing;
   const showToast = useToastStore((state) => state.showToast);
@@ -191,6 +250,7 @@ const ScenarioDetailsPage = () => {
       dataToSave?: any,
       onSuccess?: () => void,
       onError?: (error: any) => void,
+      successMessage?: string,
     ) => {
       if (!id) return;
 
@@ -207,7 +267,9 @@ const ScenarioDetailsPage = () => {
         {
           onSuccess: (response) => {
             showToast(
-              response?.message || "Scenario saved as draft successfully",
+              successMessage ||
+                response?.message ||
+                "Scenario saved as draft successfully",
               "success",
             );
             if (onSuccess) onSuccess();
@@ -245,9 +307,68 @@ const ScenarioDetailsPage = () => {
   );
 
   const handleProcessAddItems = useCallback(
-    (items: any[], groupName?: string, selectedHeaders?: string[]) => {
+    async (items: any[], groupName?: string, selectedHeaders?: string[]) => {
       const grid = (window as any).Grids?.[SCENARIO_BUILDER_GRID_ID];
       const syncedData = syncLocalGridData(grid) || gridData;
+
+      if (!syncedData) return;
+
+      // 1. Identify rows missing selected headers
+      const idsToFetch: string[] = [];
+      const processRowForBackfill = (row: ScenarioRow) => {
+        if (row.itemId) {
+          const missing =
+            selectedHeaders?.some(
+              (h) => row[h] === undefined || row[h] === "",
+            ) ?? false;
+          if (missing && !idsToFetch.includes(row.itemId)) {
+            idsToFetch.push(row.itemId);
+          }
+        }
+        if (row.Items) row.Items.forEach(processRowForBackfill);
+      };
+      syncedData.Body?.[0]?.forEach(processRowForBackfill);
+
+      // 2. Fetch missing items from Item Master API
+      const fetchedItemsMap: { [key: string]: any } = {};
+      if (idsToFetch.length > 0) {
+        try {
+          const responses = await Promise.all(
+            idsToFetch.map((id) =>
+              axiosInstance.get(`/v1/item-master/${id}`).catch((e) => {
+                console.error(`Failed to fetch item ${id}`, e);
+                return null;
+              }),
+            ),
+          );
+
+          responses.forEach((resp) => {
+            if (resp && resp.data) {
+              const rawItem = resp.data;
+              const body = buildItemMasterTreeGridBody([rawItem]);
+              if (body.Body?.[0]?.length > 0) {
+                fetchedItemsMap[rawItem.id] = body.Body[0][0];
+              }
+            }
+          });
+        } catch (e) {
+          console.error("Failed to back-fill items", e);
+        }
+      }
+
+      // 3. Merge fetched data into syncedData to populate missing cells
+      const mergeBackfill = (row: ScenarioRow) => {
+        if (row.itemId && fetchedItemsMap[row.itemId]) {
+          const cleanItem = fetchedItemsMap[row.itemId];
+          Object.keys(cleanItem).forEach((key) => {
+            if (!["id", "Def", "is_published", "itemId"].includes(key)) {
+              row[key] = getUnpackedValue(cleanItem[key]);
+            }
+          });
+        }
+        if (row.Items) row.Items.forEach(mergeBackfill);
+      };
+      syncedData.Body?.[0]?.forEach(mergeBackfill);
 
       const newState = prepareAddItems(
         syncedData,
@@ -255,6 +376,7 @@ const ScenarioDetailsPage = () => {
         groupName,
         selectedHeaders,
       );
+
       handleSaveAsDraft(
         newState,
         () => {
@@ -276,6 +398,46 @@ const ScenarioDetailsPage = () => {
       setGridData,
       setIsDrawerOpen,
       clearSelectedItems,
+    ],
+  );
+
+  const handleAddGroupItems = useCallback(
+    async (groupIds: string[]) => {
+      try {
+        const results = await Promise.all(
+          groupIds.map((id) => getItemGroupAsync(id)),
+        );
+
+        const grid = (window as any).Grids?.[SCENARIO_BUILDER_GRID_ID];
+        const syncedData = syncLocalGridData(grid) || gridData;
+
+        let newState = { ...syncedData };
+
+        results.forEach((g: any) => {
+          if (g?.items) {
+            newState = prepareAddItems(newState, g.items, g.name);
+          }
+        });
+
+        handleSaveAsDraft(newState, () => {
+          setGridData(newState);
+        });
+
+        showToast("Groups added successfully", "success");
+      } catch (error: any) {
+        showToast(
+          getErrorMessage(error, "Failed to fetch some group items"),
+          "error",
+        );
+      }
+    },
+    [
+      getItemGroupAsync,
+      gridData,
+      prepareAddItems,
+      handleSaveAsDraft,
+      setGridData,
+      showToast,
     ],
   );
 
@@ -338,6 +500,48 @@ const ScenarioDetailsPage = () => {
     [id, partialPublishScenario, showToast],
   );
 
+  const handleDeleteSelected = useCallback(() => {
+    const grid = (window as any).Grids?.[SCENARIO_BUILDER_GRID_ID];
+    if (!grid) return;
+
+    const selRows = grid.GetSelRows();
+    if (selRows.length === 0) return;
+
+    // Collect IDs of rows to delete before removing them
+    const deletedIds = new Set<string>(selRows.map((r: any) => String(r.id)));
+
+    // Visually remove each row from the grid DOM immediately
+    selRows.forEach((row: any) => {
+      grid.RemoveRow(row);
+    });
+    grid.RenderBody();
+
+    // Sync remaining data (deleted rows are now gone from DOM so syncLocalGridData won't include them)
+    const syncedData = syncLocalGridData(grid);
+
+    // Also remove from local React state so if the component re-renders, it won't re-add them
+    setGridData((prev: any) => {
+      if (!prev?.Body?.[0]) return prev;
+      const filterRows = (rows: any[]): any[] =>
+        rows
+          .filter((r: any) => !deletedIds.has(String(r.id)))
+          .map((r: any) => ({
+            ...r,
+            Items: r.Items ? filterRows(r.Items) : undefined,
+          }));
+      return { ...prev, Body: [filterRows(prev.Body[0])] };
+    });
+
+    handleSaveAsDraft(
+      syncedData,
+      () => {
+        setSelectedRowsCount(0);
+      },
+      undefined,
+      "Deletion successful",
+    );
+  }, [handleSaveAsDraft, setGridData]);
+
   const handleExport = (format: string) => {
     const grid = (window as any).Grids?.[SCENARIO_BUILDER_GRID_ID];
     if (grid) {
@@ -376,7 +580,7 @@ const ScenarioDetailsPage = () => {
       if (grid) {
         const row = grid.GetRowById(id);
         if (row) {
-          setEditingGroupName(row.A || "");
+          setEditingGroupName(row.SKU || "");
         }
       }
       setIsEditModalOpen(true);
@@ -413,8 +617,13 @@ const ScenarioDetailsPage = () => {
     const collectKeys = (rows: ScenarioRow[]) => {
       rows.forEach((row) => {
         Object.keys(row).forEach((key) => {
+          const lowerKey = key.toLowerCase();
+          const colData = gridData.ColsData || {};
           if (
             !initialColNames.includes(key) &&
+            !lowerKey.endsWith("formula") &&
+            !lowerKey.endsWith("calculated") &&
+            !lowerKey.endsWith("itemsdata") &&
             ![
               "id",
               "itemId",
@@ -423,20 +632,25 @@ const ScenarioDetailsPage = () => {
               "Expanded",
               "Selected",
               "CanSelect",
+              "CanSelect",
               "PanelSelect",
               "CanEdit",
-              "ACanEdit",
-              "AHtmlPostfix",
+              "SKUCanEdit",
+              "SKUHtmlPostfix",
               "is_published",
               "Kind",
               "Level",
               "D",
-              // "SKU",
-              // "Description",
-              // "Category",
+              "Color",
             ].includes(key)
           ) {
-            extraColsSet.add(key);
+            if (
+              colData[key] ||
+              key.startsWith("Comp_") ||
+              key.startsWith("Iterator_")
+            ) {
+              extraColsSet.add(key);
+            }
           }
         });
         if (row.Items) collectKeys(row.Items);
@@ -543,10 +757,12 @@ const ScenarioDetailsPage = () => {
         title={scenario?.name}
         status={scenario?.status}
         onAddItems={() => setIsDrawerOpen(true)}
+        onAddGroupItems={handleAddGroupItems}
         onSaveAsDraft={handleSaveAsDraft}
         onExport={handleExport}
         onPublish={handlePublish}
         onPartialPublish={handlePartialPublish}
+        onDeleteSelected={handleDeleteSelected}
         isSaving={isSaving}
         isPublishing={isPublishing}
         selectedRowsCount={selectedRowsCount}
@@ -608,6 +824,7 @@ const ScenarioDetailsPage = () => {
           </Box>
           <ScenarioDrawers
             gridId={SCENARIO_BUILDER_GRID_ID}
+            scenarioId={id}
             onSaveAsDraft={handleSaveAsDraft}
           />
         </Box>
@@ -624,6 +841,21 @@ const ScenarioDetailsPage = () => {
             }}
           >
             <CommentsSidebar />
+          </Box>
+        )}
+
+        {isActivitiesSidebarOpen && (
+          <Box
+            sx={{
+              width: 360,
+              height: "100%",
+              flexShrink: 0,
+              p: 2,
+              pl: 0,
+              transition: "width 0.3s ease-in-out",
+            }}
+          >
+            <ActivitiesSidebar />
           </Box>
         )}
       </Box>

@@ -32,13 +32,13 @@ export const AggregatorDrawerLayout = {
   LeftCols: [],
   Cols: [
     {
-      Name: "A",
+      Name: "Aggregator Name",
       Width: "300",
       Type: "Html",
       Caption: "Freight Cost",
     },
     {
-      Name: "B",
+      Name: "Cost for",
       Width: "200",
       Type: "Enum",
       Caption: "Cost for",
@@ -46,7 +46,7 @@ export const AggregatorDrawerLayout = {
       EnumKeys: "|Base UOM|Qty Per Shipment",
     },
     {
-      Name: "C",
+      Name: "Cost per unit",
       Width: "150",
       Type: "Float",
       Format: "$0.00",
@@ -54,11 +54,11 @@ export const AggregatorDrawerLayout = {
     },
   ],
   Header: {
-    A: "Freight Cost",
-    B: "Cost for",
-    C: "Cost per unit",
-    AAlign: "Left",
-    BAlign: "Left",
-    CAlign: "Left",
+    "Aggregator Name": "Freight Cost",
+    "Cost for": "Cost for",
+    "Cost per unit": "Cost per unit",
+    "Aggregator NameAlign": "Left",
+    "Cost forAlign": "Left",
+    "Cost per unitAlign": "Left",
   },
 };

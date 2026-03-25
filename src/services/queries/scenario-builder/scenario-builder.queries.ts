@@ -5,18 +5,22 @@ import type {
   CreateScenarioCommentRequest,
   CreateScenarioRequest,
   CreateScenarioResponse,
-  ForkScenarioRequest,
-  ForkScenarioResponse,
+  DuplicateScenarioRequest,
+  DuplicateScenarioResponse,
   PartialPublishScenarioRequest,
   PublishScenarioResponse,
   SaveScenarioGridRequest,
   SaveScenarioGridResponse,
+  ScenarioActivityListResponse,
   ScenarioComment,
   ScenarioCommentListResponse,
   ScenarioDetail,
+  SearchScenarioActivityRequest,
   SearchScenarioCommentsRequest,
   SearchScenariosRequest,
   SearchScenariosResponse,
+  CreateScenarioAggregatorRequest,
+  ScenarioAggregatorResponse,
 } from "./scenario-builder.types";
 
 export const useCreateScenarioComment = () => {
@@ -151,10 +155,7 @@ export const useSaveScenarioGrid = () => {
       );
       return data;
     },
-    onSuccess: (_, { scenario_id }) => {
-      queryClient.invalidateQueries({
-        queryKey: ["get-scenario", scenario_id],
-      });
+    onSuccess: () => {
       queryClient.invalidateQueries({
         queryKey: ["list-scenarios"],
         exact: false,
@@ -239,17 +240,17 @@ export const useDeleteScenario = () => {
   );
 };
 
-export const useForkScenario = () => {
+export const useDuplicateScenario = () => {
   const queryClient = useQueryClient();
 
   return useMutation<
-    ForkScenarioResponse,
+    DuplicateScenarioResponse,
     AxiosError<{ detail: string | string[] }>,
-    ForkScenarioRequest
+    DuplicateScenarioRequest
   >({
-    mutationKey: ["fork-scenario"],
+    mutationKey: ["duplicate-scenario"],
     mutationFn: async ({ scenario_id, name }) => {
-      const { data } = await axiosInstance.post<ForkScenarioResponse>(
+      const { data } = await axiosInstance.post<DuplicateScenarioResponse>(
         `/v1/scenario-builder/scenarios/${scenario_id}/fork`,
         { name },
       );
@@ -261,5 +262,76 @@ export const useForkScenario = () => {
         exact: false,
       });
     },
+  });
+};
+
+export const useListScenarioActivity = (
+  scenarioId: string | undefined,
+  payload: SearchScenarioActivityRequest,
+) => {
+  return useQuery<
+    ScenarioActivityListResponse,
+    AxiosError<{ detail: string | string[] }>
+  >({
+    queryKey: ["list-scenario-activity", scenarioId, payload],
+    queryFn: async () => {
+      const { data } = await axiosInstance.post<ScenarioActivityListResponse>(
+        `/v1/scenario-builder/scenarios/${scenarioId}/activity`,
+        payload,
+      );
+      return data;
+    },
+    enabled: !!scenarioId,
+    refetchOnWindowFocus: false,
+  });
+};
+
+export const useCreateScenarioAggregator = () => {
+  const queryClient = useQueryClient();
+
+  return useMutation<
+    ScenarioAggregatorResponse,
+    AxiosError<{ detail: string | string[] }>,
+    { scenario_id: string; payload: CreateScenarioAggregatorRequest }
+  >({
+    mutationKey: ["create-scenario-aggregator"],
+    mutationFn: async ({ scenario_id, payload }) => {
+      const { data } = await axiosInstance.post<ScenarioAggregatorResponse>(
+        `/v1/scenario-builder/scenarios/${scenario_id}/aggregators`,
+        payload,
+      );
+      return data;
+    },
+    onSuccess: (_, { scenario_id }) => {
+      queryClient.invalidateQueries({
+        queryKey: ["get-scenario-aggregator", scenario_id],
+      });
+    },
+  });
+};
+
+export const useGetScenarioAggregator = (
+  scenarioId: string | undefined,
+  cellId: string | undefined,
+) => {
+  return useQuery<
+    ScenarioAggregatorResponse,
+    AxiosError<{ detail: string | string[] }>
+  >({
+    queryKey: ["get-scenario-aggregator", scenarioId, cellId],
+    queryFn: async () => {
+      const { data } = await axiosInstance.get<ScenarioAggregatorResponse>(
+        `/v1/scenario-builder/scenarios/${scenarioId}/aggregators`,
+        {
+          params: {
+            scenario_id: scenarioId,
+            cell_id: cellId,
+          },
+        },
+      );
+      return data;
+    },
+    enabled: !!scenarioId && !!cellId,
+    refetchOnWindowFocus: false,
   });
 };

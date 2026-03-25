@@ -8,10 +8,15 @@ import MarginMarkupDrawer from "./drawers/MarginMarkupDrawer";
 
 interface ScenarioDrawersProps {
   gridId: string;
+  scenarioId?: string;
   onSaveAsDraft?: () => void;
 }
 
-const ScenarioDrawers = ({ gridId, onSaveAsDraft }: ScenarioDrawersProps) => {
+const ScenarioDrawers = ({
+  gridId,
+  scenarioId,
+  onSaveAsDraft,
+}: ScenarioDrawersProps) => {
   const {
     isAggregatorDrawerOpen,
     setIsAggregatorDrawerOpen,
@@ -59,6 +64,8 @@ const ScenarioDrawers = ({ gridId, onSaveAsDraft }: ScenarioDrawersProps) => {
               mainRowId={activeCell.rowId}
               onClose={handleClose}
               onUpdate={handleUpdate}
+              scenarioId={scenarioId}
+              cellId={`${activeCell.rowId}_${activeCell.col}`}
             />
           ) : activeCell.type === "Margin" || activeCell.type === "Markup" ? (
             <MarginMarkupDrawer
@@ -73,6 +80,9 @@ const ScenarioDrawers = ({ gridId, onSaveAsDraft }: ScenarioDrawersProps) => {
               initialItems={activeCell.items}
               onClose={handleClose}
               onUpdate={handleUpdate}
+              scenarioId={scenarioId}
+              cellId={`${activeCell.rowId}_${activeCell.col}`}
+              mainRowId={activeCell.rowId}
             />
           )}
         </Box>

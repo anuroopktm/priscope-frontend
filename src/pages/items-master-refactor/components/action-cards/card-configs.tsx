@@ -38,7 +38,7 @@ export const CARD_CONFIGS: readonly CardConfig[] = [
     image: upload,
     imageAlt: "Upload csv",
     imageStyle: { width: "130px", height: "auto" },
-  }
+  },
   // {
   //   id: "manual-add",
   //   title: (

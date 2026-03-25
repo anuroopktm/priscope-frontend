@@ -13,6 +13,7 @@ import {
   DialogContent,
   Divider,
   FormControl,
+  FormHelperText,
   InputLabel,
   MenuItem,
   Select,
@@ -38,7 +39,7 @@ const CreateScenarioModal = ({
     resolver: zodResolver(scenarioSchema),
     defaultValues: {
       label: "",
-      customer: "",
+      customer: [],
       currency: "",
     },
   });
@@ -62,9 +63,10 @@ const CreateScenarioModal = ({
     reset();
   };
 
-  const handleClose = (_e: {}, reason: "backdropClick" | "escapeKeyDown") => {
+  const handleClose = (_e?: object, reason?: string) => {
     if (reason === "backdropClick" || reason === "escapeKeyDown") return;
     onClose();
+    reset();
   };
 
   return (
@@ -99,7 +101,7 @@ const CreateScenarioModal = ({
           <Controller
             name="customer"
             control={control}
-            render={({ field }) => (
+            render={({ field, fieldState }) => (
               <FormControl fullWidth size="small">
                 <InputLabel id="customer-label">Customer</InputLabel>
                 <Select
@@ -108,7 +110,9 @@ const CreateScenarioModal = ({
                   label="Customer"
                   size="small"
                   variant="outlined"
+                  multiple
                   disabled={isCustomerLoading}
+                  error={!!fieldState.error}
                 >
                   {customerData?.customers.map((customer) => (
                     <MenuItem key={customer.id} value={customer.id}>
@@ -116,6 +120,9 @@ const CreateScenarioModal = ({
                     </MenuItem>
                   ))}
                 </Select>
+                <FormHelperText error={!!fieldState.error}>
+                  {fieldState.error?.message}
+                </FormHelperText>
               </FormControl>
             )}
           />
@@ -123,7 +130,7 @@ const CreateScenarioModal = ({
           <Controller
             name="currency"
             control={control}
-            render={({ field }) => (
+            render={({ field, fieldState }) => (
               <FormControl fullWidth size="small">
                 <InputLabel id="currency-label">Base Currency</InputLabel>
                 <Select
@@ -133,6 +140,7 @@ const CreateScenarioModal = ({
                   size="small"
                   variant="outlined"
                   disabled={isCurrencyLoading}
+                  error={!!fieldState.error}
                 >
                   {currencyData?.currencies.map((curr) => (
                     <MenuItem key={curr.id} value={curr.id}>
@@ -140,13 +148,20 @@ const CreateScenarioModal = ({
                     </MenuItem>
                   ))}
                 </Select>
+                <FormHelperText error={!!fieldState.error}>
+                  {fieldState.error?.message}
+                </FormHelperText>
               </FormControl>
             )}
           />
         </DialogContent>
 
         <DialogActions sx={{ p: 3, pt: 1, justifyContent: "start", gap: 1 }}>
-          <Button size="medium" variant="outlined" onClick={onClose}>
+          <Button
+            size="medium"
+            variant="outlined"
+            onClick={() => handleClose()}
+          >
             Cancel
           </Button>
           <Button

@@ -32,14 +32,14 @@ export const CustomDrawerLayout = {
   LeftCols: [],
   Cols: [
     {
-      Name: "A",
+      Name: "Custom input",
       Width: "250",
       Type: "Float",
       Format: "$0.00",
       Caption: "Custom input",
     },
     {
-      Name: "B",
+      Name: "Action",
       Width: "120",
       Type: "Html",
       Caption: "",
@@ -47,9 +47,9 @@ export const CustomDrawerLayout = {
     },
   ],
   Header: {
-    A: "Custom input",
-    B: "",
-    AAlign: "Left",
-    BAlign: "Right",
+    "Custom input": "Custom input",
+    Action: "",
+    "Custom inputAlign": "Left",
+    ActionAlign: "Right",
   },
 };

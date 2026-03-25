@@ -10,7 +10,7 @@ import {
 } from "@mui/material";
 import { useEffect, useState } from "react";
 
-interface ForkScenarioModalProps {
+interface DuplicateScenarioModalProps {
   open: boolean;
   onClose: () => void;
   onSubmit: (name: string) => void;
@@ -18,13 +18,13 @@ interface ForkScenarioModalProps {
   defaultName?: string;
 }
 
-const ForkScenarioModal = ({
+const DuplicateScenarioModal = ({
   open,
   onClose,
   onSubmit,
   isLoading,
   defaultName = "",
-}: ForkScenarioModalProps) => {
+}: DuplicateScenarioModalProps) => {
   const [name, setName] = useState(defaultName);
 
   useEffect(() => {
@@ -43,7 +43,7 @@ const ForkScenarioModal = ({
   return (
     <Dialog open={open} onClose={onClose} fullWidth maxWidth="sm">
       <Typography variant="h6" sx={{ color: "primary.main", px: 3, py: 2 }}>
-        Fork Scenario
+        Duplicate Scenario
       </Typography>
 
       <Divider sx={{ borderColor: "#D2D2D2" }} />
@@ -75,7 +75,7 @@ const ForkScenarioModal = ({
             disabled={!name.trim()}
             loading={isLoading}
           >
-            Fork
+            Duplicate
           </Button>
         </DialogActions>
       </Box>
@@ -83,4 +83,4 @@ const ForkScenarioModal = ({
   );
 };
 
-export default ForkScenarioModal;
+export default DuplicateScenarioModal;

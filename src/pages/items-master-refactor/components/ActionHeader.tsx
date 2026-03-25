@@ -143,17 +143,27 @@ const ActionHeader = ({
       {
         name: data.label,
         base_currency: data.currency,
-        customers: [{ customer_name: data.customer }],
+        customers: data.customer
+          ? data.customer.map((id) => ({ customer_id: id }))
+          : [],
       },
       {
         onSuccess: (response) => {
           setOpen(false);
-          showToast("Scenario created successfully", "success");
-          navigate(`/scenario-builder/details/${response.id}`);
+          showToast(
+            response.message || "Scenario created successfully",
+            "success",
+          );
+          if (response.id) {
+            navigate(`/scenario-builder/details/${response.id}`);
+          }
           clearSelectedRows();
         },
-        onError: () => {
-          showToast("Failed to create scenario", "error");
+        onError: (error) => {
+          showToast(
+            getErrorMessage(error, "Failed to create scenario"),
+            "error",
+          );
         },
       },
     );

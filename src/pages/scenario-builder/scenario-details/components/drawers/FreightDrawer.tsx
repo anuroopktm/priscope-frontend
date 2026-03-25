@@ -1,12 +1,33 @@
 import SearchTextField from "@/components/common/SearchTextField";
-import { useSearchFreightRates } from "@/services/queries/freight/freight.queries";
+import { useListCurrencies } from "@/services/queries/common/common.queries";
+import {
+  useCreateContainerType,
+  useCreateFreightRate,
+  useSearchContainerTypes,
+  useSearchFreightRates,
+} from "@/services/queries/freight/freight.queries";
 import type { FreightRate } from "@/services/queries/freight/freight.types";
+import { useToastStore } from "@/store/useToastStore";
 import AddIcon from "@mui/icons-material/Add";
-import { Box, Button, Typography } from "@mui/material";
-import { useEffect, useState } from "react";
+import CheckIcon from "@mui/icons-material/Check";
+import CloseIcon from "@mui/icons-material/Close";
+import {
+  Box,
+  Button,
+  IconButton,
+  Portal,
+  Stack,
+  TextField,
+  Typography,
+} from "@mui/material";
+import { useQueryClient } from "@tanstack/react-query";
+import React, { useCallback, useEffect, useMemo, useState } from "react";
 import { FreightDrawerLayout } from "../../tree-grid/config/freight-drawer-layout";
 import { useTreeGridInit } from "../../tree-grid/hooks/useTreeGridInit";
 import DrawerHeader from "../items-master-drawer/components/DrawerHeader";
+import { GridSelectPopover } from "./components/GridSelectPopover";
+
+console.log("FreightDrawer.tsx module loaded");
 
 interface FreightDrawerProps {
   onClose: () => void;
@@ -16,82 +37,420 @@ interface FreightDrawerProps {
 const freightGridId = "FreightDrawerGrid";
 const freightGridContainerId = "TreeGrid_" + freightGridId;
 
-const FreightGrid = ({ data }: { data: any }) => {
-  useTreeGridInit(
-    freightGridId,
-    freightGridContainerId,
-    FreightDrawerLayout,
-    data,
-  );
-  return (
-    <Box id={freightGridContainerId} sx={{ height: "100%", width: "100%" }} />
-  );
-};
+const FreightGrid = React.memo(
+  ({ data, onInit }: { data: any; onInit?: (id: string) => void }) => {
+    console.log("FreightGrid component mounting", { hasOninit: !!onInit });
+    useTreeGridInit(
+      freightGridId,
+      freightGridContainerId,
+      FreightDrawerLayout,
+      data,
+      (grid) => onInit?.(grid.id),
+    );
+    return (
+      <Box
+        id={freightGridContainerId}
+        sx={{ height: "100%", width: "100%", overflow: "visible" }}
+      />
+    );
+  },
+);
+
+FreightGrid.displayName = "FreightGrid";
 
 const FreightDrawer = ({ onClose, onSelect }: FreightDrawerProps) => {
+  console.log("FreightDrawer component executing/rendering");
+  const queryClient = useQueryClient();
+  const showToast = useToastStore((state) => state.showToast);
   const [searchTerm, setSearchTerm] = useState("");
-  const { data: freightRatesData, isLoading } = useSearchFreightRates({
+  const {
+    data: freightRatesData,
+    isLoading,
+    refetch,
+  } = useSearchFreightRates({
     search: searchTerm,
   });
+  const [localRows, setLocalRows] = useState<any[]>([]);
+
+  const [popoverPosition, setPopoverPosition] = useState<{
+    top: number;
+    left: number;
+    height: number;
+    rowId: string;
+  } | null>(null);
+  const [commentText, setCommentText] = useState("");
+
+  const [dropdownPopover, setDropdownPopover] = useState<{
+    top: number;
+    left: number;
+    width: number;
+    height: number;
+    column: string;
+    rowId: string;
+    value: string;
+  } | null>(null);
+
+  // APIs for dropdowns
+  const { data: currenciesData } = useListCurrencies({
+    search: "",
+    page_size: 100,
+    skip: 0,
+  });
+
+  const { data: containerTypesData } = useSearchContainerTypes({
+    tenant_id: "6b9d182e-5d44-4dbf-8a0d-efa9bb05996e", // Using sample tenant
+    search: "",
+    page_size: 100,
+    skip: 0,
+  });
+
+  const { mutateAsync: createContainerType } = useCreateContainerType();
+  const { mutate: createRate, isPending: isCreating } = useCreateFreightRate();
+
+  const handleClosePopover = () => {
+    setPopoverPosition(null);
+    setCommentText("");
+  };
+
+  const handleSaveFreightRow = (saveWithComment: boolean) => {
+    if (!popoverPosition) return;
+    const grid = (window as any).Grids?.[freightGridId];
+    if (!grid) return;
+
+    const rowId = popoverPosition.rowId;
+    const row = grid.GetRowById(rowId);
+    if (!row) return;
+
+    const resolveAndSave = async () => {
+      let containerTypeId = row["Container Type_id"];
+
+      if (!containerTypeId && row["Container Type"]) {
+        const existing = containerTypesData?.container_types?.find(
+          (t: any) => t.type === row["Container Type"],
+        );
+        if (existing) {
+          containerTypeId = existing.id;
+        } else {
+          try {
+            const newType = await createContainerType({
+              type: row["Container Type"],
+              description: `Standard ${row["Container Type"]} container`,
+              tenant_id: "6b9d182e-5d44-4dbf-8a0d-efa9bb05996e",
+            });
+            containerTypeId = newType.id;
+          } catch (e) {
+            showToast("Failed to create new container type", "error");
+            return;
+          }
+        }
+      }
+
+      const payload = {
+        action_key: "curr_rate",
+        comments:
+          saveWithComment && commentText.trim()
+            ? [{ comment: commentText.trim(), comment_type: "row" }]
+            : [],
+        container_type_id:
+          containerTypeId || "c3d4e5f6-7890-1234-cdef-123406789012",
+        currency: row["Currency"] || "USD",
+        port_of_destination: row["Port of Destination"] || "",
+        port_of_origin: row["Port of Origin"] || "",
+        rate: Number(row["Rate"]) || 0,
+        source: "freight_rate",
+        tenant_id: "6b9d182e-5d44-4dbf-8a0d-efa9bb05996e",
+        valid_from: new Date().toISOString().split("T")[0] + "T00:00:00",
+        valid_to: "2030-12-31T23:59:59",
+      };
+
+      createRate(payload, {
+        onSuccess: () => {
+          showToast("Freight rate saved successfully", "success");
+          setLocalRows((prev) => prev.filter((r) => r.id !== rowId));
+          handleClosePopover();
+          refetch();
+        },
+        onError: () => {
+          showToast("Failed to save freight rate", "error");
+        },
+      });
+    };
+
+    resolveAndSave();
+  };
+
+  const handleGridInit = useCallback((gridId: string) => {
+    console.log("Setting up TreeGrid events for:", gridId);
+
+    const showDropdown = (row: any, col: string) => {
+      if (!row || !row.id.startsWith("local_")) return false;
+      console.log("Triggering dropdown event for:", col, row.id);
+      const grid = (window as any).Grids?.[gridId];
+      if (!grid) return false;
+
+      // Force any active edits to save before we process the popover
+      grid.EndEdit(1);
+
+      if (col === "Container Type" || col === "Currency") {
+        grid.Focus(row, col);
+        const cell = grid.GetCell(row, col);
+        if (cell) {
+          const rect = cell.getBoundingClientRect();
+          console.log("Requesting popover at rect:", rect);
+          setDropdownPopover({
+            top: rect.top,
+            left: rect.left,
+            width: rect.width,
+            height: rect.height,
+            column: col,
+            rowId: row.id,
+            value: row[col] || "",
+          });
+          return true;
+        }
+      }
+      return false;
+    };
+
+    if ((window as any).TGSetEvent) {
+      (window as any).TGSetEvent(
+        "OnClick",
+        gridId,
+        (_: any, row: any, col: string) => showDropdown(row, col),
+      );
+      (window as any).TGSetEvent(
+        "OnFocus",
+        gridId,
+        (_: any, row: any, col: string) => {
+          showDropdown(row, col);
+        },
+      );
+      console.log("Events registered via TGSetEvent");
+    } else {
+      console.warn("TGSetEvent not found on window");
+    }
+  }, []);
+
+  const handleSelectOption = (value: string, id?: string) => {
+    if (!dropdownPopover) return;
+    const { rowId, column } = dropdownPopover;
+    const grid = (window as any).Grids?.[freightGridId];
+    if (grid) {
+      const row = grid.GetRowById(rowId);
+      if (row) {
+        // Use SetValue to ensure TreeGrid processes the change correctly
+        grid.SetValue(row, column, value, 1);
+        if (column === "Container Type" && id) {
+          row["Container Type_id"] = id;
+        }
+
+        // Sync localRows state with current grid values
+        if (rowId.startsWith("local_")) {
+          setLocalRows((prev) =>
+            prev.map((r) =>
+              r.id === rowId
+                ? {
+                    ...r,
+                    port_of_origin: grid.GetValue(row, "Port of Origin") || "",
+                    port_of_destination:
+                      grid.GetValue(row, "Port of Destination") || "",
+                    rate: Number(grid.GetValue(row, "Rate")) || 0,
+                    [column === "Container Type"
+                      ? "container_type"
+                      : "currency"]: value,
+                    ...(column === "Container Type" && id
+                      ? { container_type_id: id }
+                      : {}),
+                  }
+                : r,
+            ),
+          );
+        }
+
+        // Focus away from the grid to prevent immediate re-trigger of focus/dropdown
+        grid.Focus(null, null);
+      }
+    }
+    setDropdownPopover(null);
+  };
+
+  const handleCreateNewContainerType = async (value: string) => {
+    try {
+      const newType = await createContainerType({
+        type: value,
+        description: `Standard ${value} container`,
+        tenant_id: "6b9d182e-5d44-4dbf-8a0d-efa9bb05996e",
+      });
+      queryClient.invalidateQueries({ queryKey: ["container-types"] });
+      handleSelectOption(newType.type, newType.id);
+      showToast(`Created New Container Type: ${value}`, "success");
+    } catch (e) {
+      showToast("Failed to create container type", "error");
+    }
+  };
+
+  const handleAddNewRow = () => {
+    const grid = (window as any).Grids?.[freightGridId];
+    let updatedLocalRows = [...localRows];
+
+    if (grid) {
+      updatedLocalRows = updatedLocalRows.map((row) => {
+        const r = grid.GetRowById(row.id);
+        if (r) {
+          return {
+            ...row,
+            port_of_origin:
+              r["Port of Origin"] !== undefined
+                ? r["Port of Origin"]
+                : row.port_of_origin,
+            port_of_destination:
+              r["Port of Destination"] !== undefined
+                ? r["Port of Destination"]
+                : row.port_of_destination,
+            container_type:
+              r["Container Type"] !== undefined
+                ? r["Container Type"]
+                : row.container_type,
+            currency:
+              r["Currency"] !== undefined ? r["Currency"] : row.currency,
+            rate: r["Rate"] !== undefined ? r["Rate"] : row.rate,
+          };
+        }
+        return row;
+      });
+    }
+
+    const newId = `local_${Date.now()}`;
+    setLocalRows([
+      {
+        id: newId,
+        port_of_origin: "",
+        port_of_destination: "",
+        container_type: "",
+        currency: "",
+        rate: "",
+      },
+      ...updatedLocalRows,
+    ]);
+
+    setTimeout(() => {
+      const g = (window as any).Grids?.[freightGridId];
+      if (g) {
+        const row = g.GetRowById(newId);
+        if (row) {
+          const cell = g.GetCell(row, "Actions");
+          if (cell) {
+            const rect = cell.getBoundingClientRect();
+            g.EndEdit(1);
+            setPopoverPosition({
+              top: rect.top,
+              left: rect.left,
+              height: rect.height,
+              rowId: newId,
+            });
+          }
+        }
+      }
+    }, 400);
+  };
   const renderActionCell = (id: string, isSelected: boolean = false) => {
     if (isSelected) {
-      return `
-                <div style="display: flex; justify-content: center; align-items: center; width: 100%; height: 100%; color: #059669;">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                        <polyline points="20 6 9 17 4 12"></polyline>
-                    </svg>
-                </div>
-            `;
+      return `<div style="display: flex; justify-content: center; align-items: center; width: 100%; height: 100%; color: #059669;">
+                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <polyline points="20 6 9 17 4 12"></polyline>
+                </svg>
+            </div>`;
     }
-    return `
-            <div style="display: flex; justify-content: center; align-items: center; width: 100%; height: 100%;">
-                <button 
-                    onclick="window.handleSelectFreightRow && window.handleSelectFreightRow('${id}')"
-                    style="background: #E0F2FE; border: 1px solid #BAE6FD; border-radius: 4px; color: #0369A1; font-size: 11px; font-weight: 500; cursor: pointer; padding: 2px 8px; width: 60px; height: 24px;"
-                >
+    if (id.startsWith("local_")) {
+      return `<div style="display: flex; justify-content: center; align-items: center; width: 100%; height: 100%; gap: 8px;">
+                <button onclick="window.handleDeleteFreightRow && window.handleDeleteFreightRow('${id}')" 
+                    style="background: transparent; border: none; color: #EF4444; cursor: pointer; display: flex; align-items: center; justify-content: center; padding: 4px;"
+                    title="Delete">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M3 6h18"></path>
+                        <path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"></path>
+                        <path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"></path>
+                    </svg>
+                </button>
+            </div>`;
+    }
+    return `<div style="display: flex; justify-content: center; align-items: center; width: 100%; height: 100%;">
+                <button onclick="window.handleSelectFreightRow && window.handleSelectFreightRow('${id}')"
+                    style="background: #E0F2FE; border: 1px solid #BAE6FD; border-radius: 4px; color: #0369A1; font-size: 11px; font-weight: 500; cursor: pointer; padding: 2px 8px; width: 60px; height: 24px;">
                     Select
                 </button>
-            </div>
-        `;
+            </div>`;
   };
 
-  const gridData = {
-    Body: [
-      freightRatesData?.freight_rates?.map((rate: FreightRate) => ({
-        id: rate.id,
-        port_of_origin: rate.port_of_origin,
-        port_of_destination: rate.port_of_destination,
-        container_type: rate.container_type || "20 ft",
-        currency: rate.currency,
-        rate: rate.rate,
-        actions: renderActionCell(rate.id, false),
-      })) || [],
-    ],
-  };
+  const gridData = useMemo(() => {
+    return {
+      Body: [
+        [
+          ...localRows.map((row) => ({
+            id: row.id,
+            "Port of Origin": row.port_of_origin,
+            "Port of Destination": row.port_of_destination,
+            "Container Type": row.container_type,
+            Currency: row.currency,
+            Rate: row.rate,
+            Actions: renderActionCell(row.id, false),
+            CanEdit: "1",
+            "Port of OriginCanEdit": "1",
+            "Port of DestinationCanEdit": "1",
+            RateCanEdit: "1",
+            "Container TypeCanEdit": "1",
+            CurrencyCanEdit: "1",
+          })),
+          ...(freightRatesData?.freight_rates?.map((rate: FreightRate) => ({
+            id: rate.id,
+            "Port of Origin": rate.port_of_origin,
+            "Port of Destination": rate.port_of_destination,
+            "Container Type": rate.container_type || "20 ft",
+            "Container Type_id": rate.container_type,
+            Currency: rate.currency,
+            Rate: rate.rate,
+            Actions: renderActionCell(rate.id, false),
+            CanEdit: "0",
+            "Port of OriginCanEdit": "0",
+            "Port of DestinationCanEdit": "0",
+            RateCanEdit: "0",
+            "Container TypeCanEdit": "0",
+            CurrencyCanEdit: "0",
+          })) || []),
+        ],
+      ],
+    };
+  }, [localRows, freightRatesData]);
 
-  // Global handler for row selection
   useEffect(() => {
     (window as any).handleSelectFreightRow = (rowId: string) => {
-      const rate = freightRatesData?.freight_rates?.find(
-        (r: FreightRate) => r.id === rowId,
-      );
-      if (rate) {
-        onSelect([
-          {
-            id: rate.id,
-            name: `Freight (${rate.port_of_origin} - ${rate.port_of_destination})`,
-            cost: rate.rate,
-            currency: rate.currency,
-            source: "Freight API",
-          },
-        ]);
-        onClose();
+      const grid = (window as any).Grids?.[freightGridId];
+      if (grid) {
+        const row = grid.GetRowById(rowId);
+        if (row) {
+          onSelect([
+            {
+              id: rowId,
+              name: `Freight (${row["Port of Origin"] || ""} - ${row["Port of Destination"] || ""})`,
+              cost: Number(row["Rate"]) || 0,
+              currency: row["Currency"] || "USD",
+              source: rowId.startsWith("local_") ? "Manual" : "Freight API",
+            },
+          ]);
+          onClose();
+        }
       }
     };
+    (window as any).handleDeleteFreightRow = (rowId: string) => {
+      setLocalRows((prev) => prev.filter((r) => r.id !== rowId));
+      setPopoverPosition(null);
+    };
+
     return () => {
       delete (window as any).handleSelectFreightRow;
+      delete (window as any).handleDeleteFreightRow;
     };
-  }, [freightRatesData, onSelect, onClose]);
+  }, [onSelect, onClose]);
 
   return (
     <Box
@@ -102,15 +461,12 @@ const FreightDrawer = ({ onClose, onSelect }: FreightDrawerProps) => {
         bgcolor: "background.paper",
         borderTopLeftRadius: 8,
         borderTopRightRadius: 8,
-        overflow: "hidden",
+        overflow: "visible",
         borderTop: 1,
         borderColor: "divider",
       }}
     >
-      {/* Header */}
       <DrawerHeader title="Freight Library" onClose={onClose} />
-
-      {/* Content Container */}
       <Box
         sx={{
           flex: 1,
@@ -122,7 +478,6 @@ const FreightDrawer = ({ onClose, onSelect }: FreightDrawerProps) => {
           bgcolor: "white",
         }}
       >
-        {/* Search Bar Area */}
         <Box
           sx={{
             p: 1.5,
@@ -130,19 +485,20 @@ const FreightDrawer = ({ onClose, onSelect }: FreightDrawerProps) => {
             alignItems: "center",
             justifyContent: "space-between",
             bgcolor: "#E8E8E8",
-            borderRadius: 0.5,
+            borderRadius: 1,
             mb: 2,
           }}
         >
           <SearchTextField
             size="small"
             onSearch={setSearchTerm}
+            containerSx={{ bgcolor: "white", px: 0 }}
             sx={{
               "& .MuiOutlinedInput-root": {
-                bgcolor: "#E8E8E8",
+                bgcolor: "white",
                 color: "text.primary",
                 "& .MuiInputAdornment-root svg path": {
-                  stroke: (theme) => theme.palette.brand.primary,
+                  stroke: (theme: any) => theme.palette.brand.primary,
                 },
                 "& .MuiOutlinedInput-notchedOutline": {
                   borderColor: "#E8E8E8 !important",
@@ -150,12 +506,15 @@ const FreightDrawer = ({ onClose, onSelect }: FreightDrawerProps) => {
               },
             }}
           />
-          <Button size="small" variant="contained" startIcon={<AddIcon />}>
+          <Button
+            size="small"
+            variant="contained"
+            startIcon={<AddIcon />}
+            onClick={handleAddNewRow}
+          >
             New
           </Button>
         </Box>
-
-        {/* Grid Content */}
         <Box
           sx={{
             flex: 1,
@@ -164,7 +523,7 @@ const FreightDrawer = ({ onClose, onSelect }: FreightDrawerProps) => {
             border: "1px solid",
             borderColor: "divider",
             borderRadius: 1,
-            overflow: "hidden",
+            overflow: "visible",
           }}
         >
           {isLoading ? (
@@ -176,12 +535,133 @@ const FreightDrawer = ({ onClose, onSelect }: FreightDrawerProps) => {
                 justifyContent: "center",
               }}
             >
-              <Typography variant="body2" color="textSecondary">
-                Loading freight rates...
-              </Typography>
+              <Typography variant="body2">Loading...</Typography>
             </Box>
           ) : (
-            <FreightGrid data={gridData} />
+            <FreightGrid data={gridData} onInit={handleGridInit} />
+          )}
+
+          {dropdownPopover && (
+            <GridSelectPopover
+              anchor={dropdownPopover}
+              options={
+                dropdownPopover.column === "Container Type"
+                  ? (containerTypesData?.container_types || []).map(
+                      (t: any) => ({
+                        id: t.id,
+                        label: t.type,
+                      }),
+                    )
+                  : (currenciesData?.currencies || []).map((c: any) => ({
+                      id: c.id || c.currency || c.code,
+                      label: c.currency || c.code || "",
+                    }))
+              }
+              onSelect={handleSelectOption}
+              onClose={() => setDropdownPopover(null)}
+              showCreateNew={dropdownPopover.column === "Container Type"}
+              onCreateNew={handleCreateNewContainerType}
+              placeholder={`Search ${
+                dropdownPopover.column === "Container Type"
+                  ? "container..."
+                  : "currency..."
+              }`}
+            />
+          )}
+          {popoverPosition && (
+            <Portal>
+              <Box
+                sx={{
+                  position: "fixed",
+                  top: popoverPosition.top + popoverPosition.height - 10,
+                  left: Math.max(10, popoverPosition.left - 310),
+                  zIndex: 1000000,
+                  width: 320,
+                  bgcolor: "background.paper",
+                  borderRadius: 2,
+                  mt: 1.5,
+                }}
+              >
+                <Box
+                  sx={{
+                    p: 2,
+                    position: "relative",
+                    pr: 0,
+                    pointerEvents: "auto",
+                  }}
+                >
+                  <Typography variant="subtitle2" sx={{ mb: 1 }}>
+                    Comments*
+                  </Typography>
+                  <TextField
+                    fullWidth
+                    multiline
+                    rows={3}
+                    value={commentText}
+                    onChange={(e) => setCommentText(e.target.value)}
+                    onKeyDownCapture={(e) => {
+                      e.stopPropagation();
+                    }}
+                    onKeyUpCapture={(e) => {
+                      e.stopPropagation();
+                    }}
+                    placeholder="Type here..."
+                    autoFocus
+                    variant="standard"
+                    InputProps={{
+                      disableUnderline: true,
+                      sx: {
+                        fontSize: "13px",
+                        py: 1,
+                        borderTop: "1px solid #E5E7EB",
+                      },
+                    }}
+                  />
+                  <Stack
+                    direction="row"
+                    spacing={1.5}
+                    sx={{
+                      position: "absolute",
+                      right: -90,
+                      top: 0,
+                      display: "flex",
+                      alignItems: "center",
+                    }}
+                  >
+                    <IconButton
+                      onClick={() => handleSaveFreightRow(true)}
+                      disabled={isCreating || !commentText.trim()}
+                      sx={{
+                        bgcolor: "white",
+                        boxShadow: "0px 4px 10px rgba(0,0,0,0.1)",
+                        color: "#3B82F6",
+                        "&:hover": { bgcolor: "#F3F4F6" },
+                        border: "1px solid #E5E7EB",
+                        width: 36,
+                        height: 36,
+                      }}
+                    >
+                      <CheckIcon />
+                    </IconButton>
+                    <IconButton
+                      onClick={() => handleSaveFreightRow(false)}
+                      disabled={isCreating}
+                      sx={{
+                        bgcolor: "white",
+                        boxShadow: "0px 4px 10px rgba(0,0,0,0.1)",
+                        color: "#EF4444",
+                        "&:hover": { bgcolor: "#F3F4F6" },
+                        border: "1px solid #E5E7EB",
+                        width: 36,
+                        height: 36,
+                      }}
+                    >
+                      <CloseIcon />
+                    </IconButton>
+                  </Stack>
+                </Box>
+              </Box>
+            </Portal>
           )}
         </Box>
       </Box>
