@@ -40,7 +40,13 @@ const CostStep = ({ onNext }: { onNext: () => void }) => {
   };
 
   const onSubmit = (formData: CostStepFormValues) => {
-    updateData({ ...formData, additional_cost_elements: additionalCosts });
+    const cleaned = additionalCosts.map((i) => i.trim()).filter((i) => i !== "");
+
+    updateData({
+      ...formData,
+      additional_cost_elements: cleaned.length > 0 ? cleaned : null,
+    });
+
     onNext();
   };
 

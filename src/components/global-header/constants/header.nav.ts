@@ -16,8 +16,8 @@ export const HEADER_NAV = [
     icon: BookOpenIcon,
     items: [
       {
-        label: "Rate Libraries",
-        path: "/rate-libraries",
+        label: "Freight Rate Library",
+        path: "/freight-rate-library",
       },
     ],
   },

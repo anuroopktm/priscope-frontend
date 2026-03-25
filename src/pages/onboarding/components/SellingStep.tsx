@@ -38,12 +38,16 @@ const SellingStep = ({ onNext }: { onNext: () => void }) => {
   };
 
   const onSubmit = (formData: SellingPriceElementFormValues) => {
+    const cleaned = sellingSteps.map((i) => i.trim()).filter((i) => i !== "");
+
     updateData({
       ...formData,
-      additional_selling_price_elements: sellingSteps,
+      additional_selling_price_elements: cleaned.length > 0 ? cleaned : null,
     });
+
     onNext();
   };
+
   return (
     <Box
       component="form"
@@ -103,13 +107,12 @@ const SellingStep = ({ onNext }: { onNext: () => void }) => {
             alignItems: "center",
             flexDirection: "row",
             gap: 1,
-            // justifyContent: "center"
             lineHeight: 1,
           }}
         >
           <img src={addCircle} alt="" style={{ height: "100%" }} />
           <Typography sx={{ fontSize: "12px" }}>
-            Add another Supplier Cost
+            Additional Selling Price Elements
           </Typography>
         </Box>
         {sellingSteps.map((value, index) => (

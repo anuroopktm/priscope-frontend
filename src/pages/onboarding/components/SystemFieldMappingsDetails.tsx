@@ -19,6 +19,17 @@ const fields = [
   { label: "Customer Code", name: "customerCode" },
 ];
 
+const fieldKeyMap: Record<string, keyof SystemFieldMappingFormValues> = {
+  SKU: "sku",
+  UPC: "upc",
+  Description: "description",
+  Category: "category",
+  "HS Code": "hsCode",
+  "Supplier Name": "supplierName",
+  "Supplier Code": "supplierCode",
+  "Customer Name": "customerName",
+  "Customer Code": "customerCode",
+};
 const SystemFieldMappingsDetails = ({ onNext }: { onNext: () => void }) => {
   const { data, updateData } = useOnboardingStore();
 
@@ -36,11 +47,22 @@ const SystemFieldMappingsDetails = ({ onNext }: { onNext: () => void }) => {
       category: "",
       hsCode: "",
       supplierName: "",
+      supplierCode: "",
+      customerName: "",
+      customerCode: "",
     },
   });
 
-  const onSubmit = (data: SystemFieldMappingFormValues) => {
-    updateData({ field_mappings: data });
+  const onSubmit = (formData: SystemFieldMappingFormValues) => {
+    const field_mappings = Object.entries(fieldKeyMap).reduce(
+      (acc, [system_field, key]) => {
+        acc[system_field] = formData[key];
+        return acc;
+      },
+      {} as Record<string, string>,
+    );
+
+    updateData({ field_mappings });
     onNext();
   };
 

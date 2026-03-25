@@ -19,6 +19,7 @@ import {
   type SetupStepFormValues,
 } from "@/validations/onboarding/setupStep.schema";
 import { useOnboardingStore } from "@/pages/onboarding/store/useOnboardingStore";
+import { useListCurrencies } from "@/services/queries/common/common.queries";
 
 const DropZone = styled(Box)<{ isDragOver: boolean }>(({ theme }) => ({
   border: `1px dashed #144E72`,
@@ -36,7 +37,12 @@ interface Props {
 const SetupStep = ({ onNext }: Props) => {
   const [isDragOver, setIsDragOver] = useState(false);
   const { data, updateData } = useOnboardingStore();
-
+  const { data: currencyData, isLoading: isCurrencyLoading } =
+    useListCurrencies({
+      search: "",
+      page_size: 300,
+      skip: 0,
+    });
   const {
     register,
     handleSubmit,
@@ -51,7 +57,12 @@ const SetupStep = ({ onNext }: Props) => {
       industry: data.industry ?? "",
       company_size: data.company_size ?? "",
       primary_location: data.primary_location ?? "",
-      base_currency: data.base_currency ?? "",
+      base_currency:
+        currencyData?.currencies?.find(
+          (c) => c.currency === data.base_currency,
+        )?.id ||
+        data.base_currency ||
+        "",
       company_logo: data.company_logo ?? undefined,
     },
   });
@@ -177,18 +188,37 @@ const SetupStep = ({ onNext }: Props) => {
         <Typography fontSize={12} mb={1}>
           Base Currency *
         </Typography>
-        <TextField
-          fullWidth
-          {...register("base_currency")}
-          error={!!errors.base_currency}
-          helperText={errors.base_currency?.message}
-          size="small"
+
+        <Controller
+          name="base_currency"
+          control={control}
+          render={({ field }) => (
+            <FormControl fullWidth size="small" error={!!errors.base_currency}>
+              <Select {...field} displayEmpty disabled={isCurrencyLoading}>
+                <MenuItem value="">
+                  <em>
+                    {isCurrencyLoading
+                      ? "Loading currencies..."
+                      : "Select base currency"}
+                  </em>
+                </MenuItem>
+
+                {currencyData?.currencies?.map((curr) => (
+                  <MenuItem key={curr.id} value={curr.id}>
+                    {curr.description} ({curr.currency})
+                  </MenuItem>
+                ))}
+              </Select>
+
+              <FormHelperText>{errors.base_currency?.message}</FormHelperText>
+            </FormControl>
+          )}
         />
       </Box>
 
       <Box>
         <Typography fontSize={12} mb={1}>
-          Upload Company Logo (optional)
+          Upload Company Logo
         </Typography>
 
         <Controller

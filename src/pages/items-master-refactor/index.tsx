@@ -64,6 +64,9 @@ const ItemMasterListingPage = () => {
   const privileges: {} = JSON.parse(localStorage.getItem("privileges") || "");
   const { hasEditItemMasterPrivilege, hasAddItemMasterPrivilege } =
     hasItemMasterPrivileges(privileges);
+  const { handleGridEditConfirm, handleAdminRequestConfirm } =
+    useHandleGridEditConfirm();
+
   const { handleConfirmComment, isCreatingComment } = useConfirmComment();
 
   const { data: itemMasterData, refetch } = useListItems({
@@ -155,8 +158,6 @@ const ItemMasterListingPage = () => {
   ) => {
     handleValueChanged(grid, row, col, val, oldval, gridId);
   };
-
-  const { handleGridEditConfirm } = useHandleGridEditConfirm();
 
   const onCellEditConfirm = (
     row: TRow,
@@ -337,6 +338,7 @@ const ItemMasterListingPage = () => {
           {
             label: "Understood",
             onClick: () => {
+              handleAdminRequestConfirm();
               setOpenAdminRequestConfirmationModal(false);
             },
           },

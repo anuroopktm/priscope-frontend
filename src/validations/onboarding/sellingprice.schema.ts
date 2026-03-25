@@ -3,7 +3,7 @@ export const sellingPriceElementSchema = z.object({
   core_selling_price_element: z
     .string()
     .min(1, "Core selling price element is required"),
-  additional_selling_price_elements: z.array(z.string()).optional(),
+  additional_selling_price_elements: z.array(z.string()).nullable(),
 });
 
 export type SellingPriceElementFormValues = z.infer<

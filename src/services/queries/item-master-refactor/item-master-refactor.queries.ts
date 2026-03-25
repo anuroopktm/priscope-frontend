@@ -7,6 +7,7 @@ import type {
   EditItemMasterColResponse,
   ExportItemMasterRowPayload,
   ExportItemMasterRowResponse,
+  ItemMasterBulkAddRequest,
   ItemMasterBulkInsertAdminRequestResponse,
   ItemMasterBulkUploadFormattedDataPayload,
   ItemMasterBulkUploadResponseType,
@@ -218,6 +219,24 @@ export const useExportItemMasterRow = () => {
 };
 
 export const useAddBulkInsertAdminRequest = () => {
+  return useMutation<
+    ItemMasterBulkInsertAdminRequestResponse,
+    AxiosError,
+    // AddBulkInsertAdminRequest
+    ItemMasterBulkAddRequest
+  >({
+    mutationFn: async (payload) => {
+      const response =
+        await axiosInstance.post<ItemMasterBulkInsertAdminRequestResponse>(
+          `/v1/approval-requests`,
+          payload,
+        );
+      return response.data;
+    },
+  });
+};
+
+export const useEditCellAdminRequest = () => {
   return useMutation<
     ItemMasterBulkInsertAdminRequestResponse,
     AxiosError,

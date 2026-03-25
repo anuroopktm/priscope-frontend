@@ -1,5 +1,5 @@
-import CloseButton from "@/public/images/upload_modal/closeButton.svg";
-import DownloadImage from "@/public/images/upload_modal/download.svg";
+import CloseButton from "@/assets/rate-libraries/closeButton.svg";
+import DownloadImage from "@/assets/rate-libraries/download.svg";
 import { useGetTemplateFile } from "@/services/queries/common/common.queries";
 import { theme } from "@/theme/theme";
 import { Box, DialogTitle, Typography } from "@mui/material";
@@ -58,12 +58,12 @@ const ModalHeader: React.FC<ModalHeaderProps> = ({
             component="span"
             onClick={handleTemplateDownload}
             sx={{
-              color: theme.palette.divider,
+              color: "#3a3838ff",
               fontSize: 14,
               textDecoration: "none",
               cursor: "pointer",
               display: "flex",
-              alignItems: "center",
+              alignItems: "center"
             }}
           >
             <img

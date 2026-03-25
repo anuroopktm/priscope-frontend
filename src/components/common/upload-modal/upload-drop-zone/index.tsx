@@ -1,4 +1,4 @@
-import UploadFileImage from "@/public/images/upload_modal/uploadfile.svg";
+import UploadFileImage from "@/assets/rate-libraries/uploadfile.svg";
 import { Box, Typography } from "@mui/material";
 import { useTheme } from "@mui/material/styles";
 import React, { useCallback } from "react";

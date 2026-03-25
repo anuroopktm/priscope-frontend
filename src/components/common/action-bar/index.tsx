@@ -1,6 +1,5 @@
-"use client";
 
-import SearchIcon from "@/public/images/search.svg";
+import SearchIcon from "@/assets/rate-libraries/search.svg";
 import {
   Box,
   Button,
@@ -11,14 +10,13 @@ import {
   useTheme,
 } from "@mui/material";
 import React, { useCallback } from "react";
-// import Image from "next/image";
-import CommentIcon from "@/assets/actions/comment.svg";
+import CommentIcon from "@/assets/items-master/CommentsButton.svg";
 import {
   default as ImportDataIcon,
   default as LogFileIcon,
 } from "@/assets/actions/database-import.svg";
-import ExportDataIcon from "@/assets/actions/export-data.svg";
-import RequestsIcon from "@/assets/actions/requests.svg";
+import ExportDataIcon from "@/assets/rate-libraries/export-data.svg";
+import RequestsIcon from "@/assets/rate-libraries/requests.svg";
 import AddIcon from "@mui/icons-material/Add";
 import CheckCircleOutlineOutlinedIcon from "@mui/icons-material/CheckCircleOutlineOutlined";
 import HighlightOffOutlinedIcon from "@mui/icons-material/HighlightOffOutlined";
@@ -43,7 +41,7 @@ interface ExtendedActionBarProps {
   isUpdating?: boolean;
   showUploadModal?: boolean;
   setShowUploadModal?: (value: boolean) => void;
-  onBulkStatusUpdate?: (status: string) => void;
+  onBulkStatusUpdate?: (status: "active" | "inactive") => void;
   onToggleDrawer?: () => void;
   filterOptions?:
     | { value: string; label: string }[]
@@ -376,7 +374,7 @@ const ActionBar = ({
             />
           </Box>
           <InputBase
-            placeholder={t("common", "actionBar.searchPlaceholder")}
+            placeholder={"Search"}
             onChange={handleSearchChange}
             sx={{
               p: 1,
@@ -572,15 +570,7 @@ const ActionBar = ({
             <Button
               onClick={onToggleDrawer}
               sx={{
-                padding: "11px 12px",
-                color: theme.palette.grey[300],
-                border: "1px solid",
-                borderRadius: "8px",
                 borderColor: theme.palette.brand.tertiary,
-                "&:hover": {
-                  color: "white",
-                  bgcolor: theme.palette.brand.hover,
-                },
                 textTransform: "none",
                 fontWeight: 600,
                 minWidth: "40px",
@@ -590,7 +580,6 @@ const ActionBar = ({
               <img
                 src={CommentIcon}
                 alt={t("common", "actionBar.commentIconAlt")}
-                width={16}
               />
             </Button>
           )}
