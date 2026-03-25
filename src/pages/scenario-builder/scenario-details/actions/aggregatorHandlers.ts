@@ -192,6 +192,7 @@ export const handleAggregatorUpdate = (
 
       grid.Update();
 
+      const formulaParts: string[] = [];
       (Array.isArray(items) ? items : []).forEach((item, index) => {
         if (!item || !item.name) return;
         if (item.type === "Margin" || item.type === "Markup") return;
@@ -203,6 +204,7 @@ export const handleAggregatorUpdate = (
         const cleanName = itemName.trim();
         const safeName = cleanName.replace(/[^a-zA-Z0-9]/g, "").toLowerCase();
         const colId = `Comp_${targetCol}_${safeName || "Item"}`;
+        formulaParts.push(colId);
         const insertPos = targetPos + index;
 
         if (!grid.Cols[colId]) {
@@ -258,11 +260,23 @@ export const handleAggregatorUpdate = (
 
       grid.SetValue(row, targetCol, roundedTotal, 1);
 
+      if (formulaParts.length > 0) {
+        grid.SetAttribute(
+          row,
+          targetCol,
+          "Formula",
+          formulaParts.join(" + "),
+          1,
+        );
+        grid.SetAttribute(row, null, "Calculated", 1, 1);
+      }
+
       grid.SetAttribute(row, targetCol, "ItemsData", JSON.stringify(items), 1);
 
       // Save the updated column metadata to the grid
       grid.ColsData = colsData;
 
+      grid.Calculate(1);
       grid.Update();
       grid.Render();
     }
