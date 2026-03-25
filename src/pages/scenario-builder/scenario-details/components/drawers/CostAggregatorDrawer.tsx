@@ -377,7 +377,7 @@ const CostAggregatorDrawer = ({
       window.TGAddEvent(
         "OnAfterValueChanged",
         "ScenarioGridDetails",
-        (grid: any, r: any, col: string, val: any) => {
+        (_grid: any, r: any, col: string, val: any) => {
           if (r && r.id === mainRowId && col === "Shipment Quantity") {
             checkQuantity(val);
           }

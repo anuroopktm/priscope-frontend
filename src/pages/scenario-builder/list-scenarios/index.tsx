@@ -46,12 +46,12 @@ const ScenarioListingPage = () => {
 
   const { mutate: deleteScenario, isPending: isDeleting } = useDeleteScenario();
 
-  const handleGridInit = (grid: any) => {
+  const handleGridInit = (_grid: any) => {
     if (window.TGSetEvent) {
       window.TGSetEvent(
         "OnSelect",
         gridId,
-        (grid: any, row: any, deselect: boolean) => {
+        (_grid: any, row: any, deselect: boolean) => {
           if (deselect) {
             setSelectedForDuplicate(null);
           } else {

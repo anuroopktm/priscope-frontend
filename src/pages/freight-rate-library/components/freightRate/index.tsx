@@ -126,7 +126,7 @@ function FreightRate() {
   );
 
   const handleChange = (
-    event: React.MouseEvent<HTMLElement>,
+    _event: React.MouseEvent<HTMLElement>,
     newAlignment: string,
   ) => {
     setAllData([]);
