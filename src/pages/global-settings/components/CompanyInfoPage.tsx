@@ -24,7 +24,7 @@ import { useEffect, useState } from "react";
 import {
   useGetCompanyInfo,
   useUpdateCompanyInfo,
-} from "@/services/global-settings/global-setting.queries";
+} from "@/services/queries/global-settings/global-setting.queries";
 import { useToastStore } from "@/store/useToastStore";
 
 const DropZone = styled(Box)<{ isDragOver: boolean }>(({ theme }) => ({
@@ -253,7 +253,7 @@ export default function CompanyInfoPage() {
                         const selectedFile = e.target.files?.[0];
                         if (selectedFile) {
                           field.onChange(selectedFile);
-                          e.target.value = ""; 
+                          e.target.value = "";
                         }
                       }}
                     />

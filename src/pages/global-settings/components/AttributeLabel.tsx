@@ -1,7 +1,7 @@
 import {
   useGetAttributes,
   useUpdateAttributes,
-} from "@/services/global-settings/global-setting.queries";
+} from "@/services/queries/global-settings/global-setting.queries";
 import {
   attributeSchema,
   type AttributeSchemaType,

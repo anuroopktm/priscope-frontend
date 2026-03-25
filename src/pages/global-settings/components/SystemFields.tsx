@@ -14,7 +14,7 @@ import {
 import {
   useGetSystemFields,
   useUpdateSystemFields,
-} from "@/services/global-settings/global-setting.queries";
+} from "@/services/queries/global-settings/global-setting.queries";
 import { useEffect } from "react";
 import { useToastStore } from "@/store/useToastStore";
 

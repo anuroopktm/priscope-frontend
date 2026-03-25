@@ -14,7 +14,7 @@ import { useEffect } from "react";
 import {
   useGetAlerts,
   useUpdateAlerts,
-} from "@/services/global-settings/global-setting.queries";
+} from "@/services/queries/global-settings/global-setting.queries";
 import {
   impactSettingsSchema,
   type ImpactSettingsFormValues,
@@ -123,37 +123,37 @@ const AlertsPage = () => {
           </CardContent>
         </Card>
         <Box
-              sx={{
-                display: "flex",
-                flexDirection: "column",
-                gap: 2,
-                width: "100%",
-                maxWidth: 500,
-                mx: "auto",
-              }}
-            >
-              <Button
-                type="submit"
-                fullWidth
-                variant="contained"
-                sx={{
-                  mt: 2,
-                  backgroundColor: "#1f4e6d",
-                  textTransform: "none",
-                  borderRadius: "8px",
-                  height: 40,
-                  "&:hover": {
-                    backgroundColor: "#163c55",
-                  },
-                }}
-              >
-                {isPending ? (
-                  <CircularProgress color="inherit" size={20} />
-                ) : (
-                  "Save"
-                )}
-              </Button>
-            </Box>
+          sx={{
+            display: "flex",
+            flexDirection: "column",
+            gap: 2,
+            width: "100%",
+            maxWidth: 500,
+            mx: "auto",
+          }}
+        >
+          <Button
+            type="submit"
+            fullWidth
+            variant="contained"
+            sx={{
+              mt: 2,
+              backgroundColor: "#1f4e6d",
+              textTransform: "none",
+              borderRadius: "8px",
+              height: 40,
+              "&:hover": {
+                backgroundColor: "#163c55",
+              },
+            }}
+          >
+            {isPending ? (
+              <CircularProgress color="inherit" size={20} />
+            ) : (
+              "Save"
+            )}
+          </Button>
+        </Box>
       </Box>
     </Box>
   );
