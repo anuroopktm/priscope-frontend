@@ -72,7 +72,7 @@ const RowOverlay: React.FC<RowOverlayProps> = ({
           sx={{
             p: 1.25,
             backgroundColor: "white",
-            borderRadius: 5,
+            borderRadius: 1,
             boxShadow: 5,
             border: "1px solid",
             borderColor: error ? "error.main" : "grey.400",

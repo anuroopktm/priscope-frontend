@@ -3,7 +3,7 @@ import type { UseMutateFunction } from "@tanstack/react-query";
 
 interface ExportOptions {
   createExport: UseMutateFunction<ExportResponse, unknown, ExportRequest, unknown>;
-  showSnackBar: (args: { message: string; severity: "success" | "error" }) => void;
+  showToast: (message: string, severity: "success" | "error") => void;
   ids: string[];
   moduleName: string;
   featureName: string;
@@ -14,7 +14,7 @@ interface ExportOptions {
 
 export const handleExportRates = ({
   createExport,
-  showSnackBar,
+  showToast,
   ids,
   moduleName,
   featureName,
@@ -23,7 +23,7 @@ export const handleExportRates = ({
   options = {},
 }: ExportOptions) => {
   if (!ids || ids.length === 0) {
-    showSnackBar({ message: "No rows available for export", severity: "error" });
+    showToast("No rows available for export", "error");
     return;
   }
 
@@ -36,16 +36,10 @@ export const handleExportRates = ({
 
   createExport(payload, {
     onSuccess: () => {
-      showSnackBar({
-        message: `Export successful`,
-        severity: "success",
-      });
+      showToast(`Export successful`, "success");
     },
     onError: () => {
-      showSnackBar({
-        message: "Export failed. Please try again.",
-        severity: "error",
-      });
+      showToast("Export failed. Please try again.", "error");
     },
   });
 };

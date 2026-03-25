@@ -16,7 +16,7 @@ interface DetailsModalProps {
   isOpen: boolean;
   onClose: () => void;
   rowData: (string | number)[];
-  showSnackBar: any;
+  showToast: (message: string, severity: "success" | "error") => void;
   showLoader: (loading: boolean) => void;
 }
 
@@ -24,10 +24,9 @@ export const DetailsModal: React.FC<DetailsModalProps> = ({
   isOpen,
   onClose,
   rowData,
-  showSnackBar,
+  showToast,
   showLoader,
 }) => {
-  // const { t } = useTranslation();
   const { mutate: createExport, isPending: isExporting } = useCreateExport();
   const freightRateId = rowData?.[rowData.length - 2] as string;
   const {
@@ -109,7 +108,7 @@ export const DetailsModal: React.FC<DetailsModalProps> = ({
 
     handleExportRates({
       createExport,
-      showSnackBar,
+      showToast,
       ids,
       moduleName: "freight_rate",
       featureName: "audit",

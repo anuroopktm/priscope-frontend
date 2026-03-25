@@ -138,7 +138,7 @@ const UploadModal: React.FC<ExtendedUploadModalProps> = ({
         PaperProps={{
           sx: {
             bgcolor: theme.palette.background.paper,
-            borderRadius: 12,
+            borderRadius: 1,
             minHeight: "300px",
             maxWidth: "700px",
           },

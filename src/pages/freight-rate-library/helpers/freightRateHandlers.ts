@@ -14,10 +14,10 @@ import {
   createAdminRequestPayload,
 } from "./type";
 
-type SnackbarSetter = (args: {
-  message: string;
-  severity: "success" | "error" | "info" | "warning";
-}) => void;
+// type SnackbarSetter = (args: {
+//   message: string;
+//   severity: "success" | "error" | "info" | "warning";
+// }) => void;
 
 type MutationHandler<TData = any, TVariables = any> = {
   mutateAsync: (variables: TVariables) => Promise<TData>;
@@ -54,12 +54,11 @@ type FreightRate = {
 
 type ContainerType = { id: string; label: string; [key: string]: any };
 
-
 export const enableDisabelRequestHandler = ({
   comment,
   createAdminRequest,
   setRequestSuccessNotficationVisible,
-  setSnackbar,
+  showToast,
   setAction,
   // t,
   values,
@@ -70,7 +69,7 @@ export const enableDisabelRequestHandler = ({
   comment: string;
   createAdminRequest: CreateAdminRequestFn;
   setRequestSuccessNotficationVisible: (visible: boolean) => void;
-  setSnackbar: SnackbarSetter;
+  showToast: (message: string, severity: "success" | "error") => void;
   setAction: (action: string) => void;
   // t: TranslationFn;
   values: any[];
@@ -97,10 +96,7 @@ export const enableDisabelRequestHandler = ({
       setAction("");
     },
     onError: () => {
-      setSnackbar({
-        message: "Admin request failed",
-        severity: "error",
-      });
+      showToast("Admin request failed", "error");
       setAction("");
     },
   });
@@ -108,21 +104,18 @@ export const enableDisabelRequestHandler = ({
 
 export function exportAllFreightRates({
   allData,
-  setSnackbar,
+  showToast,
   createExport,
   // t,
 }: {
   allData: FreightRate[];
-  setSnackbar: SnackbarSetter;
+  showToast: (message: string, severity: "success" | "error") => void;
   createExport: any;
   // t: TranslationFn;
 }) {
   const ids = allData.map((row) => row.id);
   if (ids.length === 0) {
-    setSnackbar({
-      message: "No rows for export",
-      severity: "error",
-    });
+    showToast("No rows for export", "error");
     return;
   }
 
@@ -135,39 +128,33 @@ export function exportAllFreightRates({
 
   createExport(payload, {
     onSuccess: () => {
-      setSnackbar({
-        message: `Exported ${ids.length} freight rate(s) successfully`,
-        severity: "success",
-      });
+      showToast(
+        `Exported ${ids.length} freight rate(s) successfully`,
+        "success",
+      );
     },
     onError: () => {
-      setSnackbar({
-        message: "Export failed. Please try again.",
-        severity: "error",
-      });
+      showToast("Export failed. Please try again.", "error");
     },
   });
 }
 
 export function exportSelectedFreightRates({
   selectedRows,
-  setSnackbar,
+  showToast,
   createExport,
   setSelectedRows,
   // t,
 }: {
   selectedRows: Record<string, boolean>;
-  setSnackbar: SnackbarSetter;
+  showToast: (message: string, severity: "success" | "error") => void;
   createExport: any;
   setSelectedRows: (rows: Record<string, boolean>) => void;
   // t: TranslationFn;
 }) {
   const ids = Object.keys(selectedRows).filter((id) => selectedRows[id]);
   if (ids.length === 0) {
-    setSnackbar({
-      message: "No rows selected for export",
-      severity: "error",
-    });
+    showToast("No rows selected for export", "error");
     return;
   }
 
@@ -180,17 +167,14 @@ export function exportSelectedFreightRates({
 
   createExport(payload, {
     onSuccess: () => {
-      setSnackbar({
-        message: `Exported ${ids.length} freight rate(s) successfully`,
-        severity: "success",
-      });
+      showToast(
+        `Exported ${ids.length} freight rate(s) successfully`,
+        "success",
+      );
       setSelectedRows({});
     },
     onError: () => {
-      setSnackbar({
-        message: "Export failed",
-        severity: "error",
-      });
+      showToast("Export failed", "error");
       setSelectedRows({});
     },
   });
@@ -199,7 +183,7 @@ export function exportSelectedFreightRates({
 export async function freightRateBulkStatusUpdate({
   status,
   selectedRows,
-  setSnackbar,
+  showToast,
   bulkStatusUpdateMutation,
   tenantId,
   setSelectedRows,
@@ -210,7 +194,7 @@ export async function freightRateBulkStatusUpdate({
 }: {
   status: "active" | "inactive";
   selectedRows: Record<string, boolean>;
-  setSnackbar: SnackbarSetter;
+  showToast: (message: string, severity: "success" | "error") => void;
   bulkStatusUpdateMutation: MutationHandler<{ processed_count: number }, any>;
   tenantId: string;
   setSelectedRows: (rows: Record<string, boolean>) => void;
@@ -224,10 +208,7 @@ export async function freightRateBulkStatusUpdate({
   );
 
   if (selectedFreightRateIds.length === 0) {
-    setSnackbar({
-      message: "No rows selected",
-      severity: "error",
-    });
+    showToast("No rows selected", "error");
     return;
   }
 
@@ -240,12 +221,12 @@ export async function freightRateBulkStatusUpdate({
       tenant_id: tenantId,
     });
 
-    setSnackbar({
-      message: `Successfully ${status === "active" ? "enabled" : "disabled"} ${
+    showToast(
+      `Successfully ${status === "active" ? "enabled" : "disabled"} ${
         result.processed_count
       } freight rate(s)`,
-      severity: "success",
-    });
+      "success",
+    );
 
     setSelectedRows({});
     if (skip !== 0) {
@@ -254,12 +235,10 @@ export async function freightRateBulkStatusUpdate({
     }
     refetch();
   } catch (error: any) {
-    setSnackbar({
-      message: status === "active"
-        ? "Bulk enable failed"
-        : "Bulk disable failed",
-      severity: "error",
-    });
+    showToast(
+      status === "active" ? "Bulk enable failed" : "Bulk disable failed",
+      "error",
+    );
   }
 }
 
@@ -272,7 +251,7 @@ export function editFreightRate({
   containerTypesData,
   createAdminRequest,
   setRequestSuccessNotficationVisible,
-  setSnackbar,
+  showToast,
   values,
   tenantId,
   updateFreightRate,
@@ -286,7 +265,7 @@ export function editFreightRate({
   containerTypesData: any;
   createAdminRequest: CreateAdminRequestFn;
   setRequestSuccessNotficationVisible: (visible: boolean) => void;
-  setSnackbar: SnackbarSetter;
+  showToast: (message: string, severity: "success" | "error") => void;
   values: any[];
   tenantId: string;
   updateFreightRate: any;
@@ -331,10 +310,7 @@ export function editFreightRate({
         setRequestSuccessNotficationVisible(true);
       },
       onError: () => {
-        setSnackbar({
-          message: "Admin request failed",
-          severity: "error",
-        });
+        showToast("Admin request failed", "error");
       },
     });
     const value = values.find((val) => val[8] === freightRateId);
@@ -368,16 +344,10 @@ export function editFreightRate({
     { payload, freightRateId },
     {
       onSuccess: () => {
-        setSnackbar({
-          message: "Freight rate updated successfully",
-          severity: "success",
-        });
+        showToast("Freight rate updated successfully", "success");
       },
       onError: () => {
-        setSnackbar({
-          message: "Failed to update freight rate",
-          severity: "error",
-        });
+        showToast("Failed to update freight rate", "error");
       },
     },
   );
@@ -386,7 +356,7 @@ export function editFreightRate({
 export function addNewFreightRate({
   localData,
   rowIndex,
-  setSnackbar,
+  showToast,
   setFailedRows,
   setLoadingRows,
   hotRef,
@@ -405,7 +375,7 @@ export function addNewFreightRate({
 }: {
   localData: any[][];
   rowIndex: number;
-  setSnackbar: SnackbarSetter;
+  showToast: (message: string, severity: "success" | "error") => void;
   setFailedRows: React.Dispatch<React.SetStateAction<Set<number>>>;
   setLoadingRows: React.Dispatch<React.SetStateAction<Set<number>>>;
   hotRef: React.MutableRefObject<any>;
@@ -439,12 +409,10 @@ export function addNewFreightRate({
   );
 
   if (missing.length > 0) {
-    setSnackbar({
-      message: `Please fill required fields: ${missing
-        .map((f) => f.key)
-        .join(", ")}`,
-      severity: "error",
-    });
+    showToast(
+      `Please fill required fields: ${missing.map((f) => f.key).join(", ")}`,
+      "error",
+    );
 
     setFailedRows((prev) => new Set([...prev, rowIndex]));
     setLoadingRows((prev) => {
@@ -493,10 +461,7 @@ export function addNewFreightRate({
         setAddRowInprogress(false);
       },
       onError: () => {
-        setSnackbar({
-          message: "Admin request failed",
-          severity: "error",
-        });
+        showToast("Admin request failed", "error");
         setAddRowInprogress(true);
       },
     });
@@ -550,7 +515,7 @@ export function addNewFreightRate({
         err.body.detail[0].msg ||
         err.body.detail ||
         "Failed to create freight rate";
-      setSnackbar({ message, severity: "error" });
+      showToast(message, "error");
       setFailedRows((prev) => new Set([...prev, rowIndex]));
       setLoadingRows((prev) => {
         const newSet = new Set(prev);
@@ -636,10 +601,7 @@ type AddCommentParams = {
   tenantId: string;
   createComment: (payload: any) => Promise<any>; // API call function
   // t: (namespace: string, key: string) => string;
-  setSnackbar: (options: {
-    message: string;
-    severity: "success" | "error";
-  }) => void;
+  showToast: (message: string, severity: "success" | "error") => void;
 };
 
 export function addComment({
@@ -650,7 +612,7 @@ export function addComment({
   tenantId,
   createComment,
   // t,
-  setSnackbar,
+  showToast,
 }: AddCommentParams) {
   if (!comment?.trim()) return;
   const { row, col } = editingCell;
@@ -674,14 +636,8 @@ export function addComment({
 
   try {
     createComment({ freightRateId, payload });
-    setSnackbar({
-      message: "Comment added successfully",
-      severity: "success",
-    });
+    showToast("Comment added successfully", "success");
   } catch (err: any) {
-    setSnackbar({
-      message: "Failed to add comment",
-      severity: "error",
-    });
+    showToast("Failed to add comment", "error");
   }
 }

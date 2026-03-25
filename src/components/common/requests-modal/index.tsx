@@ -167,7 +167,7 @@ const RequestsModal: React.FC<FileDetailsModalProps> = ({
       fullWidth
       PaperProps={{
         sx: {
-          borderRadius: 4,
+          borderRadius: 1,
           maxHeight: "75vh",
           minHeight: "75vh",
           maxWidth: "771px",

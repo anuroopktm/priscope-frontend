@@ -35,6 +35,8 @@ import {
   onConfirmEdit,
 } from "@/helpers/handsontableHelpers";
 import { FilterDropdown } from "./filter-dropdown";
+import "handsontable/styles/handsontable.css";
+import "handsontable/styles/ht-theme-horizon.css";
 import "./HandsontableCustom.scss";
 import RowOverlay from "./row-overlay";
 import { useCreateContainerType } from "@/pages/freight-rate-library/services/freightRateService";

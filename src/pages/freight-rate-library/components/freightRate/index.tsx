@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { Alert, Box, Snackbar } from "@mui/material";
+import {  Box } from "@mui/material";
 import { debounce } from "lodash";
 import {
   useBulkStatusUpdate,
@@ -13,7 +13,6 @@ import {
   useUpdateFrieghtRate,
   useUploadFreightRateFile,
 } from "../../services/freightRateService";
-import type { SnackbarState } from "../../types";
 import { FREIGHT_RATE_HEADERS } from "../../constants/tableHeaders.constants";
 import {
   FILTER_OPTIONS,
@@ -55,6 +54,7 @@ import { resetHandsontableScroll } from "@/helpers/handsontableHelpers";
 import { openConfirmationModal } from "@/utils/getRequestConfirmationModal";
 import applyAlignmentFilter from "@/utils/applyAlignmentFilter";
 import RequestsModal from "@/components/common/requests-modal";
+import { useToastStore } from "@/store/useToastStore";
 
 function FreightRate() {
   const hotRef = useRef<any>(null);
@@ -73,10 +73,8 @@ function FreightRate() {
   const [selectedRows, setSelectedRows] = useState<Record<number, boolean>>({});
   const [showUploadModal, setShowUploadModal] = useState<boolean>(false);
   const [isDrawerOpen, setIsDrawerOpen] = useState(false);
-  const [snackbar, setSnackbar] = useState<SnackbarState>({
-    message: null,
-    severity: "info",
-  });
+
+   const { showToast } = useToastStore();
   const [initialLoadCompleted, setInitialLoadCompleted] = useState(false);
   const [highlightTarget, setHighlightTarget] = useState<{
     freightRateId: string | null;
@@ -165,10 +163,7 @@ function FreightRate() {
 
   useEffect(() => {
     if (isFreightRateListingError) {
-      setSnackbar({
-        message: "Error loading data",
-        severity: "error",
-      });
+      showToast("Error loading data", "error");
     }
   }, [isFreightRateListingError]);
 
@@ -331,7 +326,7 @@ function FreightRate() {
     addNewFreightRate({
       localData,
       rowIndex,
-      setSnackbar,
+      showToast,
       setFailedRows,
       setLoadingRows,
       hotRef,
@@ -374,7 +369,7 @@ function FreightRate() {
       containerTypesData,
       createAdminRequest,
       setRequestSuccessNotficationVisible,
-      setSnackbar,
+      showToast,
       values,
       tenantId,
       updateFreightRate,
@@ -388,7 +383,7 @@ function FreightRate() {
       createComment,
       comment,
       tenantId,
-      setSnackbar,
+      showToast,
       // t,
       data,
       editingCell,
@@ -399,7 +394,7 @@ function FreightRate() {
     freightRateBulkStatusUpdate({
       status,
       selectedRows,
-      setSnackbar,
+      showToast,
       bulkStatusUpdateMutation,
       tenantId,
       setSelectedRows,
@@ -434,7 +429,7 @@ function FreightRate() {
   }, []);
 
   const handleSnackBarClose = () => {
-    setSnackbar({ severity: "info", message: null });
+    // setSnackbar({ severity: "info", message: null });
   };
 
   const handleExportSelected = () => {
@@ -445,7 +440,7 @@ function FreightRate() {
 
     exportSelectedFreightRates({
       selectedRows,
-      setSnackbar,
+      showToast,
       createExport,
       setSelectedRows,
       // t,
@@ -453,7 +448,7 @@ function FreightRate() {
   };
 
   const handleExportAll = () => {
-    exportAllFreightRates({ allData, setSnackbar, createExport });
+    exportAllFreightRates({ allData, showToast, createExport });
   };
 
   const handleEnableDisabelRequest = (comment: string) => {
@@ -461,7 +456,7 @@ function FreightRate() {
       comment,
       createAdminRequest,
       setRequestSuccessNotficationVisible,
-      setSnackbar,
+      showToast,
       setAction,
       // t,
       values,
@@ -536,7 +531,7 @@ function FreightRate() {
             <FileDetailsModal
               onClose={setShowFilesModal}
               showLoader={setShowLoader}
-              showSnackBar={setSnackbar}
+              showToast={showToast}
               module="freight_rate"
               filterOptions={FILE_FILTER_OPTIONS}
             />
@@ -608,7 +603,7 @@ function FreightRate() {
                 />
               )}
             {showLoader && <LoaderOverlay />}
-            {snackbar.message && (
+            {/* {snackbar.message && (
               <Snackbar
                 open
                 autoHideDuration={6000}
@@ -623,13 +618,13 @@ function FreightRate() {
                   {snackbar.message}
                 </Alert>
               </Snackbar>
-            )}
+            )} */}
             {isDetailModalOpen && (
               <DetailsModal
                 isOpen={isDetailModalOpen}
                 onClose={() => setIsDetailModalOpen(false)}
                 rowData={selectedRowData}
-                showSnackBar={setSnackbar}
+                showToast={showToast}
                 showLoader={setShowLoader}
               />
             )}

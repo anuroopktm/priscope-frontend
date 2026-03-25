@@ -46,7 +46,7 @@ const FILE_UPLOAD_STATUS = {
 export interface FileDetailsModalProps {
   open?: boolean;
   onClose: any;
-  showSnackBar: any;
+  showToast: (message: string, severity: "success" | "error") => void;
   showLoader: any;
   module: string;
   filterOptions: { value: string; label: string }[];
@@ -66,7 +66,7 @@ const FileDetailsModal: React.FC<FileDetailsModalProps> = ({
   open = true,
   onClose,
   showLoader,
-  showSnackBar,
+  showToast,
   module,
   filterOptions,
   defaultTab = "uploaded",
@@ -208,7 +208,7 @@ const FileDetailsModal: React.FC<FileDetailsModalProps> = ({
         }
       },
       onError: () => {
-        showSnackBar({ message: "Failed to download file", severity: "error" });
+        showToast("Failed to download file", "error");
       },
     });
   };

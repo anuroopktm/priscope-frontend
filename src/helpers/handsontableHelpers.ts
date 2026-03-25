@@ -302,7 +302,7 @@ export const onConfirmAddRow = (
   commentRef: any,
   onConfirmRow?: (idx: number, comment: string, hotRef: any) => void,
   hotRef?: any,
-  // setAddRowInprogress?: React.Dispatch<React.SetStateAction<boolean>>,
+  setAddRowInprogress?: React.Dispatch<React.SetStateAction<boolean>>,
   removeEditOverlay?: () => void,
 ) => {
   setNewRows((prev) => {
@@ -314,6 +314,7 @@ export const onConfirmAddRow = (
   const comment = commentRef.current || "";
   onConfirmRow?.(idx, comment, hotRef!);
 
+  setAddRowInprogress?.(false);
   removeEditOverlay?.();
 };
 
