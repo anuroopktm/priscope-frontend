@@ -1,0 +1,1 @@
+export const WARNING_DAYS_LIMIT = 7

@@ -218,7 +218,7 @@ const SetupStep = ({ onNext }: Props) => {
 
       <Box>
         <Typography fontSize={12} mb={1}>
-          Upload Company Logo (optional)
+          Upload Company Logo
         </Typography>
 
         <Controller

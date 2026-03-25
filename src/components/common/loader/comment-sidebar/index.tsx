@@ -1,4 +1,3 @@
-"use client";
 import SearchIcon from "@/assets/items-master/search-01.svg";
 import { getAvatarColor } from "@/utils/getAvatarColor";
 import CloseIcon from "@mui/icons-material/Close";

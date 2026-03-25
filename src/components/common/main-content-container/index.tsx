@@ -2,7 +2,7 @@ import type { ContainerProps } from "@mui/material";
 import { Container } from "@mui/material";
 import { styled } from "@mui/material/styles";
 
-const MainContentContainer = styled(Container)(({ theme }) => ({
+export const MainContentContainer = styled(Container)(({ theme }) => ({
   backgroundColor: theme.palette.brand.surfaceBackground,
   borderRadius: "12px",
   overflow: "auto",
@@ -81,3 +81,4 @@ const MainContentContainerWithProps = ({
 };
 
 export default MainContentContainerWithProps;
+

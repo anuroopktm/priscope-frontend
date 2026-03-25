@@ -1,7 +1,7 @@
 import {
   useGetOperationsSettings,
   useUpdateOperationsSettings,
-} from "@/services/global-settings/global-setting.queries";
+} from "@/services/queries/global-settings/global-setting.queries";
 import { useToastStore } from "@/store/useToastStore";
 import {
   systemIdentifierSchema,

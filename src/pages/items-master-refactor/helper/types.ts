@@ -232,6 +232,42 @@ export interface ExportItemMasterRowPayload {
   parameters: ExportItemMasterRowResponseParameters;
 }
 
+// bulk add new 
+export interface ItemMasterBulkAddRequest {
+  source_module: string;
+  target_module: string;
+  request_action: string;
+  request_info: BulkAddRequestInfo[];
+  request_comments: string;
+}
+
+export interface BulkAddRequestInfo {
+  new_record: BulkAddNewRecord;
+}
+
+export interface BulkAddNewRecord {
+  items: BulkAddItem[];
+}
+
+export interface BulkAddItem {
+  frontend_id: string;
+  sku: string;
+  upc: string;
+  category: string;
+  hs_code: string;
+  description: string;
+  source_type: string;
+  attribute: Record<string, any>;
+  source: string;
+  action_key: string;
+  comments: BulkAddItemComment[];
+}
+
+export interface BulkAddItemComment {
+  comment_type: "field" | "general";
+  field_key: string;
+  comment: string;
+}
 // bulk insert admin add
 export interface AddBulkInsertAdminRequest {
   source_module: string;

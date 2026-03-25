@@ -1,5 +1,5 @@
 import { useMutation, useQuery } from "@tanstack/react-query";
-import { axiosInstance } from "../api/axiosInstance";
+import { axiosInstance } from "../../api/axiosInstance";
 import type { AxiosError } from "axios";
 import {
   type OperationsSettingsResponse,
@@ -28,22 +28,24 @@ export const useGetCompanyInfo = () => {
 };
 
 export const useUpdateCompanyInfo = () => {
-  return useMutation<CompanyInfoResponse, AxiosError<{ detail: string | string[] }>, FormData>(
-    {
-      mutationFn: async (payload: FormData) => {
-        const response = await axiosInstance.patch(
-          "/v1/global-settings/company-info",
-          payload,
-          {
-            headers: {
-              "Content-Type": "multipart/form-data",
-            },
+  return useMutation<
+    CompanyInfoResponse,
+    AxiosError<{ detail: string | string[] }>,
+    FormData
+  >({
+    mutationFn: async (payload: FormData) => {
+      const response = await axiosInstance.patch(
+        "/v1/global-settings/company-info",
+        payload,
+        {
+          headers: {
+            "Content-Type": "multipart/form-data",
           },
-        );
-        return response.data;
-      },
+        },
+      );
+      return response.data;
     },
-  );
+  });
 };
 
 export const useGetSystemFields = () => {
@@ -64,11 +66,11 @@ export const useGetSystemFields = () => {
 
 export const useUpdateSystemFields = () => {
   return useMutation<
-    void,
+    UpdateSystemFieldPayload[],
     AxiosError<{ detail: string | string[] }>,
-    UpdateSystemFieldPayload
+    UpdateSystemFieldPayload[]
   >({
-    mutationFn: async (payload: UpdateSystemFieldPayload) => {
+    mutationFn: async (payload: UpdateSystemFieldPayload[]) => {
       const response = await axiosInstance.patch(
         "/v1/global-settings/system-fields",
         payload,

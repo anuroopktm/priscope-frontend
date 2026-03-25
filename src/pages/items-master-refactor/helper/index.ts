@@ -23,7 +23,10 @@ import {
 } from "@/constants/privileges.constants";
 import { hasPrivilege } from "@/utils/hasPrivilege";
 import { v4 as uuidv4 } from "uuid";
-import { allowedKeys, itemMasterColumnToFieldMap } from "../constants/columnFieldMap";
+import {
+  allowedKeys,
+  itemMasterColumnToFieldMap,
+} from "../constants/columnFieldMap";
 
 export const buildTreeGridFilterHead = (
   items: itemMasterHeaderResponseArrayList[] | undefined,
@@ -309,37 +312,38 @@ export const getDataBulkUploadFormatAdminApproval = (
   newData: TreeGridRow[] | undefined,
   comment: string,
 ) => {
-  const items = newData
-    ?.filter((item) =>
-      Object.entries(item).some(([key, value]) => {
-        if (key === "id" || key === "_DefaultSort") return false;
-        return value !== undefined && value !== "" && value !== null;
-      }),
-    )
-    .map((item) => {
-      const id = uuidv4();
-      return {
-        frontend_id: id,
-        sku: String(item?.SKU),
-        upc: String(item?.UPC),
-        category: item?.Category,
-        hs_code: item?.["HS Code"],
-        description: item?.Description,
-        source_type: "manual",
-        attribute: {},
-        source: "item_master",
-        action_key: "sku",
-        comments: comment
-          ? [
-              {
-                comment_type: "field",
-                field_key: "upc",
-                comment: comment,
-              },
-            ]
-          : [],
-      };
-    });
+  const items =
+    newData
+      ?.filter((item) =>
+        Object.entries(item).some(([key, value]) => {
+          if (key === "id" || key === "_DefaultSort") return false;
+          return value !== undefined && value !== "" && value !== null;
+        }),
+      )
+      .map((item) => {
+        const id = uuidv4();
+        return {
+          frontend_id: id,
+          sku: String(item?.SKU),
+          upc: String(item?.UPC),
+          category: String(item?.Category ?? ""),
+          hs_code: String(item?.["HS Code"] ?? ""),
+          description: String(item?.Description ?? ""),
+          source_type: "manual",
+          attribute: {},
+          source: "item_master",
+          action_key: "sku",
+          comments: comment
+            ? [
+                {
+                  comment_type: "field" as const,
+                  field_key: "upc",
+                  comment: comment,
+                },
+              ]
+            : [],
+        };
+      }) ?? [];
   return {
     source_module: "item_master",
     target_module: "item_master",
@@ -479,4 +483,3 @@ export async function getItemMasterLayout(
     Solid: [],
   };
 }
-
