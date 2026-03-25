@@ -46,7 +46,7 @@ export const useScenarioGridEvents = ({
       const targetRow = findRecursive(currentRows);
       if (targetRow) {
         setEditingGroupId(rowId);
-        setEditingGroupName(targetRow.A || "");
+        setEditingGroupName(targetRow.SKU || "");
         setIsEditModalOpen(true);
       }
     };

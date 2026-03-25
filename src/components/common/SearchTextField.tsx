@@ -20,6 +20,10 @@ const SearchTextField = ({
 }: SearchTextFieldProps) => {
   const [value, setValue] = useState<string>((props.value as string) || "");
 
+  useEffect(() => {
+    setValue((props.value as string) || "");
+  }, [props.value]);
+
   const debouncedSearch = useMemo(
     () =>
       debounce((searchValue: string) => {

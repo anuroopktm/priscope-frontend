@@ -47,7 +47,7 @@ export const transformRows = (
 
     if (row.Def === "Group") {
       const groupRowId = row.id;
-      transformedRow.AHtmlPostfix = isPublished
+      transformedRow.SKUHtmlPostfix = isPublished
         ? ""
         : `<div style="display:flex; gap:12px; float:right; margin-right:8px; align-items:center; height:100%;">
             <span style="display:flex; align-items:center; cursor:pointer;" onclick="window.handleTreeGridEdit && window.handleTreeGridEdit('${groupRowId}')">${EDIT_ICON}</span>
@@ -295,8 +295,8 @@ export const useScenarioGridData = () => {
           id: groupRowId,
           Def: "Group",
           SKU: groupName,
-          ACanEdit: 0,
-          AHtmlPostfix: `<div style="display:flex; gap:12px; float:right; margin-right:8px; align-items:center; height:100%;">
+          SKUCanEdit: 0,
+          SKUHtmlPostfix: `<div style="display:flex; gap:12px; float:right; margin-right:8px; align-items:center; height:100%;">
             <span style="display:flex; align-items:center; cursor:pointer;" onclick="window.handleTreeGridEdit && window.handleTreeGridEdit('${groupRowId}')">${EDIT_ICON}</span>
             <span style="display:flex; align-items:center; cursor:pointer;" onclick="window.handleTreeGridDeleteRow && window.handleTreeGridDeleteRow('${groupRowId}')">${DELETE_ICON}</span>
           </div>`,

@@ -16,6 +16,7 @@ import {
 } from "@mui/material";
 
 interface DrawerActionHeaderProps {
+  searchTerm: string;
   onSearch: (value: string) => void;
   onAddItem?: () => void;
   onAddAsGroup?: () => void;
@@ -25,6 +26,7 @@ interface DrawerActionHeaderProps {
 }
 
 const DrawerActionHeader = ({
+  searchTerm,
   onSearch,
   onAddItem,
   onAddAsGroup,
@@ -64,6 +66,7 @@ const DrawerActionHeader = ({
       <Stack direction="row" spacing={3} sx={{ flex: 1, alignItems: "center" }}>
         <SearchTextField
           size="small"
+          value={searchTerm}
           onSearch={onSearch}
           containerSx={{ bgcolor: "white", px: 0 }}
           sx={{
