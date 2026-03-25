@@ -66,11 +66,11 @@ export const useGetSystemFields = () => {
 
 export const useUpdateSystemFields = () => {
   return useMutation<
-    void,
+    UpdateSystemFieldPayload[],
     AxiosError<{ detail: string | string[] }>,
-    UpdateSystemFieldPayload
+    UpdateSystemFieldPayload[]
   >({
-    mutationFn: async (payload: UpdateSystemFieldPayload) => {
+    mutationFn: async (payload: UpdateSystemFieldPayload[]) => {
       const response = await axiosInstance.patch(
         "/v1/global-settings/system-fields",
         payload,

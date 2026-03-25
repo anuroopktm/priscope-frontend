@@ -50,11 +50,14 @@ export type EditState = {
   oldValue: string;
 } | null;
 
-export enum ActiveOverlayType {
-  EDIT = "edit",
-  ROW_COMMENT = "rowComment",
-  CELL_COMMENT = "cellComment",
-}
+export const ActiveOverlayType = {
+  EDIT: "edit",
+  ROW_COMMENT: "rowComment",
+  CELL_COMMENT: "cellComment",
+} as const;
+
+export type ActiveOverlayType =
+  (typeof ActiveOverlayType)[keyof typeof ActiveOverlayType];
 
 export type ActiveOverlay = {
   type: ActiveOverlayType;
