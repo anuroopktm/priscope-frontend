@@ -47,6 +47,8 @@ export const transformRows = (
 
     if (row.Def === "Group") {
       const groupRowId = row.id;
+      transformedRow.SKUSpan = 3;
+      transformedRow.Spanned = 1;
       transformedRow.SKUHtmlPostfix = isPublished
         ? ""
         : `<div style="display:flex; gap:12px; float:right; margin-right:8px; align-items:center; height:100%;">
@@ -296,6 +298,8 @@ export const useScenarioGridData = () => {
           Def: "Group",
           SKU: groupName,
           SKUCanEdit: 0,
+          SKUSpan: 3,
+          Spanned: 1,
           SKUHtmlPostfix: `<div style="display:flex; gap:12px; float:right; margin-right:8px; align-items:center; height:100%;">
             <span style="display:flex; align-items:center; cursor:pointer;" onclick="window.handleTreeGridEdit && window.handleTreeGridEdit('${groupRowId}')">${EDIT_ICON}</span>
             <span style="display:flex; align-items:center; cursor:pointer;" onclick="window.handleTreeGridDeleteRow && window.handleTreeGridDeleteRow('${groupRowId}')">${DELETE_ICON}</span>

@@ -89,6 +89,8 @@ export const ScenarioDetailsLayout = {
       CanEdit: "0",
       SelectingSingle: "0",
       is_publishedVisible: "1",
+      SKUSpan: 3,
+      Spanned: 1,
     },
     // R: {
     //   CanSelect: "1",
