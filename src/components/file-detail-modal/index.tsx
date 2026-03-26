@@ -1,4 +1,3 @@
-"use client";
 import CalendarIcon from "@/assets/common/calendar.svg";
 import ClockIcon from "@/assets/common/clock.svg";
 import DownloadIcon from "@/assets/common/download.svg";

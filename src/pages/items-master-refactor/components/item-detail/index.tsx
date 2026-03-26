@@ -1,7 +1,5 @@
-"use client";
-
+import { Box, CardContent, Chip, Stack, Typography } from "@mui/material";
 import React from "react";
-import { Box, Typography, Chip, Stack, CardContent } from "@mui/material";
 
 interface ItemDetailCardProps {
   title?: string;

@@ -1,4 +1,3 @@
-"use client";
 import {
   getAfterGetRowHeader,
   getHandleAfterBeginEditing,
@@ -8,21 +7,6 @@ import {
   getHandleContextMenuCallback,
   handleGetCellMeta,
 } from "@/helpers/handsontableHandlers";
-import {
-  type ActiveOverlay,
-  ActiveOverlayType,
-  type HandsontableProps,
-} from "./types";
-import { HotTable } from "@handsontable/react";
-import Handsontable from "handsontable";
-import { registerAllModules } from "handsontable/registry";
-import React, {
-  useCallback,
-  useEffect,
-  useMemo,
-  useRef,
-  useState,
-} from "react";
 import {
   getColumnHeaders,
   getColumnHeadersRenderer,
@@ -34,14 +18,29 @@ import {
   onConfirmComment,
   onConfirmEdit,
 } from "@/helpers/handsontableHelpers";
-import { FilterDropdown } from "./filter-dropdown";
-import "handsontable/styles/handsontable.css";
-import "handsontable/styles/ht-theme-horizon.css";
-import "./HandsontableCustom.scss";
-import RowOverlay from "./row-overlay";
 import { useCreateContainerType } from "@/pages/freight-rate-library/services/freightRateService";
 import { useConfirm } from "@/pages/items-master-refactor/utils/ModalProvider";
 import { loadGoogleMaps } from "@/utils/loadGoogleMaps";
+import { HotTable } from "@handsontable/react";
+import Handsontable from "handsontable";
+import { registerAllModules } from "handsontable/registry";
+import "handsontable/styles/handsontable.css";
+import "handsontable/styles/ht-theme-horizon.css";
+import React, {
+  useCallback,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+} from "react";
+import { FilterDropdown } from "./filter-dropdown";
+import "./HandsontableCustom.scss";
+import RowOverlay from "./row-overlay";
+import {
+  type ActiveOverlay,
+  ActiveOverlayType,
+  type HandsontableProps,
+} from "./types";
 
 registerAllModules();
 

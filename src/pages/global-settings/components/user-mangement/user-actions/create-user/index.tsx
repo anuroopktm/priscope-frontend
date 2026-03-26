@@ -138,6 +138,7 @@ const GlobalSettingsCreateUserPage = () => {
           display: "flex",
           flexDirection: "column",
           bgcolor: "brand.background",
+          height: "100%",
         }}
       >
         <ActionHeader title="Add new user" />

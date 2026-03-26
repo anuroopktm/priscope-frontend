@@ -1,10 +1,8 @@
 import AuthCard from "@/pages/auth/common/AuthCard";
-import {
-  useUserSignUp,
-  useVerifyUser,
-} from "@/services/queries/auth/sign-up/sign-up.queries";
+import { useUserSignUp } from "@/services/queries/auth/sign-up/sign-up.queries";
 import { useSignupStore } from "@/store/useSignupStore";
 import { useToastStore } from "@/store/useToastStore";
+import { encryptData } from "@/utils/encryption";
 import { getErrorMessage } from "@/utils/error-helper";
 import { otpSchema, type OtpSchema } from "@/validations/auth/otp.validation";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -21,8 +19,6 @@ const OtpForm = () => {
   const { signupData, tokenInfo, clearSignupStore } = useSignupStore();
   const showToast = useToastStore((state) => state.showToast);
 
-  const { mutateAsync: verifyUserMutation, isPending: isVerifyUserPending } =
-    useVerifyUser();
   const { mutateAsync: signUpMutation, isPending: isSignUpPending } =
     useUserSignUp();
 
@@ -90,14 +86,7 @@ const OtpForm = () => {
     if (!signupData || !tokenInfo) return;
 
     try {
-      await verifyUserMutation({
-        code: tokenInfo.token,
-        email: tokenInfo.email,
-        otp_type: "login",
-        tenant_id: tokenInfo.tenant_id,
-      });
-
-      await signUpMutation({
+      const { encrypted, nonce } = await encryptData({
         code: otp,
         confirm_password: signupData.confirmPassword,
         email: tokenInfo.email,
@@ -105,6 +94,11 @@ const OtpForm = () => {
         password: signupData.password,
         tenant_id: tokenInfo.tenant_id,
         type: "email_password",
+      });
+
+      await signUpMutation({
+        encrypted,
+        nonce,
       });
 
       showToast("Successfully signed up!", "success");
@@ -183,7 +177,7 @@ const OtpForm = () => {
             size="large"
             variant="contained"
             type="submit"
-            loading={isVerifyUserPending || isSignUpPending}
+            loading={isSignUpPending}
           >
             Continue
           </Button>

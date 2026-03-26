@@ -23,6 +23,11 @@ export interface SendOtpResponse {
 }
 
 export interface UserSignUpRequest {
+  encrypted: string;
+  nonce: string;
+}
+
+export interface UserSignUpPayload {
   code: string;
   confirm_password: string;
   email: string;
