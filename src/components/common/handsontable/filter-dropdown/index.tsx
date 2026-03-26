@@ -1,15 +1,13 @@
-"use client";
-
-import React, { useState, useEffect } from "react";
+import SearchIcon from "@/assets/rate-libraries/search-01.svg";
 import {
   Box,
   Button,
   Checkbox,
-  Typography,
   InputBase,
+  Typography,
   useTheme,
 } from "@mui/material";
-import SearchIcon from "@/assets/rate-libraries/search-01.svg";
+import React, { useEffect, useState } from "react";
 
 interface FilterDropdownProps {
   isOpen: boolean;
