@@ -1,9 +1,9 @@
 import React, { useMemo, useCallback } from "react";
 import { Box, Grid, Typography, Button } from "@mui/material";
-import add from "@/app/[lang]/(protected)/item-master/assets/add-item.svg";
-import upload from "@/app/[lang]/(protected)/item-master/assets/upload-circle.svg";
-import uploadcsv from "@/app/[lang]/(protected)/item-master/assets/csv-upload.svg";
-import plus from "@/app/[lang]/(protected)/item-master/assets/plus-sign.svg";
+import add from "@/assets/rate-libraries/add-item.svg";
+import upload from "@/assets/rate-libraries/upload-circle.svg";
+import uploadcsv from "@/assets/rate-libraries/csv-upload.svg";
+import plus from "@/assets/rate-libraries/plus-sign.svg";
 import MainContentContainer from "@/components/common/main-content-container";
 
 interface CardConfig {
@@ -71,7 +71,7 @@ const TARIFF_RATE_CARD_CONFIGS = (): readonly CardConfig[] =>
 // Memoized styles to prevent recreation on every render
 const cardBoxStyles = {
   background: "linear-gradient(96.81deg, #D8ECF8 0%, #89C5EA 100%)",
-  borderRadius: 12,
+  borderRadius: 1,
   width: "100%",
   maxWidth: { xs: "100%", sm: "220px", lg: "220px" },
   minWidth: { xs: "220px", sm: "220px" },

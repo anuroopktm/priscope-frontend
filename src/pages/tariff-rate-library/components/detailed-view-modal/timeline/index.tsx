@@ -9,9 +9,9 @@ import {
   TimelineOppositeContent,
 } from "@mui/lab";
 import { Typography, Box, Avatar, Paper, Stack } from "@mui/material";
-import RateChangeIcon from "@/public/images/rate-change.svg";
-import CalenderIcon from "@/public/images/calendar-03.svg";
-import CommentIcon from "@/public/images/comment1.svg";
+import RateChangeIcon from "@/assets/rate-libraries/rate-change.svg";
+import CalenderIcon from "@/assets/rate-libraries/calendar-03.svg";
+import CommentIcon from "@/assets/rate-libraries/comment1.svg";
 
 interface TimelineItemData {
   user: string;
