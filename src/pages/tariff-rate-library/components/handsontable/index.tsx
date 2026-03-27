@@ -7,7 +7,7 @@ import React, {
 } from "react";
 import { HotTable } from "@handsontable/react";
 import { registerAllModules } from "handsontable/registry";
-import "@/shared/components/handsontable/HandsontableCustom.scss";
+import "@/components/common/handsontable/HandsontableCustom.scss";
 import Handsontable from "handsontable";
 import {
   ActiveOverlayType,

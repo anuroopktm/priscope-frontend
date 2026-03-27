@@ -1,6 +1,6 @@
 import { useEffect, useState, useMemo, useCallback, useRef } from "react";
 import { debounce } from "lodash";
-import { Box, Snackbar, Alert } from "@mui/material";
+import { Box } from "@mui/material";
 import {
   useBulkStatusUpdate,
   useCreateAdminRequest,
@@ -57,10 +57,10 @@ const columnFieldMap: Record<number, string> = {
   4: "valid_to",
 };
 
-interface SnackbarState {
-  message: string | null;
-  severity: "success" | "error" | "warning" | "info";
-}
+// interface SnackbarState {
+//   message: string | null;
+//   severity: "success" | "error" | "warning" | "info";
+// }
 
 export function createTariffRateUpdateRequestBody(
   params: CreateFreightRateRequestBodyParams,
@@ -142,10 +142,6 @@ const TariffRate = () => {
   const [isDrawerOpen, setIsDrawerOpen] = useState(false);
   const [isDetailModalOpen, setIsDetailModalOpen] = useState(false);
   const [selectedRowData, setSelectedRowData] = useState<any | null>(null);
-  const [snackbar, setSnackbar] = useState<SnackbarState>({
-    message: null,
-    severity: "info",
-  });
   const [initialLoadCompleted, setInitialLoadCompleted] = useState(false);
   const [allData, setAllData] = useState<any[]>([]);
   const [localData, setLocalData] = useState<(string | number)[][]>([]);
@@ -167,7 +163,7 @@ const TariffRate = () => {
   const [pageSize] = useState(PAGE_SIZE);
   const [skip, setSkip] = useState(0);
   const [commentData, setCommentData] = useState<any>(null);
-  const showToast = useToastStore((state) => state.showToast);
+  // const showToast = useToastStore((state) => state.showToast);
 
   // const { data } = useSession();
 
@@ -184,6 +180,7 @@ const TariffRate = () => {
   const { mutateAsync: createComment, isPending: createCommentPending } =
     useCreateTariffRateComment();
   const confirm = useConfirm();
+  const showToast = useToastStore((state) => state.showToast);
 
   const privileges: {} = JSON.parse(localStorage.getItem("privileges") || "");
 
@@ -274,10 +271,7 @@ const TariffRate = () => {
   // Handle error state for snackbar
   useEffect(() => {
     if (isTariffRateListingError) {
-      setSnackbar({
-        message: " Error loading tariff rates",
-        severity: "error",
-      });
+      showToast("Error loading tariff rates", "error");
     }
   }, [isTariffRateListingError]);
 
@@ -376,12 +370,12 @@ const TariffRate = () => {
     );
 
     if (missing.length > 0) {
-      setSnackbar({
-        message: `Please fill required fields: ${missing
+      showToast(
+        `Please fill required fields: ${missing
           .map((f) => f.key)
           .join(", ")}`,
-        severity: "error",
-      });
+        "error",
+      );
 
       setFailedRows((prev) => new Set([...prev, rowIndex]));
       setLoadingRows((prev) => {
@@ -416,10 +410,7 @@ const TariffRate = () => {
           setAddItemInProgress(false);
         },
         onError: () => {
-          setSnackbar({
-            message: "Admin request failed",
-            severity: "error",
-          });
+          showToast("Admin request failed", "error");
           setAddItemInProgress(true);
         },
       });
@@ -463,10 +454,7 @@ const TariffRate = () => {
           newSet.delete(rowIndex);
           return newSet;
         });
-        setSnackbar({
-          message: "Tariff rate created successfully",
-          severity: "success",
-        });
+        showToast("Tariff rate created successfully", "success");
         setAddItemInProgress(false);
       },
       onError: (err: any) => {
@@ -475,10 +463,7 @@ const TariffRate = () => {
           err.body.detail[0].msg ||
           err.body.detail ||
           "Tariff rate creation failed";
-        setSnackbar({
-          message,
-          severity: "error",
-        });
+        showToast(message, "error");
         setFailedRows((prev) => new Set([...prev, rowIndex]));
         setLoadingRows((prev) => {
           const newSet = new Set(prev);
@@ -546,9 +531,9 @@ const TariffRate = () => {
   };
 
   // Close snackbar
-  const handleSnackBarClose = () => {
-    setSnackbar({ message: null, severity: "info" });
-  };
+  // const handleSnackBarClose = () => {
+  //   showToast("", "info");
+  // };
 
   const handleConfirmEdit = (editingCell: any, data: any, comment: string) => {
     const tariffRateId = data[7];
@@ -585,10 +570,7 @@ const TariffRate = () => {
           setRequestSuccessNotficationVisible(true);
         },
         onError: () => {
-          setSnackbar({
-            message: "Admin request failed",
-            severity: "error",
-          });
+          showToast("Admin request failed", "error");
         },
       });
       const value = values.find((val) => val[7] === tariffRateId);
@@ -620,16 +602,10 @@ const TariffRate = () => {
       { payload, tariffRateId },
       {
         onSuccess: () => {
-          setSnackbar({
-            message: "Tariff rate updated",
-            severity: "success",
-          });
+          showToast("Tariff rate updated", "success");
         },
         onError: () => {
-          setSnackbar({
-            message: "Failed to update tariff rate",
-            severity: "error",
-          });
+          showToast("Failed to update tariff rate", "error");
         },
       },
     );
@@ -667,16 +643,10 @@ const TariffRate = () => {
       { tariffRateId, payload },
       {
         onSuccess: () => {
-          setSnackbar({
-            message: "Comment added successfully",
-            severity: "success",
-          });
+          showToast("Comment added successfully", "success");
         },
         onError: () => {
-          setSnackbar({
-            message: "Failed to add comment",
-            severity: "error",
-          });
+          showToast("Failed to add comment", "error");
         },
       },
     );
@@ -699,10 +669,7 @@ const TariffRate = () => {
     );
 
     if (selectedIds.length === 0) {
-      setSnackbar({
-        message: "No rows selected",
-        severity: "error",
-      });
+      showToast("No rows selected", "error");
       return;
     }
 
@@ -715,12 +682,12 @@ const TariffRate = () => {
         tenant_id: tenantId,
       });
 
-      setSnackbar({
-        message: `Successfully ${status === "active" ? "enabled" : "disabled"} ${
+      showToast(
+        `Successfully ${status === "active" ? "enabled" : "disabled"} ${
           result.processed_count
         } tariff rate(s)`,
-        severity: "success",
-      });
+        "success",
+      );
 
       setSelectedItems({});
       if (skip !== 0) {
@@ -729,10 +696,10 @@ const TariffRate = () => {
       }
       refetch();
     } catch (error: any) {
-      setSnackbar({
-        message: `Failed to ${status === "active" ? "enable" : "disable"} tariff rates`,
-        severity: "error",
-      });
+      showToast(
+        `Failed to ${status === "active" ? "enable" : "disable"} tariff rates`,
+        "error",
+      );
     }
   };
 
@@ -743,10 +710,7 @@ const TariffRate = () => {
     }
     const ids = Object.keys(selectedItems).filter((id) => selectedItems[id]);
     if (ids.length === 0) {
-      setSnackbar({
-        message: "No rows selected",
-        severity: "error",
-      });
+      showToast("No rows selected", "error");
       return;
     }
 
@@ -759,17 +723,11 @@ const TariffRate = () => {
 
     createExport(payload, {
       onSuccess: () => {
-        setSnackbar({
-          message: `Exported ${ids.length} tariff rate(s) successfully`,
-          severity: "success",
-        });
+        showToast(`Exported ${ids.length} tariff rate(s) successfully`, "success");
         setSelectedItems({});
       },
       onError: () => {
-        setSnackbar({
-          message: "Export failed. Please try again.",
-          severity: "error",
-        });
+        showToast("Export failed. Please try again.", "error");
         setSelectedItems({});
       },
     });
@@ -778,10 +736,7 @@ const TariffRate = () => {
   const handleExportAll = () => {
     const ids = allData.map((row) => row.id);
     if (ids.length === 0) {
-      setSnackbar({
-        message: "No rows available for export",
-        severity: "error",
-      });
+      showToast("No rows available for export", "error");
       return;
     }
 
@@ -794,16 +749,10 @@ const TariffRate = () => {
 
     createExport(payload, {
       onSuccess: () => {
-        setSnackbar({
-          message: `Exported ${ids.length} tariff rate(s) successfully`,
-          severity: "success",
-        });
+        showToast(`Exported ${ids.length} tariff rate(s) successfully`, "success");
       },
       onError: () => {
-        setSnackbar({
-          message: "Export failed. Please try again.",
-          severity: "error",
-        });
+        showToast("Export failed. Please try again.", "error");
       },
     });
   };
@@ -884,10 +833,7 @@ const TariffRate = () => {
         return false;
       } catch (error) {
         console.error("Error fetching Tariff Rate details", error);
-        setSnackbar({
-          message: "Fetching Tariff Rate details failed.",
-          severity: "error",
-        });
+        showToast("Fetching Tariff Rate details failed.", "error");
 
         return false;
       } finally {
@@ -911,10 +857,7 @@ const TariffRate = () => {
         setAction("");
       },
       onError: () => {
-        setSnackbar({
-          message: "Admin request failed",
-          severity: "error",
-        });
+        showToast("Admin request failed", "error");
         setAction("");
       },
     });
@@ -1059,7 +1002,7 @@ const TariffRate = () => {
                 />
               )}
             {showLoader && <LoaderOverlay />}
-            {snackbar.message && (
+            {/* {snackbar.message && (
               <Snackbar
                 open
                 autoHideDuration={6000}
@@ -1074,7 +1017,7 @@ const TariffRate = () => {
                   {snackbar.message}
                 </Alert>
               </Snackbar>
-            )}
+            )} */}
             {isDetailModalOpen && (
               <DetailsModal
                 isOpen={isDetailModalOpen}

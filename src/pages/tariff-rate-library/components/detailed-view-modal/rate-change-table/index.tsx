@@ -4,7 +4,7 @@ import { HotTable } from "@handsontable/react";
 import "handsontable/styles/handsontable.css";
 import "handsontable/styles/ht-theme-main.css";
 import KeyboardArrowDownRoundedIcon from "@mui/icons-material/KeyboardArrowDownRounded";
-import exportIcon from "@/public/images/export-data.svg";
+import exportIcon from "@/assets/rate-libraries/export-data.svg";
 
 interface RateChangeTableProps {
   rateChanges: {

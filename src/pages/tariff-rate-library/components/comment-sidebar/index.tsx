@@ -9,7 +9,7 @@ import {
 } from "@mui/material";
 import CloseIcon from "@mui/icons-material/Close";
 // import Image from "next/image";
-import SearchIcon from "@/public/images/search-01.svg";
+import SearchIcon from "@/assets/rate-libraries/search-01.svg";
 // import { useTenantId } from "@/shared/utils/getTenantId";
 import { useMemo, useState, useCallback, useRef, useEffect } from "react";
 import { debounce } from "lodash";
