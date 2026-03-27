@@ -15,6 +15,7 @@ import type { CreateFreightRateRequestBodyParams } from "@/pages/freight-rate-li
 import type {
   TariffRate as TariffRateType,
   TariffRateResponse,
+  CreateTariffRateCommentParams,
 } from "../../types";
 import { TARIFF_RATE_HEADERS } from "../../constants/tableHeaders.constants";
 import formatDate from "@/utils/formatDate";
@@ -622,7 +623,7 @@ const TariffRate = () => {
     const id = tariffRateId || data[7] || allData[row]?.id;
     if (!id) return;
 
-    const comments =
+    const comments: CreateTariffRateCommentParams["payload"]["comments"] =
       col !== undefined
         ? [
             {
@@ -633,7 +634,7 @@ const TariffRate = () => {
           ]
         : [{ comment_type: "row", comment }];
 
-    const payload = {
+    const payload: CreateTariffRateCommentParams["payload"] = {
       tenant_id: tenantId,
       comments,
       source: "tariff_rate",
